@@ -1,10 +1,3 @@
-/*
- * TMHelpDisplayer.java
- *
- * Created on January 31, 2007, 3:41 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

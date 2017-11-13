@@ -1,10 +1,3 @@
-/*
- * DeleteStateCommand.java
- *
- * Created on February 5, 2007, 2:22 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

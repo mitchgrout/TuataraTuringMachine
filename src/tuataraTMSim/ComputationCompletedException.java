@@ -1,10 +1,3 @@
-/*
- * ComputationCompletedException.java
- *
- * Created on December 7, 2006, 10:18 AM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

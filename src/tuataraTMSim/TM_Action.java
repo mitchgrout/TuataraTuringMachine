@@ -1,10 +1,3 @@
-/*
- * TM_Action.java
- *
- * Created on November 7, 2006, 1:26 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

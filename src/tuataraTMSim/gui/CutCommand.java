@@ -1,10 +1,3 @@
-/*
- * CutCommand.java
- *
- * Created on February 6, 2007, 3:16 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

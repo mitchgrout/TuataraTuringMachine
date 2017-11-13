@@ -1,10 +1,3 @@
-/*
- * ToggleStartStateCommand.java
- *
- * Created on February 6, 2007, 4:13 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

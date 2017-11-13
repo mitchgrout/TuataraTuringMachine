@@ -1,10 +1,3 @@
-/*
- * TMInternalFrame.java
- *
- * Created on November 20, 2006, 3:16 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

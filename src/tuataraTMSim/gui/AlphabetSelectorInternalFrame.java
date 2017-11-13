@@ -1,10 +1,3 @@
-/*
- * AlphabetSelectorInternalFrame.java
- *
- * Created on November 22, 2006, 11:59 AM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

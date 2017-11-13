@@ -1,10 +1,3 @@
-/*
- * TMachine.java
- *
- * Created on November 7, 2006, 12:11 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

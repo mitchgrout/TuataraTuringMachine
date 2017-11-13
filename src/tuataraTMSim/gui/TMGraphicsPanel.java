@@ -1,10 +1,3 @@
-/*
- * TMGraphicsPanel.java
- *
- * Created on November 9, 2006, 1:35 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

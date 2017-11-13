@@ -1,10 +1,3 @@
-/*
- * MoveStateCommand.java
- *
- * Created on February 6, 2007, 8:33 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

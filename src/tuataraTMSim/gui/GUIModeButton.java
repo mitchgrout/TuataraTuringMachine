@@ -1,10 +1,3 @@
-/*
- * GUIModeButton.java
- *
- * Created on November 24, 2006, 5:34 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

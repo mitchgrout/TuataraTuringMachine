@@ -1,10 +1,3 @@
-/*
- * TMTapeDisplayControllerPanel.java
- *
- * Created on November 16, 2006, 3:49 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

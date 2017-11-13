@@ -1,10 +1,3 @@
-/*
- * TMExecutionTimerTask.java
- *
- * Created on December 1, 2006, 4:42 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

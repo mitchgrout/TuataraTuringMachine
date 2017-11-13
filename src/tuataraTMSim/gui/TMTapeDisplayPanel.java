@@ -1,10 +1,3 @@
-/*
- * TMTapeDisplayPanel.java
- *
- * Created on November 15, 2006, 4:49 PM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato

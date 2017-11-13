@@ -1,10 +1,3 @@
-/*
- * Alphabet.java
- *
- * Created on November 22, 2006, 10:27 AM
- *
- */
-
 //  ------------------------------------------------------------------
 //
 //  Copyright (c) 2006-2007 James Foulds and the University of Waikato
