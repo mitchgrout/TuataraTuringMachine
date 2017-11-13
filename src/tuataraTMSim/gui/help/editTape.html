@@ -1,0 +1,63 @@
+<HTML>
+<H2> Editing the Tape </H2>
+
+<P> The tape is displayed in the bottom portion of the window.  The darkened cell represents the
+location of the read/write head, and the '*' symbol indicates that the first cell of the tape is the
+cell immediately to the right.  The tape extends infinitely in the rightwards direction (at least, as
+far as the memory limitations of the system will allow).
+</P>
+
+<P> This guide describes how to manually write data to the tape for processing by a Turing machine.
+</P>
+
+<P> In this program, there is only one tape, and the tape is shared with all machines that are currently open.
+There is only ever one read/write head on this tape, and the read/write head is shared between all machines.
+However, the user can manually position the read/write head and edit the tape.
+</P>
+
+<BR>
+<H3> Moving the Read/Write Head </H3>
+<P> 
+Use the left and right arrow keys on the keyboard or the arrow buttons, <IMG SRC="../images/tapeLeft.gif">  and 
+<IMG SRC="../images/tapeRight.gif">, on either side of the tape
+to move the head one cell at a time.  You may also click on a cell to jump the read/write head to
+that cell.  The left-most button near the tape, <IMG SRC="../images/tapeStart.gif">, (also available from the Tape
+ menu) sends the read/write head back to the very first cell.
+</P>
+
+<BR>
+<H3> Writing Symbols to the Tape </H3>
+<P> 
+The read/write head acts as a cursor for you to modify the tape with.  Simply type the character
+on your keyboard to have the corresponding symbol appear on the tape in the location of the read/write
+ head.  To type a blank character, press spacebar or '_'.  The backspace key also functions as you would
+ expect it to.
+</P>
+
+<BR>
+<H3> Loading and Saving a Tape  </H3>
+<P>
+Use the <IMG SRC="../images/openTape.gif"> <I> Open Tape </I>, <IMG SRC="../images/saveTape.gif"><I>Save Tape</I> and 
+<i>Save Tape As</I> items in the <I>File</I> menu to load and save a tape.
+</P>
+
+<BR>
+<H3> Reloading the Tape </H3>
+
+<P> Often when you are debugging a Turing machine, you may wish to repeatedly apply the same tape 
+input to the machine.  It is tedious to re-enter the tape input data manually, or repeatedly have to
+select the same file to load.  Hence, an option is provided to reload the tape to the state it was in when
+it was last saved.  If the tape has not been saved, using this option is equivalent to erasing the tape.
+To reload the tape, press the <IMG SRC="../images/tapeReload.gif"> <I>Reload Tape</I> button near the bottom
+ right of the window, or select <IMG SRC="../images/tapeReload.gif"> <I>Reload Tape</I> from the <I>Tape</I> Menu.
+</P>
+
+<BR>
+<H3> Erasing the Tape </H3>
+
+<P> To clear the tape contents, press the <IMG SRC="../images/tapeClear.gif"> <I>Erase Tape</I> button at the 
+bottom-right of the screen, or in the <I>Tape</I> menu.  Choosing <IMG SRC="../images/newTape.gif"> <I>New Tape</I>
+ from the <I>File</I> menu also has the effect of erasing the tape.
+</P>
+
+</HTML>
