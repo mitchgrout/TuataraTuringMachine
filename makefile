@@ -1,12 +1,14 @@
 CC=javac
+ROOT=src/tuataraTMSim
 
 all: gui
 gui:
-	javac src/tuataraTMSim/*.java src/tuataraTMSim/gui/*.java
-
+	$(CC) $(ROOT)/*.java $(ROOT)/commands/*.java $(ROOT)/exceptions/*.java $(ROOT)/TM/*.java
+	
 run:
-	cd src; java tuataraTMSim.gui.MainWindow
+	cd src; java tuataraTMSim.MainWindow
 
 .PHONY: clean
 clean:
-	rm src/tuataraTMSim/*.class src/tuataraTMSim/gui/*.class
+	rm $(ROOT)/*.class $(ROOT)/commands/*.class $(ROOT)/exceptions/*.class $(ROOT)/TM/*.class
+
