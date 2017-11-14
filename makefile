@@ -10,5 +10,5 @@ run:
 
 .PHONY: clean
 clean:
-	rm $(ROOT)/*.java $(ROOT)/commands/*.java $(ROOT)/exceptions/*.java $(ROOT)/TM/*.java
+	rm $(ROOT)/*.class $(ROOT)/commands/*.class $(ROOT)/exceptions/*.class $(ROOT)/TM/*.class
 
