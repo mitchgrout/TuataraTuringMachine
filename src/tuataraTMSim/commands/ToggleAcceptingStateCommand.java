@@ -36,21 +36,43 @@ public class ToggleAcceptingStateCommand implements TMCommand
 {
     
     /** Creates a new instance of ToggleAcceptingCommand */
-    public ToggleAcceptingStateCommand(TMGraphicsPanel panel, TM_State state)
+    public ToggleAcceptingStateCommand(TMGraphicsPanel panel, TM_State oldState, TM_State newState)
     {
         m_panel = panel;
-        m_state = state;
+        m_oldState = oldState;
+        m_newState = newState;
     }
-    
     
     public void doCommand()
     {
-        m_state.setFinalState(!m_state.isFinalState());
+        // If the old start is the new start, or there was no old start,
+        // we're simply toggling
+        if(m_oldState == null || m_oldState.equals(m_newState))
+        {
+            m_newState.setFinalState(!m_newState.isFinalState());
+        }
+        // Otherwise, we're unsetting one, and setting the other
+        else
+        {
+            m_oldState.setFinalState(false);
+            m_newState.setFinalState(true);
+        }
     }
     
     public void undoCommand()
     {
-        m_state.setFinalState(!m_state.isFinalState());
+        // If the old start is the new start, or there was no old start,
+        // we're simply toggling
+        if(m_oldState == null || m_oldState.equals(m_newState))
+        {
+            m_newState.setFinalState(!m_newState.isFinalState());
+        }
+        // Otherwise, we're unsetting one, and setting the other
+        else
+        {
+            m_oldState.setFinalState(true);
+            m_newState.setFinalState(false);
+        }
     }
     
     public String getName()
@@ -59,5 +81,5 @@ public class ToggleAcceptingStateCommand implements TMCommand
     }
     
     private TMGraphicsPanel m_panel;
-    private TM_State m_state;
+    private TM_State m_oldState, m_newState;
 }

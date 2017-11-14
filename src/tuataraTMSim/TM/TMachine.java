@@ -113,6 +113,21 @@ public class TMachine implements Serializable
         return startStates.get(index);
     }
     
+    /**
+     * Gets the final state.
+     */
+    public TM_State getFinalState()
+    {
+        for (TM_State st : m_states)
+        {
+            if(st.isFinalState())
+            {
+                return st;
+            }
+        }
+        return null;
+    }
+    
     //******methods to update/modify the machine**********
     
     public void addState(TM_State state)

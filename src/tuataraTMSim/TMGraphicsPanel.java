@@ -551,7 +551,7 @@ public class TMGraphicsPanel extends JPanel
         TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn));
+            doCommand(new ToggleAcceptingStateCommand(this, m_machine.getFinalState(), stateClickedOn));
         }
     }
     
