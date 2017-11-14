@@ -36,11 +36,11 @@ public class ToggleStartStateCommand implements TMCommand
 {
     
     /** Creates a new instance of ToggleStartStateCommand */
-    public ToggleStartStateCommand(TMGraphicsPanel panel, TM_State oldStart, TM_State newStart)
+    public ToggleStartStateCommand(TMGraphicsPanel panel, TM_State oldState, TM_State newState)
     {
         m_panel = panel;
-        m_oldStart = oldStart;
-        m_newStart = newStart;
+        m_oldState = oldState;
+        m_newState = newState;
     }
     
     
@@ -48,15 +48,15 @@ public class ToggleStartStateCommand implements TMCommand
     {
         // If the old start is the new start, or there was no old start,
         // we're simply toggling
-        if(m_oldStart == null || m_oldStart.equals(m_newStart))
+        if(m_oldState == null || m_oldState.equals(m_newState))
         {
-            m_newStart.setStartState(!m_newStart.isStartState());
+            m_newState.setStartState(!m_newState.isStartState());
         }
         // Otherwise, we're unsetting one, and setting the other
         else
         {
-            m_oldStart.setStartState(!m_oldStart.isStartState());
-            m_newStart.setStartState(!m_newStart.isStartState());
+            m_oldState.setStartState(false);
+            m_newState.setStartState(true);
         }
     }
     
@@ -64,15 +64,15 @@ public class ToggleStartStateCommand implements TMCommand
     {
         // If the old start is the new start, or there was no old start,
         // we're simply toggling
-        if(m_oldStart == null || m_oldStart.equals(m_newStart))
+        if(m_oldState == null || m_oldState.equals(m_newState))
         {
-            m_newStart.setStartState(!m_newStart.isStartState());
+            m_newState.setStartState(!m_newState.isStartState());
         }
         // Otherwise, we're unsetting one, and setting the other
         else
         {
-            m_oldStart.setStartState(!m_oldStart.isStartState());
-            m_newStart.setStartState(!m_newStart.isStartState());
+            m_oldState.setStartState(true);
+            m_newState.setStartState(false);
         }
     }
     
@@ -82,5 +82,5 @@ public class ToggleStartStateCommand implements TMCommand
     }
     
     private TMGraphicsPanel m_panel;
-    private TM_State m_oldStart, m_newStart;
+    private TM_State m_oldState, m_newState;
 }
