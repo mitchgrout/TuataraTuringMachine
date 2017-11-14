@@ -537,9 +537,10 @@ public class TMGraphicsPanel extends JPanel
     private void handleChooseStartClick(MouseEvent e)
     {
         TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleStartStateCommand(this, stateClickedOn));
+            doCommand(new ToggleStartStateCommand(this, m_machine.getStartState(), stateClickedOn));
         }
     }
     
