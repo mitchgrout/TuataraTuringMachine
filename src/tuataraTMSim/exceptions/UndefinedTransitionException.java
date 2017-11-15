@@ -25,8 +25,13 @@
 
 package tuataraTMSim.exceptions;
 
+<<<<<<< HEAD:src/tuataraTMSim/exceptions/UndefinedTransitionException.java
 /**
  * An Exception thrown when the machine attempts to follow a transtion that does not exist.
+=======
+/** An Exception thrown when the machine attempts to follow a transtion that does not exist.
+ *
+>>>>>>> master:src/tuataraTMSim/exceptions/UndefinedTransitionException.java
  * @author Jimmy
  */
 public class UndefinedTransitionException extends java.lang.Exception

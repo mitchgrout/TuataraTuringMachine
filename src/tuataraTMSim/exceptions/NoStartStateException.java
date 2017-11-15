@@ -25,8 +25,13 @@
 
 package tuataraTMSim.exceptions;
 
+<<<<<<< HEAD:src/tuataraTMSim/exceptions/NoStartStateException.java
 /**
  * An Exception thrown when a machine without a start state is executed.
+=======
+/** An exception thrown when a machine without a start state is executed.
+ *
+>>>>>>> master:src/tuataraTMSim/exceptions/NoStartStateException.java
  * @author Jimmy
  */
 public class NoStartStateException extends Exception
