@@ -36,10 +36,10 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class RemoveInconsistentTransitionsCommand implements TMCommand
 {
-    
-    /** Creates a new instance of RemoveInconsistentTransitionsCommand */
-    public RemoveInconsistentTransitionsCommand(TMGraphicsPanel panel,
-           Collection<TM_Transition>  purge)
+    /**
+     * Creates a new instance of RemoveInconsistentTransitionsCommand
+     */
+    public RemoveInconsistentTransitionsCommand(TMGraphicsPanel panel, Collection<TM_Transition> purge)
     {
         m_panel = panel;
         m_purge = purge;
@@ -78,6 +78,5 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
     }
     
     private TMGraphicsPanel m_panel;
-    private Collection<TM_Transition>  m_purge;
-    
+    private Collection<TM_Transition>  m_purge;   
 }

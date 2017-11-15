@@ -33,8 +33,7 @@ import tuataraTMSim.TM.TM_Transition;
  * @author Jimmy
  */
 public class DeleteTransitionCommand implements TMCommand
-{
-    
+{    
     /**
      * Creates a new instance of AddTransitionCommand 
      */
@@ -57,8 +56,8 @@ public class DeleteTransitionCommand implements TMCommand
     public void undoCommand()
     {
         m_panel.getSimulator().getMachine().addTransition(m_transition);
-        //if (selectedStates.contains(mousePressedState) && selectedStates.contains(mouseReleasedState))
-        //   selectedTransitions.add(t);
+        // if (selectedStates.contains(mousePressedState) && selectedStates.contains(mouseReleasedState))
+        //     selectedTransitions.add(t);
         m_panel.getSimulator().computePotentialTransitions(false);
     }
     
@@ -66,8 +65,7 @@ public class DeleteTransitionCommand implements TMCommand
     {
         return "Delete Transition";
     }
-    
-    
+        
     private TMGraphicsPanel m_panel;
     private TM_Transition m_transition;
 }

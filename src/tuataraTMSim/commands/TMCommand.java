@@ -29,12 +29,11 @@ package tuataraTMSim.commands;
  *
  * @author Jimmy
  */
-public interface TMCommand {
-    
+public interface TMCommand 
+{
     public void doCommand();
     
     public void undoCommand();
     
     public String getName();
-    
 }

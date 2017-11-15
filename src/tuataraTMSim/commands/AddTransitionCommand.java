@@ -36,7 +36,8 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class AddTransitionCommand implements TMCommand
 {
-        public final double PIXELS_BETWEEN_TRANSITIONS = 15;
+    public final double PIXELS_BETWEEN_TRANSITIONS = 15;
+
     /**
      * Creates a new instance of AddTransitionCommand 
      */
@@ -48,48 +49,61 @@ public class AddTransitionCommand implements TMCommand
     
     public void doCommand()
     {
-        //calculate where to place the midpoint so as to hopefully not interfere
-        //with existing transitions.  This is just a heuristic but will hopefully
-        //be good enough in general.
+        // Calculate where to place the midpoint so as to hopefully not interfere
+        // with existing transitions.  This is just a heuristic but will hopefully
+        // be good enough in general.
 
-        int numTransitions = 1; //count how many transitions between the two states
+        // Count how many transitions there are between the two states
+        int numTransitions = 1;
         for (TM_Transition t: m_transition.getFromState().getTransitions())
+        {
             if (t.getToState() == m_transition.getToState())
+            {
                 numTransitions++;
-        for (TM_Transition t: m_transition.getToState().getTransitions())
-            if (t.getToState() == m_transition.getFromState())
-                numTransitions++;
+            }
+        }
         
-        int countOffset = 0;
-        if (numTransitions % 2 == 0)
-            countOffset = -1;
+        for (TM_Transition t: m_transition.getToState().getTransitions())
+        {
+            if (t.getToState() == m_transition.getFromState())
+            {
+                numTransitions++;
+            }
+        }
+        
+        int countOffset = (numTransitions % 2 == 0)? -1 : 0;
         
         int middleX = (m_transition.getFromState().getX() + m_transition.getToState().getX() + TM_State.STATE_RENDERING_WIDTH) / 2;
         int middleY = (m_transition.getFromState().getY() + m_transition.getToState().getY() + TM_State.STATE_RENDERING_WIDTH) / 2;
 
         int vectorX = Math.abs(m_transition.getFromState().getX() - m_transition.getToState().getX());
         int vectorY = Math.abs(m_transition.getFromState().getY() - m_transition.getToState().getY());
-        
-        if (vectorX == 0 && vectorY == 0) //avoid a problematic case
+
+        // Avoid a problematic case        
+        if (vectorX == 0 && vectorY == 0)
         {
             vectorY = 1;
             vectorX = 1;
         }
+        
         int vectorOldX = vectorX;
         int vectorOldY = vectorY;
-        //make perpendicular to line between the states
+        
+        // Make perpendicular to line between the states
         int temp = vectorX;
         vectorX = vectorY;
         vectorY = -temp;
-        //scale
+
+        // Scale
         double length = (int)Math.sqrt(vectorX * vectorX + vectorY * vectorY);
         double newLength = (numTransitions + countOffset) * PIXELS_BETWEEN_TRANSITIONS;
         double vectorNewX = vectorX * newLength/length;
         double vectorNewY = vectorY * newLength/length;
         
-        if (m_transition.getFromState() != m_transition.getToState()) //not loop
+        // Not a loop
+        if (m_transition.getFromState() != m_transition.getToState())
         {
-            //note that these coordinates are based on the top left of the states.
+            // Note that these coordinates are based on the top left of the states.
             if (numTransitions % 2 == 1)
             {
                 Point2D cp = m_transition.getControlPointGivenMidpoint(new Point2D.Double(middleX
@@ -105,7 +119,8 @@ public class AddTransitionCommand implements TMCommand
                 m_transition.setControlPoint((int)cp.getX(), (int)cp.getY());
             }
         }
-        else //is a loop
+        // Is a loop
+        else
         {
             numTransitions /= 2;
             int xOff = 0;
@@ -117,7 +132,9 @@ public class AddTransitionCommand implements TMCommand
                 yOff = 0;
             }
             else if (numTransitions % 4 == 2)
+            {
                 yOff = -yOff;
+            }
             else if (numTransitions % 4 == 3)
             {
                 yOff = 0;
@@ -134,11 +151,13 @@ public class AddTransitionCommand implements TMCommand
                     m_transition.getFromState().getY() + yOff);
         }
 
-        //add the transition to the machine
+        // Add the transition to the machine
         m_panel.getSimulator().getMachine().addTransition(m_transition);
         if (m_panel.getSelectedStates().contains(m_transition.getFromState())
             && m_panel.getSelectedStates().contains(m_transition.getToState()))
+        {
             m_panel.getSelectedTransitions().add(m_transition);
+        }
         m_panel.getSimulator().computePotentialTransitions(false);
     }
     

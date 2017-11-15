@@ -34,8 +34,9 @@ import tuataraTMSim.TM.TM_State;
  */
 public class AddStateCommand implements TMCommand
 {
-    
-    /** Creates a new instance of AddStateCommand */
+    /** 
+     * Creates a new instance of AddStateCommand 
+     */
     public AddStateCommand(TMGraphicsPanel panel, TM_State state)
     {
         m_panel = panel;
@@ -51,21 +52,24 @@ public class AddStateCommand implements TMCommand
     public void undoCommand()
     {
         m_panel.getSimulator().getMachine().deleteState(m_state);
-        //m_labelsUsed.remove(m_state.getLabel());
         m_panel.removeLabelFromDictionary(m_state.getLabel());
 
         if (m_panel.getSimulator().getCurrentState() == m_state)
-            m_panel.getSimulator().resetMachine(); //computation can't continue if we deleted the current state
+        {
+            // Computation can't continue if we deleted the current state
+            m_panel.getSimulator().resetMachine(); 
+        }
         else
+        {
             m_panel.getSimulator().computePotentialTransitions(false);
+        }
     }
     
     public String getName()
     {
         return "Add State";
     }
-    
-    
+       
     private TMGraphicsPanel m_panel;
     private TM_State m_state;
 }

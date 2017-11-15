@@ -33,11 +33,11 @@ import tuataraTMSim.TM.TM_Transition;
  * @author Jimmy
  */
 public class ModifyInputSymbolCommand implements TMCommand
-{
-    
-    /** Creates a new instance of ModifyInputSymbolCommand */
-    public ModifyInputSymbolCommand(TMGraphicsPanel panel, TM_Transition transition,
-            char symbol)
+{    
+    /**
+     * Creates a new instance of ModifyInputSymbolCommand
+     */
+    public ModifyInputSymbolCommand(TMGraphicsPanel panel, TM_Transition transition, char symbol)
     {
         m_panel = panel;
         m_transition = transition;
@@ -50,6 +50,7 @@ public class ModifyInputSymbolCommand implements TMCommand
         m_transition.setSymbol(m_symbol);
         m_panel.getSimulator().computePotentialTransitions(false);
     }
+    
     public void undoCommand()
     {
         m_transition.setSymbol(m_oldSymbol);
@@ -64,6 +65,5 @@ public class ModifyInputSymbolCommand implements TMCommand
     private TMGraphicsPanel m_panel;
     private TM_Transition m_transition;
     private char m_symbol;
-    private char m_oldSymbol;
-    
+    private char m_oldSymbol;   
 }
