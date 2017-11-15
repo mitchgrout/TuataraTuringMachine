@@ -40,7 +40,7 @@ public class TM_Simulator
      */
     public TM_Simulator(TMachine turingMachine, Tape tape)
     {
-        m_machine =  turingMachine;
+        m_machine = turingMachine;
         m_tape = tape;
         m_random = new Random();
         computePotentialTransitions(true);
@@ -220,8 +220,7 @@ public class TM_Simulator
        
         for (TM_Transition t : out)
         {
-            if (t.getSymbol() == currentInputSymbol ||
-                t.getSymbol() == TMachine.WILDCARD_INPUT_SYMBOL) //universal transitions
+            if (t.getSymbol() == currentInputSymbol)
             {
                 m_potentialTransitions.add(t);
             }

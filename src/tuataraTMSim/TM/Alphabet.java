@@ -51,7 +51,7 @@ public class Alphabet implements Serializable, Cloneable
         
         // Can't be in the alphabet
         if (c == TMachine.EMPTY_ACTION_SYMBOL ||
-            c == TMachine.WILDCARD_INPUT_SYMBOL)
+            c == TMachine.OTHERWISE_SYMBOL)
         {
             return false;
         }

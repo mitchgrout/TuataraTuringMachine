@@ -333,11 +333,6 @@ public class TMGraphicsPanel extends JPanel
                             "' cannot be used as an input symbol!", "Update transition properties", 
                         JOptionPane.WARNING_MESSAGE);
                 }
-                else if (c == TMachine.WILDCARD_INPUT_SYMBOL)
-                {
-                    doCommand(new ModifyInputSymbolCommand(this, selectedTransition, 
-                           TMachine.WILDCARD_INPUT_SYMBOL));
-                }
                 else if (c == TMachine.OTHERWISE_SYMBOL)
                 {
                     doCommand(new ModifyInputSymbolCommand(this, selectedTransition, 
@@ -395,12 +390,6 @@ public class TMGraphicsPanel extends JPanel
                 else if ((c == ' ' || c == Tape.BLANK_SYMBOL) && getAlphabet().containsSymbol(Tape.BLANK_SYMBOL))
                 {
                     doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), Tape.BLANK_SYMBOL)));
-                }
-                else if (c == TMachine.WILDCARD_INPUT_SYMBOL)
-                {
-                    JOptionPane.showMessageDialog(null,"'" + TMachine.WILDCARD_INPUT_SYMBOL +
-                            "' can only be used as an input symbol!", "Update transition properties", 
-                        JOptionPane.WARNING_MESSAGE);
                 }
                 else if (Character.isLetterOrDigit(c))
                 {
@@ -602,8 +591,7 @@ public class TMGraphicsPanel extends JPanel
         {
             if (m_tape != null)
             {
-                if (transitionClickedOn.getSymbol() != TMachine.WILDCARD_INPUT_SYMBOL
-                        && transitionClickedOn.getSymbol() != m_tape.read())
+                if (transitionClickedOn.getSymbol() != m_tape.read())
                 {
                     // Can't select this one
                     return;
