@@ -32,14 +32,14 @@ import java.io.File;
 import javax.swing.*;
 import tuataraTMSim.TM.Tape;
 
-/** A panel for displaying a turing machine tape.  Does not include any buttons, just the tape.
+/** 
+ * A panel for displaying a turing machine tape.  Does not include any buttons, just the tape.
  *
  * @author Jimmy
  */
 public class TMTapeDisplayPanel extends JPanel
-{
-    
-    //padding constants determining empty space around components, in pixels.
+{ 
+    // Padding constants determining empty space around components, in pixels.
     public static final int CELLPADDING_X  = 4;
     public static final int CELLPADDING_Y  = 2;
     public static final int TAPEPADDING_X = 5;
@@ -65,20 +65,24 @@ public class TMTapeDisplayPanel extends JPanel
         initComponents();
     }
     
-    /** Initialization routine.
+    /**
+     * Initialization routine.
      */
     public void initComponents()
     {
         setFocusable(false);
         this.setPreferredSize(new Dimension(500,50));
         
-        addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                
+        addMouseListener(new MouseAdapter() 
+        {
+            public void mouseClicked(MouseEvent e)
+            {    
                 if (m_isEditingEnabled == false)
+                {
                     return;
-                
-                //shift r/w head to the cell that was clicked on.
+                }
+
+                // Shift r/w head to the cell that was clicked on.
                 Graphics g = getGraphics();
                 Graphics2D g2d = (Graphics2D)g;
                 FontMetrics metrics = g2d.getFontMetrics();
@@ -104,20 +108,16 @@ public class TMTapeDisplayPanel extends JPanel
                 
                 while (m_tape.headLocation() > newCell)
                 {
-                    try
-                    {     
-                        m_tape.headLeft();
-                    }
-                    catch (Exception e2) {break;}
+                    try { m_tape.headLeft(); }
+                    catch (Exception e2) { break; }
                 }
                 repaint();
-                
-                
             }
         });
     }
     
-    /** Paint this component to the given graphics object.
+    /** 
+     * Paint this component to the given graphics object.
      */
     protected void paintComponent(Graphics g)
     {
@@ -126,8 +126,7 @@ public class TMTapeDisplayPanel extends JPanel
         
         Graphics2D g2d = (Graphics2D)g;
         
-        
-        //fill background
+        // Fill background
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, w, h);
         FontMetrics metrics = g2d.getFontMetrics();
@@ -136,7 +135,8 @@ public class TMTapeDisplayPanel extends JPanel
         paintTape(g, TAPEPADDING_X,ascent + TAPEPADDING_Y);
     }
     
-    /** Paint the tape on the graphics object at the given location.
+    /** 
+     * Paint the tape on the graphics object at the given location.
      */
     public void paintTape(Graphics g, int x, int y)
     {
@@ -150,13 +150,13 @@ public class TMTapeDisplayPanel extends JPanel
             drawTapeEnd = true;
             visibleCells--;
         }
-        String tapeStr = m_tape.getPartialString(startPos, visibleCells + 1); //include any partial cell
+        String tapeStr = m_tape.getPartialString(startPos, visibleCells + 1); // Include any partial cell
         
         Graphics2D g2d = (Graphics2D)g;
         
-        //we need a monospaced font to ensure that the cells are all the same size.
-        //I can't seem to set the font in the constructor because the graphics object
-        //associated with the panel has not been created until the component is packed.
+        // We need a monospaced font to ensure that the cells are all the same size.
+        // I can't seem to set the font in the constructor because the graphics object
+        // associated with the panel has not been created until the component is packed.
         g2d.setFont(new Font("Monospaced", Font.PLAIN, 12));
         
         FontMetrics metrics = g2d.getFontMetrics();
@@ -177,7 +177,8 @@ public class TMTapeDisplayPanel extends JPanel
         }
     }
     
-    /** Paint a single cell of the tape.
+    /** 
+     * Paint a single cell of the tape.
      * @param g     The graphics object to paint to.
      * @param c     The character (symbol) contained in this cell.
      * @param isHeadLocation    True iff the read/write head is currently in this cell.
@@ -201,31 +202,33 @@ public class TMTapeDisplayPanel extends JPanel
             g2d.fill(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, width + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
             g2d.setColor(Color.WHITE);
             g2d.drawString("" + c, x, y);
-        }
-        
+        } 
     }
     
-    /** A helper function that calculates how many cells will fit on the
-     *  viewing panel at one time, rounded down to the nearest whole number.
+    /** 
+     * A helper function that calculates how many cells will fit on the viewing panel at one time,
+     * rounded down to the nearest whole number.
      */
     private int numCellsViewable(Graphics g)
     {
         Graphics2D g2d = (Graphics2D)g;
         FontMetrics metrics = g2d.getFontMetrics();
-        int width = metrics.charWidth('_'); //assumes a monospace font.
+        int width = metrics.charWidth('_'); // Assumes a monospace font.
         width += 2 * CELLPADDING_X;
         
-        return getWidth() / width; //integer division, rounding down.
+        return getWidth() / width; // Integer division, rounding down.
     }
     
-    /** Get the tape currently associated with this panel.
+    /**
+     * Get the tape currently associated with this panel.
      */
     public Tape getTape()
     {
         return m_tape;
     }
     
-    /** Change the tape currently associated with this panel to t.
+    /**
+     * Change the tape currently associated with this panel to t.
      */
     public void setTape(Tape t)
     {
@@ -252,9 +255,8 @@ public class TMTapeDisplayPanel extends JPanel
        }
        else if (e.getKeyCode() == KeyEvent.VK_LEFT)
        {
-            try {
-            getTape().headLeft();
-            } catch (Exception e2) {}
+            try { getTape().headLeft(); }
+            catch (Exception e2) { }
             repaint();
             return true;
        }
@@ -267,17 +269,17 @@ public class TMTapeDisplayPanel extends JPanel
        else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
        {
            getTape().write(Tape.BLANK_SYMBOL);
-           try {
-            getTape().headLeft();
-            } catch (Exception e2) {}
+           try { getTape().headLeft(); }
+           catch (Exception e2) { }
            repaint();
            return true;
        }
        return false;
     }
     
-    /** Save (serialize) a tape to persistent storage.
-     *  @returns true IFF the serialization was successful.
+    /** 
+     * Save (serialize) a tape to persistent storage.
+     * @returns true IFF the serialization was successful.
      */
     public boolean saveTapeAs(String file)
     {
@@ -285,29 +287,38 @@ public class TMTapeDisplayPanel extends JPanel
         return Tape.saveTape(m_tape, file);
     }
     
-    /** Save (serialize) the tape to persistent storage in
-     *  the file this panel is associated with.
-     *  @returns true IFF the serialization was successful.
-     *  If there is no file associated with the panel,
-     *  it will return false and no serialization will occur.
+    /**
+     * Save (serialize) the tape to persistent storage in
+     * the file this panel is associated with.
+     * @returns true IFF the serialization was successful.
+     * If there is no file associated with the panel,
+     * it will return false and no serialization will occur.
      */
     public boolean saveTape()
     {
         if (m_file == null)
+        {
             return false;
-        if (m_tape == null) //shouldnt happen
+        }
+        if (m_tape == null) // Shouldnt happen
+        {
             return false;
+        }
         return Tape.saveTape(m_tape, m_file.toString());
     }
-    /** Load (deserialize) a tape from persistent storage.
-     *  @param file     The file where the tape is stored.
-     *  *  @returns true IFF the deserialization was successful.
+
+    /**
+     * Load (deserialize) a tape from persistent storage.
+     * @param file     The file where the tape is stored.
+     * @returns true IFF the deserialization was successful.
      */
     public boolean loadTape(String file)
     {
         Tape t = Tape.loadTape(file);
         if (t == null)
+        {
             return false;
+        }
         m_tape.copyOther(t);
         return true;
     }
@@ -322,10 +333,9 @@ public class TMTapeDisplayPanel extends JPanel
         m_file = file;
     }
     
-    
-    /** Reload the tape from the file it was loaded from or last
-     *  saved as, or clear the tape if it was never loaded or
-     *  saved at all.
+    /** 
+     * Reload the tape from the file it was loaded from or last saved as, or clear the tape if it
+     * was never loaded or saved at all.
      */
     public void reloadTape()
     {
@@ -340,7 +350,6 @@ public class TMTapeDisplayPanel extends JPanel
         }
     }
     
-    
     public void setEditingEnabled(boolean isEnabled)
     {
         m_isEditingEnabled = isEnabled;
@@ -349,5 +358,4 @@ public class TMTapeDisplayPanel extends JPanel
     private Tape m_tape;
     private File m_file = null;
     private boolean m_isEditingEnabled = true;
-    
 }

@@ -31,14 +31,14 @@ import javax.swing.*;
 import javax.swing.border.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
 
-/** A panel containing a tape display panel and some buttons to move the
- *  read/write head.
+/** 
+ * A panel containing a tape display panel and some buttons to move the read/write head.
  *
  * @author Jimmy
  */
 public class TMTapeDisplayControllerPanel extends JPanel
 {
-    public static final int PADDING = 0; //num pixels padding.
+    public static final int PADDING = 0; // Num pixels padding.
     
     /**
      * Creates a new instance of TMTapeDisplayControllerPanel 
@@ -51,12 +51,13 @@ public class TMTapeDisplayControllerPanel extends JPanel
         initComponents(headToStartAction, eraseTapeAction, reloadAction);
     }
     
-    /** Initialization.
+    /** 
+     * Initialization.
      */
     public void initComponents(Action headToStartAction, Action eraseTapeAction, Action reloadAction)
     {
         setBackground(Color.WHITE);
-        setFocusable(false); //TODO make this work
+        setFocusable(false); // TODO: make this work
 
         Border currentBorder = getBorder();
         Border innerBorder = BorderFactory.createEmptyBorder(PADDING,PADDING,PADDING,PADDING);
@@ -70,8 +71,6 @@ public class TMTapeDisplayControllerPanel extends JPanel
         
         m_BStart = new JButton();
         m_BStart.setFocusable(false);
-        //m_BStart.setToolTipText("Move the read/write head to the start of the tape.");
-        //m_BStart.setIcon(tapeStartIcon);
         
         m_BLeft = new JButton();
         m_BLeft.setFocusable(false);
@@ -85,13 +84,9 @@ public class TMTapeDisplayControllerPanel extends JPanel
         
         m_BClearTape = new JButton();
         m_BClearTape.setFocusable(false);
-        //m_BClearTape.setToolTipText("Clear the contents of the tape.");
-        //m_BClearTape.setIcon(tapeClearIcon);
         
         m_BReloadTape = new JButton();
         m_BReloadTape.setFocusable(false);
-        //m_BReloadTape.setToolTipText("Reload the tape from disk, discarding any changes since the last save.");
-        //m_BReloadTape.setIcon(tapeReloadIcon);        
         
         setLayout(new BorderLayout());
         
@@ -119,95 +114,46 @@ public class TMTapeDisplayControllerPanel extends JPanel
         add(m_tapeDP,BorderLayout.CENTER);
         add(rightButtonPanel, BorderLayout.EAST);
 
-        /*m_BStart.addActionListener(new ActionListener() {
-             public void actionPerformed(ActionEvent e) 
-             {
-                    //move r/w head to the left end of the tape
-                    m_tapeDP.getTape().resetRWHead();
-                    repaint();
-             }
-        });*/
         m_BStart.setAction(headToStartAction);
         m_BStart.setText("");
-                //new HeadToStartAction("Move the read/write head to the start of the tape."
-            //,tapeStartIcon,m_tapeDP, this));
         
-        m_BLeft.addActionListener(new ActionListener() {
+        m_BLeft.addActionListener(new ActionListener() 
+        {
              public void actionPerformed(ActionEvent e) 
              {
                  try
                  {
-                    //move the head one cell to the left.
+                    // Move the head one cell to the left.
                     m_tapeDP.getTape().headLeft();
                     repaint();
                  }
-                 catch (TapeBoundsException e1)
-                 {
-                 }
+                 catch (TapeBoundsException e1) { }
              }
         });
         
-        m_BRight.addActionListener(new ActionListener() {
-            
+        m_BRight.addActionListener(new ActionListener()
+        {    
              public void actionPerformed(ActionEvent e) 
              {
-                 //move the head one cell to the right
+                 // Move the head one cell to the right
                  m_tapeDP.getTape().headRight();
                  repaint();
              }
         });
         
-        /*m_BClearTape.addActionListener(new ActionListener() {
-            
-             public void actionPerformed(ActionEvent e) 
-             {
-                 //wipe the tape.
-                 Object[] options = {"Ok", "Cancel"};
-                 //TODO should disable keyboard here
-                 int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-                 if (result == JOptionPane.YES_OPTION)
-                 {
-                     m_tapeDP.getTape().clearTape();
-                     repaint();
-                     //m_mainWindow.updateAllSimulators();
-                 }
-             }
-        });*/
         m_BClearTape.setAction(eraseTapeAction);
         m_BClearTape.setText("");
-        /*m_BReloadTape.addActionListener(new ActionListener() {
-            
-             public void actionPerformed(ActionEvent e) 
-             {
-                 //wipe the tape.
-                 Object[] options = {"Ok", "Cancel"};
-                 //TODO should disable keyboard here
-                 int result = 0;
-                 if (m_tapeDP.getFile() == null)
-                    JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-                 else
-                     JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-                 if (result == JOptionPane.YES_OPTION)
-                 {
-                     m_tapeDP.reloadTape();
-                     repaint();
-                     //m_mainWindow.updateAllSimulators();
-                 }
-             }
-        });*/
         m_BReloadTape.setAction(reloadAction);
         m_BReloadTape.setText("");
     }
     
-    /** Enable/disable user editing operations/buttons etc.
+    /** 
+     * Enable/disable user editing operations/buttons etc.
      */
     public void setEditingEnabled(boolean isEnabled)
     {
         m_BLeft.setEnabled(isEnabled);
         m_BRight.setEnabled(isEnabled);
-        //m_BStart.setEnabled(isEnabled);
-        //m_BClearTape.setEnabled(isEnabled);
-        //m_BReloadTape.setEnabled(isEnabled);
         m_tapeDP.setEditingEnabled(isEnabled);
     }
     
@@ -232,7 +178,7 @@ class HeadToStartAction extends AbstractAction
 
     public void actionPerformed(ActionEvent e) 
     {
-        //move r/w head to the left end of the tape
+        // Move r/w head to the left end of the tape
         m_tapeDP.getTape().resetRWHead();
         m_tapeDCP.repaint();
     }
@@ -241,10 +187,12 @@ class HeadToStartAction extends AbstractAction
     {
         m_tapeDP = tapeDP;
     }
+
     public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
     {
         m_tapeDCP = tapeDCP;
     }
+
     private TMTapeDisplayPanel m_tapeDP;
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }
@@ -261,27 +209,27 @@ class EraseTapeAction extends AbstractAction
 
     public void actionPerformed(ActionEvent e) 
     {
-        //wipe the tape.
+        // Wipe the tape.
         Object[] options = {"Ok", "Cancel"};
-        //TODO should disable keyboard here
+        // TODO: should disable keyboard here
         int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
         if (result == JOptionPane.YES_OPTION)
         {
-         m_tapeDP.getTape().clearTape();
-         m_tapeDCP.repaint();
+            m_tapeDP.getTape().clearTape();
+            m_tapeDCP.repaint();
         }
     }
-    
+
     public void setTapeDP(TMTapeDisplayPanel tapeDP)
     {
         m_tapeDP = tapeDP;
     }
-    
+
     public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
     {
         m_tapeDCP = tapeDCP;
     }
-    
+
     private TMTapeDisplayPanel m_tapeDP;
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }
@@ -298,22 +246,21 @@ class ReloadTapeAction extends AbstractAction
 
     public void actionPerformed(ActionEvent e) 
     {
-     //wipe the tape.
-     Object[] options = {"Ok", "Cancel"};
-     //TODO should disable keyboard here
-     int result = 0;
-     if (m_tapeDP.getFile() == null)
-        JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-     else
-         JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-     if (result == JOptionPane.YES_OPTION)
-     {
-         m_tapeDP.reloadTape();
-         m_tapeDCP.repaint();
-         //m_mainWindow.updateAllSimulators();
-     }
+        // Wipe the tape.
+        Object[] options = {"Ok", "Cancel"};
+        // TODO: should disable keyboard here
+        int result = 0;
+        if (m_tapeDP.getFile() == null)
+            JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+        else
+            JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+        if (result == JOptionPane.YES_OPTION)
+        {
+            m_tapeDP.reloadTape();
+            m_tapeDCP.repaint();
+        }
     }
-    
+
     public void setTapeDP(TMTapeDisplayPanel tapeDP)
     {
         m_tapeDP = tapeDP;
@@ -322,8 +269,7 @@ class ReloadTapeAction extends AbstractAction
     {
         m_tapeDCP = tapeDCP;
     }
-    
+
     private TMTapeDisplayPanel m_tapeDP;
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }
-

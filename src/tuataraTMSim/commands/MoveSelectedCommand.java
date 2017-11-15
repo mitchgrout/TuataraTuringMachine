@@ -37,12 +37,11 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class MoveSelectedCommand implements TMCommand
 {
-    
     /**
      * Creates a new instance of MoveSelectedCommand 
      */
     public MoveSelectedCommand(TMGraphicsPanel panel, Collection<TM_State> states,
-            Collection<TM_Transition> transitions, int moveX, int moveY)
+                               Collection<TM_Transition> transitions, int moveX, int moveY)
     {
         m_panel = panel;
         m_states = states;
@@ -50,7 +49,7 @@ public class MoveSelectedCommand implements TMCommand
         m_moveX = moveX;
         m_moveY = moveY;
         m_borderTransitions = 
-                m_panel.getSimulator().getMachine().getHalfSelectedTransitions(states);
+            m_panel.getSimulator().getMachine().getHalfSelectedTransitions(states);
     }
 
     public void doCommand()
@@ -79,19 +78,16 @@ public class MoveSelectedCommand implements TMCommand
             t.setControlPoint((int)(newCP.getX()), (int)(newCP.getY()));  
         }
 
-        //handle movement of transitions that are connected to the moved states
-        //by one end only
-       
+        // Handle movement of transitions that are connected to the moved states by one end only
         for (TM_Transition t : m_borderTransitions)
         {
             TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
         }
+        // TODO: Justify this
         for (TM_Transition t : m_borderTransitions)
         {
             TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
         }
-        
-        
     }
     
     public void undoCommand()
@@ -120,13 +116,12 @@ public class MoveSelectedCommand implements TMCommand
             t.setControlPoint((int)(newCP.getX()), (int)(newCP.getY()));  
         }
 
-        //handle movement of transitions that are connected to the moved states
-        //by one end only
-       
+        // Handle movement of transitions that are connected to the moved states by one end only
         for (TM_Transition t : m_borderTransitions)
         {
             TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
         }
+        // TODO: Justify this
         for (TM_Transition t : m_borderTransitions)
         {
             TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
@@ -143,6 +138,5 @@ public class MoveSelectedCommand implements TMCommand
     Collection<TM_Transition> m_transitions;
     Collection<TM_Transition> m_borderTransitions;
     int m_moveX;
-    int m_moveY;
-    
+    int m_moveY;   
 }

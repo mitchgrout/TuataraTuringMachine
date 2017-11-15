@@ -34,8 +34,9 @@ import tuataraTMSim.TM.TM_State;
  */
 public class RenameStateCommand implements TMCommand
 {
-    
-    /** Creates a new instance of RenameStateCommand */
+    /**
+     * Creates a new instance of RenameStateCommand
+     */
     public RenameStateCommand(TMGraphicsPanel panel, TM_State state, String label)
     {
         m_panel = panel;
@@ -62,7 +63,6 @@ public class RenameStateCommand implements TMCommand
     {
         return "Rename State";
     }
-
 
     TMGraphicsPanel m_panel;
     TM_State m_state;

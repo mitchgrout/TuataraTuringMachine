@@ -35,23 +35,16 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class MoveTransitionCommand  implements TMCommand
 {
-    
-    /** Creates a new instance of MoveTransitionCommand */
-    public MoveTransitionCommand(TMGraphicsPanel panel, TM_Transition transition,
-            int moveX, int moveY)
+    /**
+     * Creates a new instance of MoveTransitionCommand
+     */
+    public MoveTransitionCommand(TMGraphicsPanel panel, TM_Transition transition, int moveX, int moveY)
     {
         m_panel = panel;
         m_transition = transition;
         m_moveX = moveX;
         m_moveY = moveY;
     }
-    
-    
-    TMGraphicsPanel m_panel;
-    TM_Transition m_transition;
-    int m_moveX;
-    int m_moveY;
-
     
     public void doCommand()
     {
@@ -77,5 +70,9 @@ public class MoveTransitionCommand  implements TMCommand
     {
         return "Move Transition";
     }
-    
+        
+    TMGraphicsPanel m_panel;
+    TM_Transition m_transition;
+    int m_moveX;
+    int m_moveY;
 }

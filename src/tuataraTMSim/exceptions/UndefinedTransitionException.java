@@ -25,27 +25,25 @@
 
 package tuataraTMSim.exceptions;
 
+<<<<<<< HEAD:src/tuataraTMSim/exceptions/UndefinedTransitionException.java
+/**
+ * An Exception thrown when the machine attempts to follow a transtion that does not exist.
+=======
 /** An Exception thrown when the machine attempts to follow a transtion that does not exist.
  *
+>>>>>>> master:src/tuataraTMSim/exceptions/UndefinedTransitionException.java
  * @author Jimmy
  */
 public class UndefinedTransitionException extends java.lang.Exception
 {
-    
     /**
      * Creates a new instance of <code>UndefinedTransitionException</code> without detail message.
      */
-    public UndefinedTransitionException()
-    {
-    }
-    
+    public UndefinedTransitionException() { }
     
     /**
      * Constructs an instance of <code>UndefinedTransitionException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public UndefinedTransitionException(String msg)
-    {
-        super(msg);
-    }
+    public UndefinedTransitionException(String msg) { super(msg); }
 }

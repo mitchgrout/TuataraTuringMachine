@@ -36,21 +36,19 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class DeleteAllSelectedCommand implements TMCommand
 {
-    
-    /** Creates a new instance of DeleteAllSelectedCommand.
-        Be sure to only pass in copies of selectedStates and selectedTransitions
-        - we don't want our lists of states and transitions to change when the
-          user copies new things!
+    /** 
+     * Creates a new instance of DeleteAllSelectedCommand.
+     * Be sure to only pass in copies of selectedStates and selectedTransitions
+     * - we don't want our lists of states and transitions to change when the user copies new things!
      */
-    public DeleteAllSelectedCommand(TMGraphicsPanel panel,
-           HashSet<TM_State> selectedStates,
-           HashSet<TM_Transition>  selectedTransitions)
+    public DeleteAllSelectedCommand(TMGraphicsPanel panel, HashSet<TM_State> selectedStates,
+                                    HashSet<TM_Transition> selectedTransitions)
     {
         m_panel = panel;
         m_selectedStates = selectedStates;
         m_selectedTransitions = selectedTransitions;
         m_borderTransitions = 
-                m_panel.getSimulator().getMachine().getHalfSelectedTransitions(selectedStates);
+            m_panel.getSimulator().getMachine().getHalfSelectedTransitions(selectedStates);
     }
     
     public void doCommand()
@@ -64,13 +62,14 @@ public class DeleteAllSelectedCommand implements TMCommand
         {
             deleteTransition(t);
         }
-        m_panel.setSelectedStates(new HashSet<TM_State>()); //is this what should happen?
+        
+        m_panel.setSelectedStates(new HashSet<TM_State>()); // TODO: is this what should happen?
         m_panel.setSelectedTransitions(new HashSet<TM_Transition>());
     }
     
     public void undoCommand()
     {
-        //TODO decide if they should come back selected or not
+        // TODO: decide if they should come back selected or not
         
         for (TM_State s : m_selectedStates)
         {
@@ -81,20 +80,24 @@ public class DeleteAllSelectedCommand implements TMCommand
         for (TM_Transition t : m_selectedTransitions)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
-            /*if (m_panel.getSelectedStates().contains(m_transition.getFromState())
-            && m_panel.getSelectedStates().contains(m_transition.getToState()))
-                m_panel.getSelectedTransitions().add(m_transition);*/
+            // if (m_panel.getSelectedStates().contains(m_transition.getFromState()) &&
+            //     m_panel.getSelectedStates().contains(m_transition.getToState()))
+            // {
+            //     m_panel.getSelectedTransitions().add(m_transition);
+            // }
         }
         
         //handle transitions that attach to items outside of the state cloud
         for (TM_Transition t : m_borderTransitions)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
-            /*if (m_panel.getSelectedStates().contains(m_transition.getFromState())
-            && m_panel.getSelectedStates().contains(m_transition.getToState()))
-                m_panel.getSelectedTransitions().add(m_transition);*/
-            
+            // if (m_panel.getSelectedStates().contains(m_transition.getFromState()) &&
+            //     m_panel.getSelectedStates().contains(m_transition.getToState()))
+            // {
+            //     m_panel.getSelectedTransitions().add(m_transition);
+            // }
         }
+        
         m_panel.getSimulator().computePotentialTransitions(false);
     }
     
@@ -108,10 +111,15 @@ public class DeleteAllSelectedCommand implements TMCommand
         m_panel.getSimulator().getMachine().deleteState(s);
         m_panel.removeLabelFromDictionary(s.getLabel());
         
+        // Computation can't continue if we deleted the current state
         if (m_panel.getSimulator().getCurrentState() == s)
-            m_panel.getSimulator().resetMachine(); //computation can't continue if we deleted the current state
+        {
+            m_panel.getSimulator().resetMachine();
+        }
         else
+        {
             m_panel.getSimulator().computePotentialTransitions(false);
+        }
     }
     
     private void deleteTransition(TM_Transition t)
@@ -126,6 +134,6 @@ public class DeleteAllSelectedCommand implements TMCommand
     
     private TMGraphicsPanel m_panel;
     private HashSet<TM_State> m_selectedStates;
-    private HashSet<TM_Transition>  m_selectedTransitions;
+    private HashSet<TM_Transition> m_selectedTransitions;
     private HashSet<TM_Transition> m_borderTransitions;
 }

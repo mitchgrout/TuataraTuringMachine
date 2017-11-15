@@ -38,7 +38,9 @@ import tuataraTMSim.TM.TM_Transition;
 public class DeleteStateCommand implements TMCommand
 {
     
-    /** Creates a new instance of DeleteStateCommand */
+    /**
+     * Creates a new instance of DeleteStateCommand
+     */
     public DeleteStateCommand(TMGraphicsPanel panel, TM_State state)
     {
         m_panel = panel;
@@ -50,13 +52,17 @@ public class DeleteStateCommand implements TMCommand
     public void doCommand()
     {
         m_panel.getSimulator().getMachine().deleteState(m_state);
-
         m_panel.removeLabelFromDictionary(m_state.getLabel());
 
+        // Computation can't continue if we deleted the current state
         if (m_panel.getSimulator().getCurrentState() == m_state)
-            m_panel.getSimulator().resetMachine(); //computation can't continue if we deleted the current state
+        {
+            m_panel.getSimulator().resetMachine();
+        }
         else
+        {
             m_panel.getSimulator().computePotentialTransitions(false);
+        }
     }
     
     public void undoCommand()

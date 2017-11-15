@@ -36,14 +36,13 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class PasteCommand implements TMCommand
 {
-    /** Creates a new instance of PasteCommand.
-        Be sure to only pass in copies of selectedStates and selectedTransitions
-        - we don't want our lists of states and transitions to change when the
-          user copies new things!
+    /**
+     * Creates a new instance of PasteCommand.
+     * Be sure to only pass in copies of selectedStates and selectedTransitions
+     * - we don't want our lists of states and transitions to change when the user copies new things!
      */
-    public PasteCommand(TMGraphicsPanel panel,
-           HashSet<TM_State> selectedStates,
-           HashSet<TM_Transition>  selectedTransitions)
+    public PasteCommand(TMGraphicsPanel panel, HashSet<TM_State> selectedStates,
+                        HashSet<TM_Transition> selectedTransitions)
     {
         m_panel = panel;
         m_selectedStates = selectedStates;
@@ -60,7 +59,6 @@ public class PasteCommand implements TMCommand
                 s.setLabel(label);
             }
             m_panel.addLabelToDictionary(s.getLabel());
-                
             s.removeAllTransitions();
             m_panel.getSimulator().getMachine().addState(s);
         }
@@ -85,7 +83,8 @@ public class PasteCommand implements TMCommand
         {
             deleteTransition(t);
         }
-        m_panel.setSelectedStates(new HashSet<TM_State>()); //is this what should happen?
+        
+        m_panel.setSelectedStates(new HashSet<TM_State>()); // TODO: is this what should happen?
         m_panel.setSelectedTransitions(new HashSet<TM_Transition>());
     }
     
@@ -99,10 +98,15 @@ public class PasteCommand implements TMCommand
         m_panel.getSimulator().getMachine().deleteState(s);
         m_panel.removeLabelFromDictionary(s.getLabel());
         
+        // Computation can't continue if we deleted the current state
         if (m_panel.getSimulator().getCurrentState() == s)
-            m_panel.getSimulator().resetMachine(); //computation can't continue if we deleted the current state
+        {
+            m_panel.getSimulator().resetMachine();
+        }
         else
+        {
             m_panel.getSimulator().computePotentialTransitions(false);
+        }
     }
     
     private void deleteTransition(TM_Transition t)

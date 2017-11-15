@@ -37,10 +37,11 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class MoveStateCommand implements TMCommand
 {
-    
-    /** Creates a new instance of MoveStateCommand */
-    public MoveStateCommand(TMGraphicsPanel panel, TM_State state,
-            int moveX, int moveY, Collection<TM_Transition> transitionsInto)
+    /**
+     * Creates a new instance of MoveStateCommand
+     */
+    public MoveStateCommand(TMGraphicsPanel panel, TM_State state, int moveX, int moveY,
+                            Collection<TM_Transition> transitionsInto)
     {
         m_panel = panel;
         m_state = state;
@@ -53,18 +54,14 @@ public class MoveStateCommand implements TMCommand
 
     public void doCommand()
     {
-        TMGraphicsPanel.updateTransitionLocations(m_state,m_moveX, m_moveY,
-                    m_transitionsInto, m_transitionsOut);
-        m_state.setPosition(m_state.getX() + m_moveX,
-                    m_state.getY() + m_moveY);
+        TMGraphicsPanel.updateTransitionLocations(m_state,m_moveX, m_moveY, m_transitionsInto, m_transitionsOut);
+        m_state.setPosition(m_state.getX() + m_moveX, m_state.getY() + m_moveY);
     }
        
     public void undoCommand()
     {
-        TMGraphicsPanel.updateTransitionLocations(m_state,-m_moveX, -m_moveY,
-                    m_transitionsInto, m_transitionsOut);
-        m_state.setPosition(m_state.getX() - m_moveX,
-                    m_state.getY() - m_moveY);
+        TMGraphicsPanel.updateTransitionLocations(m_state,-m_moveX, -m_moveY, m_transitionsInto, m_transitionsOut);
+        m_state.setPosition(m_state.getX() - m_moveX, m_state.getY() - m_moveY);
     }
     
     public String getName()

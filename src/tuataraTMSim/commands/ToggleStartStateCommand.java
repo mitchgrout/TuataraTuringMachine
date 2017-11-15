@@ -34,23 +34,44 @@ import tuataraTMSim.TM.TM_State;
  */
 public class ToggleStartStateCommand implements TMCommand
 {
-    
-    /** Creates a new instance of ToggleStartStateCommand */
-    public ToggleStartStateCommand(TMGraphicsPanel panel, TM_State state)
+    /**
+     * Creates a new instance of ToggleStartStateCommand
+     */
+    public ToggleStartStateCommand(TMGraphicsPanel panel, TM_State oldState, TM_State newState)
     {
         m_panel = panel;
-        m_state = state;
+        m_oldState = oldState;
+        m_newState = newState;
     }
-    
     
     public void doCommand()
     {
-        m_state.setStartState(!m_state.isStartState());
+        // If the old start is the new start, or there was no old start, we're simply toggling
+        if(m_oldState == null || m_oldState.equals(m_newState))
+        {
+            m_newState.setStartState(!m_newState.isStartState());
+        }
+        // Otherwise, we're unsetting one, and setting the other
+        else
+        {
+            m_oldState.setStartState(false);
+            m_newState.setStartState(true);
+        }
     }
     
     public void undoCommand()
     {
-        m_state.setStartState(!m_state.isStartState());
+        // If the old start is the new start, or there was no old start, we're simply toggling
+        if(m_oldState == null || m_oldState.equals(m_newState))
+        {
+            m_newState.setStartState(!m_newState.isStartState());
+        }
+        // Otherwise, we're unsetting one, and setting the other
+        else
+        {
+            m_oldState.setStartState(true);
+            m_newState.setStartState(false);
+        }
     }
     
     public String getName()
@@ -59,5 +80,5 @@ public class ToggleStartStateCommand implements TMCommand
     }
     
     private TMGraphicsPanel m_panel;
-    private TM_State m_state;
+    private TM_State m_oldState, m_newState;
 }

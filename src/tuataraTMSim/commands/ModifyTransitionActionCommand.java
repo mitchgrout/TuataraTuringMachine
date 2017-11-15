@@ -35,10 +35,11 @@ import tuataraTMSim.TM.TM_Transition;
  */
 public class ModifyTransitionActionCommand implements TMCommand
 {
-    
-    /** Creates a new instance of ModifyTransitionActionCommand */
+    /**
+     * Creates a new instance of ModifyTransitionActionCommand
+     */
     public ModifyTransitionActionCommand(TMGraphicsPanel panel, TM_Transition transition,
-            TM_Action action)
+                                         TM_Action action)
     {
         m_panel = panel;
         m_transition = transition;
@@ -50,6 +51,7 @@ public class ModifyTransitionActionCommand implements TMCommand
     {
         m_transition.setAction(m_action);
     }
+    
     public void undoCommand()
     {
         m_transition.setAction(m_oldAction);
@@ -63,6 +65,5 @@ public class ModifyTransitionActionCommand implements TMCommand
     private TMGraphicsPanel m_panel;
     private TM_Transition m_transition;
     private TM_Action m_action;
-    private TM_Action m_oldAction;
-    
+    private TM_Action m_oldAction;   
 }

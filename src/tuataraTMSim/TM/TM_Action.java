@@ -34,16 +34,19 @@ import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
 
-/** An action for a state transition of a Turing machine, such as shifting the read/write
- *  head, or writing to the tape.
+/**
+ * An action for a state transition of a Turing machine, such as shifting the read/write head,
+ * or writing to the tape.
  * @author Jimmy
  */
 public class TM_Action implements Serializable
 {
- 
     public static final char LEFT_ARROW = (char)0x2190;
     public static final char RIGHT_ARROW = (char)0x2192;
-    /** Creates a new instance of TM_Action */
+    
+    /**
+     * Creates a new instance of TM_Action
+     * */
     public TM_Action(int dir, char inputSymbol, char outputSymbol)
     {
         m_direction = (byte)dir;
@@ -51,21 +54,29 @@ public class TM_Action implements Serializable
         m_inputChar = inputSymbol;
     }
     
-    /** Perform the action specified by this object on the given tape,
-     *  updating both the physical tape and the location of the read/write head.
+    /** 
+     * Perform the action specified by this object on the given tape, updating both the physical tape,
+     * and the location of the read/write head.
      */
     public void performAction(Tape t) throws TapeBoundsException
     {
         if (m_direction == -1)
+        {
             t.headLeft();
+        }
         else if (m_direction == 1)
+        {
             t.headRight();
+        }
         else if (m_writeChar != TMachine.EMPTY_ACTION_SYMBOL)
+        {
             t.write(m_writeChar);
+        }
     }
     
-    /** Get the direction the head moves for this action.
-     *  -1: left
+    /** 
+     * Get the direction the head moves for this action.
+     * -1: left
      *  0: don't move the head
      *  1: right
      */
@@ -74,23 +85,25 @@ public class TM_Action implements Serializable
         return m_direction;
     }
     
-    /** Gets the character that this action will write to the tape.
-     *  This is only used if the direction is 0 (does not move the head).
+    /**
+     * Gets the character that this action will write to the tape.
+     * This is only used if the direction is 0 (does not move the head).
      */
     public char getChar()
     {
         return m_writeChar;
     }
     
-    /** Returns true IFF this action will adjust the location of the read/
-     *  write head.
+    /**
+     * Returns true IFF this action will adjust the location of the read/write head.
      */
     public boolean movesHead()
     {
         return (m_direction == -1 || m_direction == 1);
     }
     
-     /** Render the state to a graphics object.
+    /**
+     * Render the state to a graphics object.
      */
     public void paint(Graphics g, int x, int y)
     {
@@ -101,15 +114,12 @@ public class TM_Action implements Serializable
         String outputStr = toString();
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         
-        //stringWidth method doesnt seem to work correctly, using char size instead
-        //x -= metrics.stringWidth(outputStr) / 2; //centre on the given x value
-        x -= (metrics.charWidth('_') * outputStr.length()) / 2; //assumes monospace font
-        //The vertical position is already ok - the baseline of the text rather than the top-left
-        //is specified.
-                
+        // stringWidth method doesnt seem to work correctly, using char size instead, assuming monospace
+        x -= (metrics.charWidth('_') * outputStr.length()) / 2;
+        // The vertical position is already ok - the baseline of the text rather than the top-left is specified.
+        
         g2d.drawString(outputStr, x, y);
     }
-    
     
     public String toString()
     {
@@ -124,6 +134,7 @@ public class TM_Action implements Serializable
                 break;
             case 1:
                 outputStr += RIGHT_ARROW;
+                break;
         }
         return outputStr;
     }
@@ -133,7 +144,7 @@ public class TM_Action implements Serializable
         m_inputChar = c;
     }
     
-    private byte m_direction; //-1 is left, +1 is right, otherwise don't move head and write char instead.
+    private byte m_direction; // NOTE: -1 is left, +1 is right, otherwise don't move head and write char instead.
     private char m_writeChar;
     private char m_inputChar;
 }

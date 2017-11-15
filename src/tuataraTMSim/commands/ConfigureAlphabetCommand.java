@@ -34,9 +34,10 @@ import tuataraTMSim.TM.Alphabet;
  */
 public class ConfigureAlphabetCommand implements TMCommand
 {
-    /** Creates a new instance of ConfigureAlphabetCommand */
-    public ConfigureAlphabetCommand(TMGraphicsPanel panel, Alphabet beforeAlphabet,
-            Alphabet afterAlphabet)
+    /**
+     * Creates a new instance of ConfigureAlphabetCommand 
+     */
+    public ConfigureAlphabetCommand(TMGraphicsPanel panel, Alphabet beforeAlphabet, Alphabet afterAlphabet)
     {
         m_panel = panel;
         m_beforeAlphabet = beforeAlphabet;

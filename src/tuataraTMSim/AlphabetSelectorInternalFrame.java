@@ -50,9 +50,10 @@ import tuataraTMSim.TM.Tape;
  * @author Jimmy
  */
 public class AlphabetSelectorInternalFrame extends JInternalFrame
-{
-    
-    /** Creates a new instance of AlphabetSelectorInternalFrame */
+{    
+    /**
+     * Creates a new instance of AlphabetSelectorInternalFrame
+     * */
     public AlphabetSelectorInternalFrame(MainWindow parent)
     {
         initComponents();
@@ -86,7 +87,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         JButton aSelectAll = new JButton("Select all");
         JButton aSelectNone = new JButton("Select none");
         
-        aSelectAll.addActionListener(new ActionListener() {
+        aSelectAll.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 for (JCheckBox l : m_letters)
@@ -96,13 +98,14 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             }
         });
         
-        aSelectNone.addActionListener(new ActionListener() {
+        aSelectNone.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 for (JCheckBox l : m_letters)
                 {
                     l.setSelected(false);
-                }
+                }   
             }
         });
         
@@ -131,7 +134,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         JButton nSelectAll = new JButton("Select all");
         JButton nSelectNone = new JButton("Select none");
         
-        nSelectAll.addActionListener(new ActionListener() {
+        nSelectAll.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 for (JCheckBox d : m_digits)
@@ -141,7 +145,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             }
         });
         
-        nSelectNone.addActionListener(new ActionListener() {
+        nSelectNone.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 for (JCheckBox d : m_digits)
@@ -156,7 +161,6 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         selectNumerical.add(nButtonPanel, BorderLayout.SOUTH);
         miscPanel.add(selectNumerical, BorderLayout.NORTH);
         getContentPane().add(miscPanel, BorderLayout.EAST);
-        // first.getText();
         
         JPanel blankPanel = new JPanel();
         blankPanel.add(blankCheckBox);
@@ -168,7 +172,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         JPanel finish = new JPanel();
         JButton ok = new JButton("Ok");
         JButton cancel = new JButton("Cancel");
-        ok.addActionListener(new ActionListener() {
+        ok.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 Alphabet tempA = new Alphabet();
@@ -200,29 +205,34 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                         m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
                         m_panel.getSimulator().getMachine().removeInconsistentTransitions(m_panel);
                         setVisible(false);
-                        try {setSelected(false);} catch (PropertyVetoException e2) {}
-                        m_panel.deselectSymbol(); //this causes a repaint also
+                        try { setSelected(false); }
+                        catch (PropertyVetoException e2) { }
+                        // This causes a repaint also
+                        m_panel.deselectSymbol();
                     }
                     else if (choice == JOptionPane.CANCEL_OPTION)
                     {
-                        //leave window open
-                    } else if (choice == JOptionPane.NO_OPTION)
+                        // Leave window open
+                    }
+                    else if (choice == JOptionPane.NO_OPTION)
                     {
                         m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
                         setVisible(false);
-                        try {setSelected(false);} catch (PropertyVetoException e2) {}
-                        //repaint();
+                        try { setSelected(false); }
+                        catch (PropertyVetoException e2) { }
                     }
                 }
                 m_panel.setModifiedSinceSave(true);
             }
         });
         
-        cancel.addActionListener(new ActionListener() {
+        cancel.addActionListener(new ActionListener()
+        {
             public void actionPerformed(ActionEvent e)
             {
                 setVisible(false);
-                try {setSelected(false);} catch (PropertyVetoException e2) {}
+                try { setSelected(false); }
+                catch (PropertyVetoException e2) { }
             }
         });
         
@@ -232,15 +242,14 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 m_parent.handleLostFocus();
                 m_parent.getGlassPane().setVisible(false);
                 
-                //fix the bug where pressing spacebar doesnt reach the system
+                // Fix the bug where pressing spacebar doesnt reach the system
                 // and merely makes an annoying beep instead.
-                //presumably the problem is that the focus owner becomes null
-                //when the internal frame was deactivated.
+                // presumably the problem is that the focus owner becomes null
+                // when the internal frame was deactivated.
                 KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
                 //kfm.clearGlobalFocusOwner();
                 m_parent.getContentPane().requestFocusInWindow();
             }
-            
         });
         
         finish.add(ok);
@@ -249,7 +258,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         getContentPane().add(southButtons, BorderLayout.SOUTH);
     }
     
-    /** Must be called before each time this internal frame is set to visible.
+    /** 
+     * Must be called before each time this internal frame is set to visible.
      */
     public void setPanel(TMGraphicsPanel panel)
     {
@@ -257,18 +267,25 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         synchronizeToAlphabet();
     }
     
-    /** Process a key event passed to this internal frame from the main window.
-     *  In particular, if the key event is a KEY_TYPED event which is a letter or
-     *  a digit, toggle the checkbox for that letter or digit.
+    /**
+     * Process a key event passed to this internal frame from the main window.
+     * In particular, if the key event is a KEY_TYPED event which is a letter or a digit, toggle the
+     * checkbox for that letter or digit.
      */
     public void handleKeyEvent(KeyEvent e)
     {
         if (e.getID() != KeyEvent.KEY_TYPED)
+        {
             return;
+        }
         if (e.isActionKey())
+        {
             return;
+        }
         if (e.getModifiers() != 0)
+        {
             return;
+        }
         char c = e.getKeyChar();
         if (Character.isDigit(c))
         {
@@ -291,9 +308,9 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 }
             }
         }
-        //TODO handle blank (space)?  The trouble is that spacebar
-        //conflicts with the ordinary usage of spacebar - to press
-        //the selected button/checkbox.
+        // TODO handle blank (space)?  The trouble is that spacebar
+        // conflicts with the ordinary usage of spacebar - to press
+        // the selected button/checkbox.
     }
     
     private void synchronizeToAlphabet()

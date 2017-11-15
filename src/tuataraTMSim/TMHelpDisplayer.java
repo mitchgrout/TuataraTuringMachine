@@ -43,10 +43,13 @@ import javax.swing.text.html.HTMLFrameHyperlinkEvent;
  *
  * @author Jimmy
  */
-public class TMHelpDisplayer extends JInternalFrame{
-    
-    /** Creates a new instance of TMHelpDisplayer */
-    public TMHelpDisplayer() {
+public class TMHelpDisplayer extends JInternalFrame
+{    
+    /**
+     * Creates a new instance of TMHelpDisplayer
+     */
+    public TMHelpDisplayer()
+    {
         initialize();
     }
     
@@ -71,7 +74,8 @@ public class TMHelpDisplayer extends JInternalFrame{
                 try
                 {
                     jep.setPage(helpURL);
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     System.err.println("Attempted to read a bad URL: " + helpURL);
                 }
@@ -83,50 +87,46 @@ public class TMHelpDisplayer extends JInternalFrame{
             
             jep.addHyperlinkListener(new Hyperactive());
             
-            //jep.setSize(640, 480);
-            //myPanel.add(jep);
             JScrollPane editorScrollPane = new JScrollPane(jep);
-            //editorScrollPane.setVerticalScrollBarPolicy(
-            //                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             editorScrollPane.setPreferredSize(new Dimension(640, 480));
             editorScrollPane.setMinimumSize(new Dimension(100, 100));
             
             myPanel.add(editorScrollPane);
             
-            //myPanel.add(new JButton("blah"));
             add(myPanel);
             
             pack();
             setLocation(100, 100);
         }
-        catch(Exception e) {System.out.println("Caught exception: " +
-            e.toString());}
-        
-        
+        catch(Exception e)
+        {
+            System.out.println("Caught exception: " + e.toString());
+        }
     }
-    
-    
 }
 
- /** Handle hyperlinks in the html help.  Code borrowed from the Sun Java 1.4.2 API Guide:
-  *  http://java.sun.com/j2se/1.4.2/docs/api/javax/swing/JEditorPane.html
-  */
- class Hyperactive implements HyperlinkListener {
-
-     public void hyperlinkUpdate(HyperlinkEvent e) {
-              if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                  JEditorPane pane = (JEditorPane) e.getSource();
-                  if (e instanceof HTMLFrameHyperlinkEvent) {
-                      HTMLFrameHyperlinkEvent  evt = (HTMLFrameHyperlinkEvent)e;
-                      HTMLDocument doc = (HTMLDocument)pane.getDocument();
-                      doc.processHTMLFrameHyperlinkEvent(evt);
-                  } else {
-                      try {
-                          pane.setPage(e.getURL());
-                      } catch (Throwable t) {
-                          t.printStackTrace();
-                      }
-                  }
-              }
-          }
- }
+/**
+ * Handle hyperlinks in the html help.  Code borrowed from the Sun Java 1.4.2 API Guide:
+ * http://java.sun.com/j2se/1.4.2/docs/api/javax/swing/JEditorPane.html
+ */
+class Hyperactive implements HyperlinkListener
+{
+    public void hyperlinkUpdate(HyperlinkEvent e) 
+    {
+        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+        {
+            JEditorPane pane = (JEditorPane) e.getSource();
+            if (e instanceof HTMLFrameHyperlinkEvent)
+            {
+                HTMLFrameHyperlinkEvent  evt = (HTMLFrameHyperlinkEvent)e;
+                HTMLDocument doc = (HTMLDocument)pane.getDocument();
+                doc.processHTMLFrameHyperlinkEvent(evt);
+            }
+            else
+            {
+                try { pane.setPage(e.getURL()); }
+                catch (Throwable t) { t.printStackTrace(); }
+            }
+        }
+    }
+}
