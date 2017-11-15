@@ -25,24 +25,20 @@
 
 package tuataraTMSim.exceptions;
 
-/** An Exception that is thrown when the r/w head goes past the beginning of the tape.
- *
+/**
+ * An Exception that is thrown when the r/w head goes past the beginning of the tape.
  * @author Jimmy
  */
-public class TapeBoundsException extends java.lang.Exception {
-    
+public class TapeBoundsException extends Exception
+{
     /**
      * Creates a new instance of <code>TapeBoundsException</code> without detail message.
      */
-    public TapeBoundsException() {
-    }
-    
+    public TapeBoundsException() { }
     
     /**
      * Constructs an instance of <code>TapeBoundsException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public TapeBoundsException(String msg) {
-        super(msg);
-    }
+    public TapeBoundsException(String msg) { super(msg); }
 }
