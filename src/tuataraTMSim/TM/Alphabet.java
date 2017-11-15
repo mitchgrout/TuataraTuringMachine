@@ -33,7 +33,9 @@ import java.io.Serializable;
  */
 public class Alphabet implements Serializable, Cloneable
 {
-    /** Creates a new instance of Alphabet.  Default is binary alphabet. */
+    /**
+     * Creates a new instance of Alphabet. Default is binary alphabet.
+     */
     public Alphabet()
     {
         setAlphabetical(false);
@@ -46,21 +48,25 @@ public class Alphabet implements Serializable, Cloneable
     public boolean containsSymbol(char c)
     {
         c = Character.toUpperCase(c);
+        
+        // Can't be in the alphabet
         if (c == TMachine.EMPTY_ACTION_SYMBOL ||
             c == TMachine.WILDCARD_INPUT_SYMBOL)
-            return false; //cant be in the alphabet
-        if (Character.isLetter(c))
         {
-            if (c < 'A' || c > 'Z')
-                return false;
-            return letters[c - 'A'];
+            return false;
         }
-        if (Character.isDigit(c))
+        else if (Character.isLetter(c))
+        {
+            return (c < 'A' || c > 'Z')? false : letters[c - 'A'];
+        }
+        else if (Character.isDigit(c))
         {
             return digits[c - '0'];
         }
-        if (c == ' ' || c == Tape.BLANK_SYMBOL)
+        else if (c == ' ' || c == Tape.BLANK_SYMBOL)
+        {
             return blank;
+        }
         return false;
     }
     
@@ -111,10 +117,10 @@ public class Alphabet implements Serializable, Cloneable
         
             returner.letters = letters.clone();
             returner.digits = digits.clone();
-            //blank should be copied correctly by super.clone
-            
+            // Blank should be copied correctly by super.clone
             return returner;
-        } catch (CloneNotSupportedException e)
+        } 
+        catch (CloneNotSupportedException e)
         {
             System.err.println("Clone failed!!!!!!");
             return null;
