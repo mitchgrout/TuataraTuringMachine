@@ -25,7 +25,6 @@
 
 package tuataraTMSim;
 
-<<<<<<< HEAD:src/tuataraTMSim/TM_GUI_Mode.java
 /**
  * An enumeration representing the different user interaction modes that the gui can be in.
  *
@@ -33,15 +32,6 @@ package tuataraTMSim;
  */
 public enum TM_GUI_Mode
 { 
-=======
-package tuataraTMSim;
-
-/** An enumeration representing the different user interaction modes that the gui can be in.
- *
- * @author Jimmy
- */
-public enum TM_GUI_Mode { 
->>>>>>> master:src/tuataraTMSim/TM_GUI_Mode.java
     ADDNODES,
     ADDTRANSITIONS,
     SELECTION,
