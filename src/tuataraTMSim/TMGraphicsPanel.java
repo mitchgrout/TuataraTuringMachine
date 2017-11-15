@@ -40,8 +40,8 @@ import javax.swing.*;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.TM.*;
 
-/** The canvas for drawing a Turing machine state diagram.
- *
+/**
+ * The canvas for drawing a Turing machine state diagram.
  * @author Jimmy
  */
 public class TMGraphicsPanel extends JPanel
@@ -55,11 +55,9 @@ public class TMGraphicsPanel extends JPanel
             new Font("Monospaced", Font.PLAIN, 14); //TESTING
     
     /**
-     * Creates a new instance of TMGraphicsPanel.
-     * The input variables must not be null, except for file.
+     * Creates a new instance of TMGraphicsPanel. The input variables must not be null, except for file.
      */
-    public TMGraphicsPanel(TMachine machine, Tape tape, File file,
-            MainWindow mainWindow)
+    public TMGraphicsPanel(TMachine machine, Tape tape, File file, MainWindow mainWindow)
     {
         m_machine = machine;
         m_tape = tape;
@@ -70,35 +68,39 @@ public class TMGraphicsPanel extends JPanel
         initialization();
     }
     
-    //Allow Swing to optimize painting by letting it know that we fill our entire bounds.
+    // Allow Swing to optimize painting by letting it know that we fill our entire bounds.
     public boolean isOpaque()
     {
         return true;
     }
     
-    /** Set the user interface interaction mode for this panel.
-     *  Determines the result of user interaction such as clicking.
+    /**
+     * Set the user interface interaction mode for this panel.
+     * Determines the result of user interaction such as clicking.
      */
     public void setUIMode(TM_GUI_Mode currentMode)
     {
         m_currentMode = currentMode;
     }
     
-    /** Get the simulator object for the machine associated with this panel.
+    /**
+     * Get the simulator object for the machine associated with this panel.
      */
     public TM_Simulator getSimulator()
     {
         return m_sim;
     }
     
-    /** Get the alphabet for the machine associated with this panel.
+    /**
+     * Get the alphabet for the machine associated with this panel.
      */
     public Alphabet getAlphabet()
     {
         return m_machine.getAlphabet();
     }
 
-    /** Render to a graphics object.
+    /**
+     * Render to a graphics object.
      */
     protected void paintComponent(Graphics g)
     {
@@ -106,7 +108,7 @@ public class TMGraphicsPanel extends JPanel
         int h = getHeight();
         
         Graphics2D g2d = (Graphics2D)g;
-        //fill background
+        // Fill background
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, w, h);
         g2d.setFont(PANEL_FONT);
@@ -156,28 +158,32 @@ public class TMGraphicsPanel extends JPanel
             }
     }
     
-    /** Setup stuff for TMGraphicsPanel.  Should only be called by the constructor.
+    /** 
+     * Setup stuff for TMGraphicsPanel. Should only be called by the constructor.
      */
     private void initialization()
     {
         setFocusable(false);
         
         final Component thisPtr = this;
-        //set up event listeners and their corresponding actions.
-        addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                
+        // Set up event listeners and their corresponding actions.
+        addMouseListener(new MouseAdapter()
+        {
+            public void mouseClicked(MouseEvent e)
+            {   
                 if (!m_editingEnabled)
+                {
                     return;
-                
-                //deselect any selected action symbol
+                }
+
+                // Deselect any selected action symbol
                 selectedSymbolBoundingBox = null;
                 selectedTransition = null;
                 
                 if (m_currentMode != TM_GUI_Mode.ERASER && m_currentMode != TM_GUI_Mode.CHOOSENEXTTRANSITION)
                 {
-                    //select characters on transitions by left clicking
-                    //or rename states
+                    // Select characters on transitions by left clicking
+                    // or rename states
                     if (clickStateName(e) || selectCharacterByClicking(e))
                     {
                         repaint();
@@ -192,7 +198,9 @@ public class TMGraphicsPanel extends JPanel
                         break;
                     case ADDTRANSITIONS:
                         if ((e.isControlDown() || e.isShiftDown()))
+                        {
                             handleSelectionClick(e);
+                        }
                         break;
                     case ERASER:
                     {
@@ -226,78 +234,88 @@ public class TMGraphicsPanel extends JPanel
                     }
                 }
                 if (m_machine.getStateClickedOn(e.getX(), e.getY())!= null ||
-                        m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics())
-                          != null)
+                    m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
+                {
                     setModifiedSinceSave(true);
+                }
                 repaint();
                 
             }
-            public void mousePressed(MouseEvent e) {
+
+            public void mousePressed(MouseEvent e)
+            {
                 if (!m_editingEnabled)
+                {
                     return;
+                }
                 handleMousePressed(e);
             }
             
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(MouseEvent e)
+            {
                 if (!m_editingEnabled)
+                {
                     return;
+                }
                 handleMouseReleased(e);
                 repaint();
             }
         });
         
-        addMouseMotionListener(new MouseMotionAdapter() {
-        public void mouseDragged(MouseEvent e) {
-            //deselect any selected action symbol
-            selectedSymbolBoundingBox = null;
-            selectedTransition = null;
-            
-            boolean repaintNeeded = false;
-            if (m_currentMode != TM_GUI_Mode.ADDTRANSITIONS)
+        addMouseMotionListener(new MouseMotionAdapter()
+        {
+            public void mouseDragged(MouseEvent e)
             {
-                if (mousePressedState != null)
+                // Deselect any selected action symbol
+                selectedSymbolBoundingBox = null;
+                selectedTransition = null;
+            
+                boolean repaintNeeded = false;
+                if (m_currentMode != TM_GUI_Mode.ADDTRANSITIONS)
                 {
-                    handleStateDrag(e);
-                    
+                    if (mousePressedState != null)
+                    {
+                        handleStateDrag(e);
+                        repaintNeeded = true;
+                    }
+                    else if (m_currentMode == TM_GUI_Mode.SELECTION && selectionInProgress)
+                    {
+                        selectionBoxEndX = e.getX();
+                        selectionBoxEndY = e.getY();
+                        repaintNeeded = true;
+                    }
+                }
+                // Add transitions mode
+                else
+                {
+                    drawPosX = e.getX();
+                    drawPosY = e.getY();
                     repaintNeeded = true;
                 }
-                else if (m_currentMode == TM_GUI_Mode.SELECTION && selectionInProgress)
+            
+                if (mousePressedTransition != null)
                 {
-                    selectionBoxEndX = e.getX();
-                    selectionBoxEndY = e.getY();
+                    handleTransitionDrag(e);
                     repaintNeeded = true;
-                    
+                }
+            
+                if (repaintNeeded)
+                {
+                    repaint();
                 }
             }
-            else //add transitions mode
-            {
-                drawPosX = e.getX();
-                drawPosY = e.getY();
-                repaintNeeded = true;
-            }
-            
-            if (mousePressedTransition != null)
-            {
-                handleTransitionDrag(e);
-                repaintNeeded = true;
-            }
-            
-            if (repaintNeeded)
-                repaint();
-        }
         });
     }
     
-    /** Accept a KeyEvent detected in the main window, and use it to update
-     *  any transition action selected by the user.  Returns true IFF a transition
-     *  action was selected and hence has been updated.
+    /** 
+     * Accept a KeyEvent detected in the main window, and use it to update any transition action
+     * selected by the user.  Returns true IFF a transition action was selected and hence has been updated.
      */
     public boolean handleKeyEvent(KeyEvent e)
     {
         if (selectedSymbolBoundingBox != null && selectedTransition != null)
         {
-            //there is a transition action currently selected by the user.
-            
+            // There is a transition action currently selected by the user.
             char c = e.getKeyChar();
             c = Character.toUpperCase(c);
             
@@ -367,11 +385,17 @@ public class TMGraphicsPanel extends JPanel
                     }
                 }
                 else if (c == 'E' && e.isShiftDown()) //shift + E makes an epsilon transition
+                {
                     doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), TMachine.EMPTY_ACTION_SYMBOL)));
+                }
                 else if (Character.isLetterOrDigit(c)  && getAlphabet().containsSymbol(c))
+                {
                     doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), c)));
+                }
                 else if ((c == ' ' || c == Tape.BLANK_SYMBOL) && getAlphabet().containsSymbol(Tape.BLANK_SYMBOL))
+                {
                     doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), Tape.BLANK_SYMBOL)));
+                }
                 else if (c == TMachine.WILDCARD_INPUT_SYMBOL)
                 {
                     JOptionPane.showMessageDialog(null,"'" + TMachine.WILDCARD_INPUT_SYMBOL +
@@ -379,15 +403,19 @@ public class TMGraphicsPanel extends JPanel
                         JOptionPane.WARNING_MESSAGE);
                 }
                 else if (Character.isLetterOrDigit(c))
+                {
                     JOptionPane.showMessageDialog(null,"The action symbol for this transition"
                         + " cannot be set to the value '" + c + "', as that symbol is not in "
                         + "the alphabet for this machine.", "Update transition properties", 
                         JOptionPane.WARNING_MESSAGE);
+                }
                 else if (c == ' ' || c == Tape.BLANK_SYMBOL)
+                {
                     JOptionPane.showMessageDialog(null,"The action symbol for this transition"
                         + " cannot be set to the value '" + Tape.BLANK_SYMBOL + "', as that symbol is not in "
                         + "the alphabet for this machine.", "Update transition properties", 
                         JOptionPane.WARNING_MESSAGE);
+                }
             }
             return true;
         }
@@ -395,33 +423,37 @@ public class TMGraphicsPanel extends JPanel
     }
     
     
-    //*** Auxiliary methods to handle click events in different situations.
-    
-    /** Handles the case where a mouse click lands on the name of a state,
-     *  by bringing up a dialog box request for a new name for the state.
-     *  @returns true IFF the mouse click triggered the dialog box and thus
-     *      should not be considered for further use.
+    // Auxiliary methods to handle click events in different situations:
+    /**
+     * Handles the case where a mouse click lands on the name of a state, by bringing up a dialog
+     * box request for a new name for the state.
+     * @returns true IFF the mouse click triggered the dialog box and thus
+     *     should not be considered for further use.
      */
     private boolean clickStateName(MouseEvent e)
     {
         TM_State nameClicked = m_machine.getStateNameClickedOn(getGraphics(),e.getX(), e.getY());
         if (nameClicked == null)
+        {
             return false;
-        
-        m_keyboardEnabled = false; //disable keyboard while dialog box shows
+        }
+        m_keyboardEnabled = false; // Disable keyboard while dialog box shows
         String result = (String)JOptionPane.showInputDialog(null, "What would you like to label the state as?", "", JOptionPane.QUESTION_MESSAGE, null, null, nameClicked.getLabel());
         m_keyboardEnabled = true;
         
         if (result == null)
+        {
             return true;
+        }
         if (result.equals(""))
         {
             JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
             return true;
         }
         if (result.equals(nameClicked.getLabel()))
-            return true; //change to the same thing
-        
+        {
+            return true; // Change to the same thing
+        }
         if (m_labelsUsed.containsKey(result))
         {
             JOptionPane.showMessageDialog(null, "You cannot assign a label that is already being used by another state!");
@@ -433,10 +465,11 @@ public class TMGraphicsPanel extends JPanel
         return true;
     }
     
-    /** Update the user selection of action characters for transitions
-     *  following a mouse click event.
-     *  @param e    The mouse click event to process.
-     *  @returns true IFF the mouse click triggered a selection and thus
+    /** 
+     * Update the user selection of action characters for transitions
+     * following a mouse click event.
+     * @param e    The mouse click event to process.
+     * @returns true IFF the mouse click triggered a selection and thus
      *      should not be considered for further use.
      */
     private boolean selectCharacterByClicking(MouseEvent e)
@@ -467,28 +500,26 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Handle a mouse click in add nodes mode.
+    /**
+     * Handle a mouse click in add nodes mode.
      */
     private void handleAddNodesClick(MouseEvent e)
     {
         if (m_machine.getStateClickedOn(e.getX(), e.getY()) != null)
         {
-            //adding states on top of states is not allowed
+            // Adding states on top of states is not allowed
             handleSelectionClick(e);
             return;
         }
         
         String label = getFirstFreeName();
-        /*
-        m_machine.addState(new TM_State(label,false, false, e.getX() - TM_State.STATE_RENDERING_WIDTH / 2, e.getY() - TM_State.STATE_RENDERING_WIDTH / 2));
-        addLabelToDictionary(label);*/
         doCommand(new AddStateCommand(this, new TM_State(label,false, false,
                 e.getX() - TM_State.STATE_RENDERING_WIDTH / 2,
                 e.getY() - TM_State.STATE_RENDERING_WIDTH / 2)));
     }
     
-    /** Handle a mouse click in eraser mode.  Delete a transition or state
-     *  that was clicked on, if any.
+    /** 
+     * Handle a mouse click in eraser mode.  Delete a transition or state that was clicked on, if any.
      */
     public void handleEraserClick(MouseEvent e)
     {
@@ -510,29 +541,15 @@ public class TMGraphicsPanel extends JPanel
     public void deleteState(TM_State s)
     {
         doCommand(new DeleteStateCommand(this, s));
-        /*
-        m_machine.deleteState(s);
-        removeLabelFromDictionary(s.getLabel());
-        
-        if (m_sim.getCurrentState() == s)
-            m_sim.resetMachine(); //computation can't continue if we deleted the current state
-        else
-            m_sim.computePotentialTransitions(false);*/
     }
     
     public void deleteTransition(TM_Transition t)
     {
         doCommand(new DeleteTransitionCommand(this, t));
-        /*boolean returner = m_machine.deleteTransition(t);
-        if (t == selectedTransition)
-        {
-            deselectSymbol();
-        }
-        m_sim.computePotentialTransitions(false);
-        return returner;*/
     }
     
-    /** Handle a mouse click in choose start state mode.
+    /**
+     * Handle a mouse click in choose start state mode.
      */
     private void handleChooseStartClick(MouseEvent e)
     {
@@ -544,7 +561,8 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Handle a mouse click in choose start state mode.
+    /**
+     * Handle a mouse click in choose start state mode.
      */
     private void handleChooseAcceptingClick(MouseEvent e)
     {
@@ -555,7 +573,8 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Handle a mouse click in selection mode.
+    /**
+     * Handle a mouse click in selection mode.
      */
     private void handleSelectionClick(MouseEvent e)
     {
@@ -585,7 +604,10 @@ public class TMGraphicsPanel extends JPanel
             {
                 if (transitionClickedOn.getSymbol() != TMachine.WILDCARD_INPUT_SYMBOL
                         && transitionClickedOn.getSymbol() != m_tape.read())
-                    return; //cant select this one
+                {
+                    // Can't select this one
+                    return;
+                }
             }
             this.getSimulator().setCurrentNextTransition(transitionClickedOn);
             repaint();
@@ -603,19 +625,22 @@ public class TMGraphicsPanel extends JPanel
         
     }
     
-    /** Handle a mouse button pressed event.  Determines selected states or
-     * transitions to prepare for mouse dragging.
+    /** 
+     * Handle a mouse button pressed event. Determines selected states or transitions to prepare for
+     * mouse dragging.
      */
     private void handleMousePressed(MouseEvent e)
     {
         if ((e.isControlDown() || e.isShiftDown()))
         {
-            //we don't want to start creating a new transition in this case
+            // We don't want to start creating a new transition in this case
             mousePressedState = null;
         }
         else
+        {
             mousePressedState = m_machine.getStateClickedOn(e.getX(), e.getY());
-        if (mousePressedState != null) //mouse press on a state
+        }
+        if (mousePressedState != null) // Mouse press on a state
         {
             setModifiedSinceSave(true);
             moveStateClickOffsetX = mousePressedState.getX() - e.getX();
@@ -631,7 +656,7 @@ public class TMGraphicsPanel extends JPanel
         else
         {
             mousePressedTransition = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-            if (mousePressedTransition != null) //mouse press on a transition
+            if (mousePressedTransition != null) // Mouse press on a transition
             {
                 setModifiedSinceSave(true);
                 transitionMidPointBeforeMove = mousePressedTransition.getMidpoint();
@@ -641,11 +666,10 @@ public class TMGraphicsPanel extends JPanel
                 return;
             }
         }
-        //no state or transition clicked on
+        // No state or transition clicked on
         if (m_currentMode == TM_GUI_Mode.SELECTION)
         {
-            //setModifiedSinceSave(true);
-            //start building a selection bounding box
+            // Start building a selection bounding box
             madeSelection = false;
             selectionInProgress = true;
             selectionBoxStartX = selectionBoxEndX = e.getX();
@@ -655,9 +679,9 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Handles a mouse button released event.  Creates any new transitions if
-     *  a transition creation drag has occurred, and resets mouse pressed states
-     *  and transitions.
+    /**
+     * Handles a mouse button released event.  Creates any new transitions if a transition creation
+     * drag has occurred, and resets mouse pressed states and transitions.
      */
     private void handleMouseReleased(MouseEvent e)
     {
@@ -682,13 +706,15 @@ public class TMGraphicsPanel extends JPanel
                         selectionBoxStartY != selectionBoxEndY); //true IFF selection not empty
 
                 if (madeSelection)
+                {
                     updateSelectedStatesAndTransitions();
+                }
                 repaint();
             }
         }
         if (mousePressedState != null && movedState)
         {
-            //create an undo/redo command object for the move of a state/set of states/transitions.
+            // Create an undo/redo command object for the move of a state/set of states/transitions.
             int translateX = mousePressedState.getX() - moveStateStartLocationX;
             int translateY = mousePressedState.getY() - moveStateStartLocationY;
 
@@ -696,7 +722,7 @@ public class TMGraphicsPanel extends JPanel
             {
                 if (selectedStates.contains(mousePressedState))
                 {
-                    //moved a set of states
+                    // Moved a set of states
                     Collection<TM_State> statesCopy = (HashSet<TM_State>)selectedStates.clone();
                     Collection<TM_Transition> transitionsCopy = (HashSet<TM_Transition>)selectedTransitions.clone();
                     addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy,
@@ -704,7 +730,7 @@ public class TMGraphicsPanel extends JPanel
                 }
                 else
                 {
-                    //moved one state
+                    // Moved one state
                     Collection<TM_Transition> transitions = new ArrayList<TM_Transition>();
                     transitions.addAll(m_transitionsToMoveState);
                     addCommand(new MoveStateCommand(this, mousePressedState, translateX, 
@@ -715,7 +741,7 @@ public class TMGraphicsPanel extends JPanel
         
         if (mousePressedTransition != null && movedTransition)
         {
-            //create an undo/redo command object for the move of a transition
+            // Create an undo/redo command object for the move of a transition
             
             int translateX = (int)(mousePressedTransition.getMidpoint().getX() - transitionMidPointBeforeMove.getX());
             int translateY = (int)(mousePressedTransition.getMidpoint().getY() - transitionMidPointBeforeMove.getY());
@@ -728,17 +754,17 @@ public class TMGraphicsPanel extends JPanel
         transitionMidPointBeforeMove = null;
         movedTransition = false;
         movedState = false;
-        drawPosX = Integer.MIN_VALUE; //reset these values so that the line is not drawn.
+        drawPosX = Integer.MIN_VALUE; // Reset these values so that the line is not drawn.
         drawPosY = Integer.MIN_VALUE;
     }
     
     private void handleTransitionDrag(MouseEvent e)
     {
-        //update control point location
-        //TODO enforce area bounds?
+        // Update control point location
+        // TODO: enforce area bounds?
         movedTransition = true;
         
-        //find the midpoint by correcting for the offset of where the user clicked
+        // Find the midpoint by correcting for the offset of where the user clicked
         double correctedMidpointX = e.getX() + moveTransitionClickOffsetX; 
         double correctedMidpointY = e.getY() + moveTransitionClickOffsetY;
         
@@ -747,7 +773,7 @@ public class TMGraphicsPanel extends JPanel
         
         mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
         
-        //move the bounding box for the selected symbol if it is on this transition action
+        // Move the bounding box for the selected symbol if it is on this transition action
         if (mousePressedTransition == selectedTransition)
         {
             updateSelectedSymbolBoundingBox();
@@ -759,15 +785,15 @@ public class TMGraphicsPanel extends JPanel
         int newX = e.getX() + moveStateClickOffsetX;
         int newY = e.getY() + moveStateClickOffsetY;
 
-        //check that this is within panel bounds.
-        //this is complicated in the case where multiple items are selected
+        // Check that this is within panel bounds.
+        // This is complicated in the case where multiple items are selected
         Dimension boundaries = getSize();
         int minY = 0;
         int minX = 0;
         int maxX = (int)boundaries.getWidth() - TM_State.STATE_RENDERING_WIDTH;
         int maxY = (int)boundaries.getHeight() - TM_State.STATE_RENDERING_WIDTH;
 
-        if (selectedStates.contains(mousePressedState)) //clicked on a selected state
+        if (selectedStates.contains(mousePressedState)) // Clicked on a selected state
         {
             int rightMostX = mousePressedState.getX();
             int leftMostX = mousePressedState.getX();
@@ -776,13 +802,21 @@ public class TMGraphicsPanel extends JPanel
             for (TM_State s : selectedStates)
             {
                 if (s.getX() > rightMostX)
+                {
                     rightMostX = s.getX();
+                }
                 if (s.getY() > bottomMostY)
+                {
                     bottomMostY = s.getY();
+                }
                 if (s.getX() < leftMostX)
+                {
                     leftMostX = s.getX();
+                }
                 if (s.getY() < topMostY)
+                {
                     topMostY = s.getY();
+                }
             }
             maxX -= rightMostX - mousePressedState.getX();
             maxY -= bottomMostY - mousePressedState.getY();
@@ -791,48 +825,50 @@ public class TMGraphicsPanel extends JPanel
         }
         newX = Math.min(newX, maxX);
         newY = Math.min(newY, maxY);
-        newX = Math.max(minX, newX); //constrain to accessable bounds of view plane
+        newX = Math.max(minX, newX); // Constrain to accessable bounds of view plane
         newY = Math.max(minY, newY);
 
         int translateX = newX - moveStateLastLocationX;
         int translateY = newY - moveStateLastLocationY;
         
         if (translateX == 0 && translateY == 0)
+        {
             return;
+        }
         movedState = true;
         if (!selectedStates.contains(mousePressedState))
         {
-            //just move the one state
+            // Just move the one state
             updateTransitionLocations(mousePressedState,translateX, translateY,
                     m_transitionsToMoveState, mousePressedState.getTransitions());
             mousePressedState.setPosition(mousePressedState.getX() + translateX,
                     mousePressedState.getY() + translateY);
-
         }
         else
         {
-            
-            //move all selected states
+            // Move all selected states
             pullSelectedTransitionsWithState(translateX, translateY);            
             for (TM_State s : selectedStates)
             {
                 s.setPosition(s.getX() + translateX,
                     s.getY() + translateY);
             }
-
         }
         moveStateLastLocationX = mousePressedState.getX();
         moveStateLastLocationY = mousePressedState.getY();
         updateSelectedSymbolBoundingBox();
     }
     
-    /** Move the bounding box for the transition symbol currently selected by the user,
-     *  if any, in the case where a transition has been moved.
+    /** 
+     * Move the bounding box for the transition symbol currently selected by the user, if any, in
+     * the case where a transition has been moved.
      */
     private void updateSelectedSymbolBoundingBox()
     {
         if (selectedSymbolBoundingBox == null || selectedTransition == null)
+        {
             return;
+        }
         if (inputSymbolSelected)
         {
             selectedSymbolBoundingBox = selectedTransition.getInputSymbolBoundingBox(getGraphics());
@@ -843,9 +879,9 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Update our sets of selected states and transitions.  Call this when
-     *  the user selection region (the draggable region, not the symbol selection)
-     *  has been moved.
+    /** 
+     * Update our sets of selected states and transitions.  Call this when the user selection region
+     * (the draggable region, not the symbol selection) has been moved.
      */
     private void updateSelectedStatesAndTransitions()
     {
@@ -866,8 +902,6 @@ public class TMGraphicsPanel extends JPanel
         }
         selectedTransitions = m_machine.getSelectedTransitions(selectedStates);
     }
-    
-    
     
     private void precomputeSelectedTransitionsToDrag()
     {
@@ -913,11 +947,11 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** When a single state is moved by the user, update the control point locations of all of the
-    *  transitions to and from that state.
-    *  Must be called before the actual state locations are updated.
-    * @pre m_transitionsToMoveState contains the transitions into mousePressedState.
-    */
+    /** 
+     * When a single state is moved by the user, update the control point locations of all of the
+     * transitions to and from that state.  Must be called before the actual state locations are updated.
+     * @pre m_transitionsToMoveState contains the transitions into mousePressedState.
+     */
     public static void updateTransitionLocations(TM_State mousePressedState, int translateX, int translateY,
             Collection<TM_Transition> transitionsInto, Collection<TM_Transition> transitionsOut)
     {
@@ -935,47 +969,37 @@ public class TMGraphicsPanel extends JPanel
         {
             if (t.getFromState() == t.getToState())
             {
-                continue; //already handled
+                continue; // Already handled
             }
             updateTransitionLocationWhenStateMoved(t, translateX, translateY);
         }
     }
     
-    /** When one end of a transition is moved, update the control point correctly.
-     *  Will not handle loops, or other cases where both ends of the transition are moved.
-     *  Must be called before the actual state locations are updated.
+    /** 
+     * When one end of a transition is moved, update the control point correctly.
+     * Will not handle loops, or other cases where both ends of the transition are moved.
+     * Must be called before the actual state locations are updated.
      */
     public static void updateTransitionLocationWhenStateMoved(TM_Transition t, int translateX, int translateY)
     {
-            double middleOfLineX = (t.getFromState().getX() +  t.getToState().getX()) / 2;
-            double middleOfLineY = (t.getFromState().getY() +  t.getToState().getY()) / 2;
-            
-            double arcCPDisplacementVectorX = t.getControlPoint().getX() - middleOfLineX;
-            double arcCPDisplacementVectorY = t.getControlPoint().getY() - middleOfLineY;
-            double newFromX = t.getFromState().getX();
-            double newFromY = t.getFromState().getY();
-            double newToX = t.getToState().getX();
-            double newToY = t.getToState().getY();
-            
-            /*if (fromStateMoved)
-            {
-                newFromX += translateX;
-                newFromY += translateY;
-            }
-            else
-            {
-                newToX += translateX;
-                newToY += translateY;
-            }*/
-            
-            double newMiddleOfLineX = (newFromX + newToX + translateX) / 2;
-            double newMiddleOfLineY = (newFromY + newToY + translateY) / 2;
-            t.setControlPoint((int)(newMiddleOfLineX + arcCPDisplacementVectorX),
-                    (int)(newMiddleOfLineY + arcCPDisplacementVectorY));
+        double middleOfLineX = (t.getFromState().getX() +  t.getToState().getX()) / 2;
+        double middleOfLineY = (t.getFromState().getY() +  t.getToState().getY()) / 2;
+
+        double arcCPDisplacementVectorX = t.getControlPoint().getX() - middleOfLineX;
+        double arcCPDisplacementVectorY = t.getControlPoint().getY() - middleOfLineY;
+        double newFromX = t.getFromState().getX();
+        double newFromY = t.getFromState().getY();
+        double newToX = t.getToState().getX();
+        double newToY = t.getToState().getY();
+
+        double newMiddleOfLineX = (newFromX + newToX + translateX) / 2;
+        double newMiddleOfLineY = (newFromY + newToY + translateY) / 2;
+        t.setControlPoint((int)(newMiddleOfLineX + arcCPDisplacementVectorX),
+                (int)(newMiddleOfLineY + arcCPDisplacementVectorY));
     }
     
     private void calcMovedTransitionSets(HashSet<TM_Transition> inTransitions,
-                HashSet<TM_Transition> outTransitions)
+            HashSet<TM_Transition> outTransitions)
     {
         for (TM_State s : selectedStates)
         {
@@ -1005,9 +1029,9 @@ public class TMGraphicsPanel extends JPanel
         }
     }
     
-    /** Find the first unused standard state label
-     *  in the machine.  Standard labels are 'q'
-     *  followed by a non-negative integer.
+    /** 
+     * Find the first unused standard state label in the machine.  Standard labels are 'q' followed
+     * by a non-negative integer.
      */
     public String getFirstFreeName()
     {
@@ -1015,7 +1039,7 @@ public class TMGraphicsPanel extends JPanel
        while (m_labelsUsed.containsKey("q" + current))
            current++;
        String returner = "q" + current;
-       //m_labelsUsed.put(returner, returner);
+       // m_labelsUsed.put(returner, returner);
        return returner;
     }
     
@@ -1024,16 +1048,18 @@ public class TMGraphicsPanel extends JPanel
         return m_labelsUsed.containsKey(name);
     }
     
-    /** Adds a state name label to the dictionary of labels that have
-     *  been used and cannot be used again (unless deleted).
+    /** 
+     * Adds a state name label to the dictionary of labels that have been used and cannot be used
+     * again (unless deleted).
      */
     public void addLabelToDictionary(String label)
     {
         m_labelsUsed.put(label, label);
     }
     
-    /** Removes a state name label from the dictionary of labels that have
-     *  been used and cannot be used again (unless deleted).
+    /**
+     * Removes a state name label from the dictionary of labels that have been used and cannot be
+     * used again (unless deleted).
      */
     public void removeLabelFromDictionary(String label)
     {
@@ -1056,8 +1082,8 @@ public class TMGraphicsPanel extends JPanel
         return m_keyboardEnabled;
     }
     
-    /** Deselect any transition action character currently selected by the user.
-     *  Causes a repaint.
+    /**
+     * Deselect any transition action character currently selected by the user. Causes a repaint.
      */
     public void deselectSymbol()
     {
@@ -1066,8 +1092,9 @@ public class TMGraphicsPanel extends JPanel
         repaint();
     }
     
-    /** Get the current transition selected by the user for modification of its 
-     * input/output symbols, or null if there isn't one.
+    /**
+     * Get the current transition selected by the user for modification of its input/output symbols,
+     * or null if there isn't one.
      */
     public TM_Transition getSelectedTransition()
     {
@@ -1084,7 +1111,8 @@ public class TMGraphicsPanel extends JPanel
         return selectedStates;
     }
     
-    /** Delete all states and transitions that the user has currently selected.
+    /**
+     * Delete all states and transitions that the user has currently selected.
      */
     public void deleteAllSelected()
     {
@@ -1096,13 +1124,12 @@ public class TMGraphicsPanel extends JPanel
         repaint();
     }
     
-    /** Copy the states and transitions currently selected by the user into a byte
-     *  array via Java serialization.
-     *  The intent of this method is to provide a copy of a partial machine where the
-     *  graph structure of the partial machine is preserved, but no references to the
-     *  original machine are maintained.  Java serialization is a useful mechanism
-     *  for achieving this.
-     *  Returns null if the process fails. That shouldnt happen, though.
+    /**
+     * Copy the states and transitions currently selected by the user into a byte array via Java
+     * serialization.  The intent of this method is to provide a copy of a partial machine where the
+     * graph structure of the partial machine is preserved, but no references to the original
+     * machine are maintained.  Java serialization is a useful mechanism for achieving this.
+     * Returns null if the process fails. That shouldnt happen, though.
      */
     byte[] copySelectedToByteArray() 
     {
@@ -1115,23 +1142,25 @@ public class TMGraphicsPanel extends JPanel
             oos.flush();
             
             return returner.toByteArray();
-            
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             return null;
         }
     }
     
-    /** Set which states are selected by the user.
-     *  @pre All of the elements of states are elements of the machine.
+    /**
+     * Set which states are selected by the user.
+     * @pre All of the elements of states are elements of the machine.
      */
     public void setSelectedStates(HashSet<TM_State> states)
     {
         selectedStates = states;
     }
     
-    /** Set which transtions are selected by the user.
-     *  @pre All of the elements of transitions are elements of the machine.
+    /**
+     * Set which transtions are selected by the user.
+     * @pre All of the elements of transitions are elements of the machine.
      */
     public void setSelectedTransitions(HashSet<TM_Transition> transitions)
     {
@@ -1147,19 +1176,23 @@ public class TMGraphicsPanel extends JPanel
     {
         m_modifiedSinceSave = isModified;
         if (m_iFrame != null)
+        {
             m_iFrame.updateTitle();
+        }
     }
     
-    /** Returns true IFF editing operations such as cut copy paste delete 
-     *  or changing of the machines or tapes is currently allowed.
+    /**
+     * Returns true IFF editing operations such as cut copy paste delete or changing of the machines
+     * or tapes is currently allowed.
      */
     public boolean isEditingEnabled()
     {
         return m_editingEnabled;
     }
     
-    /** Enable/disable editing operations such as cut copy paste delete 
-     *  or changing of the machines or tapes..
+    /** 
+     * Enable/disable editing operations such as cut copy paste delete or changing of the machines
+     * or tapes.
      */
     public void setEditingEnabled(boolean enabled)
     {
@@ -1167,9 +1200,9 @@ public class TMGraphicsPanel extends JPanel
         m_keyboardEnabled = enabled;
     }
      
-    /** Store the location of the last place we pasted to, in order to
-     *  help avoid pasting items in the same place when pasting repeatedly.
-     *  Also sets the count of pastes to the location to 1.
+    /** 
+     * Store the location of the last place we pasted to, in order to help avoid pasting items in
+     * the same place when pasting repeatedly. Also sets the count of pastes to the location to 1.
      */
     public void setLastPastedLocation(Point2D location)
     {
@@ -1177,33 +1210,33 @@ public class TMGraphicsPanel extends JPanel
         m_numPastesToSameLocation = 1;
     }
     
-    /** Get the location of the last place we pasted to.
+    /**
+     * Get the location of the last place we pasted to.
      */
     public Point2D getLastPastedLocation()
     {
         return m_lastPastedLocation;
     }
     
-    /** Increase the count of the number of times we've pasted to the same
-     *  location on the canvas.
+    /**
+     * Increase the count of the number of times we've pasted to the same location on the canvas.
      */
     public void incrementNumPastesToSameLocation()
     {
         m_numPastesToSameLocation++;
     }
     
-    /** Get the count of the number of times we've pasted to the same
-     *  location on the canvas.
+    /**
+     * Get the count of the number of times we've pasted to the same location on the canvas.
      */
     public int getNumPastesToSameLocation()
     {
         return m_numPastesToSameLocation;
     }
     
-    /***** Do/Undo/Redo handling *******/
-    
-    /** Executes a command and adds it to the undo stack.
-     *  Clears the redo stack also.
+    // Command handing:
+    /**
+     * Executes a command and adds it to the undo stack. Clears the redo stack also.
      */
     public void doCommand(TMCommand command)
     {
@@ -1215,10 +1248,9 @@ public class TMGraphicsPanel extends JPanel
         repaint();
     }
     
-    /** Adds a command to the undo stack and clears the redo stack,
-     *  but doesn't execute the command.  This is useful when the
-     *  command has already been executed at the time of adding
-     *  to the stack.
+    /** 
+     * Adds a command to the undo stack and clears the redo stack, but doesn't execute the command.
+     * This is useful when the command has already been executed at the time of adding to the stack.
      */
     public void addCommand(TMCommand command)
     {
@@ -1228,7 +1260,9 @@ public class TMGraphicsPanel extends JPanel
         repaint();
     }
     
-    /** Undoes a command.*/
+    /** 
+     * Undoes a command.
+     */
     public void undoCommand()
     {
         try
@@ -1240,10 +1274,12 @@ public class TMGraphicsPanel extends JPanel
             m_mainWindow.updateUndoActions();
             repaint();
         }
-        catch (NoSuchElementException e) {}
+        catch (NoSuchElementException e) { }
     }
     
-    /** Redoes a command.*/
+    /**
+     * Redoes a command.
+     */
     public void redoCommand()
     {
         try
@@ -1255,26 +1291,30 @@ public class TMGraphicsPanel extends JPanel
             m_mainWindow.updateUndoActions();
             repaint();
         }
-        catch (NoSuchElementException e) {}
+        catch (NoSuchElementException e) { }
     }
     
-    /** Returns the name of the command at the top of the undo stack
-     *  or null if the stack is empty.
+    /** 
+     * Returns the name of the command at the top of the undo stack or null if the stack is empty.
      */
     public String undoCommandName()
     {
         if (!undoStack.isEmpty())
+        {
             return undoStack.getLast().getName();
+        }
         return null;
     }
     
-    /** Returns the name of the command at the top of the redo stack
-     *  or null if the stack is empty.
+    /** 
+     * Returns the name of the command at the top of the redo stack or null if the stack is empty.
      */
     public String redoCommandName()
     {
         if (!redoStack.isEmpty())
+        {
             return redoStack.getLast().getName();
+        }
         return null;
     }
     
@@ -1305,22 +1345,22 @@ public class TMGraphicsPanel extends JPanel
     
     private MainWindow m_mainWindow;
     
-    //***state information for clicking and dragging interactions with the panel***\\
-    private TM_State mousePressedState = null; //the state we last pressed the mouse down on.
-    private TM_Transition mousePressedTransition = null; //the transition we last pressed the mouse down on.
-    private int drawPosX = Integer.MIN_VALUE; //for drawing lines to display potential transitions as the mouse is dragged/
+    // State information for clicking and dragging interactions with the panel:
+    private TM_State mousePressedState = null; // The state we last pressed the mouse down on.
+    private TM_Transition mousePressedTransition = null; // The transition we last pressed the mouse down on.
+    private int drawPosX = Integer.MIN_VALUE; // For drawing lines to display potential transitions as the mouse is dragged/
     private int drawPosY = Integer.MIN_VALUE;
-    private int moveTransitionClickOffsetX = Integer.MIN_VALUE;//vector from mouse click to control point
+    private int moveTransitionClickOffsetX = Integer.MIN_VALUE; // Vector from mouse click to control point
     private int moveTransitionClickOffsetY = Integer.MIN_VALUE;
-    private int moveStateClickOffsetX = Integer.MIN_VALUE; //vector from mouse click to state location
+    private int moveStateClickOffsetX = Integer.MIN_VALUE; // Vector from mouse click to state location
     private int moveStateClickOffsetY = Integer.MIN_VALUE;
     private int moveStateLastLocationX = Integer.MIN_VALUE;
     private int moveStateLastLocationY = Integer.MIN_VALUE;
-    private int moveStateStartLocationX = Integer.MIN_VALUE; //the location of a state at the start of its movement
-    private int moveStateStartLocationY = Integer.MIN_VALUE; //when it's dragged.
+    private int moveStateStartLocationX = Integer.MIN_VALUE; // The location of a state at the start of its movement
+    private int moveStateStartLocationY = Integer.MIN_VALUE; // When it's dragged.
     private boolean movedState = false;
-    private ArrayList<TM_Transition> m_transitionsToMoveState = null; //cached list of transitions that finish
-                                                                      //at a state we are dragging.
+    private ArrayList<TM_Transition> m_transitionsToMoveState = null; // Cached list of transitions that finish
+                                                                      // at a state we are dragging.
     private HashSet<TM_Transition> m_inTransitionsToMove = new HashSet<TM_Transition>();
     private HashSet<TM_Transition> m_outTransitionsToMove = new HashSet<TM_Transition>();
     HashSet<TM_Transition> m_TransitionsToMoveintersection = new HashSet<TM_Transition>();
@@ -1328,23 +1368,22 @@ public class TMGraphicsPanel extends JPanel
     private Point2D transitionMidPointBeforeMove = null;
     private boolean movedTransition = false;
     
-    private boolean m_keyboardEnabled = true; //used to temporarily disable keyboard processing,
-                                            //for instance when a dialog box is open.
-    private boolean m_editingEnabled = true; //used for temporarily disabling editing operations
+    private boolean m_keyboardEnabled = true; // Used to temporarily disable keyboard processing,
+                                              //for instance when a dialog box is open.
+    private boolean m_editingEnabled = true; // Used for temporarily disabling editing operations
     private Hashtable<String,String> m_labelsUsed = new Hashtable<String,String>();
     
-    //undo/redo stacks
+    // undo/redo stacks
     private LinkedList<TMCommand> undoStack = new LinkedList<TMCommand>();
     private LinkedList<TMCommand> redoStack = new LinkedList<TMCommand>();
     
-    //variables for storing the transition action currently selected by the user.
+    // Variables for storing the transition action currently selected by the user.
     private Shape selectedSymbolBoundingBox = null;
     private TM_Transition selectedTransition = null;
     private boolean inputSymbolSelected = false;
     
-    //used to facilitate prevention stacked objects when pasting
-    //to the same spot
-    
+    // Used to facilitate prevention stacked objects when pasting
+    // to the same spot
     private Point2D m_lastPastedLocation = null;
-    private int m_numPastesToSameLocation = 0; //how many times we pasted to lastPastedLocation.
+    private int m_numPastesToSameLocation = 0; // How many times we pasted to lastPastedLocation.
 }

@@ -35,8 +35,9 @@ import tuataraTMSim.exceptions.*;
  */
 public class TMExecutionTimerTask extends TimerTask
 {
-    
-    /** Creates a new instance of TMExecutionTimerTask */
+    /**
+     * Creates a new instance of TMExecutionTimerTask 
+     */
     public TMExecutionTimerTask(TMGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
     {
         m_panel = panel;

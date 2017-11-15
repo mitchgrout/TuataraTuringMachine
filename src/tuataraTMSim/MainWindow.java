@@ -40,14 +40,15 @@ import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.TM.*;
 
-/** The main window of the program.  An MDI interface for building and running turing machines.
- *  This class is the main entry point into the program.
+/**
+ * The main window of the program.  An MDI interface for building and running turing machines.
+ * This class is the main entry point into the program.
  * @author Jimmy
  */
 public class MainWindow extends JFrame
 {
     public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 12);
-    public static final int MACHINE_WINDOW_LAYER = 50; //the layer for internal frames containing machines.
+    public static final int MACHINE_WINDOW_LAYER = 50; // The layer for internal frames containing machines.
     public static final String TAPE_EXTENSION = ".tap";
     public static final String MACHINE_EXTENSION = ".tm";
     private final java.util.Timer m_timer = new java.util.Timer(true);
@@ -57,7 +58,7 @@ public class MainWindow extends JFrame
     public static final String OTHER_ERROR_STR = "Error!";
     public static final String HALTED_MESSAGE_TITLE_STR = "Machine halted!";
     public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
-    public static final int TOOLBAR_HGAP = 5; //padding between components in the toolbar
+    public static final int TOOLBAR_HGAP = 5; // Padding between components in the toolbar
     public static final int TOOLBAR_VGAP = 5;
 
     public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
@@ -66,8 +67,8 @@ public class MainWindow extends JFrame
     public static final int SUPERFAST_EXECUTE_SPEED_DELAY = 200;
     public static final int ULTRAFAST_EXECUTE_SPEED_DELAY = 10;
     
-    public static final int MACHINE_CANVAS_SIZE_X = 2000; //size of the scrollable machine 
-    public static final int MACHINE_CANVAS_SIZE_Y = 2000; //       window canvas in pixels
+    public static final int MACHINE_CANVAS_SIZE_X = 2000; // Size of the scrollable machine 
+    public static final int MACHINE_CANVAS_SIZE_Y = 2000; // Size of the window canvas in pixels
     
     public static final int TRANSLATE_TO_AVOID_STACKING_X = TM_State.STATE_RENDERING_WIDTH * 2;
     public static final int TRANSLATE_TO_AVOID_STACKING_Y = TM_State.STATE_RENDERING_WIDTH * 2;
@@ -79,30 +80,41 @@ public class MainWindow extends JFrame
     
     private Random myRandom = new Random();
     
-    /** Creates a new instance of MainWindow */
+    /**
+     * Creates a new instance of MainWindow
+     */
     public MainWindow()
     {
         initComponents();
         final Component thisPtr = this;
         final Container container = this.getContentPane();
-        //handle global keyboard input
+        // Handle global keyboard input
         final KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         
-        kfm.addKeyEventPostProcessor(new KeyEventPostProcessor(){
+        kfm.addKeyEventPostProcessor(new KeyEventPostProcessor()
+        {
            public boolean postProcessKeyEvent(KeyEvent e) 
-           {
-               
+           {       
                if (!m_keyboardEnabled)
+               {
                    return false;
+               }
                TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                if (gfxPanel != null && !gfxPanel.getKeyboardEnabled())
+               {
                    return false;
+               }
+               // Ignore anything with a ctrl or alt, as this may conflict with menu keyboard
+               // shortcuts/accelerators
                if (e.isAltDown() || e.isControlDown())
-                    return false; //ignore anything with a ctrl or alt, as this may conflict
-                                 //    with menu keyboard shortcuts/accelerators
-               
-               if (e.getID() == KeyEvent.KEY_TYPED || (e.getID() == KeyEvent.KEY_PRESSED && (e.isActionKey()
-                || e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE)))
+               {
+                   return false;
+               }
+               if (e.getID() == KeyEvent.KEY_TYPED ||
+                    (e.getID() == KeyEvent.KEY_PRESSED &&
+                      (e.isActionKey() ||
+                       e.getKeyCode() == KeyEvent.VK_DELETE ||
+                       e.getKeyCode() == KeyEvent.VK_BACK_SPACE)))
                {
                    if (asif.isVisible())
                    {
@@ -119,9 +131,9 @@ public class MainWindow extends JFrame
                        {
                            tapeDisp.handleKeyEvent(e);
                        }
-                       //updateAllSimulators();
                    }
-                   else if (tapeDisp != null) //no graphics panel, just a tape
+                   // No graphics panel, just a tape
+                   else if (tapeDisp != null) 
                    {
                        tapeDisp.handleKeyEvent(e);
                    }
@@ -130,7 +142,7 @@ public class MainWindow extends JFrame
            }
         });
         
-        //check for unsaved machines on exit.
+        // Check for unsaved machines on exit.
         addWindowListener(new WindowAdapter()
         {
              public void windowClosing(WindowEvent e)
@@ -156,42 +168,49 @@ public class MainWindow extends JFrame
         });
     }
     
-    /** Selects the user interface interaction mode and notifies all internal windows
-     *  accordingly.  This determines the results of user interactions such as clicking
-     *  on the state diagrams.
+    /** 
+     * Selects the user interface interaction mode and notifies all internal windows accordingly.
+     * This determines the results of user interactions such as clicking on the state diagrams.
      */
     public void setUIMode(TM_GUI_Mode mode)
     {
         m_currentMode = mode;
         if (desktopPane == null)
+        {
             return;
+        }
 
-         JInternalFrame[] internalFrames = desktopPane.getAllFramesInLayer(MACHINE_WINDOW_LAYER);
-         for (JInternalFrame frame : internalFrames)
-         {
-             try
-             {
-                 TMInternalFrame tmif = (TMInternalFrame)frame;
-                 TMGraphicsPanel panel = tmif.getGfxPanel();
-                 panel.setUIMode(mode);
-             }
-             catch (ClassCastException e)
-             {
-                 //not the right type of window, ignore it.
-             }
-         }
-         
-         for (GUIModeButton b : toolbarButtons)
-         {
-             if (b.getGUI_Mode() == mode)
-                 b.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-             else
+        JInternalFrame[] internalFrames = desktopPane.getAllFramesInLayer(MACHINE_WINDOW_LAYER);
+        for (JInternalFrame frame : internalFrames)
+        {
+            try
+            {
+                TMInternalFrame tmif = (TMInternalFrame)frame;
+                TMGraphicsPanel panel = tmif.getGfxPanel();
+                panel.setUIMode(mode);
+            }
+            catch (ClassCastException e)
+            {
+                // Not the right type of window, ignore it.
+            }
+        }
+
+        for (GUIModeButton b : toolbarButtons)
+        {
+            if (b.getGUI_Mode() == mode)
+            {
+                b.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            }
+            else
+            {
                 b.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-         }
-         
+            }
+        }
+
     }
     
-    /** Initialization.  Builds the main window and its components.
+    /** 
+     * Initialization. Builds the main window and its components.
      */
     private void initComponents()
     {
@@ -199,15 +218,14 @@ public class MainWindow extends JFrame
         this.setTitle("Tuatara Turing Machine Simulator");
         
         loadImages();
-        createActions(); //set up action objects
+        createActions(); // Set up action objects
         this.setIconImage(m_tuataraSmallIcon.getImage());
-        //create menu objects
+        // Create menu objects
         desktopPane = new javax.swing.JDesktopPane();
         
         final Component thisPtr = this;
         desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
         
-        //setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         JPanel omnibus = new JPanel();
@@ -217,7 +235,7 @@ public class MainWindow extends JFrame
         tapeDispController = new TMTapeDisplayControllerPanel(tapeDisp, this, 
                 m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction);
                 
-        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100/*tapeDispController.getHeight()*/);
+        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100);
         
         m_headToStartAction.setTapeDP(tapeDisp);
         m_headToStartAction.setTapeDCP(tapeDispController);
@@ -229,83 +247,94 @@ public class MainWindow extends JFrame
         
         tapeDispController.setVisible(true);
         
-        //set up the file choosers
-        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
-            public boolean accept(File f) {
+        // Set up the file choosers
+        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        {
+            public boolean accept(File f)
+            {
                 if (f.isDirectory())
+                {
                     return true;
-                
+                }
                 if (f.getName().endsWith(".tm"))
+                {
                     return true;
+                }
                 return false;
             }
             
-            public String getDescription() {
+            public String getDescription()
+            {
                 return "Turing Machine files";
             }
-            });
-        fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
-            public boolean accept(File f) {
+        });
+        
+        fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        {
+            public boolean accept(File f)
+            {
                 if (f.isDirectory())
+                { 
                     return true;
-                
+                }
                 if (f.getName().endsWith(".tap"))
+                {
                     return true;
+                }
                 return false;
             }
             
-            public String getDescription() {
+            public String getDescription()
+            {
                 return "Tape files";
             }
-            });
+        });
         
-        //build menus
+        // Build menus
         setJMenuBar(createMenus());
         
         //build toolbars
         JToolBar[] foobar = createToolbar();
         ToolBarPanel toolbars = new ToolBarPanel(this, new FlowLayout(FlowLayout.LEFT));
         for (JToolBar tb : foobar)
+        {
             toolbars.add(tb);
-        
+        }
+
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        //JPanel omnibus2 = new JPanel(new BorderLayout());
-        //getContentPane().add(toolbars,BorderLayout.PAGE_START);
-        //omnibus2.add(toolbars,BorderLayout.CENTER);
         getContentPane().add(toolbars);
         omnibus.setLayout(new BorderLayout());
         omnibus.add(desktopPane, java.awt.BorderLayout.CENTER);
         omnibus.add(tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
         
-        this.setExtendedState(Frame.MAXIMIZED_BOTH); //maximized on startup
+        this.setExtendedState(Frame.MAXIMIZED_BOTH); // Maximized on startup
         
-        //make a state diagram window.
-        JInternalFrame iFrame = newMachineWindow(/*tempTM()*/ new TMachine(), null);
-        desktopPane.add(iFrame);
-        
-        
-        
+        // Make a state diagram window.
+        JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
+        desktopPane.add(iFrame);      
+
         desktopPane.setSelectedFrame(iFrame);
         desktopPane.getDesktopManager().activateFrame(iFrame);
         
-        //create the alphabet configuration internal frame
+        // Create the alphabet configuration internal frame
         asif = new AlphabetSelectorInternalFrame(this);
         asif.pack();
         
-        //make the alphabet config internal frame quasi-modal.
+        // Make the alphabet config internal frame quasi-modal.
         JPanel glass = new JPanel();
         glass.setOpaque(false);
         glass.add(asif);
         setGlassPane(glass);
-        //the ModalAdapter intercepts all mouse events when the glass pane is visible.
+        
+        // The ModalAdapter intercepts all mouse events when the glass pane is visible.
         asif.addInternalFrameListener(new ModalAdapter(glass));
         
         this.setVisible(true);
         try
         {
-            //setSelected only works when the component is already
-            //displayed, so this must be done after the this.setVisible call.
+            // setSelected only works when the component is already displayed, so this must be done
+            // after the this.setVisible call.
             iFrame.moveToFront();
             iFrame.setSelected(true);
         }
@@ -313,8 +342,9 @@ public class MainWindow extends JFrame
         updateUndoActions();
     }
     
-    /** Build action objects to be assocated with menu items and toolbars.
-     *  @pre loadImages() has been called already.
+    /** 
+     * Build action objects to be assocated with menu items and toolbars.
+     * @pre loadImages() has been called already.
      */
     private void createActions()
     {
@@ -325,8 +355,8 @@ public class MainWindow extends JFrame
                 KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
         m_selectionAction = new GUI_ModeSelectionAction("Make Selection", TM_GUI_Mode.SELECTION,
                 m_selectionIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
-        m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER,
-                m_eraserIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
+        m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, m_eraserIcon,
+                KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
         m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start States",
                 TM_GUI_Mode.CHOOSESTART, m_chooseStartIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
@@ -381,8 +411,9 @@ public class MainWindow extends JFrame
                 KeyStroke.getKeyStroke(KeyEvent.VK_5, KeyEvent.CTRL_DOWN_MASK));
     }
     
-    /** Construct the menus and return the master JMenuBar object.
-     *  @pre createActions() has already been called.
+    /** 
+     * Construct the menus and return the master JMenuBar object.
+     * @pre createActions() has already been called.
      */
     JMenuBar createMenus()
     {
@@ -433,7 +464,7 @@ public class MainWindow extends JFrame
         reloadTape = new javax.swing.JMenuItem();
         headToStart = new javax.swing.JMenuItem();
         
-        //file menu
+        // File menu
         fileMenu.setText("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
         newMachineMenuItem.setAction(m_newMachineAction);
@@ -457,8 +488,10 @@ public class MainWindow extends JFrame
 
         fileMenu.add(new JSeparator());
         exitMenuItem.setText("Exit");
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 userRequestToExit();
             }
         });
@@ -466,7 +499,7 @@ public class MainWindow extends JFrame
         fileMenu.add(exitMenuItem);
         menuBar.add(fileMenu);
         
-        //edit menu
+        // Edit menu
         editMenu.setText("Edit");
         editMenu.setMnemonic(KeyEvent.VK_E);
         
@@ -490,7 +523,7 @@ public class MainWindow extends JFrame
 
         menuBar.add(editMenu);
         
-        //mode menu
+        // Mode menu
         ButtonGroup modeMenuItems = new ButtonGroup();
         m_modeMenu.setText("Mode");
         m_modeMenu.setMnemonic(KeyEvent.VK_O);
@@ -539,7 +572,7 @@ public class MainWindow extends JFrame
         
         m_addNodesMenuItem.setSelected(true);
         
-        //Machine menu
+        // Machine menu
         machineMenu.setText("Machine");
         machineMenu.setMnemonic(KeyEvent.VK_M);
         
@@ -579,7 +612,7 @@ public class MainWindow extends JFrame
         
         menuBar.add(machineMenu);
         
-        //tape menu
+        // Tape menu
         tapeMenu.setText("Tape");
         tapeMenu.setMnemonic(KeyEvent.VK_T);
         headToStart.setAction(m_headToStartAction);
@@ -590,29 +623,33 @@ public class MainWindow extends JFrame
         tapeMenu.add(eraseTape);
         menuBar.add(tapeMenu);
         
-        //alphabet menu
+        // Alphabet menu
         alphabetMenu.setText("Alphabet");
         alphabetMenu.setMnemonic(KeyEvent.VK_A);
         configureAlphabet.setAction(m_configureAlphabetAction);
         alphabetMenu.add(configureAlphabet);
         menuBar.add(alphabetMenu);
 
-        //help menu
+        // Help menu
         helpMenu.setText("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);
         contentsMenuItem.setText("Help Contents");
         contentsMenuItem.setAccelerator(KeyStroke.getKeyStroke("F1"));
         contentsMenuItem.setIcon(m_emptyIcon);
-        contentsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        contentsMenuItem.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 helpContentsMenuItemActionPerformed(evt);
             }
         });
         helpMenu.add(contentsMenuItem);
         aboutMenuItem.setText("About");
         aboutMenuItem.setIcon(m_tuataraIcon);
-        aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        aboutMenuItem.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 aboutMenuItemActionPerformed(evt);
             }
         });
@@ -622,8 +659,9 @@ public class MainWindow extends JFrame
         return menuBar;
     }
     
-    /** Set up a toolbar for quick access to common actions.
-     *  @pre createActions() has been called previously.
+    /**
+     * Set up a toolbar for quick access to common actions.
+     * @pre createActions() has been called previously.
      */
     JToolBar[] createToolbar()
     {
@@ -631,7 +669,9 @@ public class MainWindow extends JFrame
         
         JToolBar[] returner = new JToolBar[3];
         for (int i = 0; i < returner.length;i++)
+        {
             returner[i] = new JToolBar();
+        }
         GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, TM_GUI_Mode.ADDNODES);
         
         toolbarButtons.add(addNodesToolBarButton);
@@ -706,7 +746,6 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         saveTapeToolBarButton.setText("");
 
-        
         JButton cutToolBarButton = new JButton();
         cutToolBarButton.setAction(m_cutAction);
         cutToolBarButton.setFocusable(false);
@@ -762,8 +801,10 @@ public class MainWindow extends JFrame
         configureAlphabetToolBarButton.setText("");
         
         for (JToolBar t : returner)
+        {
             t.setRollover(true);
-        
+        }
+
         returner[0].setName("File/Edit");
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
@@ -786,10 +827,8 @@ public class MainWindow extends JFrame
         returner[1].add(eraserToolBarButton);
         returner[1].add(startStatesToolBarButton);
         returner[1].add(acceptingStatesToolBarButton);
-        //returner[1].addSeparator();
         returner[1].add(chooseTransitionToolBarButton);
         returner[1].add(chooseCurrentStateToolBarButton);
-        
         
         returner[2].setName("Machine");
         returner[2].add(stepToolBarButton);
@@ -797,7 +836,7 @@ public class MainWindow extends JFrame
         returner[2].add(stopExecutionToolBarButton);
         returner[2].add(resetMachineToolBarButton);
         
-        setUIMode(TM_GUI_Mode.ADDNODES); //default mode
+        setUIMode(TM_GUI_Mode.ADDNODES); // Default mode
         
         return returner;
     }
@@ -806,7 +845,9 @@ public class MainWindow extends JFrame
     {
         java.net.URL imageURL = MainWindow.class.getResource("images/state.gif");
         if (imageURL != null) 
+        {
             m_addNodesIcon = new ImageIcon(imageURL);
+        }
         imageURL = MainWindow.class.getResource("images/transition.gif");
         m_addTransitionIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/eraser.gif");
@@ -872,10 +913,10 @@ public class MainWindow extends JFrame
         m_tuataraIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/tuataraSmall.gif");
         m_tuataraSmallIcon = new ImageIcon(imageURL);
-        
     }
     
-    /** Creates a new window displaying a machine.
+    /**
+     * Creates a new window displaying a machine.
      */
     TMInternalFrame newMachineWindow(TMachine myTM, File file)
     {
@@ -888,7 +929,6 @@ public class MainWindow extends JFrame
         returner.setSize(new Dimension(640, 480));
         Point2D loc = nextWindowLocation();
         returner.setLocation((int)loc.getX(), (int)loc.getY());
-        //returner.add(gfxPanel);
         JScrollPane scroller = new JScrollPane(gfxPanel);
         scroller.setPreferredSize(new Dimension(300, 250));
         scroller.revalidate();
@@ -910,7 +950,6 @@ public class MainWindow extends JFrame
             public void internalFrameClosing(InternalFrameEvent e)
             {
                 userConfirmSaveModifiedThenClose(returner);
-                //JOptionPane.showMessageDialog((Component)null, "Internal frame closing");
             }
             
             public void internalFrameActivated(InternalFrameEvent e)
@@ -950,12 +989,12 @@ public class MainWindow extends JFrame
         return new Point2D.Float((float)x, (float)y);
     }
     
-    /** Ask the user to confirm whether they wish to save a modified machine.
-     *  If they agree, correctly handle the saving.  Afterwards, close the window
-     *  associated with the machine.
-     *  @returns    true iff the user wants to continue exiting the program, ie they
-     *              either saved the machine or chose not to save it, but did not
-     *              cancel.
+    /** 
+     * Ask the user to confirm whether they wish to save a modified machine.  If they agree,
+     * correctly handle the saving.  Afterwards, close the window associated with the machine.
+     * @returns    true iff the user wants to continue exiting the program, ie they
+     *             either saved the machine or chose not to save it, but did not
+     *             cancel.
      */
     private boolean userConfirmSaveModifiedThenClose(TMInternalFrame iFrame)
     {
@@ -963,10 +1002,12 @@ public class MainWindow extends JFrame
         iFrame.moveToFront();
         if (gfxPanel.isModifiedSinceSave())
         {
-            //TODO specify which machine
+            // TODO: specify which machine
             String name = iFrame.getTitle();
             if (name.startsWith("* "))
+            {
                 name = name.substring(2);
+            }
             int result = JOptionPane.showConfirmDialog(null,"The machine '" + name + "' is unsaved.  Do you wish to save it?", "Closing window",JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
@@ -974,7 +1015,9 @@ public class MainWindow extends JFrame
                 File outFile = gfxPanel.getFile();
                 boolean saveSuccessful = false;
                 if (outFile != null)
-                     saveSuccessful = TMachine.saveTMachine(machine, outFile.toString());
+                {
+                    saveSuccessful = TMachine.saveTMachine(machine, outFile.toString());
+                }
                 else
                 {
                     saveSuccessful = saveMachineAs(gfxPanel);
@@ -985,14 +1028,16 @@ public class MainWindow extends JFrame
                     return true;
                 }
                 else
+                {
                     return false;
+                }
             }
             else if (result == JOptionPane.NO_OPTION)
             {
                 iFrame.dispose();
                 return true;
             }
-            //on cancel, do nothing
+            // On cancel, do nothing
             return false;
         }
         else
@@ -1002,14 +1047,14 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** When there is no focus owner, the focus needs to be redirected to a valid
-     *  component so that we can trap keyboard events. This method finds the best
-     *  component to give the focus, and transfers the focus to that component.
+    /**
+     * When there is no focus owner, the focus needs to be redirected to a valid component so that
+     * we can trap keyboard events. This method finds the best component to give the focus, and
+     * transfers the focus to that component.
      */
     public void handleLostFocus()
     {
-       
-        if (desktopPane != null && false) //TESTING!!!!!!
+        if (desktopPane != null)
         {
             JInternalFrame selected = desktopPane.getSelectedFrame();
 
@@ -1018,7 +1063,9 @@ public class MainWindow extends JFrame
             for (JInternalFrame fr : frames)
             {
                 if (fr.isVisible())
+                {
                     visibleFrames.add(fr);
+                }
             }
             if (visibleFrames.size() == 0)
             {
@@ -1031,26 +1078,27 @@ public class MainWindow extends JFrame
                 for (JInternalFrame fr : visibleFrames)
                 {
                     if (desktopPane.getIndexOf(fr) < desktopPane.getIndexOf(frontMost))
+                    {
                         frontMost = fr;
+                    }
                 }
                 desktopPane.setSelectedFrame(frontMost);
-                try
-                {
-                   frontMost.setSelected(true);
-                }
-                catch (Exception e) {}
-                
+                try { frontMost.setSelected(true); }
+                catch (Exception e) { }
             }
         }
         
         if (desktopPane.getSelectedFrame() == null)
+        {
             setEnabledActionsThatRequireAMachine(false);
+        }
         updateUndoActions();
     }
     
-    /** Set the enabled/disabled status of Actions (ie toolbars and menu items) that
-     *  need a machine to apply to, however editing operations will only be enabled if
-     *  the isEditingEnabled() currently returns true.
+    /** 
+     * Set the enabled/disabled status of Actions (ie toolbars and menu items) that
+     * need a machine to apply to, however editing operations will only be enabled if
+     * the isEditingEnabled() currently returns true.
      */
     private void setEnabledActionsThatRequireAMachine(boolean isEnabled)
     {
@@ -1127,43 +1175,13 @@ public class MainWindow extends JFrame
         m_reloadTapeAction.setEnabled(isEnabled);
     }
  
-    
-    /** Creates an example turing machine, for testing purposes only.
-     *  The example machine computes the unary successor function.
-     */
-    private TMachine tempTM()
-    {
-        TMachine myTM = new TMachine();
-                
-        //Turing machine for unary successor function
-        TM_State q0 = new TM_State("q0", true, false, 300, 10);
-        TM_State q1 = new TM_State("q1", false, false, 200, 200);
-        TM_State q2 = new TM_State("q2", false, false, 300, 150);
-        TM_State q3 = new TM_State("q3", false, false, 50, 400);
-        TM_State q4 = new TM_State("q4", false, true, 400, 300);
-        
-        myTM.addState(q0);
-        myTM.addState(q1);
-        myTM.addState(q2);
-        myTM.addState(q3);
-        myTM.addState(q4);
-        myTM.addTransition(new TM_Transition(q0, q1, '1', new TM_Action(0,'1', '_')));
-        myTM.addTransition(new TM_Transition(q1, q2, '_', new TM_Action(1,'_', '_')));
-        myTM.addTransition(new TM_Transition(q2, q2, '1', new TM_Action(1,'1', '_')));
-        myTM.addTransition(new TM_Transition(q2, q3, '_', new TM_Action(0,'_', '1')));
-        myTM.addTransition(new TM_Transition(q3, q3, '1', new TM_Action(-1,'1', '_')));
-        myTM.addTransition(new TM_Transition(q3, q4, '_', new TM_Action(0,'_', '1')));
-        
-        return myTM;
-    }
-    
-    //*** Event handlers ***\\
-    
+    //Event handlers:
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt)
     {
         JOptionPane.showMessageDialog(this,"Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007," +
                 " with funding from the Department of Mathematics at the University of Waikato, New Zealand.");
     }
+    
     private void helpContentsMenuItemActionPerformed(java.awt.event.ActionEvent evt)
     {
         if (m_helpDisp == null)
@@ -1177,21 +1195,20 @@ public class MainWindow extends JFrame
             m_helpDisp.setVisible(true);
         }
         m_helpDisp.moveToFront();
-        try
-        {
-            m_helpDisp.setSelected(true);
-        } catch (java.beans.PropertyVetoException e) {}
+        try { m_helpDisp.setSelected(true); }
+        catch (java.beans.PropertyVetoException e) { }
     } 
     
-    /** An action for selecting user interface interaction modes.
-     *
+    /**
+     * An action for selecting user interface interaction modes.
      * @author Jimmy
      */
     class GUI_ModeSelectionAction extends AbstractAction
     {
-        /** Creates a new instance of GUI_ModeSelectionAction */
-        public GUI_ModeSelectionAction(String text, TM_GUI_Mode mode, ImageIcon icon,
-                KeyStroke keyShortcut)
+        /**
+         * Creates a new instance of GUI_ModeSelectionAction
+         */
+        public GUI_ModeSelectionAction(String text, TM_GUI_Mode mode, ImageIcon icon, KeyStroke keyShortcut)
         {
             super(text);
             m_mode = mode;
@@ -1204,7 +1221,9 @@ public class MainWindow extends JFrame
         {
             setUIMode(m_mode);
             if (m_menuItem != null)
+            {
                 m_menuItem.setSelected(true);
+            }
         }
         
         public void setMenuItem(JRadioButtonMenuItem menuItem)
@@ -1216,13 +1235,15 @@ public class MainWindow extends JFrame
         private JRadioButtonMenuItem m_menuItem = null;
     }
     
-    /** An action for selecting speeds for automatic execution of machines.
-     *
+    /**
+     * An action for selecting speeds for automatic execution of machines.
      * @author Jimmy
      */
     class ExecutionSpeedSelectionAction extends AbstractAction
     {
-        /** Creates a new instance of GUI_ModeSelectionAction */
+        /**
+         * Creates a new instance of GUI_ModeSelectionAction
+         */
         public ExecutionSpeedSelectionAction(String text, int delay, KeyStroke keyShortcut)
         {
             super(text);
@@ -1236,11 +1257,11 @@ public class MainWindow extends JFrame
            m_executionDelayTime = m_delay;
         }
         
-
         private int m_delay;
     }
     
-    /** Action for stepping the selected machine one iteration.
+    /** 
+     * Action for stepping the selected machine one iteration.
      */
     class StepAction extends AbstractAction
     {
@@ -1297,7 +1318,8 @@ public class MainWindow extends JFrame
         private Component m_parentComponent;
     }
     
-    /** Action for configuring the current alphabet
+    /**
+     * Action for configuring the current alphabet
      */
     class ConfigureAlphabetAction extends AbstractAction
     {
@@ -1321,7 +1343,8 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** Action for creating a new machine in a new window
+    /**
+     * Action for creating a new machine in a new window
      */
     class NewMachineAction extends AbstractAction
     {
@@ -1339,16 +1362,14 @@ public class MainWindow extends JFrame
             {
                 JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
                 desktopPane.add(iFrame);
-                try
-                {
-                    iFrame.setSelected(true);
-                }
-                catch (PropertyVetoException e2) {}
+                try { iFrame.setSelected(true); }
+                catch (PropertyVetoException e2) { }
             }
         }
     }
     
-    /** Action for opening/loading a machine diagram.
+    /** 
+     * Action for opening/loading a machine diagram.
      */
     class OpenMachineAction extends AbstractAction
     {
@@ -1363,7 +1384,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             fcMachine.setDialogTitle("Open machine");
-            m_keyboardEnabled = false; //disable keyboard input in the main window/tape.
+            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
             int returnVal = fcMachine.showOpenDialog(MainWindow.this);
             m_keyboardEnabled = true;
             
@@ -1372,39 +1393,45 @@ public class MainWindow extends JFrame
                 File inFile = fcMachine.getSelectedFile();
                 if (!inFile.exists())
                 {
-                    //try with extension
+                    // Try with extension
                     inFile = new File(inFile.toString() + MACHINE_EXTENSION);
                 }
-                if (!inFile.exists()) //still no
+                if (!inFile.exists()) // Still no
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, "Cannot find file \"" + inFile.toString() + "\"");
                 }
                 else
-                try
                 {
-                    TMachine machine = TMachine.loadTMachine(inFile.toString());
-                    if (machine == null)
-                        throw new IOException(inFile.toString());
-                    JInternalFrame iFrame = newMachineWindow(machine, inFile);
-                    desktopPane.add(iFrame);
                     try
                     {
-                        iFrame.setSelected(true);
+                        TMachine machine = TMachine.loadTMachine(inFile.toString());
+                        if (machine == null)
+                        {
+                            throw new IOException(inFile.toString());
+                        }
+                        JInternalFrame iFrame = newMachineWindow(machine, inFile);
+                        desktopPane.add(iFrame);
+                        try
+                        {
+                            iFrame.setSelected(true);
+                        }
+                        catch (PropertyVetoException e2) {}
                     }
-                    catch (PropertyVetoException e2) {}
-                } catch (Exception e2)
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
+                    catch (Exception e2)
+                    {
+                        JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
+                    }
                 }
             }
             else
             {
-                System.err.println("approve option didnt occur");
+                System.err.println("Approve option didnt occur");
             }
         }
     }
     
-    /** Action for saving a machine diagram.
+    /**
+     * Action for saving a machine diagram.
      */
     class SaveMachineAsAction extends AbstractAction
     {
@@ -1422,7 +1449,8 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** Action for saving a machine diagram.
+    /**
+     * Action for saving a machine diagram.
      */
     class SaveMachineAction extends AbstractAction
     {
@@ -1453,7 +1481,9 @@ public class MainWindow extends JFrame
                         {
                             boolean result = TMachine.saveTMachine(machine, outFile.toString());
                             if (result = false)
+                            {
                                 throw new IOException(outFile.toString());
+                            }
                             else
                             {
                                 panel.setModifiedSinceSave(false);
@@ -1461,15 +1491,17 @@ public class MainWindow extends JFrame
                         }
                     }
                 }
-            } catch (Exception e2)
+            } 
+            catch (Exception e2)
             {
                 JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
             }
         }
     }
     
-    /** Action for creating a new tape, which will be displayed in the
-     *  tape display panel and used by all machines.
+    /** 
+     * Action for creating a new tape, which will be displayed in the tape display panel and used by
+     * all machines.
      */
     class NewTapeAction extends AbstractAction
     {
@@ -1483,7 +1515,7 @@ public class MainWindow extends JFrame
         
         public void actionPerformed(ActionEvent e)
         {
-            m_keyboardEnabled = false; //disable keyboard input in the main window/tape.
+            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
             Object[] options = {"Ok", "Cancel"};
             int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             m_keyboardEnabled = true;
@@ -1492,11 +1524,11 @@ public class MainWindow extends JFrame
                 m_tape.copyOther(new CA_Tape());
                 tapeDisp.repaint();
             }
-            //updateAllSimulators();
         }
     }
     
-    /** Action for opening/loading a machine diagram.
+    /**
+     * Action for opening/loading a machine diagram.
      */
     class OpenTapeAction extends AbstractAction
     {
@@ -1511,7 +1543,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             fcTape.setDialogTitle("Open tape");
-            m_keyboardEnabled = false; //disable keyboard input in the main window/tape.
+            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
             int returnVal = fcTape.showOpenDialog(MainWindow.this);
             m_keyboardEnabled = true;
             
@@ -1520,33 +1552,38 @@ public class MainWindow extends JFrame
                 File inFile = fcTape.getSelectedFile();
                 if (!inFile.exists())
                 {
-                    //try with extension
+                    // Try with extension
                     inFile = new File(inFile.toString() + TAPE_EXTENSION);
                 }
-                if (!inFile.exists()) //still no
+                if (!inFile.exists()) // Still no
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, "Cannot find file \"" + inFile.toString() + "\"");
                 }
                 else
-                try
                 {
-                    Tape tape = Tape.loadTape(inFile.toString());
-                    if (tape == null)
-                        throw new IOException(inFile.toString());
-                    
-                    tapeDisp.getTape().copyOther(tape);
-                    tapeDisp.setFile(inFile);
-                    tapeDisp.repaint();
-                } catch (Exception e2)
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
-                    System.err.println("error opening file");
+                    try
+                    {
+                        Tape tape = Tape.loadTape(inFile.toString());
+                        if (tape == null)
+                        {
+                            throw new IOException(inFile.toString());
+                        }
+                        tapeDisp.getTape().copyOther(tape);
+                        tapeDisp.setFile(inFile);
+                        tapeDisp.repaint();
+                    }
+                    catch (Exception e2)
+                    {
+                        JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
+                        System.err.println("error opening file");
+                    }
                 }
             }
         }
     }
     
-    /** Action for saving a machine diagram.
+    /**
+     * Action for saving a machine diagram.
      */
     class SaveTapeAsAction extends AbstractAction
     {
@@ -1560,7 +1597,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {   
             fcTape.setDialogTitle("Save tape");
-            m_keyboardEnabled = false; //disable keyboard input in the main window/tape.
+            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
             int returnVal = fcTape.showSaveDialog(MainWindow.this);
             m_keyboardEnabled = true;
             
@@ -1580,9 +1617,12 @@ public class MainWindow extends JFrame
                     boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
 
                     if (result = false)
+                    {
                         throw new IOException(outFile.toString());
+                    }
                     tapeDisp.setFile(outFile);
-                } catch (Exception e2)
+                }
+                catch (Exception e2)
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
                 }
@@ -1590,7 +1630,8 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** Action for saving a machine diagram.
+    /** 
+     * Action for saving a machine diagram.
      */
     class SaveTapeAction extends AbstractAction
     {
@@ -1641,18 +1682,15 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {   
             m_copyAction.actionPerformed(e);
-            //m_deleteAction.actionPerformed(e);
             
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 HashSet<TM_State> selectedStatesCopy = (HashSet<TM_State>)panel.getSelectedStates().clone();
                 HashSet<TM_Transition> selectedTransitionsCopy = (HashSet<TM_Transition>)panel.getSelectedTransitions().clone();
-                panel.doCommand(new CutCommand(panel, selectedStatesCopy,
-                        selectedTransitionsCopy));
+                panel.doCommand(new CutCommand(panel, selectedStatesCopy, selectedTransitionsCopy));
                 updateUndoActions();
             }
-            
         }
     }
     
@@ -1735,7 +1773,10 @@ public class MainWindow extends JFrame
             try
             {
                 if (copiedData == null)
-                    return;//abort 
+                {
+                    // Abort
+                    return;
+                }
                 ByteArrayInputStream bais = new ByteArrayInputStream(copiedData);
                 ObjectInputStream restore = new ObjectInputStream(bais);
                 HashSet<TM_State> selectedStates = (HashSet<TM_State>)restore.readObject();
@@ -1743,7 +1784,10 @@ public class MainWindow extends JFrame
                 Point2D centroid = computeCentroid(selectedStates);
                 TMInternalFrame tmif = (TMInternalFrame)desktopPane.getSelectedFrame();
                 if (tmif == null)
-                    return; //abort
+                {
+                    // Abort
+                    return;
+                }
                 Point2D centreOfWindow = tmif.getCenterOfViewPort();
                 translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions, centreOfWindow,
                         tmif.getGfxPanel().getLastPastedLocation(), tmif.getGfxPanel().getNumPastesToSameLocation(),
@@ -1752,10 +1796,8 @@ public class MainWindow extends JFrame
                 if (panel != null)
                 {
                     TMachine machine = panel.getSimulator().getMachine();
-                    
                     panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
                     updateUndoActions();
-
                 }
             }
             catch (Exception e2)
@@ -1803,7 +1845,9 @@ public class MainWindow extends JFrame
             {
                 TM_Simulator sim = panel.getSimulator();
                 if (m_timerTask != null)
+                {
                     m_timerTask.cancel();
+                }
                 setEditingEnabled(false);
                 m_timerTask = new TMExecutionTimerTask(panel,  tapeDisp,  MainWindow.this);
                 m_timer.scheduleAtFixedRate(m_timerTask,0, m_executionDelayTime);
@@ -1828,7 +1872,8 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** Action for resetting the selected machine.
+    /** 
+     * Action for resetting the selected machine.
      */
     class StopMachineAction extends AbstractAction
     {
@@ -1846,7 +1891,7 @@ public class MainWindow extends JFrame
             boolean wasRunning = stopExecution();
             if (gfxPanel != null)
             {
-                //TODO reset it even if not running
+                // TODO: reset it even if not running
                 if (m_timerTask == null || !wasRunning || gfxPanel == m_timerTask.getPanel())
                 {
                     gfxPanel.getSimulator().resetMachine();
@@ -1857,58 +1902,66 @@ public class MainWindow extends JFrame
         }
     }
     
-    /** Gets the graphics panel for the currently selected machine diagram window.
-     *  If there isn't one, returns null.
+    /** 
+     * Gets the graphics panel for the currently selected machine diagram window.
+     * If there isn't one, returns null.
      */
     TMGraphicsPanel getSelectedGraphicsPanel()
     {
         if (desktopPane == null)
+        {
             return null;
-         JInternalFrame selected = desktopPane.getSelectedFrame();
-         if (selected == null)
-             return null;
-         try
-         {
-             TMInternalFrame tmif = (TMInternalFrame)selected;
-             return tmif.getGfxPanel();
-         }
-         catch (ClassCastException e)
-         {
-             //wrong window type
-             return null;
-         }
+        }
+        JInternalFrame selected = desktopPane.getSelectedFrame();
+        if (selected == null)
+        {
+            return null;
+        }
+        try
+        {
+            TMInternalFrame tmif = (TMInternalFrame)selected;
+            return tmif.getGfxPanel();
+        }
+        catch (ClassCastException e)
+        {
+            // Wrong window type
+            return null;
+        }
     }
     
     public void updateAllSimulators()
     {
         if (desktopPane == null)
+        {
             return;
-         JInternalFrame[] gfxFrames = desktopPane.getAllFramesInLayer(MACHINE_WINDOW_LAYER);
-         for (JInternalFrame frame : gfxFrames)
-         {
-             try
-             {
-                 TMInternalFrame tmif = (TMInternalFrame)frame;
-                 TMGraphicsPanel panel = tmif.getGfxPanel();
-                 if (panel != null)
-                 {
+        }
+        JInternalFrame[] gfxFrames = desktopPane.getAllFramesInLayer(MACHINE_WINDOW_LAYER);
+        for (JInternalFrame frame : gfxFrames)
+        {
+            try
+            {
+                TMInternalFrame tmif = (TMInternalFrame)frame;
+                TMGraphicsPanel panel = tmif.getGfxPanel();
+                if (panel != null)
+                {
                     panel.getSimulator().computePotentialTransitions(false);
                     panel.repaint();
-                 }
-             }
-             catch (ClassCastException e)
-             {
-                 //wrong window type
-                 //ignore it
-                 continue;
-             }
-         }
+                }
+            }
+            catch (ClassCastException e)
+            {
+                // Wrong window type ignore it
+                continue;
+            }
+        }
     }
     
     public boolean stopExecution()
     {
         if (m_timerTask != null)
+        {
             return m_timerTask.cancel();
+        }
         return false;
     }
     
@@ -1918,22 +1971,23 @@ public class MainWindow extends JFrame
         {
             super(manager);
             m_parent = parent;
-            
+
             this.addComponentListener(new ComponentAdapter()
             {
                 public void componentResized(ComponentEvent e)
                 {
                     validate();
                 }
-             });
+            });
         }
-        
+
         public Dimension getPreferredSize ()
         {
             Component[] components = this.getComponents();
-            //sort from top left to bottom right order.
-            Arrays.sort(components, new Comparator<Component>(){
-                //Note: this comparator imposes orderings that are inconsistent with equals
+            // Sort from top left to bottom right order.
+            Arrays.sort(components, new Comparator<Component>()
+            {
+                // NOTE: This comparator imposes orderings that are inconsistent with equals
                 public int compare(Component a, Component b)
                 {
                     if (a.getY() < b.getY())
@@ -1954,24 +2008,26 @@ public class MainWindow extends JFrame
                     }
                     return 0;
                 }
-                
             });
-            
+
             int widthCount = 2 * TOOLBAR_HGAP;
             int maxHeight = 0;
             int numRows = 1;
-            final int MINIMUM_SPACE_AT_END_OF_ROW = 2; //this seems to be hard-coded into
-                //swing, I had to find it by trial and error.  If there is not this much
-                //space plus the flow layout horizontal gap left at the end, a new row is started.
-                //TODO check this is still correct on linux.
+            final int MINIMUM_SPACE_AT_END_OF_ROW = 2;
+            // This seems to be hard-coded into swing, I had to find it by trial and error.  If
+            // there is not this much space plus the flow layout horizontal gap left at the end, 
+            // a new row is started.
+            // TODO" check this is still correct on linux.
 
             for (int i = 0; i < components.length; i++)
             {
                 Component c = components[i];
-                
+
                 widthCount += c.getWidth();
                 if (i != 0)
+                {
                     widthCount += TOOLBAR_HGAP;
+                }
                 maxHeight = Math.max(c.getHeight(), maxHeight);
                 if (widthCount >= m_parent.getWidth() - MINIMUM_SPACE_AT_END_OF_ROW)
                 {
@@ -1979,11 +2035,11 @@ public class MainWindow extends JFrame
                     widthCount = 2 * TOOLBAR_HGAP + c.getWidth();
                 }
             }
-            numRows = Math.min(numRows, components.length); //no more rows than components
-            
+            numRows = Math.min(numRows, components.length); // No more rows than components
+
             return new Dimension(m_parent.getWidth(), numRows * (maxHeight + TOOLBAR_VGAP) + TOOLBAR_VGAP);
         }
-        
+
         MainWindow m_parent;
     }
     
@@ -1992,7 +2048,7 @@ public class MainWindow extends JFrame
         while (true)
         {
             fcMachine.setDialogTitle("Save machine");
-            m_keyboardEnabled = false; //disable keyboard input in the main window/tape.
+            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
             int returnVal = fcMachine.showSaveDialog(MainWindow.this);
             m_keyboardEnabled = true;
 
@@ -2001,7 +2057,6 @@ public class MainWindow extends JFrame
                 File outFile = fcMachine.getSelectedFile();
                 try
                 {
-                    //TMGraphicsPanel panel = getSelectedGraphicsPanel();
                     if (panel != null)
                     {
                         TMachine machine = panel.getSimulator().getMachine();
@@ -2018,12 +2073,14 @@ public class MainWindow extends JFrame
                                 if (overwrite == JOptionPane.CANCEL_OPTION)
                                     return false;
                                 else if (overwrite == JOptionPane.NO_OPTION)
-                                    continue; //show dialoge again
+                                    continue; // Show dialogue again
                             }
                             boolean result = TMachine.saveTMachine(machine, outFile.toString());
 
                             if (result = false)
+                            {
                                 throw new IOException(outFile.toString());
+                            }
                             else
                             {
                                 panel.setModifiedSinceSave(false);
@@ -2031,35 +2088,43 @@ public class MainWindow extends JFrame
                             }
                         }
                     }
-                } catch (Exception e2)
+                } 
+                catch (Exception e2)
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
                     return false;
                 }
             }
-            else return false; //user chose not to save
-
+            else
+            {
+                // User chose not to save
+                return false;
+            }
             return true;
         }
     }
     
-    /** Returns true IFF editing operations such as cut copy paste delete 
-     *  or changing of the machines or tapes is currently allowed.
+    /** 
+     * Returns true IFF editing operations such as cut copy paste delete or changing of the machines
+     * or tapes is currently allowed.
      */
     public boolean isEditingEnabled()
     {
         return m_editingEnabled;
     }
     
-    /** Enable/disable editing operations such as cut copy paste delete 
-     *  or changing of the machines or tapes..
+    /**
+     * Enable/disable editing operations such as cut copy paste delete or changing of the machines
+     * or tapes.
      */
     public void setEditingEnabled(boolean isEnabled)
     {
         m_editingEnabled = isEnabled;
         m_keyboardEnabled = isEnabled;
         if (desktopPane == null)
-            return; //shouldnt happen.
+        {
+            return; // Shouldnt happen.
+        }
         JInternalFrame[] iFrames = desktopPane.getAllFrames();
         for (JInternalFrame f : iFrames)
         {
@@ -2070,18 +2135,21 @@ public class MainWindow extends JFrame
                 gfxPanel.setEditingEnabled(isEnabled);
                 tmif.setClosable(isEnabled);
                 exitMenuItem.setEnabled(isEnabled);
-            } catch (ClassCastException e)
+            }
+            catch (ClassCastException e)
             {
-                continue; //wrong window type
+                // Wrong window type
+                continue;
             }
         }
         setEditingActionsEnabledState(isEnabled);
         tapeDispController.setEditingEnabled(isEnabled);
     }
     
-    /** This class is designed to intercept mouse events in order to make a window modal.
-     *  It is borrowed from the Sun developer tech tips article at
-     *  http://java.sun.com/developer/JDCTechTips/2001/tt1220.html .
+    /** 
+     * This class is designed to intercept mouse events in order to make a window modal.
+     * It is borrowed from the Sun developer tech tips article at
+     * http://java.sun.com/developer/JDCTechTips/2001/tt1220.html .
      */
     class ModalAdapter extends InternalFrameAdapter
     {
@@ -2089,111 +2157,124 @@ public class MainWindow extends JFrame
 
         public ModalAdapter(Component glass)
         {
-          this.glass = glass;
+            this.glass = glass;
 
-          // Associate dummy mouse listeners
-          // Otherwise mouse events pass through
-          MouseInputAdapter adapter = new MouseInputAdapter(){};
-          glass.addMouseListener(adapter);
-          glass.addMouseMotionListener(adapter);
+            // Associate dummy mouse listeners
+            // Otherwise mouse events pass through
+            MouseInputAdapter adapter = new MouseInputAdapter(){};
+            glass.addMouseListener(adapter);
+            glass.addMouseMotionListener(adapter);
         }
 
         public void internalFrameClosed(InternalFrameEvent e)
         {
-          glass.setVisible(false);
+            glass.setVisible(false);
         }
-  }
+    }
     
-  public void userRequestToExit()
-  {
-      if (desktopPane == null)
-        System.exit(0);
-     if (!m_editingEnabled)
-         return;//cant close when running. TODO somehow grey out
-                //the close button or something
-
-     JInternalFrame[] iFrames = desktopPane.getAllFrames();
-
-     for (JInternalFrame f : iFrames)
-     {
-         try
-         {
-             TMInternalFrame tmif = (TMInternalFrame)f;
-             TMGraphicsPanel panel = tmif.getGfxPanel();
-             if (panel.isModifiedSinceSave())
-             {
-                 if (!userConfirmSaveModifiedThenClose(tmif))
-                 {
-                     return;
-                 }
-             }
-             else
-             {
-                 tmif.dispose();
-             }
-         }
-         catch (ClassCastException e2)
-         {
-             //wrong window type
-             continue;
-         }
-     }
-     //thisPtr.dispose();
-     System.exit(0);
-  }
-  
-  private void translateCentroidToMiddleOfWindow(Collection<TM_State> states,
-          Collection<TM_Transition> transitions, Point2D centreOfWindow,
-          Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
-  {
-        if (states.size() == 0)
+    public void userRequestToExit()
+    {
+        if (desktopPane == null)
+        {
+            System.exit(0);
+        }
+        if (!m_editingEnabled)
+        {
+            // TODO: Can't close when running, somehow grey out the close button or something
             return;
+        }
+
+        JInternalFrame[] iFrames = desktopPane.getAllFrames();
+
+        for (JInternalFrame f : iFrames)
+        {
+            try
+            {
+                TMInternalFrame tmif = (TMInternalFrame)f;
+                TMGraphicsPanel panel = tmif.getGfxPanel();
+                if (panel.isModifiedSinceSave())
+                {
+                    if (!userConfirmSaveModifiedThenClose(tmif))
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    tmif.dispose();
+                }
+            }
+            catch (ClassCastException e2)
+            {
+                // Wrong window type
+                continue;
+            }
+        }
+        System.exit(0);
+    }
+  
+    private void translateCentroidToMiddleOfWindow(Collection<TM_State> states,
+            Collection<TM_Transition> transitions, Point2D centreOfWindow,
+            Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
+    {
+        if (states.size() == 0)
+        {
+            return;
+        }
         Point2D centroid = computeCentroid(states);
-      
-        //TODO ensure that we dont go off the edge of the map.
+
+        // TODO: Ensure that we dont go off the edge of the map.
         int rightMostX = Integer.MIN_VALUE;
         int leftMostX = Integer.MAX_VALUE;
         int bottomMostY = Integer.MIN_VALUE;
         int topMostY = Integer.MAX_VALUE;
-        
+
         for (TM_State s : states)
         {
             if (s.getX() > rightMostX)
+            {
                 rightMostX = s.getX();
+            }
             if (s.getY() > bottomMostY)
+            {
                 bottomMostY = s.getY();
+            }
             if (s.getX() < leftMostX)
+            {
                 leftMostX = s.getX();
+            }
             if (s.getY() < topMostY)
+            {
                 topMostY = s.getY();
+            }
         }
-        
+
         int translateVectorX = (int)(centreOfWindow.getX() - centroid.getX());
         int translateVectorY = (int)(centreOfWindow.getY() - centroid.getY());
-        
-        
+
+
         if (leftMostX + translateVectorX < 0)
         {
             translateVectorX -= leftMostX + translateVectorX;
         }
-        
+
         if (topMostY + translateVectorY < 0)
         {
             translateVectorY -= topMostY + translateVectorY;
         }
-        
+
         if (rightMostX + translateVectorX > MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH)
         {
             translateVectorX -= rightMostX + translateVectorX - (MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH);
         }
-        
+
         if (bottomMostY + translateVectorY >  MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH)
         {
             translateVectorY -= bottomMostY + translateVectorY - (MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH);
         }
-        
+
         if (lastPastedLoc != null && ((int)lastPastedLoc.getX() == (int)centreOfWindow.getX() + translateVectorX
-                &&(int)lastPastedLoc.getY() == (int)centreOfWindow.getY() + translateVectorY))
+                    &&(int)lastPastedLoc.getY() == (int)centreOfWindow.getY() + translateVectorY))
         {
             translateVectorX += TRANSLATE_TO_AVOID_STACKING_X * numTimesPastedToLastLoc;
             translateVectorY += TRANSLATE_TO_AVOID_STACKING_Y * numTimesPastedToLastLoc;
@@ -2202,82 +2283,83 @@ public class MainWindow extends JFrame
         else
         {
             panel.setLastPastedLocation(new Point2D.Float((int)centreOfWindow.getX() + translateVectorX, 
-                    (int)centreOfWindow.getY() + translateVectorY));
+                        (int)centreOfWindow.getY() + translateVectorY));
         }
-            
-      
+
+
         for (TM_State s : states)
         {
             int newX = (int)(s.getX() + translateVectorX);
             int newY = (int)(s.getY() + translateVectorY);
             s.setPosition(newX, newY);
         }
-      
+
         for (TM_Transition t : transitions)
         {
             int newX = (int)(t.getControlPoint().getX() + translateVectorX);
             int newY = (int)(t.getControlPoint().getY() + translateVectorY);
             t.setControlPoint(newX, newY);
         }
-  }
+    }
   
-  /** Computes the centroid (average 'mass') of the positions of a collection of states.
-   */
-  private static Point2D computeCentroid(Collection<TM_State> states)
-  {
-      float totalX = 0;
-      float totalY = 0;
-      
-      for (TM_State s : states)
-      {
-          totalX += s.getX() + TM_State.STATE_RENDERING_WIDTH / 2; //use middle of state
-          totalY += s.getY() + TM_State.STATE_RENDERING_WIDTH / 2; //instead of top-left
-      }
-      return new Point2D.Float(totalX / states.size(), totalY / states.size());
-  }
+    /**
+     * Computes the centroid (average 'mass') of the positions of a collection of states.
+     */
+    private static Point2D computeCentroid(Collection<TM_State> states)
+    {
+        float totalX = 0;
+        float totalY = 0;
+
+        for (TM_State s : states)
+        {
+            totalX += s.getX() + TM_State.STATE_RENDERING_WIDTH / 2; // Use middle of state
+            totalY += s.getY() + TM_State.STATE_RENDERING_WIDTH / 2; // instead of top-left
+        }
+        return new Point2D.Float(totalX / states.size(), totalY / states.size());
+    }
   
-  public void updateUndoActions()
-  {
-      TMGraphicsPanel panel = getSelectedGraphicsPanel();
-      if (panel != null && isEditingEnabled())
-      {
-          String undoCommandName = panel.undoCommandName();
-          if (undoCommandName != null)
-          {
-            m_undoAction.putValue(Action.NAME, "Undo " + undoCommandName);
-            m_undoAction.setEnabled(true);
-          }
-          else
-          {
-              m_undoAction.setEnabled(false);
-              m_undoAction.putValue(Action.NAME, "Undo");
-          }
-          
-          String redoCommandName = panel.redoCommandName();
-          if (redoCommandName != null)
-          {
-            m_redoAction.putValue(Action.NAME, "Redo " + redoCommandName);
-            m_redoAction.setEnabled(true);
-          }
-          else
-          {
-              m_redoAction.setEnabled(false);
-              m_redoAction.putValue(Action.NAME, "Redo");
-          }
-      }
-      else
-      {
-          m_undoAction.setEnabled(false);
-          m_undoAction.putValue(Action.NAME, "Undo");
-          m_redoAction.setEnabled(false);
-          m_redoAction.putValue(Action.NAME, "Redo");
-      }
-      
-      m_undoToolBarButton.setText("");
-      m_redoToolBarButton.setText("");
-  }
+    public void updateUndoActions()
+    {
+        TMGraphicsPanel panel = getSelectedGraphicsPanel();
+        if (panel != null && isEditingEnabled())
+        {
+            String undoCommandName = panel.undoCommandName();
+            if (undoCommandName != null)
+            {
+                m_undoAction.putValue(Action.NAME, "Undo " + undoCommandName);
+                m_undoAction.setEnabled(true);
+            }
+            else
+            {
+                m_undoAction.setEnabled(false);
+                m_undoAction.putValue(Action.NAME, "Undo");
+            }
+
+            String redoCommandName = panel.redoCommandName();
+            if (redoCommandName != null)
+            {
+                m_redoAction.putValue(Action.NAME, "Redo " + redoCommandName);
+                m_redoAction.setEnabled(true);
+            }
+            else
+            {
+                m_redoAction.setEnabled(false);
+                m_redoAction.putValue(Action.NAME, "Redo");
+            }
+        }
+        else
+        {
+            m_undoAction.setEnabled(false);
+            m_undoAction.putValue(Action.NAME, "Undo");
+            m_redoAction.setEnabled(false);
+            m_redoAction.putValue(Action.NAME, "Redo");
+        }
+
+        m_undoToolBarButton.setText("");
+        m_redoToolBarButton.setText("");
+    }
     
-    //GUI components
+    // GUI components
     private JMenuItem aboutMenuItem;
     private JMenuItem contentsMenuItem;
     private JMenuItem copyMenuItem;
@@ -2333,15 +2415,15 @@ public class MainWindow extends JFrame
     private JRadioButtonMenuItem m_ultraFastExecuteSpeed;
     private JButton fastExecute;
     
-    private TM_GUI_Mode m_currentMode; //current user interaction mode.
+    private TM_GUI_Mode m_currentMode; // Current user interaction mode.
     
     private ArrayList<GUIModeButton> toolbarButtons;
     
     private TMTapeDisplayPanel tapeDisp;
     private TMTapeDisplayControllerPanel tapeDispController;
-    private final Tape m_tape = new CA_Tape(); //this tape is shared with all windows and machines.
-                        //you cannot allocate it to a new Tape - the alternative is to
-                        //use the copyOther method which does not alter the pointer.
+    private final Tape m_tape = new CA_Tape();
+    // This tape is shared with all windows and machines. you cannot allocate it to a new Tape - the
+    // alternative is to use the copyOther method which does not alter the pointer.
     
     private TMHelpDisplayer m_helpDisp;
     
@@ -2365,7 +2447,7 @@ public class MainWindow extends JFrame
     private int lastNewWindowLocY = 0;
     private int windowLocStepSize = minDistanceForNewWindowLoc;
     
-    //icons
+    // Icons
     ImageIcon m_addNodesIcon, m_addTransitionIcon, m_eraserIcon,
             m_selectionIcon, m_chooseStartIcon, m_chooseAcceptingIcon,
             m_chooseNextTransitionIcon, m_chooseCurrentStateIcon,
@@ -2377,7 +2459,7 @@ public class MainWindow extends JFrame
             m_tapeReloadIcon, m_emptyIcon, m_undoIcon, m_redoIcon,
             m_tuataraIcon, m_tuataraSmallIcon;
     
-    //actions
+    // Actions
     private Action m_stepAction, m_stopMachineAction,
             m_configureAlphabetAction, m_newMachineAction, m_openMachineAction,
             m_saveMachineAsAction, m_saveMachineAction, m_newTapeAction,

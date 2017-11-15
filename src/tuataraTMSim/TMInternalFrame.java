@@ -34,14 +34,16 @@ import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
-/** An internal frame containing a panel for displaying a machine.
+/** 
+ * An internal frame containing a panel for displaying a machine.
  *
  * @author Jimmy
  */
 public class TMInternalFrame extends JInternalFrame
-{
-    
-    /** Creates a new instance of TMInternalFrame */
+{ 
+    /** 
+     * Creates a new instance of TMInternalFrame
+     */
     public TMInternalFrame(TMGraphicsPanel gfxPanel)
     {
         super("hello",true,true,true, true);
@@ -76,11 +78,11 @@ public class TMInternalFrame extends JInternalFrame
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
             }
-        });
-        
+        });   
     }
     
-    /** Gets the graphical turing machine panel belonging to this internal frame.
+    /** 
+     * Gets the graphical turing machine panel belonging to this internal frame.
      */
     public TMGraphicsPanel getGfxPanel()
     {
@@ -106,9 +108,9 @@ public class TMInternalFrame extends JInternalFrame
         setTitle(titleString);
     }
     
-    /** Sets this internal frame's pointer to its scroll pane,
-     *  but doesnt actually do anything in the way of adding the scroll pane to the
-     *  component.
+    /**
+     * Sets this internal frame's pointer to its scroll pane, but doesnt actually do anything in the
+     * way of adding the scroll pane to the component.
      */
     public void setScrollPane(JScrollPane sp)
     {
@@ -118,7 +120,9 @@ public class TMInternalFrame extends JInternalFrame
     public Point2D getCenterOfViewPort()
     {
         if (m_sp == null)
+        {
             return new Point2D.Float(0.0f,0.0f);
+        }
         JViewport vp = m_sp.getViewport();
         Rectangle vpRect = vp.getViewRect();
         return new Point2D.Double(vpRect.getCenterX(), vpRect.getCenterY());

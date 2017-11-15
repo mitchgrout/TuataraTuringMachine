@@ -36,8 +36,9 @@ import javax.swing.JButton;
  */
 public class GUIModeButton extends JButton
 {
-    
-    /** Creates a new instance of GUIModeButton */
+    /**
+     * Creates a new instance of GUIModeButton
+     */
     public GUIModeButton(Action act, TM_GUI_Mode mode)
     {
         super();
