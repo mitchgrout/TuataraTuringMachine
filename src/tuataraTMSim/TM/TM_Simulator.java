@@ -44,7 +44,7 @@ public class TM_Simulator
         m_machine = turingMachine;
         m_tape = tape;
         m_random = new Random();
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /**
@@ -65,7 +65,7 @@ public class TM_Simulator
         {
             m_state = m_machine.step(m_tape, m_state, m_currentNextTransition);
         }
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /** 
@@ -74,7 +74,7 @@ public class TM_Simulator
     public void resetMachine()
     {
         m_state = null;
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /** 
@@ -181,13 +181,13 @@ public class TM_Simulator
     }
     
     /**
-     * Sets the current state that the machine is in, and calls computePotentialTransitions(true) to
-     * set up the selected next transition.
+     * Sets the current state that the machine is in, and calls computeNextTransition() to set up
+     * the selected next transition.
      */
     public void setCurrentState(TM_State state)
     {
         m_state = state;
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /**
@@ -199,65 +199,47 @@ public class TM_Simulator
     }
     
     /**
-     * Computes the list of possible transitions that the machine could take in the next execution
-     * step, and randomly selects one of them as a default transition.
+     * Get the next possible transition that the machine can take in the next execution step. This
+     * will either be a valid transition, or null. Assumes that m_machine.validate() has been called.
      */
-    public void computePotentialTransitions(boolean randomizeChosenTransition)
+    public void computeNextTransition()
     {
-        m_potentialTransitions = new ArrayList<TM_Transition>();
-        ArrayList<TM_Transition> otherwiseTransitions = new ArrayList<TM_Transition>();
+        // Since the machine is assumed valid, there are three possibilities:
+        // - No transition
+        // - An exact match
+        // - A default route via OTHERWISE_SYMBOL
+
+        TM_Transition nextTransition = null;
         
-        if (getCurrentState() == null)
+        // No state, no transitions
+        if(getCurrentState() == null)
         {
             m_currentNextTransition = null;
             return;
         }
-        
+
         ArrayList<TM_Transition> out = getCurrentState().getTransitions();
         char currentInputSymbol = m_tape.read();
        
         for (TM_Transition t : out)
         {
+            // An exact, guaranteed unique match
             if (t.getSymbol() == currentInputSymbol)
             {
-                m_potentialTransitions.add(t);
+                m_currentNextTransition = t;
+                return;
             }
+            // A non-exact match; we will keep track of this
             else if (t.getSymbol() == TMachine.OTHERWISE_SYMBOL)
             {
-                otherwiseTransitions.add(t);
+                nextTransition = t;
             }
         }
-        if (randomizeChosenTransition ||
-            m_currentNextTransition == null ||
-            !m_potentialTransitions.contains(m_currentNextTransition))
-        {
-            if (m_potentialTransitions.size() > 0)
-            {
-                int index = m_random.nextInt(m_potentialTransitions.size());
-                m_currentNextTransition = m_potentialTransitions.get(index);
-            }
-            // Pick an 'otherwise' transition
-            else if (otherwiseTransitions.size() > 0)
-            {
-                m_potentialTransitions = otherwiseTransitions;
-                int index = m_random.nextInt(m_potentialTransitions.size());
-                m_currentNextTransition = m_potentialTransitions.get(index);
-            }
-            else
-            {
-                m_currentNextTransition = null;
-            }
-        }
-    }
-    
-    /** 
-     * Get the list of transitions that the machine could follow in the next execution step, given
-     * the current configuration of the machine/tape.  If the machine is deterministic, there can be
-     * at most one element in the array.  If no transitions are possible, an empty array is returned.
-     */
-    public ArrayList<TM_Transition> getPotentialTransitions()
-    {
-        return m_potentialTransitions;
+
+        // If we are here, there is no exact match, either a default route, or no transition.
+        // These are both represented by the current value of nextTransition
+        // null -- no transition, non-null -- default route
+        m_currentNextTransition = nextTransition;
     }
     
     /**
@@ -268,25 +250,9 @@ public class TM_Simulator
         return m_currentNextTransition;
     }
     
-    /**
-     * Set the currently selected transition for the machine to execute in the next execution step
-     * if the given transition is a potential next transition, otherwise has no effect.
-     */
-    public void setCurrentNextTransition(TM_Transition t)
-    {
-        if (m_state != null)
-        {
-            if (getPotentialTransitions().contains(t))
-            {
-                m_currentNextTransition = t;
-            }
-        }
-    }
-    
     private TMachine m_machine;
     private Tape m_tape;
     private TM_State m_state;
-    private ArrayList<TM_Transition> m_potentialTransitions;
     private TM_Transition m_currentNextTransition;
     private Random m_random;
 }

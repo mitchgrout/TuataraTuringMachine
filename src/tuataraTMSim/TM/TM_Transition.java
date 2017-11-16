@@ -120,10 +120,6 @@ public class TM_Transition implements Serializable
         {
             g2d.setColor(Color.PINK);
         }
-        else if (simulator.getPotentialTransitions().contains(this))
-        {
-            g2d.setColor(LIGHT_BLUE);
-        }
         else
         {
             g2d.setColor(Color.BLUE);

@@ -383,9 +383,6 @@ public class MainWindow extends JFrame
         m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting States",
                 TM_GUI_Mode.CHOOSEACCEPTING, m_chooseAcceptingIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
-        m_chooseNextTransitionAction = new GUI_ModeSelectionAction("Choose Next Transition",
-                TM_GUI_Mode.CHOOSENEXTTRANSITION, m_chooseNextTransitionIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
         m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
                 TM_GUI_Mode.CHOOSECURRENTSTATE, m_chooseCurrentStateIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F9,0));
@@ -472,7 +469,6 @@ public class MainWindow extends JFrame
         m_eraserMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseStartMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseAcceptingMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_chooseNextTransitionMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseCurrentStateMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_slowExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
         m_mediumExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
@@ -577,11 +573,6 @@ public class MainWindow extends JFrame
         m_chooseAcceptingAction.setMenuItem(m_chooseAcceptingMenuItem);
         m_modeMenu.add(m_chooseAcceptingMenuItem);
         modeMenuItems.add(m_chooseAcceptingMenuItem);
-        
-        m_chooseNextTransitionMenuItem.setAction(m_chooseNextTransitionAction);
-        m_chooseNextTransitionAction.setMenuItem(m_chooseNextTransitionMenuItem);
-        m_modeMenu.add(m_chooseNextTransitionMenuItem);
-        modeMenuItems.add(m_chooseNextTransitionMenuItem);
         
         m_chooseCurrentStateMenuItem.setAction(m_chooseCurrentStateAction);
         m_chooseCurrentStateAction.setMenuItem(m_chooseCurrentStateMenuItem);
@@ -711,9 +702,6 @@ public class MainWindow extends JFrame
         
         GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, TM_GUI_Mode.CHOOSEACCEPTING);
         toolbarButtons.add(acceptingStatesToolBarButton);
-        
-        GUIModeButton chooseTransitionToolBarButton = new GUIModeButton(m_chooseNextTransitionAction, TM_GUI_Mode.CHOOSENEXTTRANSITION);
-        toolbarButtons.add(chooseTransitionToolBarButton);
         
         GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, TM_GUI_Mode.CHOOSECURRENTSTATE);
         toolbarButtons.add(chooseCurrentStateToolBarButton);
@@ -847,7 +835,6 @@ public class MainWindow extends JFrame
         returner[1].add(eraserToolBarButton);
         returner[1].add(startStatesToolBarButton);
         returner[1].add(acceptingStatesToolBarButton);
-        returner[1].add(chooseTransitionToolBarButton);
         returner[1].add(chooseCurrentStateToolBarButton);
         
         returner[2].setName("Machine");
@@ -878,8 +865,6 @@ public class MainWindow extends JFrame
         m_chooseStartIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/finalState.gif");
         m_chooseAcceptingIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/selectTransition.gif");
-        m_chooseNextTransitionIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/currentState.gif");
         m_chooseCurrentStateIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/step.gif");
@@ -1143,7 +1128,6 @@ public class MainWindow extends JFrame
             m_selectionAction.setEnabled(isEnabled);
             m_chooseStartAction.setEnabled(isEnabled);
             m_chooseAcceptingAction.setEnabled(isEnabled);
-            m_chooseNextTransitionAction.setEnabled(isEnabled);
             m_chooseCurrentStateAction.setEnabled(isEnabled);
             
             m_slowExecuteSpeedAction.setEnabled(isEnabled);
@@ -1172,7 +1156,6 @@ public class MainWindow extends JFrame
         m_selectionAction.setEnabled(isEnabled);
         m_chooseStartAction.setEnabled(isEnabled);
         m_chooseAcceptingAction.setEnabled(isEnabled);
-        m_chooseNextTransitionAction.setEnabled(isEnabled);
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
         m_newMachineAction.setEnabled(isEnabled);
@@ -1965,7 +1948,7 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel panel = tmif.getGfxPanel();
                 if (panel != null)
                 {
-                    panel.getSimulator().computePotentialTransitions(false);
+                    panel.getSimulator().computeNextTransition();
                     panel.repaint();
                 }
             }
@@ -2426,7 +2409,6 @@ public class MainWindow extends JFrame
     private JRadioButtonMenuItem m_eraserMenuItem;
     private JRadioButtonMenuItem m_chooseStartMenuItem;
     private JRadioButtonMenuItem m_chooseAcceptingMenuItem;
-    private JRadioButtonMenuItem m_chooseNextTransitionMenuItem;
     private JRadioButtonMenuItem m_chooseCurrentStateMenuItem;
     
     private JRadioButtonMenuItem m_slowExecuteSpeed;
@@ -2469,16 +2451,12 @@ public class MainWindow extends JFrame
     private int windowLocStepSize = minDistanceForNewWindowLoc;
     
     // Icons
-    ImageIcon m_addNodesIcon, m_addTransitionIcon, m_eraserIcon,
-            m_selectionIcon, m_chooseStartIcon, m_chooseAcceptingIcon,
-            m_chooseNextTransitionIcon, m_chooseCurrentStateIcon,
-            m_stepIcon, m_fastExecuteIcon, m_stopIcon, m_pauseIcon,
-            m_newMachineIcon, m_saveMachineIcon, m_openMachineIcon,
-            m_newTapeIcon, m_saveTapeIcon, m_openTapeIcon,
-            m_cutIcon, m_copyIcon, m_pasteIcon, m_deleteIcon,
-            m_configureAlphabetIcon,m_tapeStartIcon, m_tapeClearIcon,
-            m_tapeReloadIcon, m_emptyIcon, m_undoIcon, m_redoIcon,
-            m_tuataraIcon, m_tuataraSmallIcon;
+    ImageIcon m_addNodesIcon, m_addTransitionIcon, m_eraserIcon, m_selectionIcon, m_chooseStartIcon,
+              m_chooseAcceptingIcon, m_chooseCurrentStateIcon, m_stepIcon, m_fastExecuteIcon,
+              m_stopIcon, m_pauseIcon, m_newMachineIcon, m_saveMachineIcon, m_openMachineIcon,
+              m_newTapeIcon, m_saveTapeIcon, m_openTapeIcon, m_cutIcon, m_copyIcon, m_pasteIcon,
+              m_deleteIcon, m_configureAlphabetIcon,m_tapeStartIcon, m_tapeClearIcon,
+              m_tapeReloadIcon, m_emptyIcon, m_undoIcon, m_redoIcon, m_tuataraIcon, m_tuataraSmallIcon;
     
     // Actions
     private Action m_stepAction, m_stopMachineAction,
@@ -2498,8 +2476,7 @@ public class MainWindow extends JFrame
     
     private GUI_ModeSelectionAction m_addNodesAction , m_addTransitionsAction,
             m_eraserAction, m_selectionAction, m_chooseStartAction,
-            m_chooseAcceptingAction, m_chooseNextTransitionAction,
-            m_chooseCurrentStateAction;
+            m_chooseAcceptingAction, m_chooseCurrentStateAction;
     
     private ExecutionSpeedSelectionAction m_slowExecuteSpeedAction,
         m_mediumExecuteSpeedAction, m_fastExecuteSpeedAction,

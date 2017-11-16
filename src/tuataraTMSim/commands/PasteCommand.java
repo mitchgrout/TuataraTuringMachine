@@ -105,7 +105,7 @@ public class PasteCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
@@ -116,10 +116,10 @@ public class PasteCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     private TMGraphicsPanel m_panel;
     private HashSet<TM_State> m_selectedStates;
-    private HashSet<TM_Transition>  m_selectedTransitions;
+    private HashSet<TM_Transition> m_selectedTransitions;
 }

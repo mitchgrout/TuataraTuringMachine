@@ -59,7 +59,7 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         {
             m_panel.getSimulator().getMachine().addTransition(t);
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     private void deleteTransition(TM_Transition t)
@@ -69,7 +69,7 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()

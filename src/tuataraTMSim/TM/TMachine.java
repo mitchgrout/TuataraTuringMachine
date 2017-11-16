@@ -460,6 +460,7 @@ public class TMachine implements Serializable
             TM_Action act = t.getAction();
             if (!m_alphabet.containsSymbol(t.getSymbol()) &&
                 t.getSymbol() != TMachine.EMPTY_ACTION_SYMBOL &&
+                t.getSymbol() != TMachine.UNDEFINED_SYMBOL &&
                 t.getSymbol() != TMachine.OTHERWISE_SYMBOL)
             {
                 purge.add(t);
@@ -467,6 +468,7 @@ public class TMachine implements Serializable
             else if (act.getDirection() == 0 &&
                     !m_alphabet.containsSymbol(act.getChar()) &&
                     act.getChar() != TMachine.EMPTY_ACTION_SYMBOL &&
+                    act.getChar() != TMachine.UNDEFINED_SYMBOL &&
                     act.getChar() != TMachine.OTHERWISE_SYMBOL)
             {
                 purge.add(t);

@@ -158,7 +158,7 @@ public class AddTransitionCommand implements TMCommand
         {
             m_panel.getSelectedTransitions().add(m_transition);
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public void undoCommand()
@@ -168,7 +168,7 @@ public class AddTransitionCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()

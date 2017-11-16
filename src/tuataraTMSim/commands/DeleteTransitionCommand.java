@@ -50,7 +50,7 @@ public class DeleteTransitionCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public void undoCommand()
@@ -58,7 +58,7 @@ public class DeleteTransitionCommand implements TMCommand
         m_panel.getSimulator().getMachine().addTransition(m_transition);
         // if (selectedStates.contains(mousePressedState) && selectedStates.contains(mouseReleasedState))
         //     selectedTransitions.add(t);
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()

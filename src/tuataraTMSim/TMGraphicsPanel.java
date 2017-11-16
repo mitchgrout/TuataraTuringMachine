@@ -180,7 +180,7 @@ public class TMGraphicsPanel extends JPanel
                 selectedSymbolBoundingBox = null;
                 selectedTransition = null;
                 
-                if (m_currentMode != TM_GUI_Mode.ERASER && m_currentMode != TM_GUI_Mode.CHOOSENEXTTRANSITION)
+                if (m_currentMode != TM_GUI_Mode.ERASER)
                 {
                     // Select characters on transitions by left clicking
                     // or rename states
@@ -215,11 +215,6 @@ public class TMGraphicsPanel extends JPanel
                     case CHOOSEACCEPTING:
                     {
                         handleChooseAcceptingClick(e);
-                        break;
-                    }
-                    case CHOOSENEXTTRANSITION:
-                    {
-                        handleChooseNextTransitionClick(e);
                         break;
                     }
                     case SELECTION:
@@ -586,6 +581,9 @@ public class TMGraphicsPanel extends JPanel
     
     private void handleChooseNextTransitionClick(MouseEvent e)
     {
+        // TODO: Remove the ability to choose edges
+        return;
+        /*
         TM_Transition transitionClickedOn = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
         if (transitionClickedOn != null)
         {
@@ -600,6 +598,7 @@ public class TMGraphicsPanel extends JPanel
             this.getSimulator().setCurrentNextTransition(transitionClickedOn);
             repaint();
         }
+        */
     }
     
     private void handleChooseCurrentState(MouseEvent e)

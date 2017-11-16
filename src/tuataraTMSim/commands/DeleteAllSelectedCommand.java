@@ -98,7 +98,7 @@ public class DeleteAllSelectedCommand implements TMCommand
             // }
         }
         
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()
@@ -118,7 +118,7 @@ public class DeleteAllSelectedCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
@@ -129,7 +129,7 @@ public class DeleteAllSelectedCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     private TMGraphicsPanel m_panel;

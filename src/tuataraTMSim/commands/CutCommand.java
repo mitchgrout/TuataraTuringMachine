@@ -99,7 +99,7 @@ public class CutCommand implements TMCommand
             // }
         }
         
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()
@@ -119,7 +119,7 @@ public class CutCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
@@ -130,7 +130,7 @@ public class CutCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     private TMGraphicsPanel m_panel;

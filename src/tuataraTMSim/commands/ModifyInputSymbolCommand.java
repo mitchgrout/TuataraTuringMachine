@@ -48,13 +48,13 @@ public class ModifyInputSymbolCommand implements TMCommand
     public void doCommand()
     {
         m_transition.setSymbol(m_symbol);
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public void undoCommand()
     {
         m_transition.setSymbol(m_oldSymbol);
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
     public String getName()

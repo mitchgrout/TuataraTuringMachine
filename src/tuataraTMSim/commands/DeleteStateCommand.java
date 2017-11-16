@@ -61,7 +61,7 @@ public class DeleteStateCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
