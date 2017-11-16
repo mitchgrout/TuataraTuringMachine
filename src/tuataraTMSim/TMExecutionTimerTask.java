@@ -65,13 +65,13 @@ public class TMExecutionTimerTask extends TimerTask
             m_mainWindow.stopExecution();
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TRANS_UNDEF_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
-        catch (NoStartStateException e)
+        catch (NondeterministicException e)
         {
             cancel();
             
             m_mainWindow.stopExecution();
             
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.START_STATE_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.NONDET_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
         catch (ComputationCompletedException e)
         {

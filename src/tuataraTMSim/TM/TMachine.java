@@ -33,18 +33,32 @@ import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.TMGraphicsPanel;
 
-/** An implementation of a turing machine.  This class stores the
- *  specification of the machine (effectively its transition table), but
- *  does not contain any configuration (execution state) information.
- *  Currently assumes that the TM is deterministic.
+/** 
+ * An implementation of a turing machine.  This class stores the
+ * specification of the machine (effectively its transition table), but
+ * does not contain any configuration (execution state) information.
+ * The machine is not guaranteed to be deterministic at all times,
+ * but can be assured to be deterministic by calling TMachine.validate()
  *
  * @author Jimmy
  */
 public class TMachine implements Serializable
 {
+    /**
+     * Does not match any symbols; instead, this is used to indicate that a transition has not yet
+     * been assigned a value.
+     */
+    public static final char UNDEFINED_SYMBOL = '!';
+
+    /**
+     * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
+     */
     public static final char OTHERWISE_SYMBOL = '?';
-    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5; //epsilon
-    private static final Random RANDOM  = new Random();
+
+    /**
+     * Epsilon; Represents a do-nothing action
+     **/
+    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
     
     /**
      * Creates a new instance of TMachine
@@ -65,7 +79,83 @@ public class TMachine implements Serializable
         m_transitions = new ArrayList<TM_Transition>();
         m_alphabet = new Alphabet();
     }
-    
+
+    /**
+     * Ensures this TMachine is valid. This means there is a unique start and final state, there are
+     * no duplicate transitions, there are no undefined transitions, and the final state has no
+     * transitions leaving it. Should be called before a machine is run.
+     */
+    public void validate() throws NondeterministicException
+    {
+        boolean visitedStart = false,
+                visitedFinal = false;
+
+        for(TM_State st : m_states)
+        {
+            // List of transitions for this state
+            ArrayList<TM_Transition> transitions = st.getTransitions();
+
+            // Ensure a unique start state
+            if(st.isStartState())
+            {
+                if(!visitedStart)
+                {
+                    visitedStart = true;
+                }
+                // Duplicate start state
+                else
+                {
+                    throw new NondeterministicException("Machine has more than one start state");
+                }
+            }
+
+            // Ensure a unique final state
+            if(st.isFinalState())
+            {
+                if(!visitedFinal)
+                {
+                    visitedFinal = true;
+                    if(transitions.size() != 0)
+                    {
+                        throw new NondeterministicException("Machine has a transition leaving the final state " + st.getLabel());
+                    }
+                }
+                // Duplicate final state
+                else
+                {
+                    throw new NondeterministicException("Machine has more than one final state");
+                }
+            }
+
+            // Ensure no transitions are undefined (TMachine.UNDEFINED_SYMBOL), and no duplicate transitions
+            ArrayList<Character> usedSymbols = new ArrayList<Character>();
+            for(TM_Transition tr : transitions)
+            {
+                char c = tr.getSymbol();
+                if(c == UNDEFINED_SYMBOL)
+                {
+                    throw new NondeterministicException("State " + st.getLabel() + " has an undefined transition");
+                }
+                if(usedSymbols.contains(c))
+                {
+                    throw new NondeterministicException("State " + st.getLabel() + " has a duplicate transition for the input " + c);
+                }
+                usedSymbols.add(c);
+            }
+        }
+
+        if(!visitedStart)
+        {
+            throw new NondeterministicException("Machine has no start state");
+        }
+
+        if(!visitedFinal)
+        {
+            throw new NondeterministicException("Machine has no final state");
+        }
+    }
+
+
     /** 
      * Update the given tape with the result produced by an iteration of an instance of this
      * abstract machine that is currently in the given state.
@@ -75,10 +165,11 @@ public class TMachine implements Serializable
     {
         // TODO: handle submachines
         char currentChar = tape.read();
-         ArrayList<TM_Transition> currentTransitions = currentState.getTransitions();
-        
+        ArrayList<TM_Transition> currentTransitions = currentState.getTransitions();
+
         if (currentNextTransition != null)
         {
+            // TODO: Justify this conditional
             if (currentState.getTransitions().contains(currentNextTransition))
             {
                 currentNextTransition.getAction().performAction(tape);
@@ -109,30 +200,24 @@ public class TMachine implements Serializable
     }
     
     /** 
-     * Gets the start state. If there is more than one start state, picks a random one. 
-     * If there is no start state, returns null;
+     * Gets the start state. Assumes that validate() has been called.
      */
     public TM_State getStartState()
     {
-        ArrayList<TM_State> startStates = new ArrayList<TM_State>();
         for (TM_State st : m_states) 
         {
-            if (st.isStartState())
+            if(st.isStartState())
             {
-                startStates.add(st);
+                return st;
             }
         }
-        if (startStates.isEmpty())
-        {
-            return null;
-        }
-        
-        int index = RANDOM.nextInt(startStates.size());
-        return startStates.get(index);
+
+        // Can never reach this code due to validate() ensuring a unique start state
+        return null;
     }
     
     /**
-     * Gets the final state.
+     * Gets the final state. Assumes that validate() has been called.
      */
     public TM_State getFinalState()
     {
@@ -143,6 +228,8 @@ public class TMachine implements Serializable
                 return st;
             }
         }
+
+        // Can never reach this code due to validate() ensuring a unique final state
         return null;
     }
     
@@ -344,6 +431,7 @@ public class TMachine implements Serializable
         {
             TM_Action act = t.getAction();
             if (!a.containsSymbol(t.getSymbol()) &&
+                t.getSymbol() != TMachine.UNDEFINED_SYMBOL &&
                 t.getSymbol() != TMachine.EMPTY_ACTION_SYMBOL &&
                 t.getSymbol() != TMachine.OTHERWISE_SYMBOL)
             {
@@ -351,6 +439,7 @@ public class TMachine implements Serializable
             }
             else if (act.getDirection() == 0 &&
                      !a.containsSymbol(act.getChar()) &&
+                     act.getChar() != TMachine.UNDEFINED_SYMBOL &&
                      act.getChar() != TMachine.EMPTY_ACTION_SYMBOL &&
                      act.getChar() != TMachine.OTHERWISE_SYMBOL)
             {

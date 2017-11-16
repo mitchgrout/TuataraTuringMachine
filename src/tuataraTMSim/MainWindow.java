@@ -47,23 +47,43 @@ import tuataraTMSim.TM.*;
  */
 public class MainWindow extends JFrame
 {
+    /**
+     * Font used for rendering text.
+     */
     public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 12);
-    public static final int MACHINE_WINDOW_LAYER = 50; // The layer for internal frames containing machines.
-    public static final String TAPE_EXTENSION = ".tap";
+    
+    /**
+     * The layer used for internal frames containing machines.
+     */
+    public static final int MACHINE_WINDOW_LAYER = 50;
+   
+    /**
+     * File extension for tapes.
+     */
+    public static final String TAPE_EXTENSION    = ".tap";
+    /**
+     * File extension for machines.
+     */
     public static final String MACHINE_EXTENSION = ".tm";
+    
+    /**
+     * Internal timer.
+     */
     private final java.util.Timer m_timer = new java.util.Timer(true);
-    public static final String TRANS_UNDEF_ERR_STR = "The computation did not complete successfully.";
-    public static final String TAPE_BOUNDS_ERR_STR = "The machine r/w head went past the start of the tape.";
-    public static final String START_STATE_ERR_STR = "The machine has no start state.";
-    public static final String OTHER_ERROR_STR = "Error!";
-    public static final String HALTED_MESSAGE_TITLE_STR = "Machine halted!";
+    
+    public static final String NONDET_ERR_STR            = "The machine could not be validated.";
+    public static final String TRANS_UNDEF_ERR_STR       = "The computation did not complete successfully.";
+    public static final String TAPE_BOUNDS_ERR_STR       = "The machine r/w head went past the start of the tape.";
+    public static final String OTHER_ERROR_STR           = "Error!";
+    public static final String HALTED_MESSAGE_TITLE_STR  = "Machine halted!";
     public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
+    
     public static final int TOOLBAR_HGAP = 5; // Padding between components in the toolbar
     public static final int TOOLBAR_VGAP = 5;
 
-    public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
-    public static final int MEDIUM_EXECUTE_SPEED_DELAY = 800;
-    public static final int FAST_EXECUTE_SPEED_DELAY = 400;
+    public static final int SLOW_EXECUTE_SPEED_DELAY      = 1200;
+    public static final int MEDIUM_EXECUTE_SPEED_DELAY    = 800;
+    public static final int FAST_EXECUTE_SPEED_DELAY      = 400;
     public static final int SUPERFAST_EXECUTE_SPEED_DELAY = 200;
     public static final int ULTRAFAST_EXECUTE_SPEED_DELAY = 10;
     
@@ -1281,9 +1301,15 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                 if (gfxPanel != null)
                 {
+                    // Ensure validity first
+                    gfxPanel.getSimulator().getMachine().validate();
                     gfxPanel.getSimulator().step();
                     tapeDisp.repaint();
                 }
+            }
+            catch (NondeterministicException e2)
+            {
+                JOptionPane.showMessageDialog(m_parentComponent, MainWindow.NONDET_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE); 
             }
             catch (UndefinedTransitionException e2)
             {
@@ -1292,10 +1318,6 @@ public class MainWindow extends JFrame
             catch (TapeBoundsException e2)
             {
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
-            }
-            catch (NoStartStateException e2)
-            {
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.START_STATE_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
             }
             catch (ComputationCompletedException e2)
             {
@@ -1843,14 +1865,13 @@ public class MainWindow extends JFrame
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                TM_Simulator sim = panel.getSimulator();
                 if (m_timerTask != null)
                 {
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new TMExecutionTimerTask(panel,  tapeDisp,  MainWindow.this);
-                m_timer.scheduleAtFixedRate(m_timerTask,0, m_executionDelayTime);
+                m_timerTask = new TMExecutionTimerTask(panel, tapeDisp, MainWindow.this);
+                m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }
     }

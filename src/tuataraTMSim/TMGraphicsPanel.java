@@ -680,8 +680,8 @@ public class TMGraphicsPanel extends JPanel
             {
                 doCommand(new AddTransitionCommand(this,
                         new TM_Transition(mousePressedState, mouseReleasedState,
-                        TMachine.OTHERWISE_SYMBOL, new TM_Action(0,
-                        TMachine.OTHERWISE_SYMBOL, TMachine.EMPTY_ACTION_SYMBOL))));
+                        TMachine.UNDEFINED_SYMBOL, new TM_Action(0,
+                        TMachine.UNDEFINED_SYMBOL, TMachine.EMPTY_ACTION_SYMBOL))));
 
                 repaint();
             }

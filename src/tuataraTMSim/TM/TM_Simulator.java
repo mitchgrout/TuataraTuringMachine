@@ -30,7 +30,8 @@ import tuataraTMSim.exceptions.*;
 
 /**
  * Encapsulates the whole system for a Turing machine, including the machine and its configuration.
- * In particular, this class handles the simulation of the machine.
+ * In particular, this class handles the simulation of the machine, including validation of the
+ * machine prior to execution.
  * @author Jimmy
  */
 public class TM_Simulator
@@ -50,15 +51,15 @@ public class TM_Simulator
      * Perform an iteration of the machine.
      */
     public void step() throws TapeBoundsException, UndefinedTransitionException,
-                              NoStartStateException, ComputationCompletedException
+                              ComputationCompletedException, NondeterministicException
     {
+        // TODO: Prevent expensive calls to .validate()
+        m_machine.validate();
+
         if (m_state == null)
         {
+            // Guaranteed to exist by m_machine.validate()
             m_state = m_machine.getStartState();
-            if (m_state == null)
-            {
-                throw new NoStartStateException();
-            }
         }
         else
         {
@@ -84,7 +85,8 @@ public class TM_Simulator
      * @param doConsoleOutput  Determines if we output the configurations and computation result to standard out console.
      */
     public boolean runUntilHalt(int maxSteps, boolean doConsoleOutput)
-        throws TapeBoundsException, UndefinedTransitionException, NoStartStateException, ComputationCompletedException 
+        throws TapeBoundsException, UndefinedTransitionException,
+               ComputationCompletedException, NondeterministicException 
     {
         int currentStep = 0;
         
@@ -135,12 +137,10 @@ public class TM_Simulator
     /** 
      * Returns true IFF the machine is in an accepting state.
      */
-    public boolean isHalted() throws NoStartStateException
+    public boolean isHalted() throws NondeterministicException
     {
-        if (m_state == null)
-        {
-            throw new NoStartStateException();
-        }
+        // TODO: Do we need to validate here?
+        m_machine.validate();
         return m_state.isFinalState();
     }
     
@@ -148,12 +148,10 @@ public class TM_Simulator
      * Returns true IFF the machine is in an accepting state, with its read/write head parked at the
      * beginning of the tape.
      */
-    public boolean isHaltedWithHeadParked() throws NoStartStateException
+    public boolean isHaltedWithHeadParked() throws NondeterministicException
     {
-        if (m_state == null)
-        {
-            throw new NoStartStateException();
-        }
+        // TODO: Do we need to validate here?
+        m_machine.validate();
         return (isHalted() && m_tape.isParked());
     }
     
