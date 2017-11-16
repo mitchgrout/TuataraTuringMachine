@@ -39,7 +39,7 @@ public class NondeterministicException extends java.lang.Exception
     
     /**
      * Constructs an instance of <code>NondeterministicException</code> with the specified detail message.
-     * @param msg the detail message.
+     * @param msg The detailed error message.
      */
     public NondeterministicException(String msg) { super(msg); }
 }

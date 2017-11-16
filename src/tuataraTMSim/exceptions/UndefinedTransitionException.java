@@ -38,7 +38,7 @@ public class UndefinedTransitionException extends java.lang.Exception
     
     /**
      * Constructs an instance of <code>UndefinedTransitionException</code> with the specified detail message.
-     * @param msg the detail message.
+     * @param msg The detailed error message.
      */
     public UndefinedTransitionException(String msg) { super(msg); }
 }
