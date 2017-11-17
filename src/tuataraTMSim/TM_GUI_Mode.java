@@ -26,17 +26,43 @@
 package tuataraTMSim;
 
 /**
- * An enumeration representing the different user interaction modes that the gui can be in.
- *
+ * An enumeration representing the different user interaction modes that the GUI can be in.
  * @author Jimmy
  */
 public enum TM_GUI_Mode
 { 
+    /**
+     * Add states to the machine.
+     */
     ADDNODES,
+
+    /**
+     * Add transitions to the machine.
+     */
     ADDTRANSITIONS,
+
+    /**
+     * Select multiple states and transitions with a rectangular marquee select.
+     */
     SELECTION,
+
+    /**
+     * Remove states and transitions from the machine.
+     */
     ERASER,
+
+    /**
+     * Choose the start state of the machine.
+     */
     CHOOSESTART,
+
+    /**
+     * Choose the accepting state of the machine.
+     */
     CHOOSEACCEPTING,
+
+    /**
+     * Choose the currently executing state of the machine.
+     */
     CHOOSECURRENTSTATE
 }

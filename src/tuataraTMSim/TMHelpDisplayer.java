@@ -40,19 +40,22 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 /**
- *
+ * An extension of a frame which displays help information, stored as HTML.
  * @author Jimmy
  */
 public class TMHelpDisplayer extends JInternalFrame
 {    
     /**
-     * Creates a new instance of TMHelpDisplayer
+     * Creates a new instance of TMHelpDisplayer.
      */
     public TMHelpDisplayer()
     {
         initialize();
     }
     
+    /**
+     * Set up the frame, including attaching subcomponents and loading HTML pages. 
+     */
     public void initialize()
     {
         try
@@ -67,8 +70,7 @@ public class TMHelpDisplayer extends JInternalFrame
             jep.setEditorKit(htmlKit);
             jep.setEditable(false);
             
-            java.net.URL helpURL = TMHelpDisplayer.class.getResource(
-                                "help/index.html");
+            java.net.URL helpURL = TMHelpDisplayer.class.getResource("help/index.html");
             if (helpURL != null)
             {
                 try
@@ -106,11 +108,15 @@ public class TMHelpDisplayer extends JInternalFrame
 }
 
 /**
- * Handle hyperlinks in the html help.  Code borrowed from the Sun Java 1.4.2 API Guide:
+ * Handle hyperlinks in the html help. Code borrowed from the Sun Java 1.4.2 API Guide:
  * http://java.sun.com/j2se/1.4.2/docs/api/javax/swing/JEditorPane.html
  */
 class Hyperactive implements HyperlinkListener
 {
+    /**
+     * Called when a hyperlink is clicked.
+     * @param e The event information associated with the click event.
+     */
     public void hyperlinkUpdate(HyperlinkEvent e) 
     {
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)

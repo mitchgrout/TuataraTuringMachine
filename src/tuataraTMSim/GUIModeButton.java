@@ -31,13 +31,15 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
 /**
- *
+ * An extension of the JButton type, which has an associated action and GUI mode.
  * @author Jimmy
  */
 public class GUIModeButton extends JButton
 {
     /**
-     * Creates a new instance of GUIModeButton
+     * Creates a new instance of GUIModeButton.
+     * @param act The abstract action associated with this button.
+     * @param mode The mode to switch to after pressing this button.
      */
     public GUIModeButton(Action act, TM_GUI_Mode mode)
     {
@@ -49,10 +51,17 @@ public class GUIModeButton extends JButton
         m_mode = mode;
     }
     
+    /**
+     * Get the GUI mode associated with this button.
+     * @return The GUI mode associated with this button.
+     */
     public TM_GUI_Mode getGUI_Mode()
     {
         return m_mode;
     }
     
-    TM_GUI_Mode m_mode;
+    /**
+     * The GUI mode associated with this button.
+     */
+    private TM_GUI_Mode m_mode;
 }
