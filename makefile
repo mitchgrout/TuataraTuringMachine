@@ -1,37 +1,58 @@
+# Compiler to use
 CC=javac
-DOCC=javadoc
-FILE_JAVA=`find . -name "*.java"`
-FILE_CLASS=`find . -name "*.class"`
-FILE_HTML=`find . -name "*.html" | grep -v "help/"`
+
+# Directory to find source files
+SOURCE_DIR=src
+
+# Directory to find class files
+BUILD_DIR=build
+
+# Directory to find documentation HTML
+DOCS_DIR=docs
+
+# Directory to find images
+IMG_DIR=images
+
+# Directory to find HTML files
+HTML_DIR=help
+
+# Name of the main file
+MAIN_FILE=tuataraTMSim.MainWindow
+
+# Name of the .JAR file
 FILE_JAR=TuataraTuringMachine.jar
 
 
-# Default behaviour for $ make
+# Default behaviour for make
 all: gui
 
 # Compile everything such that the GUI can be run, but do not archive.
 gui:
-	$(CC) $(FILE_JAVA)
+	mkdir -p $(BUILD_DIR)
+	$(CC) -d $(BUILD_DIR) `find $(SOURCE_DIR) -name "*.java"`
+	cp -r $(SOURCE_DIR)/tuataraTMSim/$(IMG_DIR) $(BUILD_DIR)/tuataraTMSim/$(IMG_DIR)
+	cp -r $(SOURCE_DIR)/tuataraTMSim/$(HTML_DIR) $(BUILD_DIR)/tuataraTMSim/$(HTML_DIR)
 
-# Compile everything such that the GUI can be run, archive, and move the archive to this folder.
+# Compile everything such that the GUI can be run, and archive the $(BUILD_DIR) directory
 jar:
-	make gui &&
-	cd src   &&
-	jar cvfe $(FILE_JAR) tuataraTMSim.MainWindow $(FILE_CLASS) &&
-	mv TuataraTuringMachine.jar ..
+	make gui
+	cd $(BUILD_DIR) && jar cvfe $(FILE_JAR) $(MAIN_FILE) `find .`
 
 # Generate only javadoc documentation for the project
 docs:
-	$(DOCC) $(FILE_JAVA)
+	mkdir -p $(DOCS_DIR)
+	javadoc -private -d $(DOCS_DIR) `find $(SOURCE_DIR) -name "*.java"`
+
+# Run the project
+run:
+	cd $(BUILD_DIR) && java $(MAIN_FILE)
 
 # Compile and run the project
-run:
-	make gui &&
-	cd src   && 
-	java tuataraTMSim.MainWindow
+compile-run:
+	make gui
+	make run
 
-# Remove all intermediate files, i.e. .class files, .jar files, and javadoc .html files
+# Remove all .class files, .jar files
 .PHONY: clean
 clean:
-	rm $(FILE_CLASS) $(FILE_HTML) $(FILE_JAR)
-
+	rm -rf $(BUILD_DIR)
