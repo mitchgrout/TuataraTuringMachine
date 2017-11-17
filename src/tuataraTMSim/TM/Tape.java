@@ -29,32 +29,39 @@ import java.io.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
 import tuataraTMSim.MainWindow;
 
-/** A tape for a turing machine, also stores the position of the read/write head.
- *
+/** 
+ * A tape for a Turing machine, storing characters on an infinite tape.
  * @author Jimmy
  */
 public abstract class Tape implements Serializable
 {
+    /**
+     * The character used to represent a blank symbol, which fill the tape.
+     */
     public static final char BLANK_SYMBOL = '_';
     
-    /**
-     * Read the current character from the tape, at the position of the read/write heard.
+    /** 
+     * Read the current character from the tape, at the position of the read/write head.
+     * @return The current character from the tape, at the positoin of the
+               read/write head.
      */
     public abstract char read();
     
     /**
-     * Shift the head one cell to the left.
+     * Shift the read/write head one cell to the left.
+     * @throws TapeBoundsException If the read/write head is at the leftmost
+                                   position of the tape.
      */
     public abstract void headLeft() throws TapeBoundsException;
     
     /**
-     * Shift the head one cell to the right.
+     * Shift the read/write head one cell to the right.
      */
     public abstract void headRight();
     
     /**
-     * Write the character specified by 'c' to the location of the read/write head.
-     * @param c    the character to write.
+     * Write the given character to tape, at the location of the read/write head.
+     * @param c The character to write.
      */
     public abstract void write(char c);
     
@@ -64,24 +71,29 @@ public abstract class Tape implements Serializable
     public abstract void resetRWHead();
     
     /**
-     * True IFF the read/write head is parked in the first cell of the input tape.
+     * Determine if the read/write head is parked.
+     * @return true if the read/write head is in the first cell of the input tape, otherwise false.
      */
     public abstract boolean isParked();
     
     /**
-     * Returns a string representation of the tape.  This must contain the exact characters of the tape,
-     * in sequence, with no other text added.
+     * Get the tape contents as a String object.
+     * @return The exact characters of the tape, in sequence, with no other text added.
      */
     public abstract String toString();
     
     /**
-     * Returns a string containing the characters in a segment of the tape. The tape is a one-ended
-     * infinite tape, with blank characters filling any unset tape character.
+     * Get the tape contents from a specified offset and length as a String object.
+     * @param begin The offset from the start of the tape.
+     * @param length How many characters to read.
+     * @return Exactly length many characters, read from the tape, beginning at the offset begin, in
+     *         sequence, with no other text added.
      */
     public abstract String getPartialString(int begin, int length);
     
     /**
-     * Returns the location of the head relative to the start of the tape.
+     * Get the location of the read/write head, relative to the start of the tape.
+     * @return The location of the read/write head.
      */
     public abstract int headLocation();
     
@@ -93,18 +105,22 @@ public abstract class Tape implements Serializable
     /**
      * Set this tape to have exactly the characters of the other tape.
      * The read/write head is reset to the beginning of the tape.
+     * @param other The tape to copy.
      */
     public abstract void copyOther(Tape other);
     
     /**
-     * Set the window that this tape is associated with.  If not null, all of the machine panels
-     * in window will be kept up to date every time the tape is modified.
+     * Set the window that this tape is associated with.
+     * @param window The window to track. If not null, all of the machine panels in window will be
+     *               kept up to date every time the tape is modified.
      */
     public abstract void setWindow(MainWindow window);
     
     /**
-     * Save (serialize) a tape to persistent storage.
-     * @returns true IFF the serialization was successful.
+     * Serialize a tape, and write it to persistent storage.
+     * @param t The tape to serialize.
+     * @param file The filename to write to.
+     * @return true if the serialization and write was successful, false otherwise.
      */
     public static boolean saveTape(Tape t, String file)
     {
@@ -126,11 +142,9 @@ public abstract class Tape implements Serializable
     }
     
     /**
-     * Load (deserialize) a tape from persistent storage.
-     * @param file     The file where the tape is stored.
-     * @returns        The tape that was loaded, or null
-     *                 if the tape was not successfully
-     *                 loaded.
+     * Load and deserialize a tape from persistent storage.
+     * @param file The filename where the tape was serialized and written to.
+     * @return The deserialized tape, or null if the tape was not successfully loaded.
      */
     public static Tape loadTape(String file)
     {

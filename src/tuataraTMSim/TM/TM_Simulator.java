@@ -37,18 +37,23 @@ import tuataraTMSim.exceptions.*;
 public class TM_Simulator
 {  
     /**
-     * Creates a new instance of TM_Simulator
+     * Creates a new instance of TM_Simulator.
+     * @param machine The machine to simulate.
+     * @param tape The tape which the machine will read from.
      */
-    public TM_Simulator(TMachine turingMachine, Tape tape)
+    public TM_Simulator(TMachine machine, Tape tape)
     {
-        m_machine = turingMachine;
+        m_machine = machine;
         m_tape = tape;
-        m_random = new Random();
         computeNextTransition();
     }
     
     /**
      * Perform an iteration of the machine.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws UndefinedTransitionException If there is no transition for the machine to take.
+     * @throws ComputationCompletedException If execution halts successfully.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public void step() throws TapeBoundsException, UndefinedTransitionException,
                               ComputationCompletedException, NondeterministicException
@@ -69,7 +74,7 @@ public class TM_Simulator
     }
     
     /** 
-     * End the current computation (if any), setting the machine to its initial state.
+     * End the current computation, if any, setting the machine to its initial state.
      */
     public void resetMachine()
     {
@@ -78,11 +83,15 @@ public class TM_Simulator
     }
     
     /** 
-     * Runs until the machine halts. Returns true only if the machine terminates successfully with
-     * the head parked within the specified number of steps.
-     * @param maxSteps  The maximum number of machine iterations allowed for the computation (0 for no limit).  
-     *                  If this number is reached, the computation will be aborted and will return false.
-     * @param doConsoleOutput  Determines if we output the configurations and computation result to standard out console.
+     * Runs until the machine halts.
+     * @param maxSteps The maximum number of iterations allowed for the computation. A value of zero
+     *                 represents no limit. If this number is reached, simulation is aborted.
+     * @param doConsoleOutput Determines if configuration information should be written to stdout.
+     * @return true if the machine halts in a finite amount of steps up until maxSteps, false otherwise.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws UndefinedTransitionException If there is no transition for the machine to take.
+     * @throws ComputationCompletedException If execution halts successfully.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public boolean runUntilHalt(int maxSteps, boolean doConsoleOutput)
         throws TapeBoundsException, UndefinedTransitionException,
@@ -135,7 +144,9 @@ public class TM_Simulator
     }
     
     /** 
-     * Returns true IFF the machine is in an accepting state.
+     * Determine if the machine is in an accepting state.
+     * @return true if the machine is in an accepting state, false otherwise.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public boolean isHalted() throws NondeterministicException
     {
@@ -145,8 +156,11 @@ public class TM_Simulator
     }
     
     /**
-     * Returns true IFF the machine is in an accepting state, with its read/write head parked at the
-     * beginning of the tape.
+     * Determine if the machine is in an accepting state, and the read/write head of the tape is in
+     * the first cell of the tape.
+     * @return true if the machine is in an accepting state, with the read/write head parked, false
+     *         otherwise.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public boolean isHaltedWithHeadParked() throws NondeterministicException
     {
@@ -156,7 +170,8 @@ public class TM_Simulator
     }
     
     /**
-     * Gets a string representing current configuration ('state') of the machine.
+     * Gets a string representation of the current configuration ('state') of the machine.
+     * @return A string representation of the current configuration.
      */
     public String getConfiguration()
     {
@@ -165,7 +180,8 @@ public class TM_Simulator
     
     // Getter functions:    
     /**
-     * Gets the tape.
+     * Get the tape.
+     * @return The current tape.
      */
     public Tape getTape()
     {
@@ -174,6 +190,7 @@ public class TM_Simulator
     
     /**
      * Gets the current state that the machine is in.
+     * @return The current state.
      */
     public TM_State getCurrentState()
     {
@@ -183,6 +200,7 @@ public class TM_Simulator
     /**
      * Sets the current state that the machine is in, and calls computeNextTransition() to set up
      * the selected next transition.
+     * @param state The new current state.
      */
     public void setCurrentState(TM_State state)
     {
@@ -192,6 +210,7 @@ public class TM_Simulator
     
     /**
      * Gets the Turing machine that is being simulated.
+     * @return The machine being simulated.
      */
     public TMachine getMachine()
     {
@@ -199,8 +218,9 @@ public class TM_Simulator
     }
     
     /**
-     * Get the next possible transition that the machine can take in the next execution step. This
-     * will either be a valid transition, or null. Assumes that m_machine.validate() has been called.
+     * Get the next possible transition that the machine can take in the next execution step, and
+     * set this to be m_currentNextTransition. This will either be a valid transition, or null.
+     * Assumes that m_machine.validate() has been called.
      */
     public void computeNextTransition()
     {
@@ -244,15 +264,30 @@ public class TM_Simulator
     
     /**
      * Get the currently selected transition for the machine to execute in the next execution step.
+     * @return The next transition to be taken.
      */
     public TM_Transition getCurrentNextTransition()
     {
         return m_currentNextTransition;
     }
-    
+   
+    /**
+     * The machine being simulated.
+     */
     private TMachine m_machine;
+    
+    /**
+     * The current tape.
+     */
     private Tape m_tape;
+    
+    /**
+     * The current state the machine is in.
+     */
     private TM_State m_state;
+
+    /**
+     * The next transition to be taken.
+     */
     private TM_Transition m_currentNextTransition;
-    private Random m_random;
 }

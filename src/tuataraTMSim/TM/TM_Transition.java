@@ -37,20 +37,48 @@ import java.util.Collection;
  */
 public class TM_Transition implements Serializable
 {
-    public static final double ARROWHEAD_LENGTH = 6; // Number of pixels for arrows on transitions.
-    public static final double ACTION_TEXT_DISTANCE = 10; // Number of pixels away from transitions to draw actions.
+    /**
+     * Number of pixels for arrowheads on transitions.
+     */
+    public static final double ARROWHEAD_LENGTH = 6;
+    
+    /**
+     * Number of pixels away from transitions actions should be drawn.
+     */
+    public static final double ACTION_TEXT_DISTANCE = 10;
+    
+    /**
+     * Number of pixels away from transitions actions should be drawn, if the transition is a loop.
+     */
     public static final double ACTION_TEXT_DISTANCE_FOR_LOOPS = 15;
-    public static final double SELECTED_SYMBOL_BOX_PAD_X = 3; // Size of padding space around
-    public static final double SELECTED_SYMBOL_BOX_PAD_Y = 0; // Bounding boxes for selected symbols
-    public static final double SELECTED_INPUT_SYMBOL_BOX_X_OFFSET = -2; // Pixels to offset input symbol bounding box
+    
+    /**
+     * Width of bounding box used for padding around selected symbols.
+     */
+    public static final double SELECTED_SYMBOL_BOX_PAD_X = 3;
+    
+    /**
+     * Height of bounding box used for padding around selected symbols.
+     */
+    public static final double SELECTED_SYMBOL_BOX_PAD_Y = 0; 
+
+    /**
+     * Pixels to offset input symbol bounding box.
+     */
+    public static final double SELECTED_INPUT_SYMBOL_BOX_X_OFFSET = -2;
                                 
     /**
-     * Creates a new instance of TM_Transition
-     * */
+     * Creates a new instance of TM_Transition.
+     */
     protected TM_Transition() { }
     
     /** 
-     * Creates a new instance of TM_Transition
+     * Creates a new instance of TM_Transition, given the two connecting states, input symbol, and
+     * action.
+     * @param fromState The state this transition leaves.
+     * @param toState The state this transition arrives at.
+     * @param symbol The input symbol associated with this transition.
+     * @param action The action associated with this transition.
      */
     public TM_Transition(TM_State fromState, TM_State toState, char symbol, TM_Action action)
     {
@@ -75,6 +103,7 @@ public class TM_Transition implements Serializable
     
     /**
      * Gets the state that this transition starts from.
+     * @return The state this transition leaves.
      */
     public TM_State getFromState()
     {
@@ -83,6 +112,7 @@ public class TM_Transition implements Serializable
     
     /**
      * Gets the state that this transition ends at.
+     * @return The state this transition arrives at.
      */
     public TM_State getToState()
     {
@@ -91,6 +121,7 @@ public class TM_Transition implements Serializable
     
     /**
      * Gets the action for this transition.
+     * @return The action associated with this action.
      */
     public TM_Action getAction()
     {
@@ -99,6 +130,7 @@ public class TM_Transition implements Serializable
     
     /**
      * Gets the input symbol for this transition.
+     * @return The input symbol associated with this transition.
      */
     public char getSymbol()
     {
@@ -107,6 +139,9 @@ public class TM_Transition implements Serializable
     
     /**
      * Render the transition to a graphics object.
+     * @param g The graphics object on which to render.
+     * @param selectedTransitions The set of transitions selected by the user.
+     * @param simulator The current simulator.
      */
     public void paint(Graphics g, Collection<TM_Transition> selectedTransitions, TM_Simulator simulator)
     {
@@ -168,7 +203,9 @@ public class TM_Transition implements Serializable
     }
     
     /** 
-     * Paints the arrowhead of a transition to the graphics object in the graphics object's current colour.
+     * Paints the arrowhead of a transition to the graphics object in the graphics object's current
+     * colour.
+     * @param g The graphics object on which to render.
      */
     public void paintArrowHead(Graphics g)
     {
@@ -199,7 +236,14 @@ public class TM_Transition implements Serializable
         drawTriangle(g, arrowLoc,p1, p2);
         g2d.setStroke(originalStroke);
     }
-    
+   
+    /**
+     * Helper function which renders a triangle at a given triple of points.
+     * @param g The graphics object on which to render.
+     * @param p1 The first vertex of the triangle.
+     * @param p2 The second vertex of the triangle.
+     * @param p3 The third vertex of the triangle.
+     */
     private void drawTriangle(Graphics g, Point2D p1, Point2D p2, Point2D p3)
     {
         GeneralPath triangle = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 3);
@@ -211,7 +255,12 @@ public class TM_Transition implements Serializable
         g2d.draw(triangle);
         g2d.fill(triangle);
     }
-    
+   
+    /**
+     * Get a vector tangent to the transition's arrow.
+     * @param arrowLoc The location of the arrow.
+     * @return A vector tangent to arrowLoc.
+     */
     private Point2D getArrowTangentVector(Point2D arrowLoc)
     {
         // Get the control point for the first half of the curve
@@ -238,7 +287,11 @@ public class TM_Transition implements Serializable
     }
     
     /**
-     * Returns true iff the specified panel coordinates are within the space taken up by the action.
+     * Determine if the action associated with this transition contains the specified point.
+     * @param x The X ordinate.
+     * @param y The Y ordinate.
+     * @param g The graphics object, used to measure the label's dimensions. 
+     * @return true if the action contains the specified point, false otherwise.
      */
     public boolean actionContainsPoint(int x, int y, Graphics g)
     {
@@ -261,9 +314,11 @@ public class TM_Transition implements Serializable
     }
     
     /**
-     * Returns true iff the specified panel coordinates are within the space taken up by the
-     * arrowhead in the centre of the this transition. The size of the containing box around the
-     * arrow is the same as the size of the containing box around the action text in actionContainsPoint.
+     * Determine if the arrow associated with this transition contains the specified point.
+     * @param x The X ordinate.
+     * @param y The Y ordinate.
+     * @param g The graphics object, used to measure label's dimensions.
+     * @return true if the arrow contains the specified point, false otherwise.
      */
     public boolean arrowContainsPoint(int x, int y, Graphics g)
     {
@@ -279,7 +334,11 @@ public class TM_Transition implements Serializable
         
         return translated.contains(x, y);
     }
-    
+   
+    /**
+     * Get the location of the control point for the curve representing this transition.
+     * @return The control point of the transition.
+     */
     public Point2D getControlPoint()
     {
         return new Point2D.Float(m_controlPtX, m_controlPtY);
@@ -287,25 +346,39 @@ public class TM_Transition implements Serializable
     
     /**
      * Set the location of the control point for the curve representing this transition.
-     * @param x,y  The new coordinates of the control point, in viewplane space.
+     * @param x The X ordinate of the control point, in viewplane space.
+     * @param y The Y ordinate of the control point, in viewplane space.
      */
     public void setControlPoint(int x, int y)
     {
         m_controlPtX = x;
         m_controlPtY = y;
     }
-    
+   
+    /**
+     * Set the input symbol associated with the action.
+     * @param symbol The new input symbol.
+     */
     public void setSymbol(char symbol)
     {
         m_symbol = symbol;
         m_action.setInputSymbol(symbol);
     }
-    
+   
+    /**
+     * Set the action for this transition.
+     * @param action The new action.
+     */
     public void setAction(TM_Action action)
     {
+        // TODO: Do we need to update m_symbol? 
         m_action = action;
     }
-    
+   
+    /**
+     * Get the location of the arrow.
+     * @return The location of the arrow.
+     */
     private Point2D getActionLocation()
     {
         Point2D arrowLoc = getMidpoint();
@@ -328,7 +401,11 @@ public class TM_Transition implements Serializable
             return new Point2D.Double(m_fromState.getX() + scaled.getX(), m_fromState.getY() + scaled.getY());
         }
     }
-    
+   
+    /**
+     * Get the midpoint of the curve associated with the transition.
+     * @return The midpoint of the curve.
+     */
     public Point2D getMidpoint()
     {
         if (m_fromState != m_toState)
@@ -347,7 +424,14 @@ public class TM_Transition implements Serializable
             return curve.getP2();
         }
     }
-    
+   
+    /**
+     * Get the control point of the curve, given the midpoint.
+     * @param midpoint The midpoint of the curve.
+     * @param fromState The state the transition is leaving.
+     * @param toState The state the transition is arriving at.
+     * @return The control point of the curve.
+     */
     public static Point2D getControlPointGivenMidpoint(Point2D midpoint, TM_State fromState, TM_State toState)
     {
         double newCPX, newCPY;
@@ -371,6 +455,11 @@ public class TM_Transition implements Serializable
         return new Point2D.Float((float)newCPX, (float)newCPY);
     }
     
+    /**
+     * Get the bounding box associated with the input symbol.
+     * @param g The graphics object, used to measure the label's dimensions. 
+     * @return The bounding box associated with the input symbol.
+     */
     public Shape getInputSymbolBoundingBox(Graphics g)
     {
         String actionString = m_action.toString();
@@ -394,6 +483,11 @@ public class TM_Transition implements Serializable
         return translated;
     }
     
+    /**
+     * Get the bounding box associated with the action.
+     * @param g The graphics object, used to measure the label's dimensions. 
+     * @return The bounding box associated with the action.
+     */
     public Shape getOutputSymbolBoundingBox(Graphics g)
     {
         String actionString = m_action.toString();
@@ -419,18 +513,44 @@ public class TM_Transition implements Serializable
         
         return translated;
     }
-    
+   
+    /**
+     * Get a String representation of this transition.
+     * @return A string representation of this transition.
+     */
     public String toString()
     {
         return m_controlPtX + " " + m_controlPtY + " " + m_fromState.getLabel() + " " + m_toState.getLabel();
     }
-    
+   
+    /**
+     * The state this transition leaves.
+     */
     private TM_State m_fromState;
-    private TM_State m_toState;
-    private TM_Action m_action;
-    private char m_symbol;
     
-    // Position of the control point for the curve.
+    /**
+     * The state this transition arrives at.
+     */
+    private TM_State m_toState;
+    
+    /**
+     * The action associated with this transition.
+     */
+    private TM_Action m_action;
+    
+    /**
+     * The input symbol associated with this transition.
+     */
+    private char m_symbol;
+    // TODO: Determine if this is necessary.
+
+    /**
+     * The X ordinate of the control point for the curve.
+     */
     private int m_controlPtX = 0;
+    
+    /**
+     * The Y ordinate of the control point for the curve.
+     */
     private int m_controlPtY = 0;
 }
