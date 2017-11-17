@@ -31,22 +31,31 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with adding new transitions to a machine.
  * @author Jimmy
  */
 public class AddTransitionCommand implements TMCommand
 {
-    public final double PIXELS_BETWEEN_TRANSITIONS = 15;
+    /**
+     * Number of pixels to be used as padding between multiple transitions between two states.
+     */
+    private final double PIXELS_BETWEEN_TRANSITIONS = 15;
 
     /**
-     * Creates a new instance of AddTransitionCommand 
+     * Creates a new instance of AddTransitionCommand.
+     * @param panel The current graphics panel.
+     * @param transition The transition to add.
      */
     public AddTransitionCommand(TMGraphicsPanel panel, TM_Transition transition)
     {
         m_panel = panel;
         m_transition = transition;
     }
-    
+   
+    /**
+     * Adds the transition to the machine, and compute the next transition to be taken by the
+     * machine.
+     */
     public void doCommand()
     {
         // Calculate where to place the midpoint so as to hopefully not interfere
@@ -161,6 +170,9 @@ public class AddTransitionCommand implements TMCommand
         m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * Removes the transition from the machine, and compute the next transition to be taken by the machine.
+     */
     public void undoCommand()
     {
         m_panel.getSimulator().getMachine().deleteTransition(m_transition);
@@ -171,12 +183,22 @@ public class AddTransitionCommand implements TMCommand
         m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Add Transition";
     }
     
-    
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+
+    /**
+     * The transition to add or remove.
+     */
     private TM_Transition m_transition;
 }

@@ -31,15 +31,16 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with pasting states and transitions into a machine.
  * @author Jimmy
  */
 public class PasteCommand implements TMCommand
 {
     /**
      * Creates a new instance of PasteCommand.
-     * Be sure to only pass in copies of selectedStates and selectedTransitions
-     * - we don't want our lists of states and transitions to change when the user copies new things!
+     * @param panel The current graphics panel.
+     * @param selectedStates A copy of the set of states to paste.
+     * @param selectedTransitions A copy of the set of transitions to paste.
      */
     public PasteCommand(TMGraphicsPanel panel, HashSet<TM_State> selectedStates,
                         HashSet<TM_Transition> selectedTransitions)
@@ -48,7 +49,10 @@ public class PasteCommand implements TMCommand
         m_selectedStates = selectedStates;
         m_selectedTransitions = selectedTransitions;
     }
-    
+   
+    /**
+     * Paste the selected states and transitions into the machine.
+     */
     public void doCommand()
     {
         for (TM_State s : m_selectedStates)
@@ -72,6 +76,9 @@ public class PasteCommand implements TMCommand
         m_panel.setSelectedTransitions((HashSet<TM_Transition>)m_selectedTransitions.clone());
     }
     
+    /**
+     * Delete the pasted states and transitions from the machine.
+     */
     public void undoCommand()
     {
         for (TM_State s : m_selectedStates)
@@ -88,11 +95,19 @@ public class PasteCommand implements TMCommand
         m_panel.setSelectedTransitions(new HashSet<TM_Transition>());
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Paste";
     }
     
+    /**
+     * A helper function which deletes a specified state from the machine.
+     * @param s The state to delete.
+     */
     private void deleteState(TM_State s)
     {
         m_panel.getSimulator().getMachine().deleteState(s);
@@ -109,6 +124,10 @@ public class PasteCommand implements TMCommand
         }
     }
     
+    /**
+     * A helper function which deletes a specified transition from the machine.
+     * @param t The transition to delete.
+     */
     private void deleteTransition(TM_Transition t)
     {
         m_panel.getSimulator().getMachine().deleteTransition(t);
@@ -119,7 +138,18 @@ public class PasteCommand implements TMCommand
         m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * The current graphics panel
+     */
     private TMGraphicsPanel m_panel;
+    
+    /**
+     * The set of states to paste.
+     */
     private HashSet<TM_State> m_selectedStates;
+
+    /**
+     * The set of transitions to paste.
+     */
     private HashSet<TM_Transition> m_selectedTransitions;
 }

@@ -29,13 +29,16 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.Alphabet;
 
 /**
- *
+ * A command which deals with manipulating the tape alphabet.
  * @author Jimmy
  */
 public class ConfigureAlphabetCommand implements TMCommand
 {
     /**
-     * Creates a new instance of ConfigureAlphabetCommand 
+     * Creates a new instance of ConfigureAlphabetCommand.
+     * @param panel The current graphics panel.
+     * @param beforeAlphabet The current tape alphabet.
+     * @param afterAlphabet The new tape alphabet.
      */
     public ConfigureAlphabetCommand(TMGraphicsPanel panel, Alphabet beforeAlphabet, Alphabet afterAlphabet)
     {
@@ -44,23 +47,43 @@ public class ConfigureAlphabetCommand implements TMCommand
         m_afterAlphabet = afterAlphabet;
     }
 
+    /**
+     * Sets the current tape alphabet to the new alphabet.
+     */
     public void doCommand()
     {
         m_panel.getSimulator().getMachine().setAlphabet(m_afterAlphabet);
     }
 
+    /**
+     * Sets the current tape alphabet to the previous alphabet.
+     */
     public void undoCommand()
     {
         m_panel.getSimulator().getMachine().setAlphabet(m_beforeAlphabet);
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Configure Alphabet";
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
-    private Alphabet m_beforeAlphabet;
-    private Alphabet m_afterAlphabet;
     
+    /**
+     * The previous alphabet.
+     */
+    private Alphabet m_beforeAlphabet;
+    
+    /**
+     * The new alphabet
+     */
+    private Alphabet m_afterAlphabet;
 }

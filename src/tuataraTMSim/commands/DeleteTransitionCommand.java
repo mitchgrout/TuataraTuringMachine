@@ -29,13 +29,15 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with deleting a transition from a machine.
  * @author Jimmy
  */
 public class DeleteTransitionCommand implements TMCommand
 {    
     /**
-     * Creates a new instance of AddTransitionCommand 
+     * Creates a new instance of AddTransitionCommand.
+     * @param panel The current graphics panel.
+     * @param transition The transition to delete.
      */
     public DeleteTransitionCommand(TMGraphicsPanel panel, TM_Transition transition)
     {
@@ -43,6 +45,10 @@ public class DeleteTransitionCommand implements TMCommand
         m_transition = transition;
     }
     
+    /**
+     * Delete the transition from the machine, and compute the next transition to be taken by the
+     * machine.
+     */
     public void doCommand()
     {
         m_panel.getSimulator().getMachine().deleteTransition(m_transition);
@@ -53,6 +59,10 @@ public class DeleteTransitionCommand implements TMCommand
         m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * Add the transition back to the machine, and compute the next transition to be taken by the
+     * machine.
+     */
     public void undoCommand()
     {
         m_panel.getSimulator().getMachine().addTransition(m_transition);
@@ -60,13 +70,23 @@ public class DeleteTransitionCommand implements TMCommand
         //     selectedTransitions.add(t);
         m_panel.getSimulator().computeNextTransition();
     }
-    
+   
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Delete Transition";
     }
-        
+       
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+
+    /**
+     * The transition to delete.
+     */
     private TM_Transition m_transition;
 }
-
