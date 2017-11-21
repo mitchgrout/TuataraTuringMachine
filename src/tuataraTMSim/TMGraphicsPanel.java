@@ -612,6 +612,7 @@ public class TMGraphicsPanel extends JPanel
    
     /**
      * Scheduled for removal.
+     * @param e The generating event.
      */
     private void handleChooseNextTransitionClick(MouseEvent e)
     {

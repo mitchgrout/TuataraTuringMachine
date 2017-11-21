@@ -33,15 +33,22 @@ import tuataraTMSim.exceptions.TapeBoundsException;
 
 /** 
  * A panel containing a tape display panel and some buttons to move the read/write head.
- *
  * @author Jimmy
  */
 public class TMTapeDisplayControllerPanel extends JPanel
 {
-    public static final int PADDING = 0; // Num pixels padding.
+    /**
+     * Number of pixels used for padding between subcomponents.
+     */
+    public static final int PADDING = 0;
     
     /**
-     * Creates a new instance of TMTapeDisplayControllerPanel 
+     * Creates a new instance of TMTapeDisplayControllerPanel.
+     * @param tapeDP The tape display panel.
+     * @param windowParent The main window.
+     * @param headToStartAction Action used to move the read/write head to the start.
+     * @param eraseTapeAction Action used to erase the entire tape.
+     * @param reloadAction Action used to reload the tape.
      */
     public TMTapeDisplayControllerPanel(TMTapeDisplayPanel tapeDP, MainWindow windowParent,
             Action headToStartAction, Action eraseTapeAction, Action reloadAction)
@@ -53,6 +60,9 @@ public class TMTapeDisplayControllerPanel extends JPanel
     
     /** 
      * Initialization.
+     * @param headToStartAction Action used to move the read/write head to the start.
+     * @param eraseTapeAction Action used to erase the entire tape.
+     * @param reloadAction Action used to reload the tape.
      */
     public void initComponents(Action headToStartAction, Action eraseTapeAction, Action reloadAction)
     {
@@ -149,6 +159,7 @@ public class TMTapeDisplayControllerPanel extends JPanel
     
     /** 
      * Enable/disable user editing operations/buttons etc.
+     * @param isEnabled true if editing is enabled, false otherwise.
      */
     public void setEditingEnabled(boolean isEnabled)
     {
@@ -156,18 +167,53 @@ public class TMTapeDisplayControllerPanel extends JPanel
         m_BRight.setEnabled(isEnabled);
         m_tapeDP.setEditingEnabled(isEnabled);
     }
-    
+   
+    /**
+     * The tape display panel.
+     */
     private TMTapeDisplayPanel m_tapeDP;
+    
+    /**
+     * The main window.
+     */
     private MainWindow m_mainWindow;
+    
+    /**
+     * Button for moving the read/write head left.
+     */
     private JButton m_BLeft;
+    
+    /**
+     * Button for moving the read/write head right.
+     */
     private JButton m_BRight;
+    
+    /**
+     * Button for moving the read/write head to the start.
+     */
     private JButton m_BStart;
+    
+    /**
+     * Button for clearing the tape.
+     */
     private JButton m_BClearTape;
+    
+    /**
+     * Button for reloading the tape.
+     */
     private JButton m_BReloadTape;
 }
 
+/**
+ * Action for moving the read/write head to the start of the tape.
+ */
 class HeadToStartAction extends AbstractAction
 {
+    /**
+     * Create a new instance of HeadToStartAction.
+     * @param text Description of the action.
+     * @param icon Icon for the action.
+     */
     public HeadToStartAction(String text, Icon icon)
     {
         super(text);
@@ -176,29 +222,56 @@ class HeadToStartAction extends AbstractAction
         putValue(Action.SHORT_DESCRIPTION, "Move the read/write head to the start of the tape.");
     }
 
+    /**
+     * Move the read/write head to the leftmost end of the tape.
+     * @param e The generating event.
+     */
     public void actionPerformed(ActionEvent e) 
     {
         // Move r/w head to the left end of the tape
         m_tapeDP.getTape().resetRWHead();
         m_tapeDCP.repaint();
     }
-    
+
+    /**
+     * Set the underlying tape display panel.
+     * @param tapeDP The new tape display panel.
+     */
     public void setTapeDP(TMTapeDisplayPanel tapeDP)
     {
         m_tapeDP = tapeDP;
     }
 
+    /**
+     * Set the underlying tape controller panel.
+     * @param tapeDCP The new tape controller panel.
+     */
     public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
     {
         m_tapeDCP = tapeDCP;
     }
 
+    /**
+     * The underlying tape display panel.
+     */
     private TMTapeDisplayPanel m_tapeDP;
+
+    /**
+     * The underlying tape controller panel.
+     */
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }
 
+/**
+ * Action for erasing the tape.
+ */
 class EraseTapeAction extends AbstractAction
 {
+    /**
+     * Create a new instance of EraseTapeAction.
+     * @param text Description of the action.
+     * @param icon Icon for the action.
+     */
     public EraseTapeAction(String text, Icon icon)
     {
         super(text);
@@ -207,6 +280,10 @@ class EraseTapeAction extends AbstractAction
         putValue(Action.SHORT_DESCRIPTION, "Erase the tape.");
     }
 
+    /**
+     * Erase the tape.
+     * @param e The generating event.
+     */
     public void actionPerformed(ActionEvent e) 
     {
         // Wipe the tape.
@@ -220,22 +297,45 @@ class EraseTapeAction extends AbstractAction
         }
     }
 
+    /**
+     * Set the underlying tape display panel.
+     * @param tapeDP The new tape display panel.
+     */
     public void setTapeDP(TMTapeDisplayPanel tapeDP)
     {
         m_tapeDP = tapeDP;
     }
 
+    /**
+     * Set the underlying tape controller panel.
+     * @param tapeDCP The new tape controller panel.
+     */
     public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
     {
         m_tapeDCP = tapeDCP;
     }
 
+    /**
+     * The underlying tape display panel.
+     */
     private TMTapeDisplayPanel m_tapeDP;
+
+    /**
+     * The underlying tape controller panel.
+     */
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }
 
+/**
+ * Action for reloading the tape.
+ */
 class ReloadTapeAction extends AbstractAction
 {
+    /**
+     * Create a new instance of HeadToStartAction.
+     * @param text Description of the action.
+     * @param icon Icon for the action.
+     */
     public ReloadTapeAction(String text, Icon icon)
     {
         super(text);
@@ -261,15 +361,31 @@ class ReloadTapeAction extends AbstractAction
         }
     }
 
+    /**
+     * Set the underlying tape display panel.
+     * @param tapeDP The new tape display panel.
+     */
     public void setTapeDP(TMTapeDisplayPanel tapeDP)
     {
         m_tapeDP = tapeDP;
     }
+
+    /**
+     * Set the underlying tape controller panel.
+     * @param tapeDCP The new tape controller panel.
+     */
     public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
     {
         m_tapeDCP = tapeDCP;
     }
 
+    /**
+     * The underlying tape display panel.
+     */
     private TMTapeDisplayPanel m_tapeDP;
+
+    /**
+     * The underlying tape controller panel.
+     */
     private TMTapeDisplayControllerPanel m_tapeDCP;
 }

@@ -33,20 +33,34 @@ import javax.swing.*;
 import tuataraTMSim.TM.Tape;
 
 /** 
- * A panel for displaying a turing machine tape.  Does not include any buttons, just the tape.
- *
+ * A panel for displaying a Turing machine tape. Does not include any buttons, just the tape.
  * @author Jimmy
  */
 public class TMTapeDisplayPanel extends JPanel
 { 
-    // Padding constants determining empty space around components, in pixels.
+    /**
+     * Horizontal padding around a tape cell.
+     */
     public static final int CELLPADDING_X  = 4;
+
+    /**
+     * Vertical padding around a tape cell.
+     */
     public static final int CELLPADDING_Y  = 2;
+
+    /**
+     * Horizontal padding around the entire tape.
+     */
     public static final int TAPEPADDING_X = 5;
+
+    /**
+     * Vertical padding around the entire tape.
+     */
     public static final int TAPEPADDING_Y = 2;
     
     /**
-     * Creates a new instance of TMTapeDisplayPanel 
+     * Creates a new instance of TMTapeDisplayPanel.
+     * @param tape The underlying tape.
      */
     public TMTapeDisplayPanel(Tape tape)
     {
@@ -56,7 +70,9 @@ public class TMTapeDisplayPanel extends JPanel
     }
     
     /**
-     * Creates a new instance of TMTapeDisplayPanel 
+     * Creates a new instance of TMTapeDisplayPanel.
+     * @param tape The underlying tape.
+     * @param file The file associated with the tape.
      */
     public TMTapeDisplayPanel(Tape tape, File file)
     {
@@ -70,6 +86,7 @@ public class TMTapeDisplayPanel extends JPanel
      */
     public void initComponents()
     {
+        // TODO: Move into constructor.
         setFocusable(false);
         this.setPreferredSize(new Dimension(500,50));
         
@@ -118,6 +135,7 @@ public class TMTapeDisplayPanel extends JPanel
     
     /** 
      * Paint this component to the given graphics object.
+     * @param g The graphics object to render onto.
      */
     protected void paintComponent(Graphics g)
     {
@@ -137,6 +155,9 @@ public class TMTapeDisplayPanel extends JPanel
     
     /** 
      * Paint the tape on the graphics object at the given location.
+     * @param g The graphics object to render onto.
+     * @param x The X ordinate to render at.
+     * @param y The Y ordinate to render at.
      */
     public void paintTape(Graphics g, int x, int y)
     {
@@ -179,12 +200,13 @@ public class TMTapeDisplayPanel extends JPanel
     
     /** 
      * Paint a single cell of the tape.
-     * @param g     The graphics object to paint to.
-     * @param c     The character (symbol) contained in this cell.
-     * @param isHeadLocation    True iff the read/write head is currently in this cell.
-     * @param x, y  Coordinates of the baseline of the text when painted.
-     * @param ascent, descent   Distance in pixels the font can typically extend to above and
-     *                  below the baseline of the text.
+     * @param g The graphics object to render onto.
+     * @param c The character contained in this cell.
+     * @param isHeadLocation true if the read/write head is in this cell, false otherwise.
+     * @param x The X ordinate of the baseline of the text when painted.
+     * @param y The Y ordinate of the baseline of the text when painted.
+     * @param ascent Distance in pixels the font can extend above the baseline of the text.
+     * @param descent Distance in pixels the font can extend below the baseline of the text.
      */
     public void paintTapeCell(Graphics g, char c, boolean isHeadLocation, int x, int y, int ascent, int descent)
     {
@@ -208,6 +230,8 @@ public class TMTapeDisplayPanel extends JPanel
     /** 
      * A helper function that calculates how many cells will fit on the viewing panel at one time,
      * rounded down to the nearest whole number.
+     * @param g The graphics object used to measure text.
+     * @return The number of cells that will fit on the viewing panel.
      */
     private int numCellsViewable(Graphics g)
     {
@@ -221,6 +245,7 @@ public class TMTapeDisplayPanel extends JPanel
     
     /**
      * Get the tape currently associated with this panel.
+     * @return The tape associated with this panel.
      */
     public Tape getTape()
     {
@@ -228,13 +253,19 @@ public class TMTapeDisplayPanel extends JPanel
     }
     
     /**
-     * Change the tape currently associated with this panel to t.
+     * Change the tape currently associated with this panel.
+     * @param t The new tape associated with this panel.
      */
     public void setTape(Tape t)
     {
         m_tape = t;
     }
     
+    /**
+     * Handle a keystroke
+     * @param e The generating event.
+     * @return true if the event caused a change to the tape, false otherwise.
+     */
     public boolean handleKeyEvent(KeyEvent e)
     {
        char c = e.getKeyChar();
@@ -278,8 +309,9 @@ public class TMTapeDisplayPanel extends JPanel
     }
     
     /** 
-     * Save (serialize) a tape to persistent storage.
-     * @returns true IFF the serialization was successful.
+     * Serialize and save the tape to persistent storage.
+     * @param file The filename to save to.
+     * @return true if the tape was saved successfully, false otherwise.
      */
     public boolean saveTapeAs(String file)
     {
@@ -288,11 +320,8 @@ public class TMTapeDisplayPanel extends JPanel
     }
     
     /**
-     * Save (serialize) the tape to persistent storage in
-     * the file this panel is associated with.
-     * @returns true IFF the serialization was successful.
-     * If there is no file associated with the panel,
-     * it will return false and no serialization will occur.
+     * Serialize and save the tape to persistent storage, using the associated file.
+     * @return true if the tape was saved successfully, false otherwise.
      */
     public boolean saveTape()
     {
@@ -308,9 +337,9 @@ public class TMTapeDisplayPanel extends JPanel
     }
 
     /**
-     * Load (deserialize) a tape from persistent storage.
-     * @param file     The file where the tape is stored.
-     * @returns true IFF the deserialization was successful.
+     * Load and deserialize a tape from persistent storage.
+     * @param file The filename of the saved tape.
+     * @return true if the tape was loaded successfully, false otherwise.
      */
     public boolean loadTape(String file)
     {
@@ -323,11 +352,19 @@ public class TMTapeDisplayPanel extends JPanel
         return true;
     }
     
+    /**
+     * Get the file associated with this tape.
+     * @return The file associated with this tape.
+     */
     public File getFile()
     {
         return m_file;
     }
     
+    /**
+     * Set the file associated with this tape.
+     * @param file The new file associated with this tape.
+     */
     public void setFile(File file)
     {
         m_file = file;
@@ -350,12 +387,27 @@ public class TMTapeDisplayPanel extends JPanel
         }
     }
     
+    /**
+     * Set whether editing is enabled.
+     * @param isEnabled true if editing is enabled, false otherwise.
+     */
     public void setEditingEnabled(boolean isEnabled)
     {
         m_isEditingEnabled = isEnabled;
     }
     
+    /**
+     * The underlying tape.
+     */
     private Tape m_tape;
+
+    /**
+     * The associated file.
+     */
     private File m_file = null;
+
+    /**
+     * Whether editing is enabled.
+     */
     private boolean m_isEditingEnabled = true;
 }
