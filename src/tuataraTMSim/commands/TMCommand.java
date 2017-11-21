@@ -26,14 +26,24 @@
 package tuataraTMSim.commands;
 
 /**
- *
+ * Represents an action which can be done and undone.
  * @author Jimmy
  */
 public interface TMCommand 
 {
+    /**
+     * Performs the specified action.
+     */
     public void doCommand();
     
+    /**
+     * Undoes the specified action.
+     */
     public void undoCommand();
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName();
 }

@@ -38,7 +38,7 @@ public class TapeBoundsException extends Exception
     
     /**
      * Constructs an instance of <code>TapeBoundsException</code> with the specified detail message.
-     * @param msg the detail message.
+     * @param msg The detailed error message.
      */
     public TapeBoundsException(String msg) { super(msg); }
 }

@@ -30,13 +30,17 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with moving a transition
  * @author Jimmy
  */
-public class MoveTransitionCommand  implements TMCommand
+public class MoveTransitionCommand implements TMCommand
 {
     /**
-     * Creates a new instance of MoveTransitionCommand
+     * Creates a new instance of MoveTransitionCommand.
+     * @param panel The current graphics panel.
+     * @param transition The transition to move.
+     * @param moveX The change in X position.
+     * @param moveY The change in Y position.
      */
     public MoveTransitionCommand(TMGraphicsPanel panel, TM_Transition transition, int moveX, int moveY)
     {
@@ -45,7 +49,10 @@ public class MoveTransitionCommand  implements TMCommand
         m_moveX = moveX;
         m_moveY = moveY;
     }
-    
+   
+    /**
+     * Move the transition by the specified amount.
+     */
     public void doCommand()
     {
         Point2D midPoint = m_transition.getMidpoint();
@@ -56,6 +63,9 @@ public class MoveTransitionCommand  implements TMCommand
         m_transition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
     }
     
+    /**
+     * Move the transition back by the specified amount.
+     */
     public void undoCommand()
     {
         Point2D midPoint = m_transition.getMidpoint();
@@ -66,13 +76,32 @@ public class MoveTransitionCommand  implements TMCommand
         m_transition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
     }
 
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Move Transition";
     }
-        
-    TMGraphicsPanel m_panel;
-    TM_Transition m_transition;
-    int m_moveX;
-    int m_moveY;
+       
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_panel;
+    
+    /**
+     * The transition to move.
+     */
+    private TM_Transition m_transition;
+    
+    /**
+     * The change in X position.
+     */
+    private int m_moveX;
+    
+    /**
+     * The change in Y position.
+     */
+    private int m_moveY;
 }

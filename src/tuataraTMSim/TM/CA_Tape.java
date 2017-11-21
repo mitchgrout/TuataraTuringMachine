@@ -37,7 +37,7 @@ import tuataraTMSim.MainWindow;
 public class CA_Tape extends Tape implements Serializable 
 {   
     /**
-     * Creates a new instance of CA_Tape
+     * Creates a new instance of CA_Tape.
      */
     public CA_Tape()
     {
@@ -45,7 +45,8 @@ public class CA_Tape extends Tape implements Serializable
     }
     
     /**
-     * Creates a new instance of CA_Tape, setting the tape contents to a string
+     * Creates a new instance of CA_Tape, setting the tape contents to a string.
+     * @param initialTape The initial value of the tape.
      */
     public CA_Tape(String initialTape)
     {
@@ -53,7 +54,9 @@ public class CA_Tape extends Tape implements Serializable
     }
     
     /**
-     * Creates a new instance of CA_Tape, setting the tape contents to a string
+     * Creates a new instance of CA_Tape, setting the tape contents to a string.
+     * @param initialTape The initial value of the tape.
+     * @param window A reference to the main program window.
      */
     public CA_Tape(String initialTape, MainWindow window)
     {
@@ -67,19 +70,21 @@ public class CA_Tape extends Tape implements Serializable
     
     /**
      * Read the current character from the tape, at the position of the read/write head.
+     * @return The current character from the tape, at the positoin of the read/write head.
      */
     public char read()
     {
-        return tapeArray[headLoc];
+        return m_tapeArray[m_headLoc];
     }
     
     /**
-     * Shift the head one cell to the left.
+     * Shift the read/write head one cell to the left.
+     * @throws TapeBoundsException If the read/write head is at the leftmost position of the tape.
      */
     public void headLeft() throws TapeBoundsException
     {
-        headLoc--;
-        if (headLoc < 0)
+        m_headLoc--;
+        if (m_headLoc < 0)
         {
             resetRWHead();
             throw new TapeBoundsException();
@@ -90,24 +95,25 @@ public class CA_Tape extends Tape implements Serializable
         }
     }
     
-    /** Shift the head one cell to the right.
+    /** 
+     * Shift the read/write head one cell to the right.
      */
     public void headRight()
     {
-        headLoc++;
-        if (headLoc >= tapeArray.length)
+        m_headLoc++;
+        if (m_headLoc >= m_tapeArray.length)
         {
-            char[] newArray = new char[tapeArray.length * 2];
-            for (int i = 0; i < tapeArray.length; i++)
+            char[] newArray = new char[m_tapeArray.length * 2];
+            for (int i = 0; i < m_tapeArray.length; i++)
             {
-                newArray[i] = tapeArray[i];
+                newArray[i] = m_tapeArray[i];
             }
-            for (int i = tapeArray.length; i < newArray.length; i++)
+            for (int i = m_tapeArray.length; i < newArray.length; i++)
             {
                 // Blank
                 newArray[i] = Tape.BLANK_SYMBOL;
             }
-            tapeArray = newArray;
+            m_tapeArray = newArray;
         }
         if (m_mainWindow != null)
         {
@@ -116,12 +122,12 @@ public class CA_Tape extends Tape implements Serializable
     }
     
     /**
-     * Write the character specified by 'c' to the location of the read/write head.
-     * @param c    the character to write.
+     * Write the given character to tape, at the location of the read/write head.
+     * @param c The character to write.
      */
     public void write(char c)
     {
-        tapeArray[headLoc] = c;
+        m_tapeArray[m_headLoc] = c;
         if (m_mainWindow != null)
         {
             m_mainWindow.updateAllSimulators();
@@ -133,7 +139,7 @@ public class CA_Tape extends Tape implements Serializable
      */
     public void resetRWHead()
     {
-        headLoc = 0;
+        m_headLoc = 0;
         if (m_mainWindow != null)
         {
             m_mainWindow.updateAllSimulators();
@@ -141,49 +147,54 @@ public class CA_Tape extends Tape implements Serializable
     }
     
     /**
-     * True IFF the read/write head is parked in the first cell of the input tape.
+     * Determine if the read/write head is parked.
+     * @return true if the read/write head is in the first cell of the input tape, otherwise false.
      */
     public boolean isParked()
     {
-        return headLoc == 0;
+        return m_headLoc == 0;
     }
     
     /**
-     * Returns a string representation of the tape.  This must contain the exact characters of the tape,
-     * in sequence, with no other text added.
+     * Get the tape contents as a String object.
+     * @return The exact characters of the tape, in sequence, with no other text added.
      */
     public String toString()
     {
-        return new String(tapeArray);
+        return new String(m_tapeArray);
     }
     
     /**
-     * Returns a string containing the characters in a segment of the tape. The tape is a one-ended
-     * infinite tape, with blank characters filling any unset tape character.
+     * Get the tape contents from a specified offset and length as a String object.
+     * @param begin The offset from the start of the tape.
+     * @param length How many characters to read.
+     * @return Exactly length many characters, read from the tape, beginning at the offset begin, in
+     *         sequence, with no other text added.
      */
     public String getPartialString(int begin, int length)
     {
         char[] returnCA = new char[length];
         for (int i = 0; i < length; i++)
         {
-            if (i + begin >= tapeArray.length)
+            if (i + begin >= m_tapeArray.length)
             {
                 returnCA[i] = Tape.BLANK_SYMBOL;
             }
             else
             {
-                returnCA[i] = tapeArray[i + begin];
+                returnCA[i] = m_tapeArray[i + begin];
             }
         }
         return new String(returnCA);
     }
     
     /**
-     * Returns the location of the head relative to the start of the tape.
+     * Get the location of the read/write head, relative to the start of the tape.
+     * @return The location of the read/write head.
      */
     public int headLocation()
     {
-        return headLoc;
+        return m_headLoc;
     }
     
     /**
@@ -191,13 +202,13 @@ public class CA_Tape extends Tape implements Serializable
      */
     public void clearTape()
     {
-        tapeArray = new char[100];
-        for (int i = 0; i < tapeArray.length; i++)
+        m_tapeArray = new char[100];
+        for (int i = 0; i < m_tapeArray.length; i++)
         {
             // Blank
-            tapeArray[i] = Tape.BLANK_SYMBOL;
+            m_tapeArray[i] = Tape.BLANK_SYMBOL;
         }
-        headLoc = 0;
+        m_headLoc = 0;
         if (m_mainWindow != null)
         {
             m_mainWindow.updateAllSimulators();
@@ -207,6 +218,7 @@ public class CA_Tape extends Tape implements Serializable
     /**
      * Set this tape to have exactly the characters of the other tape.
      * The read/write head is reset to the beginning of the tape.
+     * @param other The tape to copy.
      */
     public void copyOther(Tape other)
     {
@@ -216,25 +228,31 @@ public class CA_Tape extends Tape implements Serializable
             m_mainWindow.updateAllSimulators();
         }
     }
-    
+   
+    /**
+     * Set this tape to have exactly the characters in the given string.
+     * The read/write head is reset to the beginning of the tape.
+     * @param s The string to copy.
+     */
     private void setToString(String s)
     {
-        tapeArray = new char[100 + s.length()];
+        m_tapeArray = new char[100 + s.length()];
         for (int i = 0; i < s.length(); i++)
         {
-            tapeArray[i] = s.charAt(i);
+            m_tapeArray[i] = s.charAt(i);
         }
-        for (int i = s.length(); i < tapeArray.length; i++)
+        for (int i = s.length(); i < m_tapeArray.length; i++)
         {
             // Blank
-            tapeArray[i] = Tape.BLANK_SYMBOL;
+            m_tapeArray[i] = Tape.BLANK_SYMBOL;
         }
-        headLoc = 0;
+        m_headLoc = 0;
     }
     
     /**
-     * Set the window that this tape is associated with. If not null, all of the machine panels
-     * in window will be kept up to date every time the tape is modified.
+     * Set the window that this tape is associated with. 
+     * @param window The window to track. If not null, all of the machine panels in window will be
+     *               kept up to date every time the tape is modified.
      */
     public void setWindow(MainWindow window)
     {
@@ -244,15 +262,32 @@ public class CA_Tape extends Tape implements Serializable
             m_mainWindow.updateAllSimulators();
         }
     }
-    
+   
+    /**
+     * Read a CA_Tape into this object from the given stream.
+     * @param in The stream to read.
+     * @throws IOException If an IO error occurs.
+     * @throws ClassNotFoundException If the deserialized object is not recognized.
+     */
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException
     {
         in.defaultReadObject();
-        headLoc = 0;
+        m_headLoc = 0;
         m_mainWindow = null;
     }
     
-    private transient int headLoc = 0;
-    private char[] tapeArray;
+    /**
+     * The position of the read/write head as an offset to the head of the tape.
+     */
+    private transient int m_headLoc = 0;
+    
+    /**
+     * Memory used to store the tape data.
+     */
+    private char[] m_tapeArray;
+    
+    /**
+     * The main window to track.
+     */
     private transient MainWindow m_mainWindow = null;
 }

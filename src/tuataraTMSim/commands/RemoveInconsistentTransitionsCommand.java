@@ -31,13 +31,15 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with a set of transitions which are deemed inconsistent with the alphabet.
  * @author Jimmy
  */
 public class RemoveInconsistentTransitionsCommand implements TMCommand
 {
     /**
-     * Creates a new instance of RemoveInconsistentTransitionsCommand
+     * Creates a new instance of RemoveInconsistentTransitionsCommand.
+     * @param panel The current graphics panel.
+     * @param purge The set of transitions to remove.
      */
     public RemoveInconsistentTransitionsCommand(TMGraphicsPanel panel, Collection<TM_Transition> purge)
     {
@@ -45,6 +47,9 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         m_purge = purge;
     }
     
+    /**
+     * Remove the inconsistent transitions from the machine.
+     */
     public void doCommand()
     {
         for (TM_Transition t : m_purge)
@@ -53,15 +58,22 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         }
     }
     
+    /**
+     * Restore the inconsistent transitions to the machine.
+     */
     public void undoCommand()
     {
         for (TM_Transition t : m_purge)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * Helper function which deletes a specified transition from the machine.
+     * @param t The transition to delete.
+     */
     private void deleteTransition(TM_Transition t)
     {
         m_panel.getSimulator().getMachine().deleteTransition(t);
@@ -69,14 +81,25 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Remove Inconsistent Transitions";
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
-    private Collection<TM_Transition>  m_purge;   
+    
+    /**
+     * The set of transitions to remove.
+     */
+    private Collection<TM_Transition> m_purge;   
 }

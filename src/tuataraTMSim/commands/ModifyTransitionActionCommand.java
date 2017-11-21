@@ -30,13 +30,16 @@ import tuataraTMSim.TM.TM_Action;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with changing the action of a transition.
  * @author Jimmy
  */
 public class ModifyTransitionActionCommand implements TMCommand
 {
     /**
-     * Creates a new instance of ModifyTransitionActionCommand
+     * Creates a new instance of ModifyTransitionActionCommand.
+     * @param panel The current graphics panel.
+     * @param transition The transition to modify
+     * @param action The new action for the transition.
      */
     public ModifyTransitionActionCommand(TMGraphicsPanel panel, TM_Transition transition,
                                          TM_Action action)
@@ -47,23 +50,48 @@ public class ModifyTransitionActionCommand implements TMCommand
         m_oldAction = m_transition.getAction();
     }
     
+    /**
+     * Set the action of the transitoin to be the new action.
+     */
     public void doCommand()
     {
         m_transition.setAction(m_action);
     }
     
+    /**
+     * Set the action of the transition to be its previous value.
+     */
     public void undoCommand()
     {
         m_transition.setAction(m_oldAction);
     }
-    
+   
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Modify Transition Action";
     }
-        
+
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+    
+    /**
+     * The transition to modify.
+     */
     private TM_Transition m_transition;
+    
+    /**
+     * The new action for m_transition.
+     */
     private TM_Action m_action;
+    
+    /**
+     * The old action for m_transition.
+     */
     private TM_Action m_oldAction;   
 }

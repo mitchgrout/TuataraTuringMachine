@@ -30,13 +30,16 @@ import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
 
 /**
- *
+ * An extension of a timer task which simulates a machine on a timer. 
  * @author Jimmy
  */
 public class TMExecutionTimerTask extends TimerTask
 {
     /**
-     * Creates a new instance of TMExecutionTimerTask 
+     * Creates a new instance of TMExecutionTimerTask.
+     * @param panel The current graphics panel.
+     * @param tapeDisp The current tape panel.
+     * @param window The main window.
      */
     public TMExecutionTimerTask(TMGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
     {
@@ -44,7 +47,11 @@ public class TMExecutionTimerTask extends TimerTask
         m_tapeDisp = tapeDisp;
         m_mainWindow = window;
     }
-    
+   
+    /**
+     * Run a step of the machine. If the machine throws any exception, it is caught, a messagebox
+     * containing the relevant message is shown, and execution is halted.
+     */
     public void run()
     {
         try
@@ -65,13 +72,13 @@ public class TMExecutionTimerTask extends TimerTask
             m_mainWindow.stopExecution();
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TRANS_UNDEF_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
-        catch (NoStartStateException e)
+        catch (NondeterministicException e)
         {
             cancel();
             
             m_mainWindow.stopExecution();
             
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.START_STATE_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.NONDET_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
         catch (ComputationCompletedException e)
         {
@@ -83,12 +90,20 @@ public class TMExecutionTimerTask extends TimerTask
             m_panel.repaint();
         }
     }
-    
+   
+    /**
+     * Get the current graphics panel.
+     * @return The current graphics panel.
+     */
     public TMGraphicsPanel getPanel()
     {
         return m_panel;
     }
     
+    /**
+     * Cancels the timer, stopping execution.
+     * @return true if the timer is stopped successfully, false otherwise.
+     */
     public boolean cancel()
     {
         boolean returner = super.cancel();
@@ -96,7 +111,18 @@ public class TMExecutionTimerTask extends TimerTask
         return returner;
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+    
+    /**
+     * The current tape panel.
+     */
     private TMTapeDisplayPanel m_tapeDisp;
+
+    /**
+     * The main window.
+     */
     private MainWindow m_mainWindow;
 }

@@ -36,16 +36,17 @@ import javax.swing.JViewport;
 
 /** 
  * An internal frame containing a panel for displaying a machine.
- *
  * @author Jimmy
  */
 public class TMInternalFrame extends JInternalFrame
 { 
     /** 
-     * Creates a new instance of TMInternalFrame
+     * Creates a new instance of TMInternalFrame.
+     * @param gfxPanel The current graphics panel.
      */
     public TMInternalFrame(TMGraphicsPanel gfxPanel)
     {
+        // TODO: Justify this super call's arguments.
         super("hello",true,true,true, true);
         m_gfxPanel = gfxPanel;
         
@@ -82,13 +83,17 @@ public class TMInternalFrame extends JInternalFrame
     }
     
     /** 
-     * Gets the graphical turing machine panel belonging to this internal frame.
+     * Gets the current graphics panel.
+     * @return The current graphics panel
      */
     public TMGraphicsPanel getGfxPanel()
     {
         return m_gfxPanel;
     }
-    
+   
+    /**
+     * Update the title of the frame to reflect the filename of the underlying machine.
+     */
     public void updateTitle()
     {
         File file = m_gfxPanel.getFile();
@@ -111,12 +116,17 @@ public class TMInternalFrame extends JInternalFrame
     /**
      * Sets this internal frame's pointer to its scroll pane, but doesnt actually do anything in the
      * way of adding the scroll pane to the component.
+     * @param sp The scroll panel to track.
      */
     public void setScrollPane(JScrollPane sp)
     {
         m_sp = sp;
     }
-    
+   
+    /**
+     * Get the center of the frame viewport.
+     * @return The center of the frame viewport.
+     */
     public Point2D getCenterOfViewPort()
     {
         if (m_sp == null)
@@ -128,6 +138,13 @@ public class TMInternalFrame extends JInternalFrame
         return new Point2D.Double(vpRect.getCenterX(), vpRect.getCenterY());
     }
     
-    TMGraphicsPanel m_gfxPanel;
-    JScrollPane m_sp;
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_gfxPanel;
+
+    /**
+     * The scroll panel to track.
+     */
+    private JScrollPane m_sp;
 }

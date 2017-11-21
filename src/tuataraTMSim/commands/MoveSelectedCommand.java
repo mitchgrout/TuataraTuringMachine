@@ -32,13 +32,18 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with moving a set of states and transitions.
  * @author Jimmy
  */
 public class MoveSelectedCommand implements TMCommand
 {
     /**
-     * Creates a new instance of MoveSelectedCommand 
+     * Creates a new instance of MoveSelectedCommand.
+     * @param panel The current graphics panel.
+     * @param states The set of states to move.
+     * @param transitions The set of transitions to move.
+     * @param moveX The change in X position.
+     * @param moveY The change in Y position.
      */
     public MoveSelectedCommand(TMGraphicsPanel panel, Collection<TM_State> states,
                                Collection<TM_Transition> transitions, int moveX, int moveY)
@@ -52,6 +57,9 @@ public class MoveSelectedCommand implements TMCommand
             m_panel.getSimulator().getMachine().getHalfSelectedTransitions(states);
     }
 
+    /**
+     * Move all selected states, transitions, and half-selected transitions by the specified amount.
+     */
     public void doCommand()
     {
         for (TM_State s : m_states)
@@ -90,6 +98,9 @@ public class MoveSelectedCommand implements TMCommand
         }
     }
     
+    /** 
+     * Move all selected states, transitions, and half-selected transitions back by the specified amount.
+     */
     public void undoCommand()
     {
         for (TM_State s : m_states)
@@ -128,15 +139,42 @@ public class MoveSelectedCommand implements TMCommand
         }
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Move Selected Items";
     }
 
-    TMGraphicsPanel m_panel;
-    Collection<TM_State> m_states;
-    Collection<TM_Transition> m_transitions;
-    Collection<TM_Transition> m_borderTransitions;
-    int m_moveX;
-    int m_moveY;   
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_panel;
+    
+    /**
+     * The set of selected states.
+     */
+    private Collection<TM_State> m_states;
+    
+    /**
+     * The set of selected transitions.
+     */
+    private Collection<TM_Transition> m_transitions;
+    
+    /**
+     * The set of half-selected transitions.
+     */
+    private Collection<TM_Transition> m_borderTransitions;
+    
+    /**
+     * The change in X position.
+     */
+    private int m_moveX;
+    
+    /**
+     * The change in Y position.
+     */
+    private int m_moveY;   
 }

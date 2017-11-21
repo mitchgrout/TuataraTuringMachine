@@ -46,22 +46,27 @@ import tuataraTMSim.TM.Alphabet;
 import tuataraTMSim.TM.Tape;
 
 /**
- *
+ * An frame used to select the current alphabet for a machine.
  * @author Jimmy
  */
 public class AlphabetSelectorInternalFrame extends JInternalFrame
 {    
     /**
-     * Creates a new instance of AlphabetSelectorInternalFrame
+     * Creates a new instance of AlphabetSelectorInternalFrame.
+     * @param parent The main window.
      * */
     public AlphabetSelectorInternalFrame(MainWindow parent)
     {
         initComponents();
         m_parent = parent;
     }
-    
+   
+    /**
+     * Setup the frame.
+     */
     public void initComponents()
     {
+        // TODO: Make private?
         this.setLayout(new BorderLayout());
         
         m_letters.clear();
@@ -260,6 +265,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
     
     /** 
      * Must be called before each time this internal frame is set to visible.
+     * @param panel The current graphics panel.
      */
     public void setPanel(TMGraphicsPanel panel)
     {
@@ -271,6 +277,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
      * Process a key event passed to this internal frame from the main window.
      * In particular, if the key event is a KEY_TYPED event which is a letter or a digit, toggle the
      * checkbox for that letter or digit.
+     * @param e The generating event.
      */
     public void handleKeyEvent(KeyEvent e)
     {
@@ -312,7 +319,10 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         // conflicts with the ordinary usage of spacebar - to press
         // the selected button/checkbox.
     }
-    
+   
+    /**
+     * Given the underlying alphabet, set all relevant checkboxes to match the alphabet.
+     */
     private void synchronizeToAlphabet()
     {
         for (JCheckBox d : m_digits)
@@ -327,9 +337,28 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
     }
     
-    ArrayList<JCheckBox> m_letters = new ArrayList<JCheckBox>();
-    ArrayList<JCheckBox> m_digits = new ArrayList<JCheckBox>();
-    JCheckBox blankCheckBox = new JCheckBox("_ (blank symbol)");
-    TMGraphicsPanel m_panel;
-    MainWindow m_parent;
+    /**
+     * All checkboxes which represent letters.
+     */
+    private ArrayList<JCheckBox> m_letters = new ArrayList<JCheckBox>();
+
+    /**
+     * All checkboxes which represent digits.
+     */
+    private ArrayList<JCheckBox> m_digits = new ArrayList<JCheckBox>();
+
+    /**
+     * The checkbox which represents the blank character.
+     */
+    private JCheckBox blankCheckBox = new JCheckBox("_ (blank symbol)");
+
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_panel;
+
+    /**
+     * The main window.
+     */
+    private MainWindow m_parent;
 }

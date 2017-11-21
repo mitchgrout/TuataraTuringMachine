@@ -32,14 +32,15 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with deleting a state from a machine.
  * @author Jimmy
  */
 public class DeleteStateCommand implements TMCommand
 {
-    
     /**
-     * Creates a new instance of DeleteStateCommand
+     * Creates a new instance of DeleteStateCommand.
+     * @param panel The current graphics panel.
+     * @param state The state to delete.
      */
     public DeleteStateCommand(TMGraphicsPanel panel, TM_State state)
     {
@@ -49,6 +50,10 @@ public class DeleteStateCommand implements TMCommand
         m_inTransitions = m_panel.getSimulator().getMachine().getTransitionsTo(state);
     }
     
+    /**
+     * Delete the state from the machine, deleting associated transitions, and compute the next
+     * transition to be taken by the machine.
+     */
     public void doCommand()
     {
         m_panel.getSimulator().getMachine().deleteState(m_state);
@@ -61,12 +66,17 @@ public class DeleteStateCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
+    /**
+     * Add the state back to the machine, restoring deleted transitions.
+     */
     public void undoCommand()
     {
+        // TODO: Should this also cause a call to computeNextTransition?
+
         m_panel.getSimulator().getMachine().addState(m_state);
         m_panel.addLabelToDictionary(m_state.getLabel());
         for (TM_Transition t : m_outTransitions)
@@ -76,13 +86,32 @@ public class DeleteStateCommand implements TMCommand
             m_panel.getSimulator().getMachine().addTransition(t);
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Delete State";
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+    
+    /**
+     * The state to delete.
+     */
     private TM_State m_state;
+    
+    /**
+     * The outgoing transitions associated with m_state.
+     */
     private Collection<TM_Transition> m_outTransitions = new ArrayList<TM_Transition>();
+    
+    /**
+     * The incoming transitions associated with m_state.
+     */
     private Collection<TM_Transition> m_inTransitions;
 }

@@ -30,61 +30,72 @@ import tuataraTMSim.exceptions.*;
 
 /**
  * Encapsulates the whole system for a Turing machine, including the machine and its configuration.
- * In particular, this class handles the simulation of the machine.
+ * In particular, this class handles the simulation of the machine, including validation of the
+ * machine prior to execution.
  * @author Jimmy
  */
 public class TM_Simulator
 {  
     /**
-     * Creates a new instance of TM_Simulator
+     * Creates a new instance of TM_Simulator.
+     * @param machine The machine to simulate.
+     * @param tape The tape which the machine will read from.
      */
-    public TM_Simulator(TMachine turingMachine, Tape tape)
+    public TM_Simulator(TMachine machine, Tape tape)
     {
-        m_machine =  turingMachine;
+        m_machine = machine;
         m_tape = tape;
-        m_random = new Random();
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /**
      * Perform an iteration of the machine.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws UndefinedTransitionException If there is no transition for the machine to take.
+     * @throws ComputationCompletedException If execution halts successfully.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public void step() throws TapeBoundsException, UndefinedTransitionException,
-                              NoStartStateException, ComputationCompletedException
+                              ComputationCompletedException, NondeterministicException
     {
+        // TODO: Prevent expensive calls to .validate()
+        m_machine.validate();
+
         if (m_state == null)
         {
+            // Guaranteed to exist by m_machine.validate()
             m_state = m_machine.getStartState();
-            if (m_state == null)
-            {
-                throw new NoStartStateException();
-            }
         }
         else
         {
             m_state = m_machine.step(m_tape, m_state, m_currentNextTransition);
         }
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /** 
-     * End the current computation (if any), setting the machine to its initial state.
+     * End the current computation, if any, setting the machine to its initial state.
      */
     public void resetMachine()
     {
         m_state = null;
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /** 
-     * Runs until the machine halts. Returns true only if the machine terminates successfully with
-     * the head parked within the specified number of steps.
-     * @param maxSteps  The maximum number of machine iterations allowed for the computation (0 for no limit).  
-     *                  If this number is reached, the computation will be aborted and will return false.
-     * @param doConsoleOutput  Determines if we output the configurations and computation result to standard out console.
+     * Runs until the machine halts.
+     * @param maxSteps The maximum number of iterations allowed for the computation. A value of zero
+     *                 represents no limit. If this number is reached, simulation is aborted.
+     * @param doConsoleOutput Determines if configuration information should be written to stdout.
+     * @return true if the machine halts in a finite amount of steps up until maxSteps, false otherwise.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws UndefinedTransitionException If there is no transition for the machine to take.
+     * @throws ComputationCompletedException If execution halts successfully.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public boolean runUntilHalt(int maxSteps, boolean doConsoleOutput)
-        throws TapeBoundsException, UndefinedTransitionException, NoStartStateException, ComputationCompletedException 
+        throws TapeBoundsException, UndefinedTransitionException,
+               ComputationCompletedException, NondeterministicException 
     {
         int currentStep = 0;
         
@@ -133,32 +144,34 @@ public class TM_Simulator
     }
     
     /** 
-     * Returns true IFF the machine is in an accepting state.
+     * Determine if the machine is in an accepting state.
+     * @return true if the machine is in an accepting state, false otherwise.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean isHalted() throws NoStartStateException
+    public boolean isHalted() throws NondeterministicException
     {
-        if (m_state == null)
-        {
-            throw new NoStartStateException();
-        }
+        // TODO: Do we need to validate here?
+        m_machine.validate();
         return m_state.isFinalState();
     }
     
     /**
-     * Returns true IFF the machine is in an accepting state, with its read/write head parked at the
-     * beginning of the tape.
+     * Determine if the machine is in an accepting state, and the read/write head of the tape is in
+     * the first cell of the tape.
+     * @return true if the machine is in an accepting state, with the read/write head parked, false
+     *         otherwise.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean isHaltedWithHeadParked() throws NoStartStateException
+    public boolean isHaltedWithHeadParked() throws NondeterministicException
     {
-        if (m_state == null)
-        {
-            throw new NoStartStateException();
-        }
+        // TODO: Do we need to validate here?
+        m_machine.validate();
         return (isHalted() && m_tape.isParked());
     }
     
     /**
-     * Gets a string representing current configuration ('state') of the machine.
+     * Gets a string representation of the current configuration ('state') of the machine.
+     * @return A string representation of the current configuration.
      */
     public String getConfiguration()
     {
@@ -167,7 +180,8 @@ public class TM_Simulator
     
     // Getter functions:    
     /**
-     * Gets the tape.
+     * Get the tape.
+     * @return The current tape.
      */
     public Tape getTape()
     {
@@ -176,6 +190,7 @@ public class TM_Simulator
     
     /**
      * Gets the current state that the machine is in.
+     * @return The current state.
      */
     public TM_State getCurrentState()
     {
@@ -183,17 +198,19 @@ public class TM_Simulator
     }
     
     /**
-     * Sets the current state that the machine is in, and calls computePotentialTransitions(true) to
-     * set up the selected next transition.
+     * Sets the current state that the machine is in, and calls computeNextTransition() to set up
+     * the selected next transition.
+     * @param state The new current state.
      */
     public void setCurrentState(TM_State state)
     {
         m_state = state;
-        computePotentialTransitions(true);
+        computeNextTransition();
     }
     
     /**
      * Gets the Turing machine that is being simulated.
+     * @return The machine being simulated.
      */
     public TMachine getMachine()
     {
@@ -201,95 +218,76 @@ public class TM_Simulator
     }
     
     /**
-     * Computes the list of possible transitions that the machine could take in the next execution
-     * step, and randomly selects one of them as a default transition.
+     * Get the next possible transition that the machine can take in the next execution step, and
+     * set this to be m_currentNextTransition. This will either be a valid transition, or null.
+     * Assumes that m_machine.validate() has been called.
      */
-    public void computePotentialTransitions(boolean randomizeChosenTransition)
+    public void computeNextTransition()
     {
-        m_potentialTransitions = new ArrayList<TM_Transition>();
-        ArrayList<TM_Transition> otherwiseTransitions = new ArrayList<TM_Transition>();
+        // Since the machine is assumed valid, there are three possibilities:
+        // - No transition
+        // - An exact match
+        // - A default route via OTHERWISE_SYMBOL
+
+        TM_Transition nextTransition = null;
         
-        if (getCurrentState() == null)
+        // No state, no transitions
+        if(getCurrentState() == null)
         {
             m_currentNextTransition = null;
             return;
         }
-        
+
         ArrayList<TM_Transition> out = getCurrentState().getTransitions();
         char currentInputSymbol = m_tape.read();
        
         for (TM_Transition t : out)
         {
-            if (t.getSymbol() == currentInputSymbol ||
-                t.getSymbol() == TMachine.WILDCARD_INPUT_SYMBOL) //universal transitions
+            // An exact, guaranteed unique match
+            if (t.getSymbol() == currentInputSymbol)
             {
-                m_potentialTransitions.add(t);
+                m_currentNextTransition = t;
+                return;
             }
+            // A non-exact match; we will keep track of this
             else if (t.getSymbol() == TMachine.OTHERWISE_SYMBOL)
             {
-                otherwiseTransitions.add(t);
+                nextTransition = t;
             }
         }
-        if (randomizeChosenTransition ||
-            m_currentNextTransition == null ||
-            !m_potentialTransitions.contains(m_currentNextTransition))
-        {
-            if (m_potentialTransitions.size() > 0)
-            {
-                int index = m_random.nextInt(m_potentialTransitions.size());
-                m_currentNextTransition = m_potentialTransitions.get(index);
-            }
-            // Pick an 'otherwise' transition
-            else if (otherwiseTransitions.size() > 0)
-            {
-                m_potentialTransitions = otherwiseTransitions;
-                int index = m_random.nextInt(m_potentialTransitions.size());
-                m_currentNextTransition = m_potentialTransitions.get(index);
-            }
-            else
-            {
-                m_currentNextTransition = null;
-            }
-        }
-    }
-    
-    /** 
-     * Get the list of transitions that the machine could follow in the next execution step, given
-     * the current configuration of the machine/tape.  If the machine is deterministic, there can be
-     * at most one element in the array.  If no transitions are possible, an empty array is returned.
-     */
-    public ArrayList<TM_Transition> getPotentialTransitions()
-    {
-        return m_potentialTransitions;
+
+        // If we are here, there is no exact match, either a default route, or no transition.
+        // These are both represented by the current value of nextTransition
+        // null -- no transition, non-null -- default route
+        m_currentNextTransition = nextTransition;
     }
     
     /**
      * Get the currently selected transition for the machine to execute in the next execution step.
+     * @return The next transition to be taken.
      */
     public TM_Transition getCurrentNextTransition()
     {
         return m_currentNextTransition;
     }
+   
+    /**
+     * The machine being simulated.
+     */
+    private TMachine m_machine;
     
     /**
-     * Set the currently selected transition for the machine to execute in the next execution step
-     * if the given transition is a potential next transition, otherwise has no effect.
+     * The current tape.
      */
-    public void setCurrentNextTransition(TM_Transition t)
-    {
-        if (m_state != null)
-        {
-            if (getPotentialTransitions().contains(t))
-            {
-                m_currentNextTransition = t;
-            }
-        }
-    }
-    
-    private TMachine m_machine;
     private Tape m_tape;
+    
+    /**
+     * The current state the machine is in.
+     */
     private TM_State m_state;
-    private ArrayList<TM_Transition> m_potentialTransitions;
+
+    /**
+     * The next transition to be taken.
+     */
     private TM_Transition m_currentNextTransition;
-    private Random m_random;
 }

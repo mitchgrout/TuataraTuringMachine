@@ -41,47 +41,152 @@ import tuataraTMSim.exceptions.*;
 import tuataraTMSim.TM.*;
 
 /**
- * The main window of the program.  An MDI interface for building and running turing machines.
+ * The main window of the program. An MDI interface for building and running turing machines.
  * This class is the main entry point into the program.
  * @author Jimmy
  */
 public class MainWindow extends JFrame
 {
+    // TODO: Move into a resource class?
+    
+    /**
+     * Font used for rendering text.
+     */
     public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 12);
-    public static final int MACHINE_WINDOW_LAYER = 50; // The layer for internal frames containing machines.
+    
+    /**
+     * The layer used for internal frames containing machines.
+     */
+    public static final int MACHINE_WINDOW_LAYER = 50;
+   
+    /**
+     * File extension for tapes.
+     */
     public static final String TAPE_EXTENSION = ".tap";
+    /**
+     * File extension for machines.
+     */
     public static final String MACHINE_EXTENSION = ".tm";
+    
+    /**
+     * Internal timer.
+     */
     private final java.util.Timer m_timer = new java.util.Timer(true);
+    
+    /**
+     * Error string for nondeterministic errors.
+     */
+    public static final String NONDET_ERR_STR = "The machine could not be validated.";
+
+    /**
+     * Error string for undefined transition errors.
+     */
     public static final String TRANS_UNDEF_ERR_STR = "The computation did not complete successfully.";
-    public static final String TAPE_BOUNDS_ERR_STR = "The machine r/w head went past the start of the tape.";
-    public static final String START_STATE_ERR_STR = "The machine has no start state.";
+
+    /**
+     * Error string for tape bound errors.
+     */
+    public static final String TAPE_BOUNDS_ERR_STR= "The machine r/w head went past the start of the tape.";
+
+    /**
+     * Error string for unknown errors.
+     */
     public static final String OTHER_ERROR_STR = "Error!";
-    public static final String HALTED_MESSAGE_TITLE_STR = "Machine halted!";
+
+    /**
+     * String for execution halting.
+     */
+    public static final String HALTED_MESSAGE_TITLE_STR  = "Machine halted!";
+
+    /**
+     * String for computation completion.
+     */
     public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
-    public static final int TOOLBAR_HGAP = 5; // Padding between components in the toolbar
+    
+    /**
+     * Horizontal padding between toolbar components.
+     */
+    public static final int TOOLBAR_HGAP = 5;
+
+    /**
+     * Vertical padding between toolbar components.
+     */
     public static final int TOOLBAR_VGAP = 5;
 
+    /**
+     * Delay between steps for slow execution speed.
+     */
     public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
+
+    /**
+     * Delay between steps for medium execution speed.
+     */
     public static final int MEDIUM_EXECUTE_SPEED_DELAY = 800;
+
+    /**
+     * Delay between steps for fast execution speed.
+     */
     public static final int FAST_EXECUTE_SPEED_DELAY = 400;
+
+    /**
+     * Delay between steps for superfast execution speed.
+     */
     public static final int SUPERFAST_EXECUTE_SPEED_DELAY = 200;
+
+    /**
+     * Delay between steps for ultrafast execution speed.
+     */
     public static final int ULTRAFAST_EXECUTE_SPEED_DELAY = 10;
     
-    public static final int MACHINE_CANVAS_SIZE_X = 2000; // Size of the scrollable machine 
-    public static final int MACHINE_CANVAS_SIZE_Y = 2000; // Size of the window canvas in pixels
-    
+    /**
+     * Width of the machine canvas.
+     */
+    public static final int MACHINE_CANVAS_SIZE_X = 2000;
+
+    /**
+     * Height of the machine canvas.
+     */
+    public static final int MACHINE_CANVAS_SIZE_Y = 2000;
+   
+    /**
+     * Horizontal translation of states to avoid stacking.
+     */
     public static final int TRANSLATE_TO_AVOID_STACKING_X = TM_State.STATE_RENDERING_WIDTH * 2;
+
+    /**
+     * Vertical translation of states to avoid stacking.
+     */
     public static final int TRANSLATE_TO_AVOID_STACKING_Y = TM_State.STATE_RENDERING_WIDTH * 2;
     
+    /**
+     * Maximum horizontal ratio for new window location.
+     */
     public static final double maxHorizontalRatioForNewWindowLoc = 0.3;
+
+    /**
+     * Maximum vertical ratio for new window location.
+     */
     public static final double maxVerticalRatioForNewWindowLoc = 0.3;
+
+    /**
+     * Minimum distance between two new windows.
+     */
     public static int minDistanceForNewWindowLoc = 50;
+
+    /**
+     * Random step between distances between new windows.
+     * Considered for removal.
+     */
     public static int windowLocRandomStepSize = 10;
     
+    /**
+     * Random number generator used for state and transition placement.
+     * Considered for removal.
+     */
     private Random myRandom = new Random();
     
     /**
-     * Creates a new instance of MainWindow
+     * Creates a new instance of MainWindow.
      */
     public MainWindow()
     {
@@ -153,9 +258,9 @@ public class MainWindow extends JFrame
         });
     }
     
-    
     /**
-     * @param args the command line arguments
+     * Program entry point.
+     * @param args Command line arguments. Currently, all are ignored.
      */
     public static void main(String[] args)
     {
@@ -171,6 +276,7 @@ public class MainWindow extends JFrame
     /** 
      * Selects the user interface interaction mode and notifies all internal windows accordingly.
      * This determines the results of user interactions such as clicking on the state diagrams.
+     * @param mode The new GUI mode.
      */
     public void setUIMode(TM_GUI_Mode mode)
     {
@@ -210,10 +316,11 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Initialization. Builds the main window and its components.
+     * Builds the main window and its components.
      */
     private void initComponents()
     {
+        // TODO: Used only by the constructor; potentially move into there.
         this.setSize(new Dimension(640, 480));
         this.setTitle("Tuatara Turing Machine Simulator");
         
@@ -343,8 +450,8 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Build action objects to be assocated with menu items and toolbars.
-     * @pre loadImages() has been called already.
+     * Build action objects to be assocated with menu items and toolbars. Requires loadImages() to
+     * have been called already.
      */
     private void createActions()
     {
@@ -363,9 +470,6 @@ public class MainWindow extends JFrame
         m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting States",
                 TM_GUI_Mode.CHOOSEACCEPTING, m_chooseAcceptingIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
-        m_chooseNextTransitionAction = new GUI_ModeSelectionAction("Choose Next Transition",
-                TM_GUI_Mode.CHOOSENEXTTRANSITION, m_chooseNextTransitionIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
         m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
                 TM_GUI_Mode.CHOOSECURRENTSTATE, m_chooseCurrentStateIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F9,0));
@@ -412,10 +516,11 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Construct the menus and return the master JMenuBar object.
-     * @pre createActions() has already been called.
+     * Construct the menus and return the master JMenuBar object. Requires createActions() to have
+     * been called already.
+     * @return A menu bar containing all menus.
      */
-    JMenuBar createMenus()
+    private JMenuBar createMenus()
     {
         JMenuBar menuBar = new JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -452,7 +557,6 @@ public class MainWindow extends JFrame
         m_eraserMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseStartMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseAcceptingMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_chooseNextTransitionMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_chooseCurrentStateMenuItem = new javax.swing.JRadioButtonMenuItem();
         m_slowExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
         m_mediumExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
@@ -558,11 +662,6 @@ public class MainWindow extends JFrame
         m_modeMenu.add(m_chooseAcceptingMenuItem);
         modeMenuItems.add(m_chooseAcceptingMenuItem);
         
-        m_chooseNextTransitionMenuItem.setAction(m_chooseNextTransitionAction);
-        m_chooseNextTransitionAction.setMenuItem(m_chooseNextTransitionMenuItem);
-        m_modeMenu.add(m_chooseNextTransitionMenuItem);
-        modeMenuItems.add(m_chooseNextTransitionMenuItem);
-        
         m_chooseCurrentStateMenuItem.setAction(m_chooseCurrentStateAction);
         m_chooseCurrentStateAction.setMenuItem(m_chooseCurrentStateMenuItem);
         m_modeMenu.add(m_chooseCurrentStateMenuItem);
@@ -660,10 +759,11 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Set up a toolbar for quick access to common actions.
-     * @pre createActions() has been called previously.
+     * Set up a toolbar for quick access to common actions. Requires createActions() to have been
+     * called already.
+     * @return An array of created toolbars.
      */
-    JToolBar[] createToolbar()
+    private JToolBar[] createToolbar()
     {
         toolbarButtons = new ArrayList<GUIModeButton>();
         
@@ -691,9 +791,6 @@ public class MainWindow extends JFrame
         
         GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, TM_GUI_Mode.CHOOSEACCEPTING);
         toolbarButtons.add(acceptingStatesToolBarButton);
-        
-        GUIModeButton chooseTransitionToolBarButton = new GUIModeButton(m_chooseNextTransitionAction, TM_GUI_Mode.CHOOSENEXTTRANSITION);
-        toolbarButtons.add(chooseTransitionToolBarButton);
         
         GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, TM_GUI_Mode.CHOOSECURRENTSTATE);
         toolbarButtons.add(chooseCurrentStateToolBarButton);
@@ -827,7 +924,6 @@ public class MainWindow extends JFrame
         returner[1].add(eraserToolBarButton);
         returner[1].add(startStatesToolBarButton);
         returner[1].add(acceptingStatesToolBarButton);
-        returner[1].add(chooseTransitionToolBarButton);
         returner[1].add(chooseCurrentStateToolBarButton);
         
         returner[2].setName("Machine");
@@ -841,7 +937,10 @@ public class MainWindow extends JFrame
         return returner;
     }
     
-    void loadImages()
+    /**
+     * Load all images stored in the images/ directory.
+     */
+    private void loadImages()
     {
         java.net.URL imageURL = MainWindow.class.getResource("images/state.gif");
         if (imageURL != null) 
@@ -858,8 +957,6 @@ public class MainWindow extends JFrame
         m_chooseStartIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/finalState.gif");
         m_chooseAcceptingIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/selectTransition.gif");
-        m_chooseNextTransitionIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/currentState.gif");
         m_chooseCurrentStateIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/step.gif");
@@ -917,8 +1014,11 @@ public class MainWindow extends JFrame
     
     /**
      * Creates a new window displaying a machine.
+     * @param myTM The machine to display.
+     * @param file The file associated with the machine.
+     * @return A frame used to render the machine.
      */
-    TMInternalFrame newMachineWindow(TMachine myTM, File file)
+    private TMInternalFrame newMachineWindow(TMachine myTM, File file)
     {
         final TMGraphicsPanel gfxPanel = new TMGraphicsPanel(myTM, m_tape, file, this);
         gfxPanel.setUIMode(m_currentMode);
@@ -960,7 +1060,11 @@ public class MainWindow extends JFrame
         
         return returner;
     }
-    
+   
+    /**
+     * Compute the next location to place a new window.
+     * @return The next location to place a new window.
+     */
     Point2D.Float nextWindowLocation()
     {
         int x = lastNewWindowLocX + windowLocStepSize;
@@ -990,11 +1094,10 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Ask the user to confirm whether they wish to save a modified machine.  If they agree,
-     * correctly handle the saving.  Afterwards, close the window associated with the machine.
-     * @returns    true iff the user wants to continue exiting the program, ie they
-     *             either saved the machine or chose not to save it, but did not
-     *             cancel.
+     * Ask the user to confirm whether they wish to save a modified machine. If they agree,
+     * correctly handle the saving. Afterwards, close the window associated with the machine.
+     * @param iFrame The frame being closed.
+     * @return false if the user cancelled, true otherwise.
      */
     private boolean userConfirmSaveModifiedThenClose(TMInternalFrame iFrame)
     {
@@ -1099,6 +1202,7 @@ public class MainWindow extends JFrame
      * Set the enabled/disabled status of Actions (ie toolbars and menu items) that
      * need a machine to apply to, however editing operations will only be enabled if
      * the isEditingEnabled() currently returns true.
+     * @param isEnabled true if controls should be enabled, false otherwise.
      */
     private void setEnabledActionsThatRequireAMachine(boolean isEnabled)
     {
@@ -1123,7 +1227,6 @@ public class MainWindow extends JFrame
             m_selectionAction.setEnabled(isEnabled);
             m_chooseStartAction.setEnabled(isEnabled);
             m_chooseAcceptingAction.setEnabled(isEnabled);
-            m_chooseNextTransitionAction.setEnabled(isEnabled);
             m_chooseCurrentStateAction.setEnabled(isEnabled);
             
             m_slowExecuteSpeedAction.setEnabled(isEnabled);
@@ -1134,6 +1237,10 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Set whether or not all controls are to be enabled or not.
+     * @param isEnabled true if all controls are to be enabled, false otherwise.
+     */
     private void setEditingActionsEnabledState(boolean isEnabled)
     {
         m_stepAction.setEnabled(isEnabled);
@@ -1152,7 +1259,6 @@ public class MainWindow extends JFrame
         m_selectionAction.setEnabled(isEnabled);
         m_chooseStartAction.setEnabled(isEnabled);
         m_chooseAcceptingAction.setEnabled(isEnabled);
-        m_chooseNextTransitionAction.setEnabled(isEnabled);
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
         m_newMachineAction.setEnabled(isEnabled);
@@ -1176,12 +1282,22 @@ public class MainWindow extends JFrame
     }
  
     //Event handlers:
+    /**
+     * Handle the About-Menu item being clicked.
+     * @param evt The generating event.
+     */
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt)
     {
-        JOptionPane.showMessageDialog(this,"Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007," +
-                " with funding from the Department of Mathematics at the University of Waikato, New Zealand.");
+        JOptionPane.showMessageDialog(this,
+                "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007, " + 
+                "and extended by Mitchell Grout in 2017-2018, with funding from the " +
+                "Department of Mathematics at the University of Waikato, New Zealand.");
     }
-    
+   
+    /**
+     * Handle the Help-Menu item being clicked.
+     * @param evt The generating event.
+     */
     private void helpContentsMenuItemActionPerformed(java.awt.event.ActionEvent evt)
     {
         if (m_helpDisp == null)
@@ -1206,7 +1322,11 @@ public class MainWindow extends JFrame
     class GUI_ModeSelectionAction extends AbstractAction
     {
         /**
-         * Creates a new instance of GUI_ModeSelectionAction
+         * Creates a new instance of GUI_ModeSelectionAction.
+         * @param text Description of the action.
+         * @param mode Mode the action puts the GUI into.
+         * @param icon Icon for the action.
+         * @param keyShortcut Shortcut associated with the action.
          */
         public GUI_ModeSelectionAction(String text, TM_GUI_Mode mode, ImageIcon icon, KeyStroke keyShortcut)
         {
@@ -1217,6 +1337,9 @@ public class MainWindow extends JFrame
             putValue(ACCELERATOR_KEY, keyShortcut);
         }
 
+        /**
+         * Change the UI mode, and select the relevant menu item.
+         */
         public void actionPerformed(ActionEvent e)
         {
             setUIMode(m_mode);
@@ -1226,12 +1349,23 @@ public class MainWindow extends JFrame
             }
         }
         
+        /**
+         * Set the associated menu item.
+         * @param menuItem The menu item associated with this action.
+         */
         public void setMenuItem(JRadioButtonMenuItem menuItem)
         {
             m_menuItem = menuItem;
         }
 
+        /**
+         * The GUI mode associated with this action.
+         */
         private TM_GUI_Mode m_mode;
+
+        /**
+         * The menu item associated with this action.
+         */
         private JRadioButtonMenuItem m_menuItem = null;
     }
     
@@ -1242,8 +1376,11 @@ public class MainWindow extends JFrame
     class ExecutionSpeedSelectionAction extends AbstractAction
     {
         /**
-         * Creates a new instance of GUI_ModeSelectionAction
-         */
+         * Creates a new instance of ExecutionSpeedSelectionAction.
+         * @param text Description of the action.
+         * @param delay The new execution delay for the machine.
+         * @param keyShortcut Shortcut associated with the action.
+        */
         public ExecutionSpeedSelectionAction(String text, int delay, KeyStroke keyShortcut)
         {
             super(text);
@@ -1252,11 +1389,18 @@ public class MainWindow extends JFrame
             m_delay = delay;
         }
 
+        /**
+         * Change the execution delay of the machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
            m_executionDelayTime = m_delay;
         }
         
+        /**
+         * The delay for execution of the machine.
+         */
         private int m_delay;
     }
     
@@ -1265,6 +1409,12 @@ public class MainWindow extends JFrame
      */
     class StepAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of StepAction.
+         * @param text Description of the action. 
+         * @param parentComponent The owner component.
+         * @param icon Icon for the action.
+         */
         public StepAction(String text, Component parentComponent, ImageIcon icon)
         {
             super(text);
@@ -1274,6 +1424,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Step through one iteration of the machine simulation.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             try
@@ -1281,9 +1435,15 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                 if (gfxPanel != null)
                 {
+                    // Ensure validity first
+                    gfxPanel.getSimulator().getMachine().validate();
                     gfxPanel.getSimulator().step();
                     tapeDisp.repaint();
                 }
+            }
+            catch (NondeterministicException e2)
+            {
+                JOptionPane.showMessageDialog(m_parentComponent, MainWindow.NONDET_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE); 
             }
             catch (UndefinedTransitionException e2)
             {
@@ -1292,10 +1452,6 @@ public class MainWindow extends JFrame
             catch (TapeBoundsException e2)
             {
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
-            }
-            catch (NoStartStateException e2)
-            {
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.START_STATE_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
             }
             catch (ComputationCompletedException e2)
             {
@@ -1315,14 +1471,22 @@ public class MainWindow extends JFrame
             repaint();
         }
 
+        /**
+         * The owning component.
+         */
         private Component m_parentComponent;
     }
     
     /**
-     * Action for configuring the current alphabet
+     * Action for configuring the current alphabet.
      */
     class ConfigureAlphabetAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of GUI_ModeSelectionAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public ConfigureAlphabetAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1348,6 +1512,11 @@ public class MainWindow extends JFrame
      */
     class NewMachineAction extends AbstractAction
     {
+       /**
+         * Creates a new instance of NewMachineAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public NewMachineAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1355,7 +1524,11 @@ public class MainWindow extends JFrame
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Create a new machine, in a new frame.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             if (desktopPane != null)
@@ -1373,6 +1546,11 @@ public class MainWindow extends JFrame
      */
     class OpenMachineAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of OpenMachineAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public OpenMachineAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1380,7 +1558,11 @@ public class MainWindow extends JFrame
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Open a dialog to select a machine file, load the file, and display in new frame.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             fcMachine.setDialogTitle("Open machine");
@@ -1431,17 +1613,26 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Action for saving a machine diagram.
+     * Action for saving a machine diagram with a new name.
      */
     class SaveMachineAsAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of SaveMachineAsAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public SaveMachineAsAction(String text, ImageIcon icon)
         {
             super(text);
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Open a dialog to select a machine file, and save the machine to the given filename.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -1454,6 +1645,11 @@ public class MainWindow extends JFrame
      */
     class SaveMachineAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of SaveMachineAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public SaveMachineAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1461,7 +1657,12 @@ public class MainWindow extends JFrame
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Save the machine to its associated file. If it does not have an associated file, display
+         * a dialog to choose a file.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             try
@@ -1494,7 +1695,7 @@ public class MainWindow extends JFrame
             } 
             catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
+                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred. Your file has not been saved!");
             }
         }
     }
@@ -1505,6 +1706,11 @@ public class MainWindow extends JFrame
      */
     class NewTapeAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of NewTapeAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public NewTapeAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1513,6 +1719,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Display a confirmation dialog, then clear the tape.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
@@ -1528,10 +1738,15 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Action for opening/loading a machine diagram.
+     * Action for opening a tape.
      */
     class OpenTapeAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of OpenTapeAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public OpenTapeAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1540,6 +1755,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Display a dialog, and load the selected tape file.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             fcTape.setDialogTitle("Open tape");
@@ -1583,10 +1802,15 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Action for saving a machine diagram.
+     * Action for saving a tape. 
      */
     class SaveTapeAsAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of SaveTapeAsAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public SaveTapeAsAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1594,6 +1818,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Display a dialog, and save the tape to the specified file.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             fcTape.setDialogTitle("Save tape");
@@ -1631,10 +1859,15 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Action for saving a machine diagram.
+     * Action for saving a tape.
      */
     class SaveTapeAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of SaveTapeAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public SaveTapeAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1643,6 +1876,11 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Save the tape to its associated file. If it does not have an associated file, display a
+         * dialog.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             try
@@ -1668,9 +1906,17 @@ public class MainWindow extends JFrame
             }
         }
     }
-    
+        
+    /**
+     * Action for cutting states and transitions from a machine.
+     */
     class CutSelectedAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of CutSelectedAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public CutSelectedAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1679,6 +1925,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Cut the selected states and transitions from the machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             m_copyAction.actionPerformed(e);
@@ -1694,8 +1944,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for copying states and transitions from a machine.
+     */
     class CopySelectedAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of CopySelectedAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public CopySelectedAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1704,6 +1962,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Copy the selected states and transitions from a machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -1714,8 +1976,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for undoing a command.
+     */
     class UndoAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of UndoAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public UndoAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1724,6 +1994,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Undo the last action on the undo stack.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -1736,8 +2010,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for redoing a command.
+     */
     class RedoAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of RedoAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public RedoAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1746,6 +2028,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Redo the last command on the redo stack
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -1758,8 +2044,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for pasting states and transitions into a machine.
+     */
     class PasteAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of PasteAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public PasteAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1768,6 +2062,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Paste previously cut/copied states and transitions into the machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             try
@@ -1808,8 +2106,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for deleting selected states and transitions from a machine.
+     */
     class DeleteSelectedAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of DeleteSelectedAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public DeleteSelectedAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1817,7 +2123,11 @@ public class MainWindow extends JFrame
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Delete the selected states and transitions from the machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {   
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -1828,8 +2138,16 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Action for executing a machine.
+     */
     class FastExecuteAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of FastExecuteAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public FastExecuteAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1838,25 +2156,36 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Begin simulating the machine at the specified delay.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         { 
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                TM_Simulator sim = panel.getSimulator();
                 if (m_timerTask != null)
                 {
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new TMExecutionTimerTask(panel,  tapeDisp,  MainWindow.this);
-                m_timer.scheduleAtFixedRate(m_timerTask,0, m_executionDelayTime);
+                m_timerTask = new TMExecutionTimerTask(panel, tapeDisp, MainWindow.this);
+                m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }
     }
     
+    /**
+     * Action for pausing execution of a machine.
+     */
     class PauseExecutionAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of PauseExecutionAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public PauseExecutionAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1864,7 +2193,11 @@ public class MainWindow extends JFrame
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
-        
+       
+        /**
+         * Pause the execution of the machine.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             stopExecution();
@@ -1877,6 +2210,11 @@ public class MainWindow extends JFrame
      */
     class StopMachineAction extends AbstractAction
     {
+        /**
+         * Creates a new instance of StopMachineAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
         public StopMachineAction(String text, ImageIcon icon)
         {
             super(text);
@@ -1885,6 +2223,10 @@ public class MainWindow extends JFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
         
+        /**
+         * Stop the execution of the current machine, resetting all associated state.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
             TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
@@ -1904,9 +2246,9 @@ public class MainWindow extends JFrame
     
     /** 
      * Gets the graphics panel for the currently selected machine diagram window.
-     * If there isn't one, returns null.
+     * @return A reference to the currently selected graphics panel, or null if there is no such panel.
      */
-    TMGraphicsPanel getSelectedGraphicsPanel()
+    private TMGraphicsPanel getSelectedGraphicsPanel()
     {
         if (desktopPane == null)
         {
@@ -1928,7 +2270,10 @@ public class MainWindow extends JFrame
             return null;
         }
     }
-    
+   
+    /**
+     * Compute the next transition for every simulator currently loaded.
+     */
     public void updateAllSimulators()
     {
         if (desktopPane == null)
@@ -1944,7 +2289,7 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel panel = tmif.getGfxPanel();
                 if (panel != null)
                 {
-                    panel.getSimulator().computePotentialTransitions(false);
+                    panel.getSimulator().computeNextTransition();
                     panel.repaint();
                 }
             }
@@ -1956,6 +2301,10 @@ public class MainWindow extends JFrame
         }
     }
     
+    /**
+     * Stop execution of the current machine.
+     * @return true if the currently executing machine is stopped, false otherwise.
+     */
     public boolean stopExecution()
     {
         if (m_timerTask != null)
@@ -1964,9 +2313,17 @@ public class MainWindow extends JFrame
         }
         return false;
     }
-    
+   
+    /**
+     * A tool bar component.
+     */
     private class ToolBarPanel extends JPanel
     {
+        /**
+         * Creates a new instance of ToolBarPanel.
+         * @param parent The main window.
+         * @param manager The layout manager to use. 
+         */
         ToolBarPanel(MainWindow parent, LayoutManager manager)
         {
             super(manager);
@@ -1981,7 +2338,11 @@ public class MainWindow extends JFrame
             });
         }
 
-        public Dimension getPreferredSize ()
+        /**
+         * Get the preferred size for this component.
+         * @return The preferred size for this component.
+         */
+        public Dimension getPreferredSize()
         {
             Component[] components = this.getComponents();
             // Sort from top left to bottom right order.
@@ -2040,9 +2401,17 @@ public class MainWindow extends JFrame
             return new Dimension(m_parent.getWidth(), numRows * (maxHeight + TOOLBAR_VGAP) + TOOLBAR_VGAP);
         }
 
-        MainWindow m_parent;
+        /**
+         * The main window.
+         */
+        private MainWindow m_parent;
     }
-    
+   
+    /**
+     * Save the current machine, by displaying a file dialog.
+     * @param panel The current graphics panel.
+     * @return true if the machine is saved successfully, false otherwise.
+     */
     public boolean saveMachineAs(TMGraphicsPanel panel)
     {
         while (true)
@@ -2077,6 +2446,7 @@ public class MainWindow extends JFrame
                             }
                             boolean result = TMachine.saveTMachine(machine, outFile.toString());
 
+                            // TODO: Assignment bug?
                             if (result = false)
                             {
                                 throw new IOException(outFile.toString());
@@ -2105,8 +2475,8 @@ public class MainWindow extends JFrame
     }
     
     /** 
-     * Returns true IFF editing operations such as cut copy paste delete or changing of the machines
-     * or tapes is currently allowed.
+     * Determine if editing the machine or tape is enabled
+     * @return true if editing is enabled, false otherwise.
      */
     public boolean isEditingEnabled()
     {
@@ -2114,8 +2484,8 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Enable/disable editing operations such as cut copy paste delete or changing of the machines
-     * or tapes.
+     * Set whether editing the machine or tape is enabled.
+     * @param isEnabled true if editing is enabled, false otherwise.
      */
     public void setEditingEnabled(boolean isEnabled)
     {
@@ -2153,25 +2523,39 @@ public class MainWindow extends JFrame
      */
     class ModalAdapter extends InternalFrameAdapter
     {
-        Component glass;
-
+        /**
+         * Create an instance of ModalAdapter.
+         * @param glass The underlying component.
+         */
         public ModalAdapter(Component glass)
         {
             this.glass = glass;
 
             // Associate dummy mouse listeners
             // Otherwise mouse events pass through
-            MouseInputAdapter adapter = new MouseInputAdapter(){};
+            MouseInputAdapter adapter = new MouseInputAdapter() { };
             glass.addMouseListener(adapter);
             glass.addMouseMotionListener(adapter);
         }
 
+        /**
+         * Set the underlying component to be invisible when this closes.
+         * @param e The generating event.
+         */
         public void internalFrameClosed(InternalFrameEvent e)
         {
             glass.setVisible(false);
         }
+ 
+        /**
+         * Underlying component
+         */
+        private Component glass;
     }
     
+    /**
+     * Handle when a user requests to exit the program.
+     */
     public void userRequestToExit()
     {
         if (desktopPane == null)
@@ -2212,7 +2596,17 @@ public class MainWindow extends JFrame
         }
         System.exit(0);
     }
-  
+ 
+    /**
+     * Compute the centroid of the given set of states, and move the centroid of the machine to the
+     * center of the window.
+     * @param states The set of states.
+     * @param transitions The set of transitions.
+     * @param centreOfWindow The centre of the frame.
+     * @param lastPastedLoc The last pasted location.
+     * @param numTimesPastedToLastLoc The number of times an item has been pasted to the last pasted location.
+     * @param panel The current graphics panel.
+     */
     private void translateCentroidToMiddleOfWindow(Collection<TM_State> states,
             Collection<TM_Transition> transitions, Point2D centreOfWindow,
             Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
@@ -2303,7 +2697,9 @@ public class MainWindow extends JFrame
     }
   
     /**
-     * Computes the centroid (average 'mass') of the positions of a collection of states.
+     * Computes the centroid (centre of mass) of the positions of a collection of states.
+     * @param states The set of states.
+     * @return The centroid of the states.
      */
     private static Point2D computeCentroid(Collection<TM_State> states)
     {
@@ -2318,6 +2714,9 @@ public class MainWindow extends JFrame
         return new Point2D.Float(totalX / states.size(), totalY / states.size());
     }
   
+    /**
+     * Update the undo/redo buttons with the new undo/redo command names.
+     */
     public void updateUndoActions()
     {
         TMGraphicsPanel panel = getSelectedGraphicsPanel();
@@ -2360,127 +2759,664 @@ public class MainWindow extends JFrame
     }
     
     // GUI components
+
+    /**
+     * Menu item for displaying information about this program.
+     */
     private JMenuItem aboutMenuItem;
+
+    /**
+     * Menu item for displaying user documentation.
+     */
     private JMenuItem contentsMenuItem;
+
+    /**
+     * Menu item for copying selected items.
+     */
     private JMenuItem copyMenuItem;
+
+    /**
+     * Menu item for cutting selected items.
+     */
     private JMenuItem cutMenuItem;
+
+    /**
+     * Menu item for deleting selected items.
+     */
     private JMenuItem deleteMenuItem;
+
+    /**
+     * Desktop pane for the window, containing all frames.
+     */
     private JDesktopPane desktopPane;
+
+    /**
+     * Menu containing all items associated with editing.
+     */
     private JMenu editMenu;
+
+    /**
+     * Menu item for undoing an action.
+     */
     private JMenuItem undoMenuItem;
+
+    /**
+     * Menu item for redoing an action.
+     */
     private JMenuItem redoMenuItem;
+
+    /**
+     * Menu item for pasting cut/copied items.
+     */
     private JMenuItem pasteMenuItem;
+
+    /**
+     * Menu item for exiting the program.
+     */
     private JMenuItem exitMenuItem;
+
+    /**
+     * Menu containing all items associated with file manipulation.
+     */
     private JMenu fileMenu;
+
+    /**
+     * Menu containing all items associated with program help.
+     */
     private JMenu helpMenu;
+
+    /**
+     * Menu containing all items associated with machine simulation.
+     */
     private JMenu machineMenu;
+
+    /**
+     * Menu containing all items associated with alphabet configuration.
+     */
     private JMenu alphabetMenu;
+
+    /**
+     * Menu item for configuring the alphabet.
+     */
     private JMenuItem configureAlphabet;
+
+    /**
+     * Menu item for resetting machine execution state.
+     */
     private JMenuItem resetMachineMenuItem;
+
+    /**
+     * Menu item for stepping through machine execution.
+     */
     private JMenuItem stepMenuItem;
+
+    /**
+     * Menu item for running the machine simulation.
+     */
     private JMenuItem fastExecuteMenuItem;
+
+    /**
+     * Menu item for pausing machine simulation.
+     */
     private JMenuItem m_stopExecutionMenuItem;
-    private JTabbedPane jTabbedPane1;
+
+    /**
+     * Menu bar containing all menus.
+     */
     private JMenuBar menuBar;
     
+    /**
+     * Menu containing all items associated with tape manipulation.
+     */
     private JMenu tapeMenu;
+
+    /**
+     * Menu item for erasing the tape.
+     */
     private JMenuItem eraseTape;
+
+    /**
+     * Menu item for reloading the tape.
+     */
     private JMenuItem reloadTape;
+
+    /**
+     * Menu item for resetting the read/write head for the tape.
+     */
     private JMenuItem headToStart;
     
+    /**
+     * Menu item for creating a new machine.
+     */
     private JMenuItem newMachineMenuItem;
+
+    /**
+     * Menu item for opening a machine from file.
+     */
     private JMenuItem openMachineMenuItem;
+
+    /**
+     * Menu item for saving a machine to a selected file.
+     */
     private JMenuItem saveMachineAsMenuItem;
+
+    /**
+     * Menu item for saving a machine to an associated file.
+     */
     private JMenuItem saveMachineMenuItem;
     
+    /**
+     * Menu item for creating a new tape.
+     */
     private JMenuItem newTapeMenuItem;
+
+    /**
+     * Menu item for opening a tape from file.
+     */
     private JMenuItem openTapeMenuItem;
+
+    /**
+     * Menu item for saving a tape to a selected file.
+     */
     private JMenuItem saveTapeAsMenuItem;
+
+    /**
+     * Menu item for saving a tape to an associated file.
+     */
     private JMenuItem saveTapeMenuItem;
-    
+
+    /**
+     * Menu containing all items associated with changing GUI mode. 
+     */
     private JMenu m_modeMenu;
+
+    /**
+     * Menu item for changing GUI mode to ADDNODES.
+     */
     private JRadioButtonMenuItem m_addNodesMenuItem;
+
+    /**
+     * Menu item for changing GUI mode to ADDTRANSITIONS.
+     */
     private JRadioButtonMenuItem m_addTransitionsMenuItem;
+
+    /**
+     * Menu item for changing GUI mode to SELECTION.
+     */
     private JRadioButtonMenuItem m_makeSelectionMenuItem;
+    
+    /**
+     * Menu item for changing GUI mode to ERASER.
+     */
     private JRadioButtonMenuItem m_eraserMenuItem;
+    
+    /**
+     * Menu item for changing GUI mode to CHOOSESTART.
+     */
     private JRadioButtonMenuItem m_chooseStartMenuItem;
+    
+    /**
+     * Menu item for changing GUI mode to CHOOSEACCEPTING. 
+     */
     private JRadioButtonMenuItem m_chooseAcceptingMenuItem;
-    private JRadioButtonMenuItem m_chooseNextTransitionMenuItem;
+    
+    /**
+     * Menu item for changing GUI mode to CHOOSECURRENTSTATE.
+     */
     private JRadioButtonMenuItem m_chooseCurrentStateMenuItem;
-    
+
+    /**
+     * Menu item for setting execution speed to slow.
+     */
     private JRadioButtonMenuItem m_slowExecuteSpeed;
+    
+    /**
+     * Menu item for changing execution speed to medium.
+     */
     private JRadioButtonMenuItem m_mediumExecuteSpeed;
+    
+    /**
+     * Menu item for changing execution speed to fast.
+     */
     private JRadioButtonMenuItem m_fastExecuteSpeed;
+    
+    /**
+     * Menu item for changing execution speed to superfast.
+     */
     private JRadioButtonMenuItem m_superFastExecuteSpeed;
+    
+    /**
+     * Menu item for changing execution speed to ultrafast.
+     */
     private JRadioButtonMenuItem m_ultraFastExecuteSpeed;
+    
+    /**
+     * Menu item for starting machine simulation.
+     */
     private JButton fastExecute;
-    
-    private TM_GUI_Mode m_currentMode; // Current user interaction mode.
-    
+
+    /**
+     * Current GUI mode.
+     */
+    private TM_GUI_Mode m_currentMode;
+
+    /**
+     * List of buttons which have an associated GUI mode and action.
+     */
     private ArrayList<GUIModeButton> toolbarButtons;
-    
+
+    /**
+     * Tape display panel.
+     */
     private TMTapeDisplayPanel tapeDisp;
+
+    /**
+     * Tape controller.
+     */
     private TMTapeDisplayControllerPanel tapeDispController;
+
+    /**
+     * Main shared tape.
+     */
     private final Tape m_tape = new CA_Tape();
-    // This tape is shared with all windows and machines. you cannot allocate it to a new Tape - the
-    // alternative is to use the copyOther method which does not alter the pointer.
-    
+
+    /**
+     * Frame for displaying help information as HTML.
+     */
     private TMHelpDisplayer m_helpDisp;
-    
+
+    /**
+     * List of copied states.
+     */ 
     private ArrayList<TM_State> copiedStates;
+
+    /**
+     * List of copied transitions.
+     */
     private ArrayList<TM_Transition> copiedTransitions;
-        
+
+    /**
+     * Frame for selecting the current alphabet.
+     */
     private AlphabetSelectorInternalFrame asif;
-    
+
+    /**
+     * Whether the keyboard is currently enabled.
+     */
     private boolean m_keyboardEnabled = true;
+
+    /**
+     * Whether editing is currently enabled.
+     */
     private boolean m_editingEnabled = true;
-    
+
+    /**
+     * Dialog for choosing a file, specifically for machines.
+     */
     private final JFileChooser fcMachine = new JFileChooser();
+
+    /**
+     * Dialog for choosing a file, specifically for tapes.
+     */
     private final JFileChooser fcTape = new JFileChooser();
-    
+
+    /**
+     * Timer task used for stepping through a machine on a delay.
+     */
     private TMExecutionTimerTask m_timerTask;
+    
+    /**
+     * Simulation delay associated with the machine, used by m_timerTask.
+     */
     private int m_executionDelayTime;
-    
+
+    /**
+     * Data which has been copied, used for pasting.
+     */
     private byte[] copiedData = null;
-    
+
+    /**
+     * X ordinate of the last new frame.
+     */
     private int lastNewWindowLocX = 0;
+
+    /**
+     * Y ordinate of the last new frame.
+     */
     private int lastNewWindowLocY = 0;
+
+    /**
+     * Distance between new frames.
+     */
     private int windowLocStepSize = minDistanceForNewWindowLoc;
+
+    /**
+     * Icon for adding states.
+     */
+    private ImageIcon m_addNodesIcon;
+
+    /**
+     * Icon for adding transitions.
+     */
+    private ImageIcon m_addTransitionIcon;
     
-    // Icons
-    ImageIcon m_addNodesIcon, m_addTransitionIcon, m_eraserIcon,
-            m_selectionIcon, m_chooseStartIcon, m_chooseAcceptingIcon,
-            m_chooseNextTransitionIcon, m_chooseCurrentStateIcon,
-            m_stepIcon, m_fastExecuteIcon, m_stopIcon, m_pauseIcon,
-            m_newMachineIcon, m_saveMachineIcon, m_openMachineIcon,
-            m_newTapeIcon, m_saveTapeIcon, m_openTapeIcon,
-            m_cutIcon, m_copyIcon, m_pasteIcon, m_deleteIcon,
-            m_configureAlphabetIcon,m_tapeStartIcon, m_tapeClearIcon,
-            m_tapeReloadIcon, m_emptyIcon, m_undoIcon, m_redoIcon,
-            m_tuataraIcon, m_tuataraSmallIcon;
+    /**
+     * Icon for removing states and transitions.
+     */
+    private ImageIcon m_eraserIcon;
     
-    // Actions
-    private Action m_stepAction, m_stopMachineAction,
-            m_configureAlphabetAction, m_newMachineAction, m_openMachineAction,
-            m_saveMachineAsAction, m_saveMachineAction, m_newTapeAction,
-            m_openTapeAction, m_saveTapeAsAction, m_saveTapeAction,
-            m_cutAction, m_copyAction, m_pasteAction, m_deleteAction,
-            m_fastExecuteAction, m_pauseExecutionAction, m_undoAction,
-            m_redoAction;
+    /**
+     * Icon for selecting states and transitions.
+     */
+    private ImageIcon m_selectionIcon;
     
+    /**
+     * Icon for choosing start states.
+     */
+    private ImageIcon m_chooseStartIcon;
+    
+    /**
+     * Icon for choosing accepting states.
+     */
+    private ImageIcon m_chooseAcceptingIcon;
+    
+    /**
+     * Icon for choosing current states.
+     */
+    private ImageIcon m_chooseCurrentStateIcon;
+
+    /**
+     * Icon for performing a simulation step.
+     */
+    private ImageIcon m_stepIcon;
+
+    /**
+     * Icon for running the simulation.
+     */
+    private ImageIcon m_fastExecuteIcon;
+
+    /**
+     * Icon for stopping the simulation.
+     */
+    private ImageIcon m_stopIcon;
+
+    /**
+     * Icon for pausing the simulation.
+     */
+    private ImageIcon m_pauseIcon;
+
+    /**
+     * Icon for creating a new machine.
+     */
+    private ImageIcon m_newMachineIcon;
+
+    /**
+     * Icon for saving a machine
+     */
+    private ImageIcon m_saveMachineIcon;
+
+    /**
+     * Icon for opening a machine.
+     */
+    private ImageIcon m_openMachineIcon;
+
+    /**
+     * Icon for creating a new tape.
+     */
+    private ImageIcon m_newTapeIcon;
+
+    /**
+     * Icon for saving a tape.
+     */
+    private ImageIcon m_saveTapeIcon;
+
+    /**
+     * Icon for opening a tape.
+     */
+    private ImageIcon m_openTapeIcon;
+
+    /**
+     * Icon for cutting selected states and transitions.
+     */
+    private ImageIcon m_cutIcon;
+
+    /**
+     * Icon for copying selected states and transitions.
+     */
+    private ImageIcon m_copyIcon;
+
+    /**
+     * Icon for pasting selected states and transitions.
+     */
+    private ImageIcon m_pasteIcon;
+
+    /**
+     * Icon for deleting selected states and transitions
+     */
+    private ImageIcon m_deleteIcon;
+
+    /**
+     * Icon for configuring the alphabet.
+     */
+    private ImageIcon m_configureAlphabetIcon;
+
+    /**
+     * Icon for moving the read/write head to the start of the tape.
+     */
+    private ImageIcon m_tapeStartIcon;
+
+    /**
+     * Icon for clearing the tape.
+     */
+    private ImageIcon m_tapeClearIcon;
+
+    /**
+     * Icon for reloading the tape.
+     */
+    private ImageIcon m_tapeReloadIcon;
+
+    /**
+     * Icon which does not have any associated image. 
+     */
+    private ImageIcon m_emptyIcon;
+
+    /**
+     * Icon for undoing an action.
+     */
+    private ImageIcon m_undoIcon;
+
+    /**
+     * Icon for redoing an action.
+     */
+    private ImageIcon m_redoIcon;
+
+    /**
+     * Icon for the program.
+     */
+    private ImageIcon m_tuataraIcon;
+
+    /**
+     * Small icon for the program.
+     */
+    private ImageIcon m_tuataraSmallIcon;
+
+    /**
+     * Action for stepping through execution.
+     */
+    private Action m_stepAction;
+
+    /**
+     * Action for stopping a simulation.
+     */
+    private Action m_stopMachineAction;
+
+    /**
+     * Action for configuring the alphabet.
+     */
+    private Action m_configureAlphabetAction;
+
+    /**
+     * Action for creating a new machine.
+     */
+    private Action m_newMachineAction;
+
+    /**
+     * Action for opening a machine.
+     */
+    private Action m_openMachineAction;
+
+    /**
+     * Action for saving a machine to a selected file.
+     */
+    private Action m_saveMachineAsAction;
+
+    /**
+     * Action for saving a machine to an associated file.
+     */
+    private Action m_saveMachineAction; 
+
+    /**
+     * Action for creating a new tape.
+     */
+    private Action m_newTapeAction;
+
+    /**
+     * Action for opening a tape.
+     */
+    private Action m_openTapeAction;
+
+    /**
+     * Action for saving a tape to a selected file.
+     */
+    private Action m_saveTapeAsAction;
+
+    /**
+     * Action for saving a tape to an associated file.
+     */
+    private Action m_saveTapeAction;
+
+    /**
+     * Action for cutting selected states and transitions.
+     */
+    private Action m_cutAction;
+
+    /**
+     * Action for copying selected states and transitions.
+     */
+    private Action m_copyAction;
+
+    /**
+     * Action for pasting selected states and transitions.
+     */
+    private Action m_pasteAction;
+
+    /**
+     * Action for deleting selected states and transitions.
+     */
+    private Action m_deleteAction;
+
+    /**
+     * Action for starting simulation of the machine.
+     */
+    private Action m_fastExecuteAction;
+
+    /**
+     * Action for pausing simulation of the machine.
+     */
+    private Action m_pauseExecutionAction;
+
+    /**
+     * Action for undoing a command.
+     */
+    private Action m_undoAction;
+
+    /**
+     * Action for redoing a command
+     */
+    private Action m_redoAction;
+
+    /**
+     * Toolbar button for undoing an action.
+     */
     private JButton m_undoToolBarButton;
+
+    /**
+     * Toolbar button for redoing an action.
+     */
     private JButton m_redoToolBarButton;
-    
+
+    /**
+     * Action for moving the read/write head to the start of the tape.
+     */
     private HeadToStartAction m_headToStartAction;
+
+    /**
+     * Action for erasing the tape.
+     */
     private EraseTapeAction m_eraseTapeAction;
+
+    /**
+     * Action for reloading the tape.
+     */
     private ReloadTapeAction m_reloadTapeAction;
+
+    /**
+     * Action associated with ADDNODES.
+     */
+    private GUI_ModeSelectionAction m_addNodesAction;
     
-    private GUI_ModeSelectionAction m_addNodesAction , m_addTransitionsAction,
-            m_eraserAction, m_selectionAction, m_chooseStartAction,
-            m_chooseAcceptingAction, m_chooseNextTransitionAction,
-            m_chooseCurrentStateAction;
+    /**
+     * Action associated with ADDTRANSITIONS.
+     */
+    private GUI_ModeSelectionAction m_addTransitionsAction;
     
-    private ExecutionSpeedSelectionAction m_slowExecuteSpeedAction,
-        m_mediumExecuteSpeedAction, m_fastExecuteSpeedAction,
-        m_superFastExecuteSpeedAction, m_ultraFastExecuteSpeedAction;
+    /**
+     * Action associated with ERASER.
+     */
+    private GUI_ModeSelectionAction m_eraserAction;
+    
+    /**
+     * Action associated with SELECTION.
+     */
+    private GUI_ModeSelectionAction m_selectionAction;
+    
+    /**
+     * Action associated with CHOOSESTART.
+     */
+    private GUI_ModeSelectionAction m_chooseStartAction;
+    
+    /**
+     * Action associated with CHOOSEACCEPTING.
+     */
+    private GUI_ModeSelectionAction m_chooseAcceptingAction;
+    
+    /**
+     * Action associated with CHOOSECURRENTSTATE.
+     */
+    private GUI_ModeSelectionAction m_chooseCurrentStateAction;
+
+    /**
+     * Action to set execution speed to slow.
+     */
+    private ExecutionSpeedSelectionAction m_slowExecuteSpeedAction;
+    
+    /**
+     * Action to set execution speed to medium.
+     */
+    private ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction;
+    
+    /**
+     * Action to set execution speed to fast.
+     */
+    private ExecutionSpeedSelectionAction m_fastExecuteSpeedAction;
+    
+    /**
+     * Action to set execution speed to superfast.
+     */
+    private ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction; 
+    
+    /**
+     * Action to set execution speed to ultrafast.
+     */
+    private ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction;
 }

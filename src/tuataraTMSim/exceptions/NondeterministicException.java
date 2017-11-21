@@ -1,6 +1,6 @@
 //  ------------------------------------------------------------------
 //
-//  Copyright (c) 2006-2007 James Foulds and the University of Waikato
+//  Copyright (c) 2017-2018 Mitchell Grout and the University of Waikato
 //
 //  ------------------------------------------------------------------
 //  This file is part of Tuatara Turing Machine Simulator.
@@ -19,26 +19,27 @@
 //  along with Tuatara Turing Machine Simulator.  If not, see
 //  <http://www.gnu.org/licenses/>.
 //
-//  author email: jf47 (at) waikato (dot) ac (dot) nz
+//  author email: mjg44 (at) waikato (dot) ac (dot) nz
 //
 //  ------------------------------------------------------------------
 
 package tuataraTMSim.exceptions;
 
 /**
- * An Exception thrown when a machine without a start state is executed.
- * @author Jimmy
+ * An Exception thrown when the machine finds a nondeterministic state, i.e. one that has multiple
+ * transitions for the same input
+ * @author Mitchell
  */
-public class NoStartStateException extends Exception
-{    
+public class NondeterministicException extends java.lang.Exception
+{
     /**
-     * Creates a new instance of <code>NoStartStateException</code> without detail message.
+     * Creates a new instance of <code>NondeterministicException</code> without detail message.
      */
-    public NoStartStateException() { }
+    public NondeterministicException() { }
     
     /**
-     * Constructs an instance of <code>NoStartStateException</code> with the specified detail message.
-     * @param msg the detail message.
+     * Constructs an instance of <code>NondeterministicException</code> with the specified detail message.
+     * @param msg The detailed error message.
      */
-    public NoStartStateException(String msg) { super(msg); }
+    public NondeterministicException(String msg) { super(msg); }
 }

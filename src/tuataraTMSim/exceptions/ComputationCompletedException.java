@@ -38,7 +38,7 @@ public class ComputationCompletedException extends Exception
     
     /**
      * Constructs an instance of <code>ComputationCompletedException</code> with the specified detail message.
-     * @param msg the detail message.
+     * @param msg The detailed error message.
      */
     public ComputationCompletedException(String msg) { super(msg); }    
 }

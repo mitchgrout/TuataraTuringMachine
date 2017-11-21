@@ -35,17 +35,27 @@ import javax.swing.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
 
 /**
- * An action for a state transition of a Turing machine, such as shifting the read/write head,
- * or writing to the tape.
+ * An action for a state transition of a Turing machine, such as shifting the read/write head, or
+ * writing to the tape.
  * @author Jimmy
  */
 public class TM_Action implements Serializable
 {
+    /**
+     * Character representing a left-shift to the read/write head of the tape.
+     */
     public static final char LEFT_ARROW = (char)0x2190;
+    
+    /**
+     * Character representing a right-shift to the read/write head of the tape.
+     */
     public static final char RIGHT_ARROW = (char)0x2192;
     
     /**
-     * Creates a new instance of TM_Action
+     * Creates a new instance of TM_Action.
+     * @param dir The direction the read/write head should move.
+     * @param inputSymbol The value for which if read from the tape, the action will occur.
+     * @param outputSymbol The value for which if dir is zero, will be written to the tape.
      * */
     public TM_Action(int dir, char inputSymbol, char outputSymbol)
     {
@@ -55,8 +65,10 @@ public class TM_Action implements Serializable
     }
     
     /** 
-     * Perform the action specified by this object on the given tape, updating both the physical tape,
-     * and the location of the read/write head.
+     * Perform the action specified by this object on the given tape, updating both the physical
+     * tape, and the location of the read/write head.
+     * @param t The tape to be modified.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
      */
     public void performAction(Tape t) throws TapeBoundsException
     {
@@ -79,6 +91,7 @@ public class TM_Action implements Serializable
      * -1: left
      *  0: don't move the head
      *  1: right
+     *  @return The direction the head moves for this action.
      */
     public int getDirection()
     {
@@ -88,6 +101,7 @@ public class TM_Action implements Serializable
     /**
      * Gets the character that this action will write to the tape.
      * This is only used if the direction is 0 (does not move the head).
+     * @return The value to be written to the tape.
      */
     public char getChar()
     {
@@ -95,7 +109,8 @@ public class TM_Action implements Serializable
     }
     
     /**
-     * Returns true IFF this action will adjust the location of the read/write head.
+     * Determine if this action moves the read/write head of the tape.
+     * @return true if the action moves the read/write head of the tape, false otherwise.
      */
     public boolean movesHead()
     {
@@ -103,7 +118,10 @@ public class TM_Action implements Serializable
     }
     
     /**
-     * Render the state to a graphics object.
+     * Render the action to a graphics object.
+     * @param g The graphics object to render to.
+     * @param x The X ordinate to render to.
+     * @param y The Y ordinate to render to.
      */
     public void paint(Graphics g, int x, int y)
     {
@@ -121,6 +139,10 @@ public class TM_Action implements Serializable
         g2d.drawString(outputStr, x, y);
     }
     
+    /**
+     * Get a String representation of this action.
+     * @return A String representation of this action.
+     */
     public String toString()
     {
         String outputStr = m_inputChar + "/";
@@ -138,13 +160,28 @@ public class TM_Action implements Serializable
         }
         return outputStr;
     }
-    
+   
+    /**
+     * Set the input symbol for this action.
+     * @param c The new input symbol.
+     */
     public void setInputSymbol(char c)
     {
         m_inputChar = c;
     }
     
-    private byte m_direction; // NOTE: -1 is left, +1 is right, otherwise don't move head and write char instead.
+    /**
+     * The direction the read/write head should move. Is exactly one of { -1, 0, +1 }
+     */
+    private byte m_direction;
+
+    /**
+     * The character that should be written to the tape if m_direction is zero.
+     */
     private char m_writeChar;
+    
+    /**
+     * The character that must be read from the tape for this action to occur.
+     */
     private char m_inputChar;
 }

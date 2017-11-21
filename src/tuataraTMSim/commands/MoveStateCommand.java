@@ -32,13 +32,18 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A comand which deals with moving a state.
  * @author Jimmy
  */
 public class MoveStateCommand implements TMCommand
 {
     /**
-     * Creates a new instance of MoveStateCommand
+     * Creates a new instance of MoveStateCommand.
+     * @param panel The current graphics panel.
+     * @param state The state to move.
+     * @param moveX The change in X position.
+     * @param moveY The change in Y position.
+     * @param transitionsInto The set of transitions coming into the state.
      */
     public MoveStateCommand(TMGraphicsPanel panel, TM_State state, int moveX, int moveY,
                             Collection<TM_Transition> transitionsInto)
@@ -52,27 +57,60 @@ public class MoveStateCommand implements TMCommand
         m_transitionsOut.addAll(state.getTransitions());
     }
 
+    /**
+     * Move the state, incoming and outgoing transitions, by the specified amount.
+     */
     public void doCommand()
     {
         TMGraphicsPanel.updateTransitionLocations(m_state,m_moveX, m_moveY, m_transitionsInto, m_transitionsOut);
         m_state.setPosition(m_state.getX() + m_moveX, m_state.getY() + m_moveY);
     }
        
+    /**
+     * Move the state, and incoming and outgoing transitions, back by the specified amount.
+     */
     public void undoCommand()
     {
         TMGraphicsPanel.updateTransitionLocations(m_state,-m_moveX, -m_moveY, m_transitionsInto, m_transitionsOut);
         m_state.setPosition(m_state.getX() - m_moveX, m_state.getY() - m_moveY);
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Move State";
     }
 
-    TMGraphicsPanel m_panel;
-    TM_State m_state;
-    int m_moveX;
-    int m_moveY;
-    Collection<TM_Transition> m_transitionsInto;
-    Collection<TM_Transition> m_transitionsOut;
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_panel;
+    
+    /**
+     * The state to move.
+     */
+    private TM_State m_state;
+    
+    /**
+     * The change in X position.
+     */
+    private int m_moveX;
+    
+    /**
+     * The change in Y position.
+     */
+    private int m_moveY;
+    
+    /**
+     * The set of transitions coming into m_state.
+     */
+    private Collection<TM_Transition> m_transitionsInto;
+    
+    /**
+     * The set of transitions leaving m_state.
+     */
+    private Collection<TM_Transition> m_transitionsOut;
 }

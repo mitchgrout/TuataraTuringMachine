@@ -29,13 +29,17 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_State;
 
 /**
- *
+ * A command which deals with changing the accepting state of a machine.
  * @author Jimmy
  */
 public class ToggleAcceptingStateCommand implements TMCommand
 {
     /**
-     * Creates a new instance of ToggleAcceptingCommand
+     * Creates a new instance of ToggleAcceptingCommand.
+     * @param panel The current graphics panel.
+     * @param oldState The previous accepting state.
+     * @param newState The new accepting state. If newState and oldState are the same state, then we
+     *                 toggle the value for the state.
      */
     public ToggleAcceptingStateCommand(TMGraphicsPanel panel, TM_State oldState, TM_State newState)
     {
@@ -44,6 +48,10 @@ public class ToggleAcceptingStateCommand implements TMCommand
         m_newState = newState;
     }
     
+    /**
+     * If oldState and newState are different, then newState is made to be the accepting state.
+     * If they are the same, then the value is toggled.
+     */
     public void doCommand()
     {
         // If the old start is the new start, or there was no old start, we're simply toggling
@@ -59,6 +67,10 @@ public class ToggleAcceptingStateCommand implements TMCommand
         }
     }
     
+    /**
+     * If oldState and newState are different, then oldState is made to be the accepting state.
+     * If they are the same, then the value is toggled.
+     */
     public void undoCommand()
     {
         // If the old start is the new start, or there was no old start, we're simply toggling
@@ -74,11 +86,27 @@ public class ToggleAcceptingStateCommand implements TMCommand
         }
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Toggle Accepting State";
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
-    private TM_State m_oldState, m_newState;
+
+    /**
+     * The old accepting state.
+     */
+    private TM_State m_oldState;
+    
+    /**
+     * The new accepting state.
+     */
+    private TM_State m_newState;
 }

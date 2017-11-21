@@ -29,13 +29,16 @@ import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_State;
 
 /**
- *
+ * A command which deals with changing the label of a state.
  * @author Jimmy
  */
 public class RenameStateCommand implements TMCommand
 {
     /**
-     * Creates a new instance of RenameStateCommand
+     * Creates a new instance of RenameStateCommand.
+     * @param panel The current graphics panel.
+     * @param state The state to rename.
+     * @param label The new label for the state.
      */
     public RenameStateCommand(TMGraphicsPanel panel, TM_State state, String label)
     {
@@ -45,6 +48,9 @@ public class RenameStateCommand implements TMCommand
         m_oldLabel = state.getLabel();
     }
 
+    /**
+     * Change the label of the state to the new label.
+     */
     public void doCommand()
     {
         m_panel.removeLabelFromDictionary(m_oldLabel);
@@ -52,6 +58,9 @@ public class RenameStateCommand implements TMCommand
         m_state.setLabel(m_label);
     }
     
+    /**
+     * Restore the label of the state to its previous value.
+     */
     public void undoCommand()
     {
         m_panel.removeLabelFromDictionary(m_label);
@@ -59,13 +68,32 @@ public class RenameStateCommand implements TMCommand
         m_state.setLabel(m_oldLabel);
     }
     
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Rename State";
     }
 
-    TMGraphicsPanel m_panel;
-    TM_State m_state;
-    String m_label;
-    String m_oldLabel;
+    /**
+     * The current graphics panel.
+     */
+    private TMGraphicsPanel m_panel;
+    
+    /**
+     * The state to rename.
+     */
+    private TM_State m_state;
+    
+    /**
+     * The new label for m_state.
+     */
+    private String m_label;
+    
+    /**
+     * The old label for m_state
+     */
+    private String m_oldLabel;
 }

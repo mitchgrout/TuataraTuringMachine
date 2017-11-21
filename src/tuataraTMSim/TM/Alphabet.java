@@ -28,7 +28,7 @@ package tuataraTMSim.TM;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a collection of symbols which can appear on a Tape.
  * @author Jimmy
  */
 public class Alphabet implements Serializable, Cloneable
@@ -45,89 +45,131 @@ public class Alphabet implements Serializable, Cloneable
         setSymbol('1', true);
     }
     
+    /**
+     * Determine if this alphabet contains the given symbol.
+     * @param c The symbol to check.
+     * @return true if this alphabet contains c, otherwise false.
+     */
     public boolean containsSymbol(char c)
     {
         c = Character.toUpperCase(c);
         
         // Can't be in the alphabet
         if (c == TMachine.EMPTY_ACTION_SYMBOL ||
-            c == TMachine.WILDCARD_INPUT_SYMBOL)
+            c == TMachine.UNDEFINED_SYMBOL ||
+            c == TMachine.OTHERWISE_SYMBOL)
         {
             return false;
         }
         else if (Character.isLetter(c))
         {
-            return (c < 'A' || c > 'Z')? false : letters[c - 'A'];
+            return (c < 'A' || c > 'Z')? false : m_letters[c - 'A'];
         }
         else if (Character.isDigit(c))
         {
-            return digits[c - '0'];
+            return m_digits[c - '0'];
         }
         else if (c == ' ' || c == Tape.BLANK_SYMBOL)
         {
-            return blank;
+            return m_blank;
         }
         return false;
     }
     
+    /**
+     * Set whether or not the given symbol is in this alphabet.
+     * @param c The symbol to set.
+     * @param value If true, then make c part of this alphabet, otherwise remove it.
+     */
     public void setSymbol(char c, boolean value)
     {
         c = Character.toUpperCase(c);
         
         if (Character.isLetter(c))
         {
-            letters[c - 'A'] = value;
+            m_letters[c - 'A'] = value;
         }
         else if (Character.isDigit(c))
         {
-            digits[c - '0'] = value;
+            m_digits[c - '0'] = value;
         }
         else if (c == ' ' || c == Tape.BLANK_SYMBOL)
         {
-            blank = value;
+            m_blank = value;
         }
     }
-    
+   
+    /**
+     * Set all letters in this alphabet to either be in the alphabet or not.
+     * @param value If true, then set all letters to be in this alphabet, otherwise set all letters
+     *              to not be in this alphabet.
+     */
     public void setAlphabetical(boolean value)
     {
-        for (boolean l : letters)
+        for (boolean l : m_letters)
         {
             l = value;
         }
     }
     
-    public void setDigits(boolean value)
+    /**
+     * Set all digits in this alphabet to either be in the alphabet or not.
+     * @param value If true, then set all digits to be in this alphabet, otherwise set all digits to
+     *              not be in this alphabet.
+     */
+   public void setDigits(boolean value)
     {
-        for (boolean d : digits)
+        for (boolean d : m_digits)
         {
             d = value;
         }
     }
     
+    /**
+     * Set whether or not the blank character is in the alphabet or not.
+     * @param value If true, then the blank character is in the alphabet, otherwise not.
+     */
     public void setBlank(boolean value)
     {
-        blank = value;
+        m_blank = value;
     }
     
+    /**
+     * Create a deep copy of this object.
+     * @return A deep copy of this object. Specifically, the object will have a distinct address,
+     *         and all member variables will be pointing to distinct addresses, but represent the 
+     *         same value.
+     */
     public Object clone()
     {
         try
         {
             Alphabet returner = (Alphabet)super.clone();
         
-            returner.letters = letters.clone();
-            returner.digits = digits.clone();
+            returner.m_letters = m_letters.clone();
+            returner.m_digits = m_digits.clone();
             // Blank should be copied correctly by super.clone
             return returner;
         } 
         catch (CloneNotSupportedException e)
         {
-            System.err.println("Clone failed!!!!!!");
+            System.err.println("Clone failed!");
             return null;
         }
     }
     
-    protected boolean[] letters = new boolean[26];
-    protected boolean[] digits = new boolean[10];
-    protected boolean blank = false;
+    /**
+     * A bitmap determining which letters are in this alphabet.
+     */
+    protected boolean[] m_letters = new boolean[26];
+
+    /**
+     * A bitmap determining which digits are in this alphabet.
+     */
+    protected boolean[] m_digits = new boolean[10];
+    
+    /**
+     * A boolean determining if the blank character is in this alphabet.
+     */
+    protected boolean m_blank = false;
 }

@@ -31,7 +31,7 @@ import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
 
 /**
- *
+ * A command which deals with cutting states and transitions from a machine.
  * @author Jimmy
  */
 public class CutCommand implements TMCommand
@@ -39,8 +39,9 @@ public class CutCommand implements TMCommand
     
     /** 
      * Creates a new instance of CutCommand.
-     * Be sure to only pass in copies of selectedStates and selectedTransitions
-     * - we don't want our lists of states and transitions to change when the user copies new things!
+     * @param panel The current graphics panel.
+     * @param selectedStates A copy of the set of states to cut.
+     * @param selectedTransitions A copy of the set of transitions to cut.
      */
     public CutCommand(TMGraphicsPanel panel, HashSet<TM_State> selectedStates,
                       HashSet<TM_Transition> selectedTransitions)
@@ -51,7 +52,10 @@ public class CutCommand implements TMCommand
         m_borderTransitions = 
             m_panel.getSimulator().getMachine().getHalfSelectedTransitions(selectedStates);
     }
-    
+
+    /**
+     * Cut the selected states, transitions, and half-selected transitions from the machine.
+     */
     public void doCommand()
     {
         for (TM_State s : m_selectedStates)
@@ -68,6 +72,9 @@ public class CutCommand implements TMCommand
         m_panel.setSelectedTransitions(new HashSet<TM_Transition>());
     }
     
+    /**
+     * Restore the cut selected states, transitions, and half-selected transitions to the machine.
+     */
     public void undoCommand()
     {
         // TODO: decide if they should come back selected or not
@@ -99,14 +106,22 @@ public class CutCommand implements TMCommand
             // }
         }
         
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
-    
+   
+    /**
+     * Get the friendly name of this command.
+     * @return The friendly name of this command.
+     */
     public String getName()
     {
         return "Cut";
     }
-    
+
+    /**
+     * A helper function which deletes a specified state from the machine.
+     * @param s The state to delete.
+     */
     private void deleteState(TM_State s)
     {
         m_panel.getSimulator().getMachine().deleteState(s);
@@ -119,10 +134,14 @@ public class CutCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computePotentialTransitions(false);
+            m_panel.getSimulator().computeNextTransition();
         }
     }
     
+    /**
+     * A helper function which deletes a specified transition from the machine.
+     * @param t The transition to delete.
+     */
     private void deleteTransition(TM_Transition t)
     {
         m_panel.getSimulator().getMachine().deleteTransition(t);
@@ -130,11 +149,26 @@ public class CutCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computePotentialTransitions(false);
+        m_panel.getSimulator().computeNextTransition();
     }
     
+    /**
+     * The current graphics panel.
+     */
     private TMGraphicsPanel m_panel;
+    
+    /**
+     * The set of states to cut.
+     */
     private HashSet<TM_State> m_selectedStates;
+
+    /**
+     * The set of transitions to cut.
+     */
     private HashSet<TM_Transition> m_selectedTransitions;
+    
+    /**
+     * The set of half-selected transitions to cut.
+     */
     private HashSet<TM_Transition> m_borderTransitions;
 }
