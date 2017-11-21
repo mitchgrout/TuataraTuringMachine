@@ -71,7 +71,8 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
     }
     
     /**
-     * Helper function which deletes a specified transitoin from the machine.
+     * Helper function which deletes a specified transition from the machine.
+     * @param t The transition to delete.
      */
     private void deleteTransition(TM_Transition t)
     {
