@@ -1,8 +1,9 @@
 <html>
 <H2> Creating and Editing Machines </H2>
 
-<P>In this section, we present a task-oriented ("how-to") guide to creating and editing machines.
+<P> In this section, we present a task-oriented ("how-to") guide to creating and editing machines.
 </P>
+
 <BR>
 <H3> Choosing an Alphabet </H3>
 <P> Each machine has an alphabet assocated with it.  This is the set of symbols that it can read and
@@ -10,115 +11,103 @@ write to the tape.  In this program, unlike in some Turing machine models there 
 alphabets for allowable input ("input alphabet") and symbols that the machine can write to the tape
 ("tape alphabet").  Instead, consider the single alphabet to be the union of these two alphabets.
 </P>
-
 <P>In the Alphabet menu, click on <IMG SRC="../images/configureAlphabet.gif"> <I>Configure Alphabet</I>.
-  This will bring up the alphabet configuration dialog.  Check the boxes for the symbols that you
-  wish to include in your alphabet, and press <I>Ok</I>.
+This will bring up the alphabet configuration dialog.  Check the boxes for the symbols that you wish
+to include in your alphabet, and press <I>Ok</I>.
 </P>
 
 <BR>
 <H3> Adding States </H3>
-<P>To add a state, choose the <IMG SRC="../images/state.gif"> <I>Add States</I> mode from the Mode menu or from the toolbar.  Now, clicking
-on an empty space in a machine window will create a state at that location.
+<P>To add a state, choose the <IMG SRC="../images/state.gif"> <I>Add States</I> mode from the Mode
+menu or from the toolbar.  Now, clicking on an empty space in a machine window will create a state
+at that location.
 </P>
 
 <BR>
 <H3> Adding Transitons </H3>
-<P> Select the <IMG SRC="../images/transition.gif"> <I>Add Transitions</I> mode from the Mode menu or from the toolbar.  Click on a state, and 
-drag the mouse to another state without releasing the mouse button to create a transition between
-the two states.  Create self-loops by both clicking and releasing the mouse on the same state.
+<P> Select the <IMG SRC="../images/transition.gif"> <I>Add Transitions</I> mode from the Mode menu
+or from the toolbar.  Click on a state, and drag the mouse to another state without releasing the
+mouse button to create a transition between the two states.  Create self-loops by both clicking and
+releasing the mouse on the same state.
 </P>
-
-<P> Each transition has an input symbol (to the left of the <I>/</I>), and an action symbol (to the right of
-the <I>/</I>).  When the machine is in the 'from' state of a transition, and the symbol on the tape beneath
-the read/write head matches the input symbol of a transition, the action defined by the action symbol
-may be performed and the machine state is set to the 'to' state of the transition.
+<P> Each transition has an input symbol (to the left of the <I>/</I>), and an action symbol (to the
+right of the <I>/</I>).  When the machine is in the 'from' state of a transition, and the symbol on
+the tape beneath the read/write head matches the input symbol of a transition, the action defined by
+the action symbol may be performed and the machine state is set to the 'to' state of the transition.
 </P>
-
-<P> By default, the transition created has an <I>otherwise</I> input symbol, '<I>?</I>', which will match with any
-symbol on the tape if and only if there is no other transition that matches.
-  The output action defaults to the <I>epsilon</I> action, the empty action which causes no change to be made to the tape.
+<P> By default, the transition created has an <I>undefined</I> input symbol, '<I>!</I>', which
+matches nothing, and will prevent the machine from running until replaced with a symbol from the
+machine alphabet.  The output action defaults to the <I>epsilon</I> action, the empty action which
+causes no change to be made to the tape.
 </P>
 
 <BR>
 <H3> Choosing Transition Symbols </H3>
-<P> Click on the input or output symbol of a transition, and on your keyboard type the character that
- you want to change the symbol to be.  You may only change the symbol to characters that belong to the 
-alphabet of the machine, or one of the special symbols described below. If the blank symbol is in the alphabet,
- you may type this character by pressing the spacebar button or the underscore key '<I>_</I>'.
+<P> Click on the input or output symbol of a transition, and on your keyboard type the character
+that you want to change the symbol to be.  You may only change the symbol to characters that belong
+to the alphabet of the machine, or one of the special symbols described below.  If the blank symbol
+is in the alphabet, you may type this character by pressing the spacebar button or the underscore
+key '<I>_</I>'.
 </P>
-
-<P> Input symbols may be set to <I>wildcard</I> symbols by typing '<I>*</I>'.  Wildcards match any symbol.
+<P> A useful input symbol is the <I>otherwise</I> symbol, '<I>?</I>', which matches any symbol, but
+only if no other transition's input symbol matches.  A machine cannot have several <I>otherwise</I>
+transitions.
 </P>
-
-<P> Another useful input symbol is the <I>otherwise</I> symbol, '<I>?</I>', which matches any symbol, but only if
- no other transition's input symbol matches.  If several <I>otherwise</I> transitions exist, and there are no other
- matching outgoing transitions, all of the <I>otherwise</I> transitions are considered to match the input symbol.
+<P> Empty epsilon actions are created by pressing '<I>Shift + E</I>' when the action symbol is
+selected.  These actions cause no change to the tape.
 </P>
-
-<P> Empty epsilon actions are created by pressing '<I>Shift + E </I>'when the action symbol is selected.  These
- actions cause no change to the tape.
-</P>
-
-<P> Set the action to move the read/write head left or right by typing the <I>left</I> and <I>right</I> arrow keys,
- respectively.
+<P> Set the action to move the read/write head left or right by typing the <I>left</I> and
+<I>right</I> arrow keys, respectively.
 </P>
 
 <BR>
 <H3> Deleting States and Transitions</H3>
-<P> Choose the <IMG SRC="../images/eraser.gif"> <I>Eraser</I> mode from the Mode menu or toolbar. 
+<P> Choose the <IMG SRC="../images/eraser.gif"> <I>Eraser</I> mode from the Mode menu or toolbar.
 Click on a state or transition to erase it.
 </P>
 
 <BR>
 <H3> Moving States and Transitions </H3>
 <P> Click on a state and drag it to move it to another location.  Transitions can be moved similarly
- by clicking on their action text or the directional arrows and dragging.
+by clicking on their action text or the directional arrows and dragging.
 </P>
 
 <BR>
 <H3> Choosing Start States </H3>
-<P> Select the <IMG SRC="../images/startState.gif"> <I>Choose Start States</I> mode from the Mode menu.
- Click on a state to toggle whether it is
- a start state or not.  If there is more than one start state, a start state will be chosen randomly
- upon execution.  If you wish to select a specific start state to use, you can use the 
-<IMG SRC="../images/currentState.gif"> <I>Choose Current State</I> mode to set the current state to
- that start state, and begin execution from there.
+<P> Select the <IMG SRC="../images/startState.gif"> <I>Choose Start States</I> mode from the Mode
+menu.  Click on a state to toggle whether it is a start state or not.  Only one state may be a start
+state.
 </P>
 
 <BR>
 <H3> Choosing Accepting States </H3>
-<P> Select the <IMG SRC="../images/finalState.gif"> <I>Choose Accepting States</I> mode from the Mode menu.
-  Click on a state to toggle whether it is an accepting state or not.
+<P> Select the <IMG SRC="../images/finalState.gif"> <I>Choose Accepting States</I> mode from the
+Mode menu.  Click on a state to toggle whether it is an accepting state or not.  Only one state may
+be an accepting state.
 </P>
 
 <BR>
 <H3> Copying and Pasting </H3>
-
 <P> A set of states can be selected by dragging a box around them in the <IMG SRC="../images/selection.gif">
- <I>Make Selection mode</I>.  To add
-or remove states from the current set of selected states, click on them while holding the shift key.
-All transitions that connect only to other states within the set of selected states are automatically
-selected.
+<I>Make Selection mode</I>.  To add or remove states from the current set of selected states, click
+on them while holding the shift key.  All transitions that connect only to other states within the
+set of selected states are automatically selected.
 </P>
-
-<P> These selected states and transitions can now be cut, copied and pasted using the appropriate items
-from the Edit menu.  Pasted states are renamed to the first free name that has not yet been used in
-this machine to prevent duplication of names.
+<P> These selected states and transitions can now be cut, copied and pasted using the appropriate
+items from the Edit menu.  Pasted states are renamed to the first free name that has not yet been
+used in this machine to prevent duplication of names.
 </P>
 
 <BR>
 <H3> Renaming States </H3>
-
-<P> To give a state a custom name, click once on its name.  This brings up the appropriate dialog box.
-States must be uniquely named within a machine - duplicate names are not allowed.
+<P> To give a state a custom name, click once on its name.  This brings up the appropriate dialog
+box.  States must be uniquely named within a machine - duplicate names are not allowed.
 </P>
 
 <BR>
 <H3> Loading and Saving Machines </H3>
-<P>
-Machines can be saved to a hard disk or other storage medium by selecting <IMG SRC="../images/saveMachine.gif"> 
-<I> Save Machine </I> from the <I>File</I> menu.
-Choose <IMG SRC="../images/openMachine.gif"> <I> Open Machine </I> from the <I>File</I> menu to retrieve a machine later.
+<P> Machines can be saved to a hard disk or other storage medium by selecting <IMG SRC="../images/saveMachine.gif"> 
+<I> Save Machine </I> from the <I>File</I> menu.  Choose <IMG SRC="../images/openMachine.gif"> <I>Open Machine </I>
+from the <I>File</I> menu to retrieve a machine later.
 </P>
 </html>
