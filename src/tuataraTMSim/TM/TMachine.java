@@ -36,8 +36,9 @@ import tuataraTMSim.TMGraphicsPanel;
 /**
  * An implementation of a Turing machine. This class stores the specification of the machine, in
  * particular the set of states and transitions, but does not contain any configuration (execution
- * state) information.  The machine is not guaranteed to be deterministic at all times, but can be
- * assured to be deterministic by calling TMachine.validate()
+ * state) information. All simulation interaction should be done via TM_Simulator.  The machine is
+ * not guaranteed to be deterministic at all times, but can be assured to be deterministic by
+ * calling TMachine.validate()
  * @author Jimmy
  */
 public class TMachine implements Serializable
@@ -69,6 +70,7 @@ public class TMachine implements Serializable
         m_states = states;
         m_transitions = transitions;
         m_alphabet = alphabet;
+        m_validated = false;
     }
     
     /**
@@ -76,23 +78,40 @@ public class TMachine implements Serializable
      */
     public TMachine()
     {
-        m_states = new ArrayList<TM_State>();
-        m_transitions = new ArrayList<TM_Transition>();
-        m_alphabet = new Alphabet();
+        this(new ArrayList<TM_State>(), new ArrayList<TM_Transition>(), new Alphabet());
+    }
+
+    /**
+     * Change the state of this TMachine to invalid. This means that the next call to validate()
+     * will force the entire check to be performed, instead of being predicated on m_validated.
+     * This should be called outside this class when one of the underlying states is toggled to be a
+     * start state or accepting state.
+     */
+    public void invalidate()
+    {
+        m_validated = false;
     }
 
     /**
      * Ensures this TMachine is valid. This means there is a unique start and final state, there are
-     * no duplicate transitions, there are no undefined transitions, and the final state has no
-     * transitions leaving it. Should be called before a machine is run.
+     * no duplicate transitions, there are no undefined transitions, all transitions are within our
+     * alphabet, and the final state has no transitions leaving it. Should be called before a
+     * machine is run.
      * @throws NondeterministicException If the machine is considered nondeterministic, i.e. any of
      *                                   the prior conditions are violated.
      */
     public void validate() throws NondeterministicException
     {
-        // TODO: See if we can cache this result, so long as the machine has not been modified, to
-        //       reduce overhead from repeat calls. As the doc states, this should be called before
-        //       running the machine, which in the simulator corresponds to running before every step.
+        // If we have already validated the machine, and we havent mutated our machine, then we do
+        // not need to perform this computation again.
+        if(m_validated)
+        {
+            return;
+        }
+
+        // Otherwise, pre-emptively assume it is no longer valid.
+        m_validated = false;
+
         boolean visitedStart = false,
                 visitedFinal = false;
 
@@ -138,13 +157,20 @@ public class TMachine implements Serializable
             for(TM_Transition tr : transitions)
             {
                 char c = tr.getSymbol();
+                // Undefined
                 if(c == UNDEFINED_SYMBOL)
                 {
                     throw new NondeterministicException("State " + st.getLabel() + " has an undefined transition");
                 }
+                // Duplicate
                 if(usedSymbols.contains(c))
                 {
                     throw new NondeterministicException("State " + st.getLabel() + " has a duplicate transition for the input " + c);
+                }
+                // Not in the alphabet
+                if(!m_alphabet.containsSymbol(c))
+                {
+                    throw new NondeterministicException("State " + st.getLabel() + " has a transition with an unknown input " + c);
                 }
                 usedSymbols.add(c);
             }
@@ -159,8 +185,10 @@ public class TMachine implements Serializable
         {
             throw new NondeterministicException("Machine has no final state");
         }
-    }
 
+        // Our machine is valid
+        m_validated = true;
+    }
 
     /** 
      * Given the current execution state and tape, perform the current action, and update the state.
@@ -184,7 +212,7 @@ public class TMachine implements Serializable
 
         if (currentNextTransition != null)
         {
-            // TODO: Justify this conditional
+            // Sanity check
             if (currentState.getTransitions().contains(currentNextTransition))
             {
                 currentNextTransition.getAction().performAction(tape);
@@ -250,13 +278,15 @@ public class TMachine implements Serializable
         return null;
     }
     
-    // Methods to update/modify the machine:
     /**
      * Add a state to the machine.
      * @param state The state to add.
      */
     public void addState(TM_State state)
     {
+        // Adding a new state potentially makes our machine invalid.
+        invalidate();
+        
         m_states.add(state);
     }
     
@@ -267,6 +297,9 @@ public class TMachine implements Serializable
      */
     public boolean deleteState(TM_State state)
     {
+        // Removing an existing state potentially makes our machine invalid.
+        invalidate();
+        
         if (m_states.remove(state))
         {
             removeTransitionsConnectedTo(state);
@@ -282,6 +315,9 @@ public class TMachine implements Serializable
      */
     public void addTransition(TM_Transition transition)
     {
+        // Adding transitions potentially makes our machine invalid.
+        invalidate();
+
         m_transitions.add(transition);
         transition.getFromState().addTransition(transition);
     }
@@ -294,6 +330,9 @@ public class TMachine implements Serializable
      */
     public boolean deleteTransition(TM_Transition transition)
     {
+        // Removing transitions from a valid machine preserves validity; 
+        // resetting m_validated is not necessary.
+        
         if (m_transitions.remove(transition))
         {
             transition.getFromState().removeTransition(transition);
@@ -308,6 +347,9 @@ public class TMachine implements Serializable
      */
     private void removeTransitionsConnectedTo(TM_State state)
     {
+        // Removing transitions from a valid machine preserves validity;
+        // invalidation is not necessary.
+
         for (Iterator<TM_Transition> i = m_transitions.iterator(); i.hasNext(); )
         {
             TM_Transition current = i.next();
@@ -319,7 +361,6 @@ public class TMachine implements Serializable
         }
     }
     
-    // Static methods for serialization:
     /** 
      * Serialize a machine, and write it to persistent storage.
      * @param machine The machine to serialize.
@@ -373,7 +414,6 @@ public class TMachine implements Serializable
         return returner;
    }
     
-    // Methods related to graphics and user interface interaction:
     /** 
      * Render the machine to a graphics object.
      * @param g The graphics object to render to.
@@ -407,6 +447,7 @@ public class TMachine implements Serializable
     public TM_State getStateClickedOn(int clickX, int clickY)
     {
         TM_State returner = null;
+        
         // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
         for (TM_State state : m_states)
         {
@@ -428,6 +469,7 @@ public class TMachine implements Serializable
     public TM_State getStateNameClickedOn(Graphics g, int clickX, int clickY)
     {
         TM_State returner = null;
+        
         // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
         for (TM_State state : m_states)
         {
@@ -449,6 +491,7 @@ public class TMachine implements Serializable
     public TM_Transition getTransitionClickedOn(int clickX, int clickY, Graphics g)
     {
         TM_Transition returner = null;
+        
         // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
         for (TM_Transition transition : m_transitions)
         {
@@ -533,6 +576,9 @@ public class TMachine implements Serializable
      */
     public void removeInconsistentTransitions(TMGraphicsPanel panel)
     {
+        // Removing inconsistent transitions preserves validity;
+        // invalidation is not necessary.
+
         ArrayList<TM_Transition> purge = new ArrayList<TM_Transition>();
         for (TM_Transition t: m_transitions)
         {
@@ -658,4 +704,10 @@ public class TMachine implements Serializable
      * The alphabet for the machine.
      */
     private Alphabet m_alphabet;
+
+    /**
+     * Determine if this machine has been deemed valid or not.  Will be set to true after successful
+     * calls to validate(), and set to false after mutations have occured to the machine.
+     */
+    private transient boolean m_validated = false;
 }

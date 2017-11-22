@@ -1435,8 +1435,6 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                 if (gfxPanel != null)
                 {
-                    // Ensure validity first
-                    gfxPanel.getSimulator().getMachine().validate();
                     gfxPanel.getSimulator().step();
                     tapeDisp.repaint();
                 }

@@ -33,7 +33,7 @@ import java.util.*;
 import javax.swing.*;
 
 /**
- * Represents a state (node) in a Turing machine.
+ * Represents a state in a Turing machine.
  * @author Jimmy
  */
 public class TM_State implements Serializable
@@ -47,21 +47,7 @@ public class TM_State implements Serializable
      * Distance of graphical text below picture of the state.
      */
     public static final int TEXT_DISTANCE = 15; 
-    
-    /**
-     * Creates a new instance of TM_State.
-     * @param label The label for the state.
-     * @param startState Whether or not this state is the start state.
-     * @param finalState Whether or not this state is the final state.
-     */
-    public TM_State(String label, boolean startState, boolean finalState)
-    {
-        m_label = label;
-        m_startState = startState;
-        m_finalState = finalState;
-        m_transitions = new ArrayList<TM_Transition>();
-    }
-    
+ 
     /**
      * Creates a new instance of TM_State, with a specified location.
      * @param label The label for the state.
@@ -81,7 +67,19 @@ public class TM_State implements Serializable
     }
     
     /**
-     * Determine if this state is the start state.
+     * Creates a new instance of TM_State.
+     * @param label The label for the state.
+     * @param startState Whether or not this state is the start state.
+     * @param finalState Whether or not this state is the final state.
+     */
+    public TM_State(String label, boolean startState, boolean finalState)
+    {
+        this(label, startState, finalState, 0, 0);
+    }
+    
+    /**
+     * Determine if this state is the start state. Does not guarantee uniqueness, unless the owning
+     * machine is valid.
      * @return true if this is the start state, false otherwise.
      */
     public boolean isStartState()
@@ -99,7 +97,8 @@ public class TM_State implements Serializable
     }
     
     /**
-     * Determine if this state is the final state.
+     * Determine if this state is the final state. Does not guarantee uniqueness, unless the owning
+     * machine is valid.
      * @return true if this is the final state, false otherwise.
      */
     public boolean isFinalState()
@@ -179,7 +178,7 @@ public class TM_State implements Serializable
      */
     public boolean isSubmachine()
     {
-        return (m_subMachine != null);
+        return m_subMachine != null;
     }
     
     /**
@@ -192,7 +191,6 @@ public class TM_State implements Serializable
         return m_subMachine;
     }
     
-    // Graphics-related methods:    
     /**
      * Get the spatial X ordinate of the object on the viewing plane.
      * @return The X ordinate of this object on the viewing plane.
@@ -328,10 +326,10 @@ public class TM_State implements Serializable
     /**
      * The X ordinate of this state, relative to the window.
      */
-    protected int m_windowX = 0;
+    protected int m_windowX;
     
     /**
      * The Y ordinate of this state, relative to the window.
      */
-    protected int m_windowY = 0;
+    protected int m_windowY;
 }
