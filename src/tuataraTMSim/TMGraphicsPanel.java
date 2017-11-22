@@ -63,8 +63,6 @@ public class TMGraphicsPanel extends JPanel
      */
     public TMGraphicsPanel(TMachine machine, Tape tape, File file, MainWindow mainWindow)
     {
-        m_machine = machine;
-        m_tape = tape;
         m_sim = new TM_Simulator(machine, tape);
         m_file = file;
         m_labelsUsed = machine.createLabelsHashtable();
@@ -106,7 +104,7 @@ public class TMGraphicsPanel extends JPanel
      */
     public Alphabet getAlphabet()
     {
-        return m_machine.getAlphabet();
+        return m_sim.getMachine().getAlphabet();
     }
 
     /**
@@ -133,7 +131,7 @@ public class TMGraphicsPanel extends JPanel
             g2d.draw(new Ellipse2D.Float(currentState.getX() - 5, currentState.getY() - 5, TM_State.STATE_RENDERING_WIDTH + 10, TM_State.STATE_RENDERING_WIDTH + 10));
         }
 
-        m_machine.paint(g, selectedStates, selectedTransitions, m_sim);
+        m_sim.getMachine().paint(g, selectedStates, selectedTransitions, m_sim);
         if (m_currentMode == TM_GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
         {
             if (!(drawPosX == Integer.MIN_VALUE) || !(drawPosY == Integer.MIN_VALUE))
@@ -241,8 +239,8 @@ public class TMGraphicsPanel extends JPanel
                         break;
                     }
                 }
-                if (m_machine.getStateClickedOn(e.getX(), e.getY())!= null ||
-                    m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
+                if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY())!= null ||
+                    m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
                 {
                     setModifiedSinceSave(true);
                 }
@@ -430,7 +428,7 @@ public class TMGraphicsPanel extends JPanel
      */
     private boolean clickStateName(MouseEvent e)
     {
-        TM_State nameClicked = m_machine.getStateNameClickedOn(getGraphics(),e.getX(), e.getY());
+        TM_State nameClicked = m_sim.getMachine().getStateNameClickedOn(getGraphics(),e.getX(), e.getY());
         if (nameClicked == null)
         {
             return false;
@@ -471,7 +469,7 @@ public class TMGraphicsPanel extends JPanel
      */
     private boolean selectCharacterByClicking(MouseEvent e)
     {
-        TM_Transition transitionClicked = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+        TM_Transition transitionClicked = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
         if (transitionClicked != null)
         {
             Shape s1 = transitionClicked.getInputSymbolBoundingBox(getGraphics());
@@ -504,7 +502,7 @@ public class TMGraphicsPanel extends JPanel
      */
     private void handleAddNodesClick(MouseEvent e)
     {
-        if (m_machine.getStateClickedOn(e.getX(), e.getY()) != null)
+        if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY()) != null)
         {
             // Adding states on top of states is not allowed
             handleSelectionClick(e);
@@ -524,14 +522,14 @@ public class TMGraphicsPanel extends JPanel
      */
     public void handleEraserClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
             deleteState(stateClickedOn);
         }
         else
         {
-            TM_Transition transitionClickedOn = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            TM_Transition transitionClickedOn = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
             if (transitionClickedOn != null)
             {
                 deleteTransition(transitionClickedOn);
@@ -564,11 +562,11 @@ public class TMGraphicsPanel extends JPanel
      */
     private void handleChooseStartClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
 
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleStartStateCommand(this, m_machine.getStartState(), stateClickedOn));
+            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
         }
     }
     
@@ -579,10 +577,10 @@ public class TMGraphicsPanel extends JPanel
      */
     private void handleChooseAcceptingClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleAcceptingStateCommand(this, m_machine.getFinalState(), stateClickedOn));
+            doCommand(new ToggleAcceptingStateCommand(this, m_sim.getMachine().getFinalState(), stateClickedOn));
         }
     }
     
@@ -593,7 +591,7 @@ public class TMGraphicsPanel extends JPanel
      */
     private void handleSelectionClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         
         if (!(e.isControlDown() || e.isShiftDown()))
         {
@@ -607,33 +605,7 @@ public class TMGraphicsPanel extends JPanel
                 selectedStates.add(stateClickedOn);
             }
         }
-        selectedTransitions = m_machine.getSelectedTransitions(selectedStates);
-    }
-   
-    /**
-     * Scheduled for removal.
-     * @param e The generating event.
-     */
-    private void handleChooseNextTransitionClick(MouseEvent e)
-    {
-        // TODO: Remove the ability to choose edges
-        return;
-        /*
-        TM_Transition transitionClickedOn = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-        if (transitionClickedOn != null)
-        {
-            if (m_tape != null)
-            {
-                if (transitionClickedOn.getSymbol() != m_tape.read())
-                {
-                    // Can't select this one
-                    return;
-                }
-            }
-            this.getSimulator().setCurrentNextTransition(transitionClickedOn);
-            repaint();
-        }
-        */
+        selectedTransitions = m_sim.getMachine().getSelectedTransitions(selectedStates);
     }
 
     /**
@@ -643,7 +615,7 @@ public class TMGraphicsPanel extends JPanel
      */
     private void handleChooseCurrentState(MouseEvent e)
     {
-        TM_State stateClickedOn = m_machine.getStateClickedOn(e.getX(), e.getY());
+        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
 
         if (stateClickedOn != null)
         {
@@ -665,7 +637,7 @@ public class TMGraphicsPanel extends JPanel
         }
         else
         {
-            mousePressedState = m_machine.getStateClickedOn(e.getX(), e.getY());
+            mousePressedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         }
         if (mousePressedState != null) // Mouse press on a state
         {
@@ -676,13 +648,13 @@ public class TMGraphicsPanel extends JPanel
             moveStateLastLocationY = mousePressedState.getY();
             moveStateStartLocationX = mousePressedState.getX();
             moveStateStartLocationY = mousePressedState.getY();
-            m_transitionsToMoveState = m_machine.getTransitionsTo(mousePressedState);
+            m_transitionsToMoveState = m_sim.getMachine().getTransitionsTo(mousePressedState);
             precomputeSelectedTransitionsToDrag();
             return;
         }
         else
         {
-            mousePressedTransition = m_machine.getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            mousePressedTransition = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
             if (mousePressedTransition != null) // Mouse press on a transition
             {
                 setModifiedSinceSave(true);
@@ -715,7 +687,7 @@ public class TMGraphicsPanel extends JPanel
     {
         if (m_currentMode == TM_GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
         {
-            TM_State mouseReleasedState = m_machine.getStateClickedOn(e.getX(), e.getY());
+            TM_State mouseReleasedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
             if (mouseReleasedState != null)
             {
                 doCommand(new AddTransitionCommand(this,
@@ -928,7 +900,7 @@ public class TMGraphicsPanel extends JPanel
         int width = Math.abs(selectionBoxStartX - selectionBoxEndX);
         int height = Math.abs(selectionBoxStartY - selectionBoxEndY);
         
-        HashSet<TM_State> states = m_machine.getSelectedStates(topLeftX, topLeftY, width, height);
+        HashSet<TM_State> states = m_sim.getMachine().getSelectedStates(topLeftX, topLeftY, width, height);
         
         if (selectionConcatenateMode)
         {
@@ -938,7 +910,7 @@ public class TMGraphicsPanel extends JPanel
         {
             selectedStates = states;
         }
-        selectedTransitions = m_machine.getSelectedTransitions(selectedStates);
+        selectedTransitions = m_sim.getMachine().getSelectedTransitions(selectedStates);
     }
    
     /**
@@ -1064,7 +1036,7 @@ public class TMGraphicsPanel extends JPanel
         {
             ArrayList<TM_Transition> out = s.getTransitions();
             outTransitions.addAll(out);
-            ArrayList<TM_Transition> in = m_machine.getTransitionsTo(s);
+            ArrayList<TM_Transition> in = m_sim.getMachine().getTransitionsTo(s);
             inTransitions.addAll(in);
         }
     }
@@ -1442,16 +1414,6 @@ public class TMGraphicsPanel extends JPanel
     }
     
     /**
-     * The underlying machine.
-     */
-    private TMachine m_machine;
-
-    /**
-     * The tape used by the machine.
-     */
-    private Tape m_tape;
-    
-    /**
      * The current GUI mode.
      */
     private TM_GUI_Mode m_currentMode;
@@ -1509,7 +1471,7 @@ public class TMGraphicsPanel extends JPanel
     private boolean m_modifiedSinceSave = false;
     
     /**
-     * The underlying machine simulator.
+     * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
      */
     private TM_Simulator m_sim;
     
@@ -1528,7 +1490,6 @@ public class TMGraphicsPanel extends JPanel
      */
     private MainWindow m_mainWindow;
     
-    // State information for clicking and dragging interactions with the panel:
     /**
      *  The state we last pressed a mouse button on.
      */
