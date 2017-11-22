@@ -379,25 +379,33 @@ public class TMGraphicsPanel extends JPanel
                 {
                     if (e.getKeyCode() == KeyEvent.VK_LEFT)
                     {
-                        doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(-1, selectedTransition.getSymbol(), c)));
+                        doCommand(new ModifyTransitionActionCommand(this, selectedTransition,
+                                    new TM_Action(-1, selectedTransition.getAction().getInputChar(), c)));
                     }
                     else
                     if (e.getKeyCode() == KeyEvent.VK_RIGHT)
                     {
-                        doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(1, selectedTransition.getSymbol(), c)));
+                        doCommand(new ModifyTransitionActionCommand(this, selectedTransition, 
+                                    new TM_Action(1, selectedTransition.getAction().getInputChar(), c)));
                     }
                 }
                 else if (c == 'E' && e.isShiftDown()) //shift + E makes an epsilon transition
                 {
-                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), TMachine.EMPTY_ACTION_SYMBOL)));
+                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition, 
+                                new TM_Action(0, selectedTransition.getAction().getInputChar(),
+                                TMachine.EMPTY_ACTION_SYMBOL)));
                 }
                 else if (Character.isLetterOrDigit(c)  && getAlphabet().containsSymbol(c))
                 {
-                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), c)));
+                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition, 
+                                new TM_Action(0, selectedTransition.getAction().getInputChar(), 
+                                c)));
                 }
                 else if ((c == ' ' || c == Tape.BLANK_SYMBOL) && getAlphabet().containsSymbol(Tape.BLANK_SYMBOL))
                 {
-                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition, new TM_Action(0, selectedTransition.getSymbol(), Tape.BLANK_SYMBOL)));
+                    doCommand(new ModifyTransitionActionCommand(this, selectedTransition,
+                                new TM_Action(0, selectedTransition.getAction().getInputChar(),
+                                Tape.BLANK_SYMBOL)));
                 }
                 else if (Character.isLetterOrDigit(c))
                 {
@@ -690,11 +698,8 @@ public class TMGraphicsPanel extends JPanel
             TM_State mouseReleasedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
             if (mouseReleasedState != null)
             {
-                doCommand(new AddTransitionCommand(this,
-                        new TM_Transition(mousePressedState, mouseReleasedState,
-                        TMachine.UNDEFINED_SYMBOL, new TM_Action(0,
-                        TMachine.UNDEFINED_SYMBOL, TMachine.EMPTY_ACTION_SYMBOL))));
-
+                TM_Transition newTrans = new TM_Transition(mousePressedState, mouseReleasedState, TM_Action.DEFAULT_ACTION);
+                doCommand(new AddTransitionCommand(this, newTrans));
                 repaint();
             }
         }

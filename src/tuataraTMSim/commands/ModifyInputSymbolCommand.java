@@ -45,7 +45,7 @@ public class ModifyInputSymbolCommand implements TMCommand
         m_panel = panel;
         m_transition = transition;
         m_symbol = symbol;
-        m_oldSymbol = m_transition.getSymbol();
+        m_oldSymbol = m_transition.getAction().getInputChar();
     }
     
     /**
@@ -53,7 +53,7 @@ public class ModifyInputSymbolCommand implements TMCommand
      */
     public void doCommand()
     {
-        m_transition.setSymbol(m_symbol);
+        m_transition.getAction().setInputChar(m_symbol);
         m_panel.getSimulator().computeNextTransition();
     }
     
@@ -62,7 +62,7 @@ public class ModifyInputSymbolCommand implements TMCommand
      */
     public void undoCommand()
     {
-        m_transition.setSymbol(m_oldSymbol);
+        m_transition.getAction().setInputChar(m_oldSymbol);
         m_panel.getSimulator().computeNextTransition();
     }
     

@@ -232,7 +232,7 @@ public class TM_Simulator
         TM_Transition nextTransition = null;
         
         // No state, no transitions
-        if(getCurrentState() == null)
+        if (getCurrentState() == null)
         {
             m_currentNextTransition = null;
             return;
@@ -243,14 +243,16 @@ public class TM_Simulator
        
         for (TM_Transition t : out)
         {
+            char inp = t.getAction().getInputChar();
+
             // An exact, guaranteed unique match
-            if (t.getSymbol() == currentInputSymbol)
+            if (inp == currentInputSymbol)
             {
                 m_currentNextTransition = t;
                 return;
             }
             // A non-exact match; we will keep track of this
-            else if (t.getSymbol() == TMachine.OTHERWISE_SYMBOL)
+            else if (inp == TMachine.OTHERWISE_SYMBOL)
             {
                 nextTransition = t;
             }

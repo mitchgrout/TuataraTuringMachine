@@ -42,6 +42,12 @@ import tuataraTMSim.exceptions.TapeBoundsException;
 public class TM_Action implements Serializable
 {
     /**
+     * The default action for new transitions.
+     */
+    public static final TM_Action DEFAULT_ACTION = 
+        new TM_Action(0, TMachine.UNDEFINED_SYMBOL, TMachine.UNDEFINED_SYMBOL);
+
+    /**
      * Character representing a left-shift to the read/write head of the tape.
      */
     public static final char LEFT_ARROW = (char)0x2190;
@@ -59,8 +65,9 @@ public class TM_Action implements Serializable
      * */
     public TM_Action(int dir, char inputSymbol, char outputSymbol)
     {
-        m_direction = (byte)dir;
-        m_writeChar = outputSymbol;
+        // NOTE: We use setDirection instead of directly setting m_direction, as it sanitizes input
+        setDirection(dir);
+        m_outputChar = outputSymbol;
         m_inputChar = inputSymbol;
     }
     
@@ -80,9 +87,9 @@ public class TM_Action implements Serializable
         {
             t.headRight();
         }
-        else if (m_writeChar != TMachine.EMPTY_ACTION_SYMBOL)
+        else if (m_outputChar != TMachine.EMPTY_ACTION_SYMBOL)
         {
-            t.write(m_writeChar);
+            t.write(m_outputChar);
         }
     }
     
@@ -97,15 +104,67 @@ public class TM_Action implements Serializable
     {
         return m_direction;
     }
-    
+
+    /**
+     * Set the direction the head moves for this action.
+     * -1: left
+     *  0: don't move the head
+     *  1: right
+     *  @param dir The direction the head should move.
+     */
+    public void setDirection(int dir)
+    {
+        // Sanitize our input, just in case.
+        if(dir < 0)
+        {
+            m_direction = -1;
+        }
+        else if(dir > 0)
+        {
+            m_direction = 1;
+        }
+        else
+        {
+            dir = 0;
+        }
+    }
+
+    /**
+     * Gets the character that must be read from the tape in order for the action to occur.
+     * @return The input character for this action.
+     */
+    public char getInputChar()
+    {
+        return m_inputChar;
+    }
+
+    /**
+     * Set the input character for this action.
+     * @param c The new input character.
+     */
+    public void setInputChar(char c)
+    {
+        m_inputChar = c;
+    }
+ 
     /**
      * Gets the character that this action will write to the tape.
      * This is only used if the direction is 0 (does not move the head).
      * @return The value to be written to the tape.
      */
-    public char getChar()
+    public char getOutputChar()
     {
-        return m_writeChar;
+        return m_outputChar;
+    }
+
+    /**
+     * Set the character that this action will write to the tape. 
+     * This is only used if the direction is 0 (does not move the head).
+     * @param c The new value to be written to the tape.
+     */
+    public void setOutputChar(char c)
+    {
+        m_outputChar = c;
     }
     
     /**
@@ -114,7 +173,7 @@ public class TM_Action implements Serializable
      */
     public boolean movesHead()
     {
-        return (m_direction == -1 || m_direction == 1);
+        return m_direction != 0;
     }
     
     /**
@@ -152,7 +211,7 @@ public class TM_Action implements Serializable
                 outputStr += LEFT_ARROW;
                 break;
             case 0:
-                outputStr += m_writeChar;
+                outputStr += m_outputChar;
                 break;
             case 1:
                 outputStr += RIGHT_ARROW;
@@ -160,28 +219,19 @@ public class TM_Action implements Serializable
         }
         return outputStr;
     }
-   
-    /**
-     * Set the input symbol for this action.
-     * @param c The new input symbol.
-     */
-    public void setInputSymbol(char c)
-    {
-        m_inputChar = c;
-    }
-    
+      
     /**
      * The direction the read/write head should move. Is exactly one of { -1, 0, +1 }
      */
     private byte m_direction;
 
     /**
-     * The character that should be written to the tape if m_direction is zero.
-     */
-    private char m_writeChar;
-    
-    /**
      * The character that must be read from the tape for this action to occur.
      */
     private char m_inputChar;
+
+    /**
+     * The character that should be written to the tape if m_direction is zero.
+     */
+    private char m_outputChar;
 }

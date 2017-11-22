@@ -93,10 +93,14 @@ public class TMachine implements Serializable
     }
 
     /**
-     * Ensures this TMachine is valid. This means there is a unique start and final state, there are
-     * no duplicate transitions, there are no undefined transitions, all transitions are within our
-     * alphabet, and the final state has no transitions leaving it. Should be called before a
-     * machine is run.
+     * Ensures this TMachine is valid. This must include the following checks:
+     * - There is a unique start state.
+     * - There is a unique halt state.
+     * - No state has more than one transition for every symbol in the alphabet, including ?.
+     * - No state has a transition with input !.
+     * - No state has a transition with action !.
+     * - No state has a transition with input outside the alphabet.
+     * - No state has a transition with action outside the alphabet.
      * @throws NondeterministicException If the machine is considered nondeterministic, i.e. any of
      *                                   the prior conditions are violated.
      */
@@ -152,27 +156,41 @@ public class TMachine implements Serializable
                 }
             }
 
-            // Ensure no transitions are undefined (TMachine.UNDEFINED_SYMBOL), and no duplicate transitions
+            // Ensure no transitions are undefined (TMachine.UNDEFINED_SYMBOL), no duplicate transitions,
+            // no transitions outside of our alphabet.
             ArrayList<Character> usedSymbols = new ArrayList<Character>();
             for(TM_Transition tr : transitions)
             {
-                char c = tr.getSymbol();
-                // Undefined
-                if(c == UNDEFINED_SYMBOL)
+                // Get input/output for this transition
+                char inp = tr.getAction().getInputChar();
+                char out = tr.getAction().getOutputChar();
+
+                // Undefined input
+                if(inp == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException("State " + st.getLabel() + " has an undefined transition");
+                    throw new NondeterministicException("Transition " + tr.toString() + " has an undefined input.");
                 }
-                // Duplicate
-                if(usedSymbols.contains(c))
+                // Undefined output
+                if(out == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException("State " + st.getLabel() + " has a duplicate transition for the input " + c);
+                    throw new NondeterministicException("Transition " + tr.toString() + " has an undefined action.");
                 }
-                // Not in the alphabet
-                if(!m_alphabet.containsSymbol(c))
+                // Duplicate input
+                if(usedSymbols.contains(inp))
                 {
-                    throw new NondeterministicException("State " + st.getLabel() + " has a transition with an unknown input " + c);
+                    throw new NondeterministicException("State " + st.getLabel() + " has a more than one transition with input " + inp + ".");
                 }
-                usedSymbols.add(c);
+                // Input not in the alphabet
+                if(!m_alphabet.containsSymbol(inp))
+                {
+                    throw new NondeterministicException("Transition " + tr.toString() + " has an input which is not in the alphabet.");
+                }
+                // Output not in the alphabet
+                if(tr.getAction().movesHead() && !m_alphabet.containsSymbol(out))
+                {
+                    throw new NondeterministicException("Transition " + tr.toString() + " has an action which is not in the alphabet.");
+                }
+                usedSymbols.add(inp);
             }
         }
 
@@ -539,7 +557,39 @@ public class TMachine implements Serializable
     {
         m_alphabet = alphabet;
     }
-    
+   
+    /**
+     * Determine whether a given action is consistent with an alphabet.
+     * @param act The action to test the consistency of.
+     * @param alph The alphabet to test against.
+     * @return true if the action is considered consistent with the alphabet, i.e. does not contain
+     *         input or output which is not present in the alphabet and is not a special character,
+     *         false otherwise.
+     */
+    private boolean isConsistentWithAlphabet(TM_Action act, Alphabet alph)
+    {
+        char inp = act.getInputChar();
+        char out = act.getOutputChar();
+
+        // Determine if input is inconsistent
+        if (!alph.containsSymbol(inp) &&
+            inp != TMachine.UNDEFINED_SYMBOL &&
+            inp != TMachine.OTHERWISE_SYMBOL)
+        {
+            return false;
+        }
+        // Determine if action is inconsistent
+        else if (act.movesHead() &&
+                 !alph.containsSymbol(out) &&
+                 out != TMachine.UNDEFINED_SYMBOL &&
+                 out != TMachine.EMPTY_ACTION_SYMBOL)
+        {
+            return false;
+        }
+        // Otherwise consistent
+        return true;
+    }
+
     /** 
      * Determine if this machine is consistent with the alphabet, i.e. does not have any transitions
      * with inputs not present in the alphabet.
@@ -551,18 +601,7 @@ public class TMachine implements Serializable
         for (TM_Transition t: m_transitions)
         {
             TM_Action act = t.getAction();
-            if (!a.containsSymbol(t.getSymbol()) &&
-                t.getSymbol() != TMachine.UNDEFINED_SYMBOL &&
-                t.getSymbol() != TMachine.EMPTY_ACTION_SYMBOL &&
-                t.getSymbol() != TMachine.OTHERWISE_SYMBOL)
-            {
-                return false;
-            }
-            else if (act.getDirection() == 0 &&
-                     !a.containsSymbol(act.getChar()) &&
-                     act.getChar() != TMachine.UNDEFINED_SYMBOL &&
-                     act.getChar() != TMachine.EMPTY_ACTION_SYMBOL &&
-                     act.getChar() != TMachine.OTHERWISE_SYMBOL)
+            if(!isConsistentWithAlphabet(act, a))
             {
                 return false;
             }
@@ -583,23 +622,11 @@ public class TMachine implements Serializable
         for (TM_Transition t: m_transitions)
         {
             TM_Action act = t.getAction();
-            if (!m_alphabet.containsSymbol(t.getSymbol()) &&
-                t.getSymbol() != TMachine.EMPTY_ACTION_SYMBOL &&
-                t.getSymbol() != TMachine.UNDEFINED_SYMBOL &&
-                t.getSymbol() != TMachine.OTHERWISE_SYMBOL)
-            {
-                purge.add(t);
-            }
-            else if (act.getDirection() == 0 &&
-                    !m_alphabet.containsSymbol(act.getChar()) &&
-                    act.getChar() != TMachine.EMPTY_ACTION_SYMBOL &&
-                    act.getChar() != TMachine.UNDEFINED_SYMBOL &&
-                    act.getChar() != TMachine.OTHERWISE_SYMBOL)
+            if(!isConsistentWithAlphabet(act, m_alphabet))
             {
                 purge.add(t);
             }
         }
-        
         panel.doCommand(new RemoveInconsistentTransitionsCommand(panel, purge));
     }
     
