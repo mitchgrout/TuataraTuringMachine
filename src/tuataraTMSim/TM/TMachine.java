@@ -157,7 +157,7 @@ public class TMachine implements Serializable
                     {
                         throw new NondeterministicException(String.format(
                                     "Machine has a transition leaving the final state leaving %s.",
-                                    st.getLabel()); 
+                                    st.getLabel())); 
                     }
                 }
                 // Duplicate final state
