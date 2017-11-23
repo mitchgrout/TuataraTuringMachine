@@ -698,7 +698,8 @@ public class TMGraphicsPanel extends JPanel
             TM_State mouseReleasedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
             if (mouseReleasedState != null)
             {
-                TM_Transition newTrans = new TM_Transition(mousePressedState, mouseReleasedState, TM_Action.DEFAULT_ACTION);
+                TM_Transition newTrans = new TM_Transition(mousePressedState, mouseReleasedState,
+                        new TM_Action(0, TMachine.UNDEFINED_SYMBOL, TMachine.UNDEFINED_SYMBOL));
                 doCommand(new AddTransitionCommand(this, newTrans));
                 repaint();
             }
