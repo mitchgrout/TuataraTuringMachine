@@ -38,7 +38,15 @@ import tuataraTMSim.TMGraphicsPanel;
  * particular the set of states and transitions, but does not contain any configuration (execution
  * state) information. All simulation interaction should be done via TM_Simulator.  The machine is
  * not guaranteed to be deterministic at all times, but can be assured to be deterministic by
- * calling TMachine.validate()
+ * calling TMachine.validate().
+ * We will use the following definition for a Turing machine:
+ * M = (Q, d, q0, qf, X), where
+ * - Q is a finite set of states
+ * - X is a finite alphabet, consisting of input and tape characters.
+ * - d is a partial function, Q x X -> Q x (Y u {L,R})
+ * - q0 is the unique start state
+ * - qf is the unique halt state
+ * - d(qf, x) is undefined for all x in X
  * @author Jimmy
  */
 public class TMachine implements Serializable
@@ -96,6 +104,7 @@ public class TMachine implements Serializable
      * Ensures this TMachine is valid. This must include the following checks:
      * - There is a unique start state.
      * - There is a unique halt state.
+     * - No transitions leave the halt state.
      * - No state has more than one transition for every symbol in the alphabet, including ?.
      * - No state has a transition with input !.
      * - No state has a transition with action !.
@@ -134,7 +143,7 @@ public class TMachine implements Serializable
                 // Duplicate start state
                 else
                 {
-                    throw new NondeterministicException("Machine has more than one start state");
+                    throw new NondeterministicException("Machine has more than one start state.");
                 }
             }
 
@@ -146,13 +155,15 @@ public class TMachine implements Serializable
                     visitedFinal = true;
                     if(transitions.size() != 0)
                     {
-                        throw new NondeterministicException("Machine has a transition leaving the final state " + st.getLabel());
+                        throw new NondeterministicException(String.format(
+                                    "Machine has a transition leaving the final state leaving %s.",
+                                    st.getLabel()); 
                     }
                 }
                 // Duplicate final state
                 else
                 {
-                    throw new NondeterministicException("Machine has more than one final state");
+                    throw new NondeterministicException("Machine has more than one final state.");
                 }
             }
 
@@ -168,40 +179,46 @@ public class TMachine implements Serializable
                 // Undefined input
                 if(inp == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException("Transition " + tr.toString() + " has an undefined input.");
+                    throw new NondeterministicException(String.format(
+                                "Transition %s has an undefined input.", tr.toString()));
                 }
                 // Undefined output
                 if(out == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException("Transition " + tr.toString() + " has an undefined action.");
+                    throw new NondeterministicException(String.format(
+                                "Transition %s has an undefined action.", tr.toString()));
                 }
                 // Duplicate input
                 if(usedSymbols.contains(inp))
                 {
-                    throw new NondeterministicException("State " + st.getLabel() + " has a more than one transition with input " + inp + ".");
+                    throw new NondeterministicException(String.format(
+                                "State %s has more than one transition with input %c.", st.getLabel(), inp));
                 }
                 // Input not in the alphabet
                 if(!m_alphabet.containsSymbol(inp))
                 {
-                    throw new NondeterministicException("Transition " + tr.toString() + " has an input which is not in the alphabet.");
+                    throw new NondeterministicException(String.format(
+                                "Transition %s has an input which is not in the alphabet.", tr.toString()));
                 }
                 // Output not in the alphabet
                 if(tr.getAction().movesHead() && !m_alphabet.containsSymbol(out))
                 {
-                    throw new NondeterministicException("Transition " + tr.toString() + " has an action which is not in the alphabet.");
+                    throw new NondeterministicException(String.format(
+                                "Transition %s has an action which is not in the alphabet.", tr.toString()));
                 }
+                // Keep track of this symbol, to check for duplicate inputs.
                 usedSymbols.add(inp);
             }
         }
 
         if(!visitedStart)
         {
-            throw new NondeterministicException("Machine has no start state");
+            throw new NondeterministicException("Machine has no start state.");
         }
 
         if(!visitedFinal)
         {
-            throw new NondeterministicException("Machine has no final state");
+            throw new NondeterministicException("Machine has no final state.");
         }
 
         // Our machine is valid
