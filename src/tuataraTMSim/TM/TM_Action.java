@@ -42,12 +42,6 @@ import tuataraTMSim.exceptions.TapeBoundsException;
 public class TM_Action implements Serializable
 {
     /**
-     * The default action for new transitions.
-     */
-    public static final TM_Action DEFAULT_ACTION = 
-        new TM_Action(0, TMachine.UNDEFINED_SYMBOL, TMachine.UNDEFINED_SYMBOL);
-
-    /**
      * Character representing a left-shift to the read/write head of the tape.
      */
     public static final char LEFT_ARROW = (char)0x2190;
