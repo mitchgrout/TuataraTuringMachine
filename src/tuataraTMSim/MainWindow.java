@@ -472,7 +472,7 @@ public class MainWindow extends JFrame
                 KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
         m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
                 TM_GUI_Mode.CHOOSECURRENTSTATE, m_chooseCurrentStateIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F9,0));
+                KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
         
         m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", m_configureAlphabetIcon);
 
@@ -1435,8 +1435,6 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                 if (gfxPanel != null)
                 {
-                    // Ensure validity first
-                    gfxPanel.getSimulator().getMachine().validate();
                     gfxPanel.getSimulator().step();
                     tapeDisp.repaint();
                 }

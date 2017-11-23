@@ -54,6 +54,9 @@ public class ToggleStartStateCommand implements TMCommand
      */
     public void doCommand()
     {
+        // Changing the start state of a machine invalidates it.
+        m_panel.getSimulator().getMachine().invalidate();
+
         // If the old start is the new start, or there was no old start, we're simply toggling
         if(m_oldState == null || m_oldState.equals(m_newState))
         {
@@ -73,6 +76,9 @@ public class ToggleStartStateCommand implements TMCommand
      */
     public void undoCommand()
     {
+        // Changing the start state of a machine invalidates it.
+        m_panel.getSimulator().getMachine().invalidate();
+
         // If the old start is the new start, or there was no old start, we're simply toggling
         if(m_oldState == null || m_oldState.equals(m_newState))
         {

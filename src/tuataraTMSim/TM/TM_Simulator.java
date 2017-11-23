@@ -58,7 +58,8 @@ public class TM_Simulator
     public void step() throws TapeBoundsException, UndefinedTransitionException,
                               ComputationCompletedException, NondeterministicException
     {
-        // TODO: Prevent expensive calls to .validate()
+        // Validation is cached, so long as no invalidating mutations are made, so this is not an
+        // expensive call in general.
         m_machine.validate();
 
         if (m_state == null)
@@ -150,7 +151,7 @@ public class TM_Simulator
      */
     public boolean isHalted() throws NondeterministicException
     {
-        // TODO: Do we need to validate here?
+        // Guarantee that there is a unique halting state, hence guarantee the result makes sense.
         m_machine.validate();
         return m_state.isFinalState();
     }
@@ -164,7 +165,7 @@ public class TM_Simulator
      */
     public boolean isHaltedWithHeadParked() throws NondeterministicException
     {
-        // TODO: Do we need to validate here?
+        // Guarantee that there is a unique halting state, hence guarantee the result makes sense.
         m_machine.validate();
         return (isHalted() && m_tape.isParked());
     }
@@ -178,7 +179,6 @@ public class TM_Simulator
         return "\""+ m_tape.toString() + "\", " + m_state.getLabel();
     }
     
-    // Getter functions:    
     /**
      * Get the tape.
      * @return The current tape.
@@ -232,7 +232,7 @@ public class TM_Simulator
         TM_Transition nextTransition = null;
         
         // No state, no transitions
-        if(getCurrentState() == null)
+        if (getCurrentState() == null)
         {
             m_currentNextTransition = null;
             return;
@@ -243,14 +243,16 @@ public class TM_Simulator
        
         for (TM_Transition t : out)
         {
+            char inp = t.getAction().getInputChar();
+
             // An exact, guaranteed unique match
-            if (t.getSymbol() == currentInputSymbol)
+            if (inp == currentInputSymbol)
             {
                 m_currentNextTransition = t;
                 return;
             }
             // A non-exact match; we will keep track of this
-            else if (t.getSymbol() == TMachine.OTHERWISE_SYMBOL)
+            else if (inp == TMachine.OTHERWISE_SYMBOL)
             {
                 nextTransition = t;
             }

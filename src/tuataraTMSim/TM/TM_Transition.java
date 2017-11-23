@@ -77,15 +77,13 @@ public class TM_Transition implements Serializable
      * action.
      * @param fromState The state this transition leaves.
      * @param toState The state this transition arrives at.
-     * @param symbol The input symbol associated with this transition.
      * @param action The action associated with this transition.
      */
-    public TM_Transition(TM_State fromState, TM_State toState, char symbol, TM_Action action)
+    public TM_Transition(TM_State fromState, TM_State toState, TM_Action action)
     {
         m_fromState = fromState;
         m_toState = toState;
         m_action = action;
-        m_symbol = symbol;
         if (fromState != toState)
         {
             // This is using the top-left coordinates of the state's circle,
@@ -129,14 +127,14 @@ public class TM_Transition implements Serializable
     }
     
     /**
-     * Gets the input symbol for this transition.
-     * @return The input symbol associated with this transition.
+     * Set the action for this transition.
+     * @param action The new action.
      */
-    public char getSymbol()
+    public void setAction(TM_Action action)
     {
-        return m_symbol;
+        m_action = action;
     }
-    
+ 
     /**
      * Render the transition to a graphics object.
      * @param g The graphics object on which to render.
@@ -354,27 +352,7 @@ public class TM_Transition implements Serializable
         m_controlPtX = x;
         m_controlPtY = y;
     }
-   
-    /**
-     * Set the input symbol associated with the action.
-     * @param symbol The new input symbol.
-     */
-    public void setSymbol(char symbol)
-    {
-        m_symbol = symbol;
-        m_action.setInputSymbol(symbol);
-    }
-   
-    /**
-     * Set the action for this transition.
-     * @param action The new action.
-     */
-    public void setAction(TM_Action action)
-    {
-        // TODO: Do we need to update m_symbol? 
-        m_action = action;
-    }
-   
+     
     /**
      * Get the location of the arrow.
      * @return The location of the arrow.
@@ -466,7 +444,7 @@ public class TM_Transition implements Serializable
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int symbolWidth = metrics.charWidth('_');
         
-        Rectangle2D boundingBox = metrics.getStringBounds("" + m_symbol, g);
+        Rectangle2D boundingBox = metrics.getStringBounds("" + m_action.getInputChar(), g);
         boundingBox = new Rectangle2D.Double(boundingBox.getMinX(),
              boundingBox.getMinY(),
              symbolWidth  + 2 * SELECTED_SYMBOL_BOX_PAD_X,
@@ -520,7 +498,8 @@ public class TM_Transition implements Serializable
      */
     public String toString()
     {
-        return m_controlPtX + " " + m_controlPtY + " " + m_fromState.getLabel() + " " + m_toState.getLabel();
+        return String.format("%s -> %s [%s/%s]", m_fromState.getLabel(), m_toState.getLabel(),
+                                                 m_action.getInputChar(), m_action.getOutputChar());
     }
    
     /**
@@ -538,12 +517,6 @@ public class TM_Transition implements Serializable
      */
     private TM_Action m_action;
     
-    /**
-     * The input symbol associated with this transition.
-     */
-    private char m_symbol;
-    // TODO: Determine if this is necessary.
-
     /**
      * The X ordinate of the control point for the curve.
      */
