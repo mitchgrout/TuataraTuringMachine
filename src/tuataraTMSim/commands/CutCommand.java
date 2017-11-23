@@ -60,12 +60,12 @@ public class CutCommand implements TMCommand
     {
         for (TM_State s : m_selectedStates)
         {
-            deleteState(s);
+            CommandUtils.deleteState(m_panel, s);
         }
         
         for (TM_Transition t : m_selectedTransitions)
         {
-            deleteTransition(t);
+            CommandUtils.deleteTransition(m_panel, t);
         }
         
         m_panel.setSelectedStates(new HashSet<TM_State>()); // TODO: is this what should happen?
@@ -116,40 +116,6 @@ public class CutCommand implements TMCommand
     public String getName()
     {
         return "Cut";
-    }
-
-    /**
-     * A helper function which deletes a specified state from the machine.
-     * @param s The state to delete.
-     */
-    private void deleteState(TM_State s)
-    {
-        m_panel.getSimulator().getMachine().deleteState(s);
-        m_panel.removeLabelFromDictionary(s.getLabel());
-        
-        // Computation can't continue if we deleted the current state
-        if (m_panel.getSimulator().getCurrentState() == s)
-        {
-            m_panel.getSimulator().resetMachine();
-        }
-        else
-        {
-            m_panel.getSimulator().computeNextTransition();
-        }
-    }
-    
-    /**
-     * A helper function which deletes a specified transition from the machine.
-     * @param t The transition to delete.
-     */
-    private void deleteTransition(TM_Transition t)
-    {
-        m_panel.getSimulator().getMachine().deleteTransition(t);
-        if (t == m_panel.getSelectedTransition())
-        {
-            m_panel.deselectSymbol();
-        }
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
