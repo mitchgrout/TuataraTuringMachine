@@ -54,7 +54,7 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
     {
         for (TM_Transition t : m_purge)
         {
-            deleteTransition(t);
+            CommandUtils.deleteTransition(m_panel, t);
         }
     }
     
@@ -66,20 +66,6 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
         for (TM_Transition t : m_purge)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
-        }
-        m_panel.getSimulator().computeNextTransition();
-    }
-    
-    /**
-     * Helper function which deletes a specified transition from the machine.
-     * @param t The transition to delete.
-     */
-    private void deleteTransition(TM_Transition t)
-    {
-        m_panel.getSimulator().getMachine().deleteTransition(t);
-        if (t == m_panel.getSelectedTransition())
-        {
-            m_panel.deselectSymbol();
         }
         m_panel.getSimulator().computeNextTransition();
     }
