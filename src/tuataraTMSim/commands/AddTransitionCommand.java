@@ -26,6 +26,7 @@
 package tuataraTMSim.commands;
 
 import java.awt.geom.Point2D;
+import tuataraTMSim.Spline;
 import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_State;
 import tuataraTMSim.TM.TM_Transition;
@@ -115,15 +116,15 @@ public class AddTransitionCommand implements TMCommand
             // Note that these coordinates are based on the top left of the states.
             if (numTransitions % 2 == 1)
             {
-                Point2D cp = m_transition.getControlPointGivenMidpoint(new Point2D.Double(middleX
-                         + vectorNewX, middleY + vectorNewY), 
+                Point2D cp = Spline.getControlPointFromMidPoint(
+                        new Point2D.Double(middleX + vectorNewX, middleY + vectorNewY),
                         m_transition.getFromState(), m_transition.getToState());
                 m_transition.setControlPoint((int)cp.getX(), (int)cp.getY());
             }
             else
             {
-                Point2D cp = m_transition.getControlPointGivenMidpoint(new Point2D.Double(middleX
-                         - vectorNewX, middleY - vectorNewY), 
+                Point2D cp = Spline.getControlPointFromMidPoint(
+                        new Point2D.Double(middleX - vectorNewX, middleY - vectorNewY), 
                         m_transition.getFromState(), m_transition.getToState());
                 m_transition.setControlPoint((int)cp.getX(), (int)cp.getY());
             }

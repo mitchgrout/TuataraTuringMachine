@@ -30,6 +30,7 @@ import java.awt.geom.*;
 import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.util.Collection;
+import tuataraTMSim.Spline;
 
 /**
  * Represents a transition in a Turing machine.
@@ -136,6 +137,38 @@ public class TM_Transition implements Serializable
     }
  
     /**
+     * Get the location of the control point for the curve representing this transition, i.e. the
+     * point used to build the spline.
+     * @return The control point of the transition.
+     */
+    public Point2D getControlPoint()
+    {
+        return new Point2D.Double(m_controlPtX, m_controlPtY);
+    }
+    
+    /**
+     * Set the location of the control point for the curve representing this transition, i.e. the
+     * point used to build the spline.
+     * @param x The X ordinate of the control point, in viewplane space.
+     * @param y The Y ordinate of the control point, in viewplane space.
+     */
+    public void setControlPoint(int x, int y)
+    {
+        m_controlPtX = x;
+        m_controlPtY = y;
+    }
+
+    /**
+     * Get the midpoint of the spline representing the transition, i.e. the point sitting on the
+     * spline used to manipulate it. A wrapper to Spline.getMidPointFromControlPoint.
+     * @return The midpoint of the spline.
+     */
+    public Point2D getMidpoint()
+    {
+        return Spline.getMidPointFromControlPoint(getControlPoint(), m_fromState, m_toState);
+    }
+ 
+    /**
      * Render the transition to a graphics object.
      * @param g The graphics object on which to render.
      * @param selectedTransitions The set of transitions selected by the user.
@@ -143,8 +176,10 @@ public class TM_Transition implements Serializable
      */
     public void paint(Graphics g, Collection<TM_Transition> selectedTransitions, TM_Simulator simulator)
     {
-        final Color LIGHT_BLUE = new Color(0,0,0.5f);
+        // Get a 2d graphics object
         Graphics2D g2d = (Graphics2D)g;
+
+        // Choose color based off of this transitions state
         if (selectedTransitions.contains(this))
         {
             g2d.setColor(Color.RED);
@@ -157,46 +192,55 @@ public class TM_Transition implements Serializable
         {
             g2d.setColor(Color.BLUE);
         }
-        
+       
+        // Get the location of the action associated with this transition
         Point2D actionLocation = getActionLocation();
+
+        // An arc
         if (m_fromState != m_toState)
-        {         
-            QuadCurve2D curve = new QuadCurve2D.Float(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                    m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2, m_controlPtX, m_controlPtY,
-                    m_toState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                    m_toState.getY() + TM_State.STATE_RENDERING_WIDTH/2);
+        {
+            // Build and render the arc spline
+            QuadCurve2D curve = Spline.buildArcSpline(getControlPoint(), m_fromState, m_toState);
             g2d.draw(curve);
         }
+        // A loop
         else
         {
-            Point2D perpendicular1 = new Point2D.Float(-(m_controlPtY - (m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2)),
-                    m_controlPtX - (m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2));
+            // Get a perpendicular vector
+            Point2D perp = new Point2D.Double(
+                    -m_controlPtY + (m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH / 2),
+                     m_controlPtX - (m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH / 2));
 
-            double scaleFactor = TM_State.STATE_RENDERING_WIDTH * 1.5 / perpendicular1.distance(new Point2D.Float(0,0));
+            // Rescale our perpendicular vector by the scaling factor
+            double scaleFactor = 
+                TM_State.STATE_RENDERING_WIDTH * 1.5 / perp.distance(new Point2D.Float(0,0));
             AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-            
-            scale.transform(perpendicular1, perpendicular1);
-            
-            Point2D controlPoint1 = new Point2D.Float(m_controlPtX + (float)perpendicular1.getX(), 
-                    m_controlPtY + (float)perpendicular1.getY());
-            Point2D controlPoint2 = new Point2D.Float(m_controlPtX - (float)perpendicular1.getX(),
-                    m_controlPtY - (float)perpendicular1.getY());
-            
-            g2d.draw(new CubicCurve2D.Float(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                        m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2,
-                        (int)controlPoint1.getX(), (int)controlPoint1.getY(),
-                        (int)controlPoint2.getX(), (int)controlPoint2.getY(),
-                        m_toState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                        m_toState.getY() + TM_State.STATE_RENDERING_WIDTH/2));
+            scale.transform(perp, perp);
+
+            // Build the two control points for the rendered arc
+            Point2D controlPoint1 = new Point2D.Double(
+                    m_controlPtX + perp.getX(), 
+                    m_controlPtY + perp.getY());
+            Point2D controlPoint2 = new Point2D.Double(
+                    m_controlPtX - perp.getX(),
+                    m_controlPtY - perp.getY());
+           
+            // Build and render the loop spline
+            CubicCurve2D curve = Spline.buildLoopSpline(controlPoint1, controlPoint2, m_fromState);
+            g2d.draw(curve);
         }
+
+        boolean startEqualsEnd = 
+            ((int)m_fromState.getX() == (int)m_toState.getX() &&
+            ((int)m_fromState.getY() == (int)m_toState.getY()));
         
-        boolean startEqualsEnd = ((int)m_fromState.getX() == (int)m_toState.getX() &&
-                ((int)m_fromState.getY() == (int)m_toState.getY()));
-        
+        // TODO: Justify this conditional
         if (!startEqualsEnd || (m_fromState == m_toState))
         {
             paintArrowHead(g);
         }
+
+        // Render the action
         m_action.paint(g, (int)actionLocation.getX(), (int)actionLocation.getY());
     }
     
@@ -207,24 +251,36 @@ public class TM_Transition implements Serializable
      */
     public void paintArrowHead(Graphics g)
     {
+        // Get a 2d graphics object
         Graphics2D g2d = (Graphics2D)g;
+
+        // Change the line style 
         Stroke originalStroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
+        g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
+
+        // Get the midpoint of the curve
         Point2D arrowLoc = getMidpoint();
-        
-        Point2D tangentVector = getArrowTangentVector(arrowLoc);
+        // and the tangent vector associated with the midpoint
+        Point2D tangentVector = 
+            Spline.getMidPointTangentVector(getControlPoint(), arrowLoc, m_fromState, m_toState);
+       
+        // Get the magnitude of the tangent, and build a scale factor
         double length = tangentVector.distance(new Point2D.Double(0, 0));
         double scaleFactor = 1.0/length * ARROWHEAD_LENGTH;
+
+        // Build transforms for scaling, rotation, and translation
         AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
         AffineTransform rotateClockwise = AffineTransform.getRotateInstance(Math.PI/ 2.0 + Math.PI/4.5, arrowLoc.getX(), arrowLoc.getY());
         AffineTransform rotateAnticlockwise = AffineTransform.getRotateInstance(-(Math.PI/ 2.0 + Math.PI/4.5), arrowLoc.getX(), arrowLoc.getY());
         AffineTransform translateToEndpoint = AffineTransform.getTranslateInstance(arrowLoc.getX(), arrowLoc.getY());
         
+        // Copy the tangent vector, scale, translate, and rotate
         Point2D p1 = (Point2D)tangentVector.clone();
         scale.transform(p1, p1);
         translateToEndpoint.transform(p1, p1);
         rotateClockwise.transform(p1, p1);
         
+        // Copy the tangent vector, scale, translate, and rotate
         Point2D p2 = (Point2D)tangentVector.clone();
         scale.transform(p2, p2);
         translateToEndpoint.transform(p2, p2);
@@ -244,46 +300,21 @@ public class TM_Transition implements Serializable
      */
     private void drawTriangle(Graphics g, Point2D p1, Point2D p2, Point2D p3)
     {
-        GeneralPath triangle = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 3);
+        // Get a 2d graphics object
         Graphics2D g2d = (Graphics2D)g;
+
+        // Build the path
+        GeneralPath triangle = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 3);
         triangle.moveTo((float)p1.getX(), (float)p1.getY());
         triangle.lineTo((float)p2.getX(), (float)p2.getY());
         triangle.lineTo((float)p3.getX(), (float)p3.getY());
         triangle.lineTo((float)p1.getX(), (float)p1.getY());
+
+        // Render and fill the path
         g2d.draw(triangle);
         g2d.fill(triangle);
     }
    
-    /**
-     * Get a vector tangent to the transition's arrow.
-     * @param arrowLoc The location of the arrow.
-     * @return A vector tangent to arrowLoc.
-     */
-    private Point2D getArrowTangentVector(Point2D arrowLoc)
-    {
-        // Get the control point for the first half of the curve
-        Point2D controlPoint;
-        if (m_fromState != m_toState)
-        {
-            AffineTransform translate = AffineTransform.getTranslateInstance(0, -ACTION_TEXT_DISTANCE);
-            QuadCurve2D curve = new QuadCurve2D.Float(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                    m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2, m_controlPtX, m_controlPtY,
-                    m_toState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                    m_toState.getY() + TM_State.STATE_RENDERING_WIDTH/2);
-            curve.subdivide(curve, null);
-            controlPoint =  curve.getCtrlPt();
-        }
-        else
-        {
-            Point2D.Double startOfCurve = new Point2D.Double(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                    m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2);
-            Point2D vectorToArrow = new Point2D.Double(arrowLoc.getX() - startOfCurve.getX(), arrowLoc.getY() - startOfCurve.getY());
-            //get the vector orthogonal to it
-            return new Point2D.Double(-vectorToArrow.getY(), vectorToArrow.getX());
-        }
-        return new Point2D.Double(arrowLoc.getX() - controlPoint.getX(), arrowLoc.getY() - controlPoint.getY());
-    }
-    
     /**
      * Determine if the action associated with this transition contains the specified point.
      * @param x The X ordinate.
@@ -293,21 +324,30 @@ public class TM_Transition implements Serializable
      */
     public boolean actionContainsPoint(int x, int y, Graphics g)
     {
-        String actionString = m_action.toString();
+        // Object used to measure string dimensions using the graphics object
         FontMetrics metrics = g.getFontMetrics(g.getFont());
+        
+        // Assuming monospace, the width of a single character
         int symbolWidth = metrics.charWidth('_');
+
+        // Get the text representing the action
+        String actionString = m_action.toString();
         
-        Rectangle2D tempRect = metrics.getStringBounds(actionString, g);
-        Rectangle2D boundingBox = new Rectangle2D.Double(tempRect.getX(),
-                tempRect.getY(), actionString.length() * symbolWidth,
+        // Get the size of the action string, and create its bounding box
+        Rectangle2D actionDims = metrics.getStringBounds(actionString, g);
+        Rectangle2D boundingBox = new Rectangle2D.Double(
+                actionDims.getX(), actionDims.getY(),
+                actionString.length() * symbolWidth,
                 metrics.getHeight());
-        
+       
+        // Get the location of the action 
         Point2D actionLocation = getActionLocation();
-        
-        AffineTransform trans = AffineTransform.getTranslateInstance(actionLocation.getX()
-            - ((symbolWidth * actionString.length()) / 2), actionLocation.getY());
+   
+        // Translate to the correct position
+        AffineTransform trans = AffineTransform.getTranslateInstance(
+                actionLocation.getX() - ((symbolWidth * actionString.length()) / 2),
+                actionLocation.getY());
         Shape translated = trans.createTransformedShape(boundingBox);
-        
         return translated.contains(x, y);
     }
     
@@ -320,47 +360,36 @@ public class TM_Transition implements Serializable
      */
     public boolean arrowContainsPoint(int x, int y, Graphics g)
     {
-        String actionString = m_action.toString();
+        // Object used to measure string dimensions using the graphics object
         FontMetrics metrics = g.getFontMetrics(g.getFont());
-        
+
+        // Get the text representing the action
+        String actionString = m_action.toString();
+       
+        // Get the size of the action string
         Rectangle2D boundingBox = metrics.getStringBounds(actionString, g);
-        
-        Point2D arrowLocation = this.getMidpoint();
-        AffineTransform trans =
-            AffineTransform.getTranslateInstance(arrowLocation.getX() - metrics.stringWidth(actionString) / 2, arrowLocation.getY());
+       
+        // Get the midpoint of the spline
+        Point2D arrowLocation = getMidpoint();
+
+        // Translate to the correct position
+        AffineTransform trans = AffineTransform.getTranslateInstance(
+                arrowLocation.getX() - metrics.stringWidth(actionString) / 2,
+                arrowLocation.getY());
         Shape translated = trans.createTransformedShape(boundingBox);
-        
         return translated.contains(x, y);
     }
-   
+       
     /**
-     * Get the location of the control point for the curve representing this transition.
-     * @return The control point of the transition.
-     */
-    public Point2D getControlPoint()
-    {
-        return new Point2D.Float(m_controlPtX, m_controlPtY);
-    }
-    
-    /**
-     * Set the location of the control point for the curve representing this transition.
-     * @param x The X ordinate of the control point, in viewplane space.
-     * @param y The Y ordinate of the control point, in viewplane space.
-     */
-    public void setControlPoint(int x, int y)
-    {
-        m_controlPtX = x;
-        m_controlPtY = y;
-    }
-     
-    /**
-     * Get the location of the arrow.
-     * @return The location of the arrow.
+     * Get the midpoint of the spline, represented by the arrow on the transition..
+     * @return The location of the midpoint.
      */
     private Point2D getActionLocation()
     {
+        // Compute the location of the arrow, i.e. the midpoint
         Point2D arrowLoc = getMidpoint();
         
+        // A loop 
         if (m_fromState != m_toState)
         {
             AffineTransform translate = AffineTransform.getTranslateInstance(0, -ACTION_TEXT_DISTANCE);
@@ -368,71 +397,27 @@ public class TM_Transition implements Serializable
         }
         else
         {
-            Point2D startToMidpoint = new Point2D.Double(arrowLoc.getX() - m_fromState.getX(), arrowLoc.getY() - m_fromState.getY());
+            // Get the vector between the midpoint and start
+            Point2D startToMidpoint = new Point2D.Double(
+                    arrowLoc.getX() - m_fromState.getX(),
+                    arrowLoc.getY() - m_fromState.getY());
+
             // Scale the start to midpoint vector to account for text distance from midpoint
-            double scaleFactor = (startToMidpoint.distance(new Point2D.Float(0,0)) + ACTION_TEXT_DISTANCE_FOR_LOOPS) / startToMidpoint.distance(new Point2D.Float(0,0));
-            
+            double scaleFactor = 
+                (startToMidpoint.distance(new Point2D.Float(0,0)) + ACTION_TEXT_DISTANCE_FOR_LOOPS)
+                / startToMidpoint.distance(new Point2D.Float(0,0));
+           
+            // Scale 
             AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
             Point2D scaled = new Point2D.Float();
             scale.transform(startToMidpoint, scaled);
             
-            return new Point2D.Double(m_fromState.getX() + scaled.getX(), m_fromState.getY() + scaled.getY());
+            return new Point2D.Double(
+                    m_fromState.getX() + scaled.getX(),
+                    m_fromState.getY() + scaled.getY());
         }
     }
    
-    /**
-     * Get the midpoint of the curve associated with the transition.
-     * @return The midpoint of the curve.
-     */
-    public Point2D getMidpoint()
-    {
-        if (m_fromState != m_toState)
-        {
-            QuadCurve2D curve = new QuadCurve2D.Float(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2, m_fromState.getY()+ TM_State.STATE_RENDERING_WIDTH/2, m_controlPtX, m_controlPtY, m_toState.getX() + TM_State.STATE_RENDERING_WIDTH/2, m_toState.getY() + TM_State.STATE_RENDERING_WIDTH/2);
-            curve.subdivide(curve, null);
-            return curve.getP2();
-        }
-        else
-        {
-            CubicCurve2D curve = new CubicCurve2D.Float(m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                        m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH/2, m_controlPtX - TM_State.STATE_RENDERING_WIDTH,
-                        m_controlPtY, m_controlPtX + TM_State.STATE_RENDERING_WIDTH , m_controlPtY, m_toState.getX()
-                        + TM_State.STATE_RENDERING_WIDTH/2, m_toState.getY() + TM_State.STATE_RENDERING_WIDTH/2);
-            curve.subdivide(curve, null);
-            return curve.getP2();
-        }
-    }
-   
-    /**
-     * Get the control point of the curve, given the midpoint.
-     * @param midpoint The midpoint of the curve.
-     * @param fromState The state the transition is leaving.
-     * @param toState The state the transition is arriving at.
-     * @return The control point of the curve.
-     */
-    public static Point2D getControlPointGivenMidpoint(Point2D midpoint, TM_State fromState, TM_State toState)
-    {
-        double newCPX, newCPY;
-        if (fromState == toState)
-        {
-            // Formula to find the control point given the location of the midpoint.
-            // Calculated using the cubic bezier curve formula by pretending that both inner
-            // control points are actually just mousePressedTransition's 'control point'.
-            newCPX = 4.0/3.0 * (midpoint.getX() - (fromState.getX() + TM_State.STATE_RENDERING_WIDTH / 2) / 4.0);
-            newCPY = 4.0/3.0 * (midpoint.getY() - (fromState.getY() + TM_State.STATE_RENDERING_WIDTH / 2) / 4.0);
-        }
-        else
-        {
-            // Quadratic curve formula to find the control point given the location of the 
-            // midpoint of the curve.
-            newCPX = 2.0 * midpoint.getX() - 0.5 * (fromState.getX() + TM_State.STATE_RENDERING_WIDTH / 2
-                + toState.getX() + TM_State.STATE_RENDERING_WIDTH / 2);
-            newCPY = 2.0 * midpoint.getY() - 0.5 * (fromState.getY() + TM_State.STATE_RENDERING_WIDTH / 2
-                + toState.getY() + TM_State.STATE_RENDERING_WIDTH / 2);
-        }
-        return new Point2D.Float((float)newCPX, (float)newCPY);
-    }
-    
     /**
      * Get the bounding box associated with the input symbol.
      * @param g The graphics object, used to measure the label's dimensions. 
@@ -440,25 +425,31 @@ public class TM_Transition implements Serializable
      */
     public Shape getInputSymbolBoundingBox(Graphics g)
     {
-        String actionString = m_action.toString();
+        // Object used to measure string dimensions using the graphics object
         FontMetrics metrics = g.getFontMetrics(g.getFont());
+
+        // Assuming monospace, the width of a single character
         int symbolWidth = metrics.charWidth('_');
-        
+
+        // How many symbols are used in drawing the action
+        int actionLen = m_action.toString().length();
+
+        // Bounds for the input character, with added padding
         Rectangle2D boundingBox = metrics.getStringBounds("" + m_action.getInputChar(), g);
-        boundingBox = new Rectangle2D.Double(boundingBox.getMinX(),
-             boundingBox.getMinY(),
-             symbolWidth  + 2 * SELECTED_SYMBOL_BOX_PAD_X,
-             boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y); // Add padding
+        boundingBox = new Rectangle2D.Double(
+                boundingBox.getMinX(), boundingBox.getMinY(),
+                symbolWidth + 2 * SELECTED_SYMBOL_BOX_PAD_X,
+                boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y);
+
+        // Get the location of the action
         Point2D actionLocation = getActionLocation();
-        
-       AffineTransform trans = AffineTransform.getTranslateInstance(actionLocation.getX()
-            - (symbolWidth * actionString.length()) / 2
-            - SELECTED_SYMBOL_BOX_PAD_X
-            + SELECTED_INPUT_SYMBOL_BOX_X_OFFSET,
-            actionLocation.getY() - SELECTED_SYMBOL_BOX_PAD_Y);
-        Shape translated = trans.createTransformedShape(boundingBox);
-        
-        return translated;
+
+        // Translate to the correct position
+        AffineTransform trans = AffineTransform.getTranslateInstance(
+                actionLocation.getX() - (symbolWidth * actionLen) / 2
+                - SELECTED_SYMBOL_BOX_PAD_X + SELECTED_INPUT_SYMBOL_BOX_X_OFFSET,
+                actionLocation.getY() - SELECTED_SYMBOL_BOX_PAD_Y);
+        return trans.createTransformedShape(boundingBox);
     }
     
     /**
@@ -468,28 +459,31 @@ public class TM_Transition implements Serializable
      */
     public Shape getOutputSymbolBoundingBox(Graphics g)
     {
-        String actionString = m_action.toString();
-        // rest of string without the output char.
-        String restOfActionString = actionString.substring(0, actionString.length() - 1);
-        char outputSymbol = actionString.charAt(actionString.length() - 1);
+        // Object used to measure string dimensions using the graphics object
         FontMetrics metrics = g.getFontMetrics(g.getFont());
+
+        // Assuming monospace, the width of a single character
         int symbolWidth = metrics.charWidth('_');
+
+        // How many symbols are used in drawing the action
+        int actionLen = m_action.toString().length();
+ 
+        // Bounds for the output character, with added padding
+        Rectangle2D boundingBox = metrics.getStringBounds("" + m_action.getOutputChar(), g);
+        boundingBox = new Rectangle2D.Double(
+            boundingBox.getMinX(), boundingBox.getMinY(), 
+            symbolWidth + 2 * SELECTED_SYMBOL_BOX_PAD_X, 
+            boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y);
         
-        Rectangle2D boundingBox = metrics.getStringBounds("" + outputSymbol, g);
-        
-        boundingBox = new Rectangle2D.Double(boundingBox.getMinX(),
-             boundingBox.getMinY(),
-             symbolWidth + 2 * SELECTED_SYMBOL_BOX_PAD_X,
-             boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y); // Add padding
+        // Get the location of the action
         Point2D actionLocation = getActionLocation();
         
-        AffineTransform trans = AffineTransform.getTranslateInstance(actionLocation.getX()
-            - (symbolWidth * actionString.length()) / 2 // Centre text on action location
-            + (symbolWidth * 2) // Shift two characters to the right
-            - SELECTED_SYMBOL_BOX_PAD_X, actionLocation.getY());
-        Shape translated = trans.createTransformedShape(boundingBox);
-        
-        return translated;
+        // Translate to the correct position
+        AffineTransform trans = AffineTransform.getTranslateInstance(
+            actionLocation.getX() - (symbolWidth * actionLen) / 2
+            + (symbolWidth * 2) - SELECTED_SYMBOL_BOX_PAD_X, 
+            actionLocation.getY() - SELECTED_SYMBOL_BOX_PAD_Y);
+        return trans.createTransformedShape(boundingBox);
     }
    
     /**
@@ -518,12 +512,12 @@ public class TM_Transition implements Serializable
     private TM_Action m_action;
     
     /**
-     * The X ordinate of the control point for the curve.
+     * The X ordinate of the control point for the curve, i.e. the point used to build the spline.
      */
     private int m_controlPtX = 0;
     
     /**
-     * The Y ordinate of the control point for the curve.
+     * The Y ordinate of the control point for the curve, i.e. the point used to build the spline.
      */
     private int m_controlPtY = 0;
 }

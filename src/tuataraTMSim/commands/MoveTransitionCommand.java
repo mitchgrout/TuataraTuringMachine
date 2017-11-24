@@ -26,6 +26,7 @@
 package tuataraTMSim.commands;
 
 import java.awt.geom.Point2D;
+import tuataraTMSim.Spline;
 import tuataraTMSim.TMGraphicsPanel;
 import tuataraTMSim.TM.TM_Transition;
 
@@ -56,7 +57,7 @@ public class MoveTransitionCommand implements TMCommand
     public void doCommand()
     {
         Point2D midPoint = m_transition.getMidpoint();
-        Point2D newCP = TM_Transition.getControlPointGivenMidpoint(
+        Point2D newCP = Spline.getControlPointFromMidPoint(
                 new Point2D.Double(midPoint.getX() + m_moveX, midPoint.getY() + m_moveY),
                 m_transition.getFromState(), m_transition.getToState());
         
@@ -69,7 +70,7 @@ public class MoveTransitionCommand implements TMCommand
     public void undoCommand()
     {
         Point2D midPoint = m_transition.getMidpoint();
-        Point2D newCP = TM_Transition.getControlPointGivenMidpoint(
+        Point2D newCP = Spline.getControlPointFromMidPoint(
                 new Point2D.Double(midPoint.getX() - m_moveX, midPoint.getY() - m_moveY),
                 m_transition.getFromState(), m_transition.getToState());
         
