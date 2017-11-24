@@ -276,7 +276,16 @@ public class TMachine implements Serializable
         }      
         throw new UndefinedTransitionException(message);
     }
-    
+
+    /**
+     * Return a collection containing all states in this machine.
+     * @return A collection of all states in this machine.
+     */
+    public ArrayList<TM_State> getStates()
+    {
+        return m_states;
+    }
+
     /** 
      * Get the start state. Assumes that validate() has been called.
      * @return The unique start state of the machine.
