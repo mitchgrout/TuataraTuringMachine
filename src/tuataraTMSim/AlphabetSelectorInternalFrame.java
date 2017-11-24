@@ -71,7 +71,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
         m_letters.clear();
         m_digits.clear();
-        blankCheckBox.setSelected(false);
+        m_blank.setSelected(false);
        
         // Set frame title
         setTitle("Please select the symbols for the alphabet");
@@ -181,7 +181,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
         // Controls for blank character:
         JPanel blankPanel = new JPanel();
-        blankPanel.add(blankCheckBox);
+        blankPanel.add(m_blank);
         blankPanel.setBorder(BorderFactory.createTitledBorder(""));
         rightPanel.add(blankPanel, BorderLayout.SOUTH);
         
@@ -196,9 +196,29 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
 
         // Controls for specific alphabets
         JPanel specificPanel = new JPanel();
+        JButton sUnary = new JButton("Unary");
         JButton sBinary = new JButton("Binary");
         JButton sDecimal = new JButton("Decimal");
-        JButton sHex = new JButton("Hexadecimal");
+
+        sUnary.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly unary
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c == '1');
+                }
+
+                m_blank.setSelected(true);
+            }
+        });
 
         sBinary.addActionListener(new ActionListener()
         {
@@ -215,6 +235,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     char c = d.getText().charAt(0);
                     d.setSelected(c == '0' || c == '1');
                 }
+
+                m_blank.setSelected(true);
             }
         });
 
@@ -233,31 +255,14 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     char c = d.getText().charAt(0);
                     d.setSelected(c >= '0' && c <= '9');
                 }
+
+                m_blank.setSelected(true);
             }
         });
 
-        sHex.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                // Make the alphabet strictly hexadecimal
-                for (JCheckBox a : m_letters)
-                {
-                    char c = a.getText().charAt(0);
-                    a.setSelected(c >= 'A' && c <= 'F');
-                }
-
-                for (JCheckBox d : m_digits)
-                {
-                    char c = d.getText().charAt(0);
-                    d.setSelected(c >= '0' && c <= '9');
-                }
-            }
-        });
-
+        specificPanel.add(sUnary);
         specificPanel.add(sBinary);
         specificPanel.add(sDecimal);
-        specificPanel.add(sHex);
         southPanel.add(specificPanel, BorderLayout.WEST);
         
 
@@ -278,7 +283,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 {
                     tempA.setSymbol(l.getText().charAt(0), l.isSelected());
                 }
-                tempA.setSymbol(Tape.BLANK_SYMBOL, blankCheckBox.isSelected());
+                tempA.setSymbol(Tape.BLANK_SYMBOL, m_blank.isSelected());
                 
                 Alphabet oldAlphabet =(Alphabet)m_panel.getSimulator().getMachine().getAlphabet().clone();
                 
@@ -421,7 +426,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         {
             l.setSelected(m_panel.getAlphabet().containsSymbol(l.getText().charAt(0)));
         }
-        blankCheckBox.setSelected(m_panel.getAlphabet().containsSymbol(Tape.BLANK_SYMBOL));
+        m_blank.setSelected(m_panel.getAlphabet().containsSymbol(Tape.BLANK_SYMBOL));
         
     }
     
@@ -438,7 +443,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
     /**
      * The checkbox which represents the blank character.
      */
-    private JCheckBox blankCheckBox = new JCheckBox("_ (blank symbol)");
+    private JCheckBox m_blank = new JCheckBox("_ (blank symbol)");
 
     /**
      * The current graphics panel.
