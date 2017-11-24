@@ -72,13 +72,17 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         m_letters.clear();
         m_digits.clear();
         blankCheckBox.setSelected(false);
-        
+       
+        // Set frame title
         setTitle("Please select the symbols for the alphabet");
                 
+        
+        // Controls for alphabetical characters:
         JPanel selectAlphabetical = new JPanel();
         selectAlphabetical.setLayout(new BorderLayout());
         selectAlphabetical.setBorder(BorderFactory.createTitledBorder("Alphabetical Symbols"));
-                
+        
+        // Create and add all check buttons to a 6 row / 5 col grid 
         JPanel alphabetSoup = new JPanel();
         alphabetSoup.setLayout(new GridLayout(6,5));
         for (char c = 'A'; c <= 'Z'; c++)
@@ -88,6 +92,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             m_letters.add(bc);
         }
         selectAlphabetical.add(alphabetSoup, BorderLayout.CENTER);
+
+        // Create and add the select all/none buttons
         JPanel aButtonPanel = new JPanel();
         JButton aSelectAll = new JButton("Select all");
         JButton aSelectNone = new JButton("Select none");
@@ -118,16 +124,21 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         aButtonPanel.add(aSelectNone);
         selectAlphabetical.add(aButtonPanel, BorderLayout.SOUTH);
         getContentPane().add(selectAlphabetical, BorderLayout.WEST);
-        
+       
+
+        // For alignment, numeric and blank panels will be put in this panel
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BorderLayout());
+
+
+        // Controls for numerical characters:
         JPanel selectNumerical = new JPanel();
         selectNumerical.setLayout(new BorderLayout());
         selectNumerical.setBorder(BorderFactory.createTitledBorder("Numerical Symbols"));
-                
-        JPanel miscPanel = new JPanel();
-        miscPanel.setLayout(new BorderLayout());
         
+        // Create and add all check buttons to a 4 row / 3 col grid
         JPanel numericalSoup = new JPanel();
-        numericalSoup.setLayout(new GridLayout(4,5));
+        numericalSoup.setLayout(new GridLayout(4, 3));
         for (int c = 0; c <= 9; c++)
         {
             JCheckBox bc = new JCheckBox("" + c);
@@ -135,6 +146,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             m_digits.add(bc);
         }
         selectNumerical.add(numericalSoup, BorderLayout.CENTER);
+
+        // Create and add the select all/none buttons
         JPanel nButtonPanel = new JPanel();
         JButton nSelectAll = new JButton("Select all");
         JButton nSelectNone = new JButton("Select none");
@@ -164,16 +177,91 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         nButtonPanel.add(nSelectAll);
         nButtonPanel.add(nSelectNone);
         selectNumerical.add(nButtonPanel, BorderLayout.SOUTH);
-        miscPanel.add(selectNumerical, BorderLayout.NORTH);
-        getContentPane().add(miscPanel, BorderLayout.EAST);
+        rightPanel.add(selectNumerical, BorderLayout.NORTH);
         
+        // Controls for blank character:
         JPanel blankPanel = new JPanel();
         blankPanel.add(blankCheckBox);
         blankPanel.setBorder(BorderFactory.createTitledBorder(""));
-        miscPanel.add(blankPanel, BorderLayout.SOUTH);
+        rightPanel.add(blankPanel, BorderLayout.SOUTH);
         
-        JPanel southButtons = new JPanel();
-        southButtons.setLayout(new BorderLayout());
+        // Add the right pane containing the numeric and blank panels
+        getContentPane().add(rightPanel, BorderLayout.EAST);
+
+
+        // For alignment, specific alphabet and button panels will be put in this panel
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BorderLayout());
+
+
+        // Controls for specific alphabets
+        JPanel specificPanel = new JPanel();
+        JButton sBinary = new JButton("Binary");
+        JButton sDecimal = new JButton("Decimal");
+        JButton sHex = new JButton("Hexadecimal");
+
+        sBinary.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly binary
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c == '0' || c == '1');
+                }
+            }
+        });
+
+        sDecimal.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly decimal
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c >= '0' && c <= '9');
+                }
+            }
+        });
+
+        sHex.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly hexadecimal
+                for (JCheckBox a : m_letters)
+                {
+                    char c = a.getText().charAt(0);
+                    a.setSelected(c >= 'A' && c <= 'F');
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c >= '0' && c <= '9');
+                }
+            }
+        });
+
+        specificPanel.add(sBinary);
+        specificPanel.add(sDecimal);
+        specificPanel.add(sHex);
+        southPanel.add(specificPanel, BorderLayout.WEST);
+        
+
+        // Controls for OK/Cancel buttons
         JPanel finish = new JPanel();
         JButton ok = new JButton("Ok");
         JButton cancel = new JButton("Cancel");
@@ -259,8 +347,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
         finish.add(ok);
         finish.add(cancel);
-        southButtons.add(finish, BorderLayout.EAST);
-        getContentPane().add(southButtons, BorderLayout.SOUTH);
+        southPanel.add(finish, BorderLayout.EAST);
+        getContentPane().add(southPanel, BorderLayout.SOUTH);
     }
     
     /** 
