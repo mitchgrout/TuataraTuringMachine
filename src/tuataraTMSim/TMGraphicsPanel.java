@@ -779,7 +779,8 @@ public class TMGraphicsPanel extends JPanel
         double correctedMidpointX = e.getX() + moveTransitionClickOffsetX; 
         double correctedMidpointY = e.getY() + moveTransitionClickOffsetY;
         
-        Point2D newCP = TM_Transition.getControlPointGivenMidpoint(new Point2D.Double(correctedMidpointX, correctedMidpointY),
+        Point2D newCP = Spline.getControlPointFromMidPoint(
+                new Point2D.Double(correctedMidpointX, correctedMidpointY),
                 mousePressedTransition.getFromState(), mousePressedTransition.getToState());
         
         mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
@@ -957,7 +958,7 @@ public class TMGraphicsPanel extends JPanel
             Point2D midpoint = t.getMidpoint();
             midpoint.setLocation(midpoint.getX() + halfOfTranslatedX, midpoint.getY()+ halfOfTranslatedY);
 
-            Point2D newCP = TM_Transition.getControlPointGivenMidpoint(midpoint, t.getFromState(), t.getToState());
+            Point2D newCP = Spline.getControlPointFromMidPoint(midpoint, t.getFromState(), t.getToState());
             t.setControlPoint((int)(newCP.getX()), (int)(newCP.getY()));  
         }
 
