@@ -39,8 +39,7 @@ public class SchemeRelabelCommand implements TMCommand
     /**
      * Creates a new instance of SchemeRelabelCommand.
      * @param panel The current graphics panel.
-     * @param state The state to rename.
-     * @param label The new label for the state.
+     * @param scheme The new naming scheme for the machine.
      */
     public SchemeRelabelCommand(TMGraphicsPanel panel, NamingScheme scheme)
     {
