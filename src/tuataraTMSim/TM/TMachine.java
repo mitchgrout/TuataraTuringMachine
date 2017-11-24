@@ -43,7 +43,7 @@ import tuataraTMSim.TMGraphicsPanel;
  * M = (Q, d, q0, qf, X), where
  * - Q is a finite set of states
  * - X is a finite alphabet, consisting of input and tape characters.
- * - d is a partial function, Q x X -> Q x (Y u {L,R})
+ * - d is a partial function, with QxX mapping to Qx(Yu{L,R})
  * - q0 is the unique start state
  * - qf is the unique halt state
  * - d(qf, x) is undefined for all x in X
@@ -195,13 +195,13 @@ public class TMachine implements Serializable
                                 "State %s has more than one transition with input %c.", st.getLabel(), inp));
                 }
                 // Input not in the alphabet
-                if(!m_alphabet.containsSymbol(inp))
+                if(!m_alphabet.containsSymbol(inp) && inp != OTHERWISE_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an input which is not in the alphabet.", tr.toString()));
                 }
                 // Output not in the alphabet
-                if(tr.getAction().movesHead() && !m_alphabet.containsSymbol(out))
+                if(!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out))
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an action which is not in the alphabet.", tr.toString()));
