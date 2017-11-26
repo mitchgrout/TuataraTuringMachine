@@ -42,6 +42,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import tuataraTMSim.commands.ChangeSchemeCommand;
 import tuataraTMSim.commands.SchemeRelabelCommand;
 import tuataraTMSim.TM.Alphabet;
 import tuataraTMSim.TM.Tape;
@@ -120,8 +121,7 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                 m_panel.doCommand(new SchemeRelabelCommand(m_panel, scheme));
 
                 // Update machine
-                // TODO: Make into a command
-                m_panel.getSimulator().getMachine().setNamingScheme(scheme);
+                m_panel.doCommand(new ChangeSchemeCommand(m_panel, scheme));
            
                 // Close the frame
                 setVisible(false);
@@ -160,7 +160,7 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                 }
 
                 // Update machine, without renaming
-                m_panel.getSimulator().getMachine().setNamingScheme(scheme);
+                m_panel.doCommand(new ChangeSchemeCommand(m_panel, scheme));
 
                 // Close the frame
                 setVisible(false);
