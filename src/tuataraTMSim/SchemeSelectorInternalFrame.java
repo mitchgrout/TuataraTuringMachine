@@ -121,7 +121,7 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
 
                 // Update machine
                 // TODO: Make into a command
-                m_panel.setNamingScheme(scheme);
+                m_panel.getSimulator().getMachine().setNamingScheme(scheme);
            
                 // Close the frame
                 setVisible(false);
@@ -160,7 +160,7 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                 }
 
                 // Update machine, without renaming
-                m_panel.setNamingScheme(scheme);
+                m_panel.getSimulator().getMachine().setNamingScheme(scheme);
 
                 // Close the frame
                 setVisible(false);
@@ -207,7 +207,7 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
     public void setPanel(TMGraphicsPanel panel)
     {
         m_panel = panel;
-        NamingScheme scheme = m_panel.getNamingScheme();
+        NamingScheme scheme = m_panel.getSimulator().getMachine().getNamingScheme();
         if (scheme == NamingScheme.GENERAL)
         {
             m_general.setSelected(true);

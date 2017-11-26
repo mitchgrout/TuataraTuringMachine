@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.*;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.NamingScheme;
 import tuataraTMSim.TMGraphicsPanel;
 
 /**
@@ -275,6 +276,25 @@ public class TMachine implements Serializable
             message = "The last state was not an accepting state.";
         }      
         throw new UndefinedTransitionException(message);
+    }
+
+    /**
+     *  Get the naming scheme for this machine.
+     *  @return The naming scheme for this machine.
+     */
+    public NamingScheme getNamingScheme()
+    {
+        return m_scheme;
+    }
+
+    /**
+     * Se the naming scheme for this machine.
+     * May cause a rename of all existing states.
+     * @param scheme The new naming scheme to use.
+     */
+    public void setNamingScheme(NamingScheme scheme)
+    {
+        m_scheme = scheme;
     }
 
     /**
@@ -757,6 +777,11 @@ public class TMachine implements Serializable
      * The alphabet for the machine.
      */
     private Alphabet m_alphabet;
+
+    /**
+     * The naming scheme to use.
+     */
+    private NamingScheme m_scheme = NamingScheme.GENERAL;
 
     /**
      * Determine if this machine has been deemed valid or not.  Will be set to true after successful

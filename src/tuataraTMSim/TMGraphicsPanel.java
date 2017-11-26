@@ -1077,25 +1077,6 @@ public class TMGraphicsPanel extends JPanel
         }
     }
    
-    /**
-     * Get the naming scheme for this machine.
-     * @return The naming schee for this machine.
-     */
-    public NamingScheme getNamingScheme()
-    {
-        return m_stateNaming;
-    }
-
-    /**
-     * Set the naming scheme for this machine.
-     * May cause a rename of all existing states.
-     * @param naming The new naming scheme to use.
-     */
-    public void setNamingScheme(NamingScheme naming)
-    {
-        m_stateNaming = naming;
-    }
-
     /** 
      * Find the first unused standard state label in the machine. Standard labels are 'q' followed
      * by a non-negative integer.
@@ -1103,7 +1084,7 @@ public class TMGraphicsPanel extends JPanel
      */
     public String getFirstFreeName()
     {
-        switch (m_stateNaming)
+        switch (m_sim.getMachine().getNamingScheme())
         {
             case GENERAL:
                 int current = 0;
@@ -1120,7 +1101,7 @@ public class TMGraphicsPanel extends JPanel
             default:
                 return null;
         }
-   }
+    }
     
     /**
      * Determine if the label dictionary contains a given label.
@@ -1453,11 +1434,6 @@ public class TMGraphicsPanel extends JPanel
      * The current GUI mode.
      */
     private TM_GUI_Mode m_currentMode;
-
-    /**
-     * Current naming scheme used for new states.
-     */
-    private NamingScheme m_stateNaming = NamingScheme.GENERAL;
 
     /**
      * The set of selected states.
