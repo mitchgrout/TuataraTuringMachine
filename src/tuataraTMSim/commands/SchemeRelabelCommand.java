@@ -25,6 +25,7 @@
 
 package tuataraTMSim.commands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import tuataraTMSim.NamingScheme;
 import tuataraTMSim.TMGraphicsPanel;
@@ -59,12 +60,41 @@ public class SchemeRelabelCommand implements TMCommand
      */
     public void doCommand()
     {
-        // TODO: GENERALIZE
-        int counter = 0;
-        for (TM_State s : m_panel.getSimulator().getMachine().getStates())
+        ArrayList<TM_State> states = m_panel.getSimulator().getMachine().getStates();
+        int counter;
+        switch(m_scheme)
         {
-            s.setLabel((m_scheme == NamingScheme.NORMALIZED? "" : "q") + counter);
-            counter++;
+            case GENERAL:
+                counter = 0;
+                for (TM_State s : states)
+                {
+                    s.setLabel(String.format("q%d", counter));
+                    counter++;
+                }
+                break;
+
+            case NORMALIZED:
+                counter = 1;
+                int size = states.size();
+                for (TM_State s : states)
+                {
+                    if (s.isStartState())
+                    {
+                        s.setLabel("0");
+                    }
+                    else if (s.isFinalState())
+                    {
+                        s.setLabel("" + (size - 1));
+                    }
+                    else
+                    {
+                        s.setLabel("" + counter);
+                        counter++;
+                    }
+                }
+                break;
+
+            default: break;
         }
     }
     
