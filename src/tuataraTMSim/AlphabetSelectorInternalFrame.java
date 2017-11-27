@@ -42,8 +42,11 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import tuataraTMSim.commands.ConfigureAlphabetCommand;
+import tuataraTMSim.commands.JoinCommand;
+import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.TM.Alphabet;
 import tuataraTMSim.TM.Tape;
+import tuataraTMSim.TM.TM_Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.
@@ -289,7 +292,10 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 
                 if (m_panel.getSimulator().getMachine().isConsistentWithAlphabet(tempA))
                 {
+                    // Change the alphabet
                     m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+
+                    // Hide the frame
                     setVisible(false);
                     try {setSelected(false);} catch (PropertyVetoException e2) {}
                 }
@@ -300,11 +306,20 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                             "Configure alphabet", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, "Cancel");
                     if (choice == JOptionPane.YES_OPTION)
                     {
-                        m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
-                        m_panel.getSimulator().getMachine().removeInconsistentTransitions(m_panel);
+                        // Get the set of inconsistent transitions
+                        ArrayList<TM_Transition> purge =
+                            m_panel.getSimulator().getMachine().getInconsistentTransitions();
+
+                        // Change the alphabet, and remove inconsistent transitions
+                        m_panel.doCommand(new JoinCommand(
+                            new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA),
+                            new RemoveInconsistentTransitionsCommand(m_panel, purge)));
+
+                        // Hide the frame
                         setVisible(false);
                         try { setSelected(false); }
                         catch (PropertyVetoException e2) { }
+
                         // This causes a repaint also
                         m_panel.deselectSymbol();
                     }
@@ -314,7 +329,9 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     }
                     else if (choice == JOptionPane.NO_OPTION)
                     {
+                        // TODO: This may cause problems with determinism
                         m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+
                         setVisible(false);
                         try { setSelected(false); }
                         catch (PropertyVetoException e2) { }

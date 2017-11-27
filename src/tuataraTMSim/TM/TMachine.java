@@ -654,7 +654,25 @@ public class TMachine implements Serializable
         }
         return true;
     }
-    
+   
+    /**
+     * Determine all transitions which are deemed inconsistent with this machine's alphabet.
+     * @return A collection of transitions which are inconsistent with the alphabet.
+     */
+    public ArrayList<TM_Transition> getInconsistentTransitions()
+    {
+        ArrayList<TM_Transition> purge = new ArrayList<TM_Transition>();
+        for (TM_Transition t: m_transitions)
+        {
+            TM_Action act = t.getAction();
+            if(!isConsistentWithAlphabet(act, m_alphabet))
+            {
+                purge.add(t);
+            }
+        }
+        return purge;
+    }
+
     /**
      * Delete transitions that are not consistent with this machine's alphabet.
      * @param panel The current graphics panel.

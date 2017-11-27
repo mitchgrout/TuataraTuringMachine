@@ -25,40 +25,38 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.NamingScheme;
-import tuataraTMSim.TMGraphicsPanel;
-
 /**
- * A command which deals with changing the naming scheme for a machine. 
+ * A command which deals with joining arbitrarily many commands into a single unified command.
  */
-public class ChangeSchemeCommand implements TMCommand
+public class JoinCommand implements TMCommand
 {
-    /**
-     * Creates a new instance of ChangeSchemeCommand.
-     * @param panel The current graphics panel.
-     * @param scheme The new naming scheme.
+    /** 
+     * Creates a new instance of JoinCommand.
+     * @param first The first command to run.
+     * @param second The second command to run.
      */
-    public ChangeSchemeCommand(TMGraphicsPanel panel, NamingScheme scheme) 
+    public JoinCommand(TMCommand first, TMCommand second)
     {
-        m_panel = panel;
-        m_oldScheme = m_panel.getSimulator().getMachine().getNamingScheme();
-        m_newScheme = scheme;
+        m_first = first;
+        m_second = second;
     }
-
+    
     /**
-     * Sets the naming scheme to the new naming scheme.
+     * Run all commands in order.
      */
     public void doCommand()
     {
-        m_panel.getSimulator().getMachine().setNamingScheme(m_newScheme);
+        m_first.doCommand();
+        m_second.doCommand();
     }
-
+    
     /**
-     * Sets the naming scheme to the old naming scheme.
+     * Undo all commands in reverse order.
      */
     public void undoCommand()
     {
-        m_panel.getSimulator().getMachine().setNamingScheme(m_oldScheme);
+        m_second.undoCommand();
+        m_first.undoCommand();
     }
     
     /**
@@ -67,21 +65,18 @@ public class ChangeSchemeCommand implements TMCommand
      */
     public String getName()
     {
-        return "Change Naming Scheme";
+        // TODO: Potentially precompute this; to do so, we need to postulate that all names must
+        //       either be CT constants, or defined in the constructor of every command.
+        return String.format("%s & %s", m_first.getName(), m_second.getName());
     }
     
     /**
-     * The current graphics panel.
+     * The first command to run.
      */
-    private TMGraphicsPanel m_panel;
-    
+    private TMCommand m_first;
+
     /**
-     * The previous naming scheme.
+     * The second command to run.
      */
-    private NamingScheme m_oldScheme;
-    
-    /**
-     * The new naming scheme.
-     */
-    private NamingScheme m_newScheme;
+    private TMCommand m_second;
 }

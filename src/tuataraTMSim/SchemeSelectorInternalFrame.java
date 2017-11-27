@@ -43,6 +43,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import tuataraTMSim.commands.ChangeSchemeCommand;
+import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.SchemeRelabelCommand;
 import tuataraTMSim.TM.Alphabet;
 import tuataraTMSim.TM.Tape;
@@ -117,13 +118,12 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                 NamingScheme scheme = m_general.isSelected()?
                                      NamingScheme.GENERAL : NamingScheme.NORMALIZED;
                 
-                // Rename all commands
-                m_panel.doCommand(new SchemeRelabelCommand(m_panel, scheme));
-
-                // Update machine
-                m_panel.doCommand(new ChangeSchemeCommand(m_panel, scheme));
+                // Rename all commands, and update the machine
+                m_panel.doCommand(new JoinCommand(
+                    new SchemeRelabelCommand(m_panel, scheme),
+                    new ChangeSchemeCommand(m_panel, scheme)));
            
-                // Close the frame
+                // Hide the frame
                 setVisible(false);
                 try { setSelected(false); }
                 catch (PropertyVetoException e2) { }
@@ -151,17 +151,21 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
 
                     if (choice == JOptionPane.OK_OPTION)
                     {
-                        m_panel.doCommand(new SchemeRelabelCommand(m_panel, scheme));
+                        // Update the machine, renaming
+                        m_panel.doCommand(new JoinCommand(
+                            new SchemeRelabelCommand(m_panel, scheme),
+                            new ChangeSchemeCommand(m_panel, scheme)));
                     }
                     else
                     {
                         return;
                     }
                 }
-
-                // Update machine, without renaming
-                m_panel.doCommand(new ChangeSchemeCommand(m_panel, scheme));
-
+                else
+                {
+                    // Update machine, without renaming
+                    m_panel.doCommand(new ChangeSchemeCommand(m_panel, scheme));
+                }
                 // Close the frame
                 setVisible(false);
                 try { setSelected(false); }
