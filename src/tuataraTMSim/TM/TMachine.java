@@ -673,27 +673,6 @@ public class TMachine implements Serializable
         return purge;
     }
 
-    /**
-     * Delete transitions that are not consistent with this machine's alphabet.
-     * @param panel The current graphics panel.
-     */
-    public void removeInconsistentTransitions(TMGraphicsPanel panel)
-    {
-        // Removing inconsistent transitions preserves validity;
-        // invalidation is not necessary.
-
-        ArrayList<TM_Transition> purge = new ArrayList<TM_Transition>();
-        for (TM_Transition t: m_transitions)
-        {
-            TM_Action act = t.getAction();
-            if(!isConsistentWithAlphabet(act, m_alphabet))
-            {
-                purge.add(t);
-            }
-        }
-        panel.doCommand(new RemoveInconsistentTransitionsCommand(panel, purge));
-    }
-    
     /** 
      * Finds the transitions whose 'to' state is the given state.
      * A new ArrayList will be generated each time this is called.
