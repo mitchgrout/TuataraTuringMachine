@@ -1,38 +1,45 @@
 <html>
-<H2> Overview of Tuatara Turing Machine Simulator </H2>
-<P>This program is a graphical toolkit for designing and simulating Turing machines.  It was written
-by Jimmy Foulds during 2006-2007, and later updated and extended by Mitchell Grout during 2016-2017,
+<h2> Overview of Tuatara Turing Machine Simulator </h2>
+<p>
+This program is a graphical toolkit for designing and simulating Turing machines.  It was written by
+Jimmy Foulds during 2006-2007, and later updated and extended by Mitchell Grout during 2016-2017,
 with funding from the Department of Mathematics at the University of Waikato, New Zealand.
-</P>
+</p>
 
-<P>Turing machines are a class of abstract machines which are commonly believed to be capable of
+<p>
+Turing machines are a class of abstract machines which are commonly believed to be capable of
 performing any computation that is specifiable by an algorithm.
-</P>
+</p>
 
-<P>A Turing machine operates by reading and modifying a tape of data.  Here, a "tape" is a sequence
-of cells that contain symbols from some alphabet.  This is achieved via a "read/write head", which
-can move left or right along the tape, reading or modifying one cell at a time.
-</P>
+<p>
+A Turing machine operates by reading and modifying a tape of data.  Here, a "tape" is a sequence of
+cells that contain symbols from some alphabet.  This is achieved via a "read/write head", which can
+move left or right along the tape, reading or modifying one cell at a time.
+</p>
 
-<P>Turing machines consist of a set of states (sometimes known as "nodes"), and a set of transitions
+<p>
+Turing machines consist of a set of states (sometimes known as "nodes"), and a set of transitions
 between the states.  Each transition specifies an "input symbol" and an action.  If the machine is
 in a particular state, and there is an outgoing transition for which the input symbol matches the
 symbol on the tape in the location of the read/write head, the action is performed and the machine
 changes state to the state specified by the transition. 
-</P>
+</p>
 
-<p>If there is no outgoing transition from the current state with an input symbol that matches the
+<p>
+If there is no outgoing transition from the current state with an input symbol that matches the
 current symbol on the tape, the computation halts. 
 </p>
 
-<P>There exist alternate models for Turing machines, where actions are associated with states
-instead of with transitions.  These models are not covered in this piece of software. 
-</P>
+<p>
+There exist alternate models for Turing machines, where actions are associated with states instead
+of with transitions.  These models are not covered in this piece of software. 
+</p>
 
-<P>In Tuatara Turing Machine Simulator, the tape has a "first" cell at the left end of the tape, but
+<p>
+In Tuatara Turing Machine Simulator, the tape has a "first" cell at the left end of the tape, but
 has no "last" cell - the tape extends infinitely to the right.  For a computation to complete
 successfully, the machine should "park" the head in the first cell at the end of the computation.
 Other models exist where the tape extends infinitely to the left as well as to the right (a "doubly
 infinite tape"), but this is not the approach taken here.
-</P>
+</p>
 </html>
