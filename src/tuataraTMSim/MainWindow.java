@@ -472,10 +472,10 @@ public class MainWindow extends JFrame
                 m_selectionIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
         m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, m_eraserIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
-        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start States",
+        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State",
                 TM_GUI_Mode.CHOOSESTART, m_chooseStartIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
-        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting States",
+        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State",
                 TM_GUI_Mode.CHOOSEACCEPTING, m_chooseAcceptingIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
         m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
@@ -483,7 +483,7 @@ public class MainWindow extends JFrame
                 KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
         
         m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", m_configureAlphabetIcon);
-        m_configureSchemeAction = new ConfigureSchemeAction("Configure Scheme", m_configureSchemeIcon);
+        m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", m_configureSchemeIcon);
         
         m_newMachineAction = new NewMachineAction("New Machine", m_newMachineIcon);
         m_openMachineAction = new OpenMachineAction("Open Machine", m_openMachineIcon);
@@ -1542,7 +1542,7 @@ public class MainWindow extends JFrame
             super(text);
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
-            // putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(EventKey.VK_S, KeyEvent.CTRL_DOWN_MASK));
+            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
         }
 
         public void actionPerformed(ActionEvent e)
