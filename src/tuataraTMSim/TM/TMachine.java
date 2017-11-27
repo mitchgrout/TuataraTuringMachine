@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.*;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.NamingScheme;
 import tuataraTMSim.TMGraphicsPanel;
 
 /**
@@ -276,7 +277,35 @@ public class TMachine implements Serializable
         }      
         throw new UndefinedTransitionException(message);
     }
-    
+
+    /**
+     *  Get the naming scheme for this machine.
+     *  @return The naming scheme for this machine.
+     */
+    public NamingScheme getNamingScheme()
+    {
+        return m_scheme;
+    }
+
+    /**
+     * Se the naming scheme for this machine.
+     * May cause a rename of all existing states.
+     * @param scheme The new naming scheme to use.
+     */
+    public void setNamingScheme(NamingScheme scheme)
+    {
+        m_scheme = scheme;
+    }
+
+    /**
+     * Return a collection containing all states in this machine.
+     * @return A collection of all states in this machine.
+     */
+    public ArrayList<TM_State> getStates()
+    {
+        return m_states;
+    }
+
     /** 
      * Get the start state. Assumes that validate() has been called.
      * @return The unique start state of the machine.
@@ -625,16 +654,13 @@ public class TMachine implements Serializable
         }
         return true;
     }
-    
+   
     /**
-     * Delete transitions that are not consistent with this machine's alphabet.
-     * @param panel The current graphics panel.
+     * Determine all transitions which are deemed inconsistent with this machine's alphabet.
+     * @return A collection of transitions which are inconsistent with the alphabet.
      */
-    public void removeInconsistentTransitions(TMGraphicsPanel panel)
+    public ArrayList<TM_Transition> getInconsistentTransitions()
     {
-        // Removing inconsistent transitions preserves validity;
-        // invalidation is not necessary.
-
         ArrayList<TM_Transition> purge = new ArrayList<TM_Transition>();
         for (TM_Transition t: m_transitions)
         {
@@ -644,9 +670,9 @@ public class TMachine implements Serializable
                 purge.add(t);
             }
         }
-        panel.doCommand(new RemoveInconsistentTransitionsCommand(panel, purge));
+        return purge;
     }
-    
+
     /** 
      * Finds the transitions whose 'to' state is the given state.
      * A new ArrayList will be generated each time this is called.
@@ -748,6 +774,11 @@ public class TMachine implements Serializable
      * The alphabet for the machine.
      */
     private Alphabet m_alphabet;
+
+    /**
+     * The naming scheme to use.
+     */
+    private NamingScheme m_scheme = NamingScheme.GENERAL;
 
     /**
      * Determine if this machine has been deemed valid or not.  Will be set to true after successful

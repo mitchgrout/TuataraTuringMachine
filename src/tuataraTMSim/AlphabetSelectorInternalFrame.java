@@ -42,8 +42,11 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import tuataraTMSim.commands.ConfigureAlphabetCommand;
+import tuataraTMSim.commands.JoinCommand;
+import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.TM.Alphabet;
 import tuataraTMSim.TM.Tape;
+import tuataraTMSim.TM.TM_Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.
@@ -71,14 +74,18 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
         m_letters.clear();
         m_digits.clear();
-        blankCheckBox.setSelected(false);
-        
+        m_blank.setSelected(false);
+       
+        // Set frame title
         setTitle("Please select the symbols for the alphabet");
                 
+        
+        // Controls for alphabetical characters:
         JPanel selectAlphabetical = new JPanel();
         selectAlphabetical.setLayout(new BorderLayout());
         selectAlphabetical.setBorder(BorderFactory.createTitledBorder("Alphabetical Symbols"));
-                
+        
+        // Create and add all check buttons to a 6 row / 5 col grid 
         JPanel alphabetSoup = new JPanel();
         alphabetSoup.setLayout(new GridLayout(6,5));
         for (char c = 'A'; c <= 'Z'; c++)
@@ -88,6 +95,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             m_letters.add(bc);
         }
         selectAlphabetical.add(alphabetSoup, BorderLayout.CENTER);
+
+        // Create and add the select all/none buttons
         JPanel aButtonPanel = new JPanel();
         JButton aSelectAll = new JButton("Select all");
         JButton aSelectNone = new JButton("Select none");
@@ -118,16 +127,21 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         aButtonPanel.add(aSelectNone);
         selectAlphabetical.add(aButtonPanel, BorderLayout.SOUTH);
         getContentPane().add(selectAlphabetical, BorderLayout.WEST);
-        
+       
+
+        // For alignment, numeric and blank panels will be put in this panel
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BorderLayout());
+
+
+        // Controls for numerical characters:
         JPanel selectNumerical = new JPanel();
         selectNumerical.setLayout(new BorderLayout());
         selectNumerical.setBorder(BorderFactory.createTitledBorder("Numerical Symbols"));
-                
-        JPanel miscPanel = new JPanel();
-        miscPanel.setLayout(new BorderLayout());
         
+        // Create and add all check buttons to a 4 row / 3 col grid
         JPanel numericalSoup = new JPanel();
-        numericalSoup.setLayout(new GridLayout(4,5));
+        numericalSoup.setLayout(new GridLayout(4, 3));
         for (int c = 0; c <= 9; c++)
         {
             JCheckBox bc = new JCheckBox("" + c);
@@ -135,6 +149,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
             m_digits.add(bc);
         }
         selectNumerical.add(numericalSoup, BorderLayout.CENTER);
+
+        // Create and add the select all/none buttons
         JPanel nButtonPanel = new JPanel();
         JButton nSelectAll = new JButton("Select all");
         JButton nSelectNone = new JButton("Select none");
@@ -164,16 +180,96 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         nButtonPanel.add(nSelectAll);
         nButtonPanel.add(nSelectNone);
         selectNumerical.add(nButtonPanel, BorderLayout.SOUTH);
-        miscPanel.add(selectNumerical, BorderLayout.NORTH);
-        getContentPane().add(miscPanel, BorderLayout.EAST);
+        rightPanel.add(selectNumerical, BorderLayout.NORTH);
         
+        // Controls for blank character:
         JPanel blankPanel = new JPanel();
-        blankPanel.add(blankCheckBox);
+        blankPanel.add(m_blank);
         blankPanel.setBorder(BorderFactory.createTitledBorder(""));
-        miscPanel.add(blankPanel, BorderLayout.SOUTH);
+        rightPanel.add(blankPanel, BorderLayout.SOUTH);
         
-        JPanel southButtons = new JPanel();
-        southButtons.setLayout(new BorderLayout());
+        // Add the right pane containing the numeric and blank panels
+        getContentPane().add(rightPanel, BorderLayout.EAST);
+
+
+        // For alignment, specific alphabet and button panels will be put in this panel
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BorderLayout());
+
+
+        // Controls for specific alphabets
+        JPanel specificPanel = new JPanel();
+        JButton sUnary = new JButton("Unary");
+        JButton sBinary = new JButton("Binary");
+        JButton sDecimal = new JButton("Decimal");
+
+        sUnary.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly unary
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c == '1');
+                }
+
+                m_blank.setSelected(true);
+            }
+        });
+
+        sBinary.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly binary
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c == '0' || c == '1');
+                }
+
+                m_blank.setSelected(true);
+            }
+        });
+
+        sDecimal.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Make the alphabet strictly decimal
+                for (JCheckBox a : m_letters)
+                {
+                    a.setSelected(false);
+                }
+
+                for (JCheckBox d : m_digits)
+                {
+                    char c = d.getText().charAt(0);
+                    d.setSelected(c >= '0' && c <= '9');
+                }
+
+                m_blank.setSelected(true);
+            }
+        });
+
+        specificPanel.add(sUnary);
+        specificPanel.add(sBinary);
+        specificPanel.add(sDecimal);
+        southPanel.add(specificPanel, BorderLayout.WEST);
+        
+
+        // Controls for OK/Cancel buttons
         JPanel finish = new JPanel();
         JButton ok = new JButton("Ok");
         JButton cancel = new JButton("Cancel");
@@ -190,13 +286,16 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 {
                     tempA.setSymbol(l.getText().charAt(0), l.isSelected());
                 }
-                tempA.setSymbol(Tape.BLANK_SYMBOL, blankCheckBox.isSelected());
+                tempA.setSymbol(Tape.BLANK_SYMBOL, m_blank.isSelected());
                 
                 Alphabet oldAlphabet =(Alphabet)m_panel.getSimulator().getMachine().getAlphabet().clone();
                 
                 if (m_panel.getSimulator().getMachine().isConsistentWithAlphabet(tempA))
                 {
+                    // Change the alphabet
                     m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+
+                    // Hide the frame
                     setVisible(false);
                     try {setSelected(false);} catch (PropertyVetoException e2) {}
                 }
@@ -207,11 +306,20 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                             "Configure alphabet", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, "Cancel");
                     if (choice == JOptionPane.YES_OPTION)
                     {
-                        m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
-                        m_panel.getSimulator().getMachine().removeInconsistentTransitions(m_panel);
+                        // Get the set of inconsistent transitions
+                        ArrayList<TM_Transition> purge =
+                            m_panel.getSimulator().getMachine().getInconsistentTransitions();
+
+                        // Change the alphabet, and remove inconsistent transitions
+                        m_panel.doJoinCommand(
+                            new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA),
+                            new RemoveInconsistentTransitionsCommand(m_panel, purge));
+
+                        // Hide the frame
                         setVisible(false);
                         try { setSelected(false); }
                         catch (PropertyVetoException e2) { }
+
                         // This causes a repaint also
                         m_panel.deselectSymbol();
                     }
@@ -221,7 +329,9 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     }
                     else if (choice == JOptionPane.NO_OPTION)
                     {
+                        // TODO: This may cause problems with determinism
                         m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+
                         setVisible(false);
                         try { setSelected(false); }
                         catch (PropertyVetoException e2) { }
@@ -259,8 +369,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         
         finish.add(ok);
         finish.add(cancel);
-        southButtons.add(finish, BorderLayout.EAST);
-        getContentPane().add(southButtons, BorderLayout.SOUTH);
+        southPanel.add(finish, BorderLayout.EAST);
+        getContentPane().add(southPanel, BorderLayout.SOUTH);
     }
     
     /** 
@@ -333,7 +443,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         {
             l.setSelected(m_panel.getAlphabet().containsSymbol(l.getText().charAt(0)));
         }
-        blankCheckBox.setSelected(m_panel.getAlphabet().containsSymbol(Tape.BLANK_SYMBOL));
+        m_blank.setSelected(m_panel.getAlphabet().containsSymbol(Tape.BLANK_SYMBOL));
         
     }
     
@@ -350,7 +460,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
     /**
      * The checkbox which represents the blank character.
      */
-    private JCheckBox blankCheckBox = new JCheckBox("_ (blank symbol)");
+    private JCheckBox m_blank = new JCheckBox("_ (blank symbol)");
 
     /**
      * The current graphics panel.

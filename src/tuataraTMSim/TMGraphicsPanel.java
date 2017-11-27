@@ -516,11 +516,22 @@ public class TMGraphicsPanel extends JPanel
             handleSelectionClick(e);
             return;
         }
-        
-        String label = getFirstFreeName();
-        doCommand(new AddStateCommand(this, new TM_State(label,false, false,
-                e.getX() - TM_State.STATE_RENDERING_WIDTH / 2,
-                e.getY() - TM_State.STATE_RENDERING_WIDTH / 2)));
+       
+        int x = e.getX() - TM_State.STATE_RENDERING_WIDTH / 2;
+        int y = e.getY() - TM_State.STATE_RENDERING_WIDTH / 2;
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                String label = getFirstFreeName();
+                doCommand(new AddStateCommand(this, new TM_State(label, false, false, x, y)));
+                break;
+
+            case NORMALIZED:
+                doJoinCommand(
+                    new AddStateCommand(this, new TM_State("", false, false, x, y)),
+                    new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+                break;
+        }
     }
     
     /** 
@@ -551,7 +562,18 @@ public class TMGraphicsPanel extends JPanel
      */
     public void deleteState(TM_State s)
     {
-        doCommand(new DeleteStateCommand(this, s));
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                doCommand(new DeleteStateCommand(this, s));
+                break;
+
+            case NORMALIZED:
+                doJoinCommand(
+                    new DeleteStateCommand(this, s),
+                    new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+                break;
+        }
     }
     
     /**
@@ -574,7 +596,18 @@ public class TMGraphicsPanel extends JPanel
 
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
+            switch (m_sim.getMachine().getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                        new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
+                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+                    break;
+            }
         }
     }
     
@@ -588,7 +621,17 @@ public class TMGraphicsPanel extends JPanel
         TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleAcceptingStateCommand(this, m_sim.getMachine().getFinalState(), stateClickedOn));
+            switch (m_sim.getMachine().getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleAcceptingStateCommand(this, m_sim.getMachine().getFinalState(), stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                        new ToggleAcceptingStateCommand(this, m_sim.getMachine().getFinalState(), stateClickedOn),
+                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+            }
         }
     }
     
@@ -1076,7 +1119,7 @@ public class TMGraphicsPanel extends JPanel
             m_iFrame.updateTitle();
         }
     }
-    
+   
     /** 
      * Find the first unused standard state label in the machine. Standard labels are 'q' followed
      * by a non-negative integer.
@@ -1084,12 +1127,23 @@ public class TMGraphicsPanel extends JPanel
      */
     public String getFirstFreeName()
     {
-       int current = 0;
-       while (m_labelsUsed.containsKey("q" + current))
-           current++;
-       String returner = "q" + current;
-       // m_labelsUsed.put(returner, returner);
-       return returner;
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                int current = 0;
+                while (m_labelsUsed.containsKey("q" + current))
+                {
+                    current++;
+                }
+                return "q" + current;
+
+            case NORMALIZED:
+                // Assume every state name is normalized, hence no naming conflicts
+                return "" + m_sim.getMachine().getStates().size();
+        
+            default:
+                return null;
+        }
     }
     
     /**
@@ -1195,9 +1249,18 @@ public class TMGraphicsPanel extends JPanel
     {
         HashSet<TM_State> selectedStatesCopy = (HashSet<TM_State>)selectedStates.clone();
         HashSet<TM_Transition> selectedTransitionsCopy = (HashSet<TM_Transition>)selectedTransitions.clone();
-        doCommand(new DeleteAllSelectedCommand(this, selectedStatesCopy,
-                selectedTransitionsCopy));
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                doCommand(new DeleteAllSelectedCommand(this, selectedStatesCopy,
+                        selectedTransitionsCopy));
+                break;
 
+            case NORMALIZED:
+                doJoinCommand(
+                    new DeleteAllSelectedCommand(this, selectedStatesCopy, selectedTransitionsCopy),
+                    new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+        }
         repaint();
     }
     
@@ -1336,6 +1399,16 @@ public class TMGraphicsPanel extends JPanel
         m_mainWindow.updateUndoActions();
         repaint();
     }
+
+    /**
+     * Convenience wrapper to doCommand(new JoinCommand(first, second)).
+     * @param first The first command to run.
+     * @param second The second command to run.
+     */
+    public void doJoinCommand(TMCommand first, TMCommand second)
+    {
+        doCommand(new JoinCommand(first, second));
+    }
     
     /** 
      * Adds a command to the undo stack and clears the redo stack, but doesn't execute the command.
@@ -1423,7 +1496,7 @@ public class TMGraphicsPanel extends JPanel
      * The current GUI mode.
      */
     private TM_GUI_Mode m_currentMode;
-    
+
     /**
      * The set of selected states.
      */

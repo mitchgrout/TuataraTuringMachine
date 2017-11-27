@@ -4,17 +4,27 @@
 <P> In this section, we present a task-oriented ("how-to") guide to creating and editing machines.
 </P>
 
-<BR>
-<H3> Choosing an Alphabet </H3>
+<BR> <H3> Choosing an Alphabet </H3>
 <P> Each machine has an alphabet assocated with it.  This is the set of symbols that it can read and
 write to the tape.  In this program, unlike in some Turing machine models there are not separate
 alphabets for allowable input ("input alphabet") and symbols that the machine can write to the tape
 ("tape alphabet").  Instead, consider the single alphabet to be the union of these two alphabets.
 </P>
-<P>In the Alphabet menu, click on <IMG SRC="../images/configureAlphabet.gif"> <I>Configure Alphabet</I>.
-This will bring up the alphabet configuration dialog.  Check the boxes for the symbols that you wish
-to include in your alphabet, and press <I>Ok</I>.
+<P>In the Configuration menu, click on <IMG SRC="../images/configureAlphabet.gif"> 
+<I>Configure Alphabet</I>.  This will bring up the alphabet configuration dialog.  Check the boxes
+for the symbols that you wish to include in your alphabet, and press <I>Ok</I>.
 </P>
+
+<BR>
+<H3> Choosing a Naming Scheme </H3>
+<P> When adding new states, a new label will be selected from a set of potential labels. This pool
+may be configured by choosing a different naming scheme.
+</P>
+<P> In the Configuration menu, click on <IMG SRC="../images/scheme.gif"> <I>Configure Scheme</I>.
+This will bring up the naming scheme dialog.  Choose the naming scheme that you would like to use
+for the current machine.  To rename all of your states to fit the new scheme, click 
+<I>OK & Rename</I>, or click <I>OK</I> to change the scheme without renaming existing states.
+Some naming schemes will require a rename of all existing states.
 
 <BR>
 <H3> Adding States </H3>
@@ -73,15 +83,15 @@ by clicking on their action text or the directional arrows and dragging.
 </P>
 
 <BR>
-<H3> Choosing Start States </H3>
-<P> Select the <IMG SRC="../images/startState.gif"> <I>Choose Start States</I> mode from the Mode
+<H3> Choosing a Start State </H3>
+<P> Select the <IMG SRC="../images/startState.gif"> <I>Choose Start State</I> mode from the Mode
 menu.  Click on a state to toggle whether it is a start state or not.  Only one state may be a start
 state.
 </P>
 
 <BR>
-<H3> Choosing Accepting States </H3>
-<P> Select the <IMG SRC="../images/finalState.gif"> <I>Choose Accepting States</I> mode from the
+<H3> Choosing an Accepting State </H3>
+<P> Select the <IMG SRC="../images/finalState.gif"> <I>Choose Accepting State</I> mode from the
 Mode menu.  Click on a state to toggle whether it is an accepting state or not.  Only one state may
 be an accepting state.
 </P>

@@ -427,16 +427,24 @@ public class MainWindow extends JFrame
         // Create the alphabet configuration internal frame
         asif = new AlphabetSelectorInternalFrame(this);
         asif.pack();
+
+        // Create the scheme selector internal frame
+        ssif = new SchemeSelectorInternalFrame(this);
+        ssif.pack();
         
         // Make the alphabet config internal frame quasi-modal.
         JPanel glass = new JPanel();
         glass.setOpaque(false);
         glass.add(asif);
+        glass.add(ssif);
         setGlassPane(glass);
         
         // The ModalAdapter intercepts all mouse events when the glass pane is visible.
-        asif.addInternalFrameListener(new ModalAdapter(glass));
-        
+        ModalAdapter adapter = new ModalAdapter(glass);
+        asif.addInternalFrameListener(adapter);
+        ssif.addInternalFrameListener(adapter);
+        // !!!
+
         this.setVisible(true);
         try
         {
@@ -464,10 +472,10 @@ public class MainWindow extends JFrame
                 m_selectionIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
         m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, m_eraserIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
-        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start States",
+        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State",
                 TM_GUI_Mode.CHOOSESTART, m_chooseStartIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
-        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting States",
+        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State",
                 TM_GUI_Mode.CHOOSEACCEPTING, m_chooseAcceptingIcon,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
         m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
@@ -475,7 +483,8 @@ public class MainWindow extends JFrame
                 KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
         
         m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", m_configureAlphabetIcon);
-
+        m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", m_configureSchemeIcon);
+        
         m_newMachineAction = new NewMachineAction("New Machine", m_newMachineIcon);
         m_openMachineAction = new OpenMachineAction("Open Machine", m_openMachineIcon);
         m_saveMachineAction = new SaveMachineAction("Save Machine", m_saveMachineIcon);
@@ -525,8 +534,9 @@ public class MainWindow extends JFrame
         JMenuBar menuBar = new JMenuBar();
         fileMenu = new javax.swing.JMenu();
         machineMenu = new javax.swing.JMenu();
-        alphabetMenu = new javax.swing.JMenu();
+        configMenu = new javax.swing.JMenu();
         configureAlphabet = new javax.swing.JMenuItem();
+        configureScheme = new javax.swing.JMenuItem();
         resetMachineMenuItem = new javax.swing.JMenuItem();
         stepMenuItem = new javax.swing.JMenuItem();
         newMachineMenuItem = new javax.swing.JMenuItem();
@@ -721,13 +731,15 @@ public class MainWindow extends JFrame
         eraseTape.setAction(m_eraseTapeAction);
         tapeMenu.add(eraseTape);
         menuBar.add(tapeMenu);
-        
-        // Alphabet menu
-        alphabetMenu.setText("Alphabet");
-        alphabetMenu.setMnemonic(KeyEvent.VK_A);
+       
+        // Config menu
+        configMenu.setText("Configuration");
+        configMenu.setMnemonic(KeyEvent.VK_C);
         configureAlphabet.setAction(m_configureAlphabetAction);
-        alphabetMenu.add(configureAlphabet);
-        menuBar.add(alphabetMenu);
+        configMenu.add(configureAlphabet);
+        configureScheme.setAction(m_configureSchemeAction);
+        configMenu.add(configureScheme);
+        menuBar.add(configMenu);
 
         // Help menu
         helpMenu.setText("Help");
@@ -896,7 +908,13 @@ public class MainWindow extends JFrame
         configureAlphabetToolBarButton.setFocusable(false);
         configureAlphabetToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         configureAlphabetToolBarButton.setText("");
-        
+       
+        JButton configureSchemeToolBarButton = new JButton();
+        configureSchemeToolBarButton.setAction(m_configureSchemeAction);
+        configureSchemeToolBarButton.setFocusable(false);
+        configureSchemeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        configureSchemeToolBarButton.setText("");
+
         for (JToolBar t : returner)
         {
             t.setRollover(true);
@@ -916,7 +934,7 @@ public class MainWindow extends JFrame
         returner[0].add(m_undoToolBarButton);
         returner[0].add(m_redoToolBarButton);
         returner[0].add(configureAlphabetToolBarButton);
-        
+        returner[0].add(configureSchemeToolBarButton); 
         returner[1].setName("Mode");
         returner[1].add(addNodesToolBarButton);
         returner[1].add(addTransitionsToolBarButton);
@@ -998,6 +1016,8 @@ public class MainWindow extends JFrame
         m_redoIcon = new ImageIcon(imageURL);
         imageURL = MainWindow.class.getResource("images/configureAlphabet.gif");
         m_configureAlphabetIcon = new ImageIcon(imageURL);
+        imageURL = MainWindow.class.getResource("images/scheme.gif");
+        m_configureSchemeIcon = new ImageIcon(imageURL);
 
         imageURL = MainWindow.class.getResource("images/tapeStart.gif");
         m_tapeStartIcon = new ImageIcon(imageURL);
@@ -1213,6 +1233,7 @@ public class MainWindow extends JFrame
         {
             m_stepAction.setEnabled(isEnabled);
             m_configureAlphabetAction.setEnabled(isEnabled);
+            m_configureSchemeAction.setEnabled(isEnabled);
             m_saveMachineAsAction.setEnabled(isEnabled);
             m_saveMachineAction.setEnabled(isEnabled);
             m_cutAction.setEnabled(isEnabled);
@@ -1245,6 +1266,7 @@ public class MainWindow extends JFrame
     {
         m_stepAction.setEnabled(isEnabled);
         m_configureAlphabetAction.setEnabled(isEnabled);
+        m_configureSchemeAction.setEnabled(isEnabled);
         m_cutAction.setEnabled(isEnabled);
         m_copyAction.setEnabled(isEnabled);
         m_pasteAction.setEnabled(isEnabled);
@@ -1500,6 +1522,36 @@ public class MainWindow extends JFrame
             {
                 asif.setPanel(panel);
                 asif.show();
+                getGlassPane().setVisible(true);
+            }
+        }
+    }
+
+    /**
+     * Action for configuring the current naming scheme.
+     */
+    class ConfigureSchemeAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ConfigureSchemeAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
+        public ConfigureSchemeAction(String text, ImageIcon icon)
+        {
+            super(text);
+            putValue(Action.SMALL_ICON, icon);
+            putValue(Action.SHORT_DESCRIPTION, text);
+            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
+        }
+
+        public void actionPerformed(ActionEvent e)
+        {
+            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            if (panel != null)
+            {
+                ssif.setPanel(panel);
+                ssif.show();
                 getGlassPane().setVisible(true);
             }
         }
@@ -2092,7 +2144,18 @@ public class MainWindow extends JFrame
                 if (panel != null)
                 {
                     TMachine machine = panel.getSimulator().getMachine();
-                    panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                    switch (panel.getSimulator().getMachine().getNamingScheme())
+                    {
+                        case GENERAL:
+                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                            break;
+
+                        case NORMALIZED:
+                            panel.doJoinCommand(
+                                new PasteCommand(panel, selectedStates, selectedTransitions),
+                                new SchemeRelabelCommand(panel, NamingScheme.NORMALIZED));
+                            break;
+                    }
                     updateUndoActions();
                 }
             }
@@ -2829,14 +2892,19 @@ public class MainWindow extends JFrame
     private JMenu machineMenu;
 
     /**
-     * Menu containing all items associated with alphabet configuration.
+     * Menu containing all items associated with configurement of the machine and environment.
      */
-    private JMenu alphabetMenu;
+    private JMenu configMenu;
 
     /**
      * Menu item for configuring the alphabet.
      */
     private JMenuItem configureAlphabet;
+
+    /**
+     * Menu item for configuring the naming scheme.
+     */
+    private JMenuItem configureScheme;
 
     /**
      * Menu item for resetting machine execution state.
@@ -3039,6 +3107,11 @@ public class MainWindow extends JFrame
     private AlphabetSelectorInternalFrame asif;
 
     /**
+     * Frame for selecting the current naming scheme.
+     */
+    private SchemeSelectorInternalFrame ssif;
+
+    /**
      * Whether the keyboard is currently enabled.
      */
     private boolean m_keyboardEnabled = true;
@@ -3199,6 +3272,11 @@ public class MainWindow extends JFrame
     private ImageIcon m_configureAlphabetIcon;
 
     /**
+     * Icon for configuring the naming scheme.
+     */
+    private ImageIcon m_configureSchemeIcon;
+
+    /**
      * Icon for moving the read/write head to the start of the tape.
      */
     private ImageIcon m_tapeStartIcon;
@@ -3252,6 +3330,11 @@ public class MainWindow extends JFrame
      * Action for configuring the alphabet.
      */
     private Action m_configureAlphabetAction;
+
+    /**
+     * Action for configuring the naming scheme.
+     */
+    private Action m_configureSchemeAction;
 
     /**
      * Action for creating a new machine.
