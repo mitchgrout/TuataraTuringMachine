@@ -119,9 +119,9 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                                      NamingScheme.GENERAL : NamingScheme.NORMALIZED;
                 
                 // Rename all commands, and update the machine
-                m_panel.doCommand(new JoinCommand(
+                m_panel.doJoinCommand(
                     new SchemeRelabelCommand(m_panel, scheme),
-                    new ChangeSchemeCommand(m_panel, scheme)));
+                    new ChangeSchemeCommand(m_panel, scheme));
            
                 // Hide the frame
                 setVisible(false);
@@ -152,9 +152,9 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                     if (choice == JOptionPane.OK_OPTION)
                     {
                         // Update the machine, renaming
-                        m_panel.doCommand(new JoinCommand(
+                        m_panel.doJoinCommand(
                             new SchemeRelabelCommand(m_panel, scheme),
-                            new ChangeSchemeCommand(m_panel, scheme)));
+                            new ChangeSchemeCommand(m_panel, scheme));
                     }
                     else
                     {

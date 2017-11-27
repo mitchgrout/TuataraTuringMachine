@@ -2144,7 +2144,18 @@ public class MainWindow extends JFrame
                 if (panel != null)
                 {
                     TMachine machine = panel.getSimulator().getMachine();
-                    panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                    switch (panel.getSimulator().getMachine().getNamingScheme())
+                    {
+                        case GENERAL:
+                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                            break;
+
+                        case NORMALIZED:
+                            panel.doJoinCommand(
+                                new PasteCommand(panel, selectedStates, selectedTransitions),
+                                new SchemeRelabelCommand(panel, NamingScheme.NORMALIZED));
+                            break;
+                    }
                     updateUndoActions();
                 }
             }
