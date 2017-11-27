@@ -139,8 +139,9 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
                 NamingScheme scheme = m_general.isSelected()?
                                       NamingScheme.GENERAL : NamingScheme.NORMALIZED;
 
-                // Force a rename for normalized machines
-                if (scheme == NamingScheme.NORMALIZED)
+                // Force a rename for normalized machines, so long as there are any states
+                if (m_panel.getSimulator().getMachine().getStates().size() != 0 &&
+                    scheme == NamingScheme.NORMALIZED)
                 {
                     int choice = JOptionPane.showOptionDialog(null,
                             "Changing the naming scheme to normalized requires renaming all " +
