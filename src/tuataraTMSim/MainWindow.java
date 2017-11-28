@@ -221,9 +221,9 @@ public class MainWindow extends JFrame
                        e.getKeyCode() == KeyEvent.VK_DELETE ||
                        e.getKeyCode() == KeyEvent.VK_BACK_SPACE)))
                {
-                   if (asif.isVisible())
+                   if (m_asif.isVisible())
                    {
-                       asif.handleKeyEvent(e);
+                       m_asif.handleKeyEvent(e);
                        return false;
                    }
                    char c = e.getKeyChar();
@@ -272,7 +272,18 @@ public class MainWindow extends JFrame
             }
         });
     }
-    
+
+    /**
+     * Create an ImageIcon based off of the given filename. The images/ directory is prepended to
+     * the given filename.
+     * @param fname The filename of the image, found in the images/ directory.
+     * @return An ImageIcon representing the loaded image.
+     */
+    private static ImageIcon loadIcon(String fname)
+    {
+        return new ImageIcon(MainWindow.class.getResource("images/" + fname));
+    }
+
     /** 
      * Selects the user interface interaction mode and notifies all internal windows accordingly.
      * This determines the results of user interactions such as clicking on the state diagrams.
@@ -312,7 +323,6 @@ public class MainWindow extends JFrame
                 b.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
             }
         }
-
     }
     
     /** 
@@ -320,15 +330,20 @@ public class MainWindow extends JFrame
      */
     private void initComponents()
     {
+        // Build the menubar
+        
         // TODO: Used only by the constructor; potentially move into there.
         this.setSize(new Dimension(640, 480));
         this.setTitle("Tuatara Turing Machine Simulator");
-        
-        loadImages();
+       
+        m_emptyIcon = loadIcon("emptyIcon.gif");
+        m_tuataraIcon = loadIcon("tuatara.gif");
+        m_tuataraSmallIcon = loadIcon("tuataraSmall.gif");
+
         createActions(); // Set up action objects
         this.setIconImage(m_tuataraSmallIcon.getImage());
         // Create menu objects
-        desktopPane = new javax.swing.JDesktopPane();
+        desktopPane = new JDesktopPane();
         
         final Component thisPtr = this;
         desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
@@ -354,7 +369,7 @@ public class MainWindow extends JFrame
         
         tapeDispController.setVisible(true);
         
-        // Set up the file choosers
+        // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
         fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
@@ -425,24 +440,24 @@ public class MainWindow extends JFrame
         desktopPane.getDesktopManager().activateFrame(iFrame);
         
         // Create the alphabet configuration internal frame
-        asif = new AlphabetSelectorInternalFrame(this);
-        asif.pack();
+        m_asif = new AlphabetSelectorInternalFrame(this);
+        m_asif.pack();
 
         // Create the scheme selector internal frame
-        ssif = new SchemeSelectorInternalFrame(this);
-        ssif.pack();
+        m_ssif = new SchemeSelectorInternalFrame(this);
+        m_ssif.pack();
         
         // Make the alphabet config internal frame quasi-modal.
         JPanel glass = new JPanel();
         glass.setOpaque(false);
-        glass.add(asif);
-        glass.add(ssif);
+        glass.add(m_asif);
+        glass.add(m_ssif);
         setGlassPane(glass);
         
         // The ModalAdapter intercepts all mouse events when the glass pane is visible.
         ModalAdapter adapter = new ModalAdapter(glass);
-        asif.addInternalFrameListener(adapter);
-        ssif.addInternalFrameListener(adapter);
+        m_asif.addInternalFrameListener(adapter);
+        m_ssif.addInternalFrameListener(adapter);
         // !!!
 
         this.setVisible(true);
@@ -463,66 +478,78 @@ public class MainWindow extends JFrame
      */
     private void createActions()
     {
+        // File menu
+        m_newMachineAction    = new NewMachineAction("New Machine", loadIcon("newMachine.gif"));
+        m_openMachineAction   = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));
+        m_saveMachineAction   = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"));
+        m_saveMachineAsAction = new SaveMachineAsAction("Save Machine As", loadIcon("emptyIcon.gif"));
+        
+        m_newTapeAction    = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
+        m_openTapeAction   = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
+        m_saveTapeAction   = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"));
+        m_saveTapeAsAction = new SaveTapeAsAction("Save Tape As", loadIcon("emptyIcon.gif"));
+
+        // Edit menu
+        m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
+        m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
+
+        m_cutAction    = new CutSelectedAction("Cut", loadIcon("cut.gif"));
+        m_copyAction   = new CopySelectedAction("Copy", loadIcon("copy.gif"));
+        m_pasteAction  = new PasteAction("Paste", loadIcon("paste.gif"));
+        m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
+
+        // Mode menu
         m_addNodesAction = new GUI_ModeSelectionAction("Add States", TM_GUI_Mode.ADDNODES,
-                m_addNodesIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
-        m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions",
-                TM_GUI_Mode.ADDTRANSITIONS, m_addTransitionIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
+                loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
+
+        m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", TM_GUI_Mode.ADDTRANSITIONS,
+                loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
+
         m_selectionAction = new GUI_ModeSelectionAction("Make Selection", TM_GUI_Mode.SELECTION,
-                m_selectionIcon, KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
-        m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, m_eraserIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
-        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State",
-                TM_GUI_Mode.CHOOSESTART, m_chooseStartIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
-        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State",
-                TM_GUI_Mode.CHOOSEACCEPTING, m_chooseAcceptingIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
-        m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State",
-                TM_GUI_Mode.CHOOSECURRENTSTATE, m_chooseCurrentStateIcon,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
-        
-        m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", m_configureAlphabetIcon);
-        m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", m_configureSchemeIcon);
-        
-        m_newMachineAction = new NewMachineAction("New Machine", m_newMachineIcon);
-        m_openMachineAction = new OpenMachineAction("Open Machine", m_openMachineIcon);
-        m_saveMachineAction = new SaveMachineAction("Save Machine", m_saveMachineIcon);
-        m_saveMachineAsAction = new SaveMachineAsAction("Save Machine As", m_emptyIcon);
-        
-        m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", m_tapeStartIcon);
-        m_eraseTapeAction = new EraseTapeAction("Erase Tape", m_tapeClearIcon);
-        m_reloadTapeAction = new ReloadTapeAction("Reload Tape", m_tapeReloadIcon);
-        
-        m_newTapeAction = new NewTapeAction("New Tape", m_newTapeIcon);
-        m_openTapeAction = new OpenTapeAction("Open Tape", m_openTapeIcon);
-        m_saveTapeAction = new SaveTapeAction("Save Tape", m_saveTapeIcon);
-        m_saveTapeAsAction = new SaveTapeAsAction("Save Tape As", m_emptyIcon);
-        
-        m_undoAction = new UndoAction("Undo", m_undoIcon);
-        m_redoAction = new RedoAction("Redo", m_redoIcon);
-        m_cutAction = new CutSelectedAction("Cut", m_cutIcon);
-        m_copyAction = new CopySelectedAction("Copy", m_copyIcon);
-        m_pasteAction = new PasteAction("Paste", m_pasteIcon);
-        m_deleteAction = new DeleteSelectedAction("Delete Selected Items", m_deleteIcon);
-                
-        m_fastExecuteAction = new FastExecuteAction("Execute", m_fastExecuteIcon);
-        m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", m_pauseIcon);
-        m_stepAction = new StepAction("Step", this, m_stepIcon);
-        m_stopMachineAction = new StopMachineAction("Stop Execution", m_stopIcon);
-        
-        
-        m_slowExecuteSpeedAction = new ExecutionSpeedSelectionAction("Slow", SLOW_EXECUTE_SPEED_DELAY, 
+                loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
+
+        m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, 
+                loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
+
+        m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", TM_GUI_Mode.CHOOSESTART, 
+                loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
+
+        m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", TM_GUI_Mode.CHOOSEACCEPTING,
+                loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
+
+        m_chooseCurrentStateAction = new GUI_ModeSelectionAction("Choose Current State", TM_GUI_Mode.CHOOSECURRENTSTATE, 
+                loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
+
+        // Machine menu
+        m_stepAction           = new StepAction("Step", this, loadIcon("step.gif"));
+        m_fastExecuteAction    = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
+        m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
+        m_stopMachineAction    = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
+
+        m_slowExecuteSpeedAction = new ExecutionSpeedSelectionAction("Slow", SLOW_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_1, KeyEvent.CTRL_DOWN_MASK));
+
         m_mediumExecuteSpeedAction = new ExecutionSpeedSelectionAction("Medium", MEDIUM_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_2, KeyEvent.CTRL_DOWN_MASK));
+        
         m_fastExecuteSpeedAction = new ExecutionSpeedSelectionAction("Fast", FAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_3, KeyEvent.CTRL_DOWN_MASK));
+        
         m_superFastExecuteSpeedAction = new ExecutionSpeedSelectionAction("Super Fast", SUPERFAST_EXECUTE_SPEED_DELAY, 
                 KeyStroke.getKeyStroke(KeyEvent.VK_4, KeyEvent.CTRL_DOWN_MASK));
+        
         m_ultraFastExecuteSpeedAction = new ExecutionSpeedSelectionAction("Ultra Fast", ULTRAFAST_EXECUTE_SPEED_DELAY, 
-                KeyStroke.getKeyStroke(KeyEvent.VK_5, KeyEvent.CTRL_DOWN_MASK));
-    }
+                KeyStroke.getKeyStroke(KeyEvent.VK_5, KeyEvent.CTRL_DOWN_MASK));     
+
+        // Tape menu
+        m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
+        m_reloadTapeAction  = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
+        m_eraseTapeAction   = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
+
+        // Configuration menu
+        m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif"));
+        m_configureSchemeAction   = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
+   }
     
     /** 
      * Construct the menus and return the master JMenuBar object. Requires createActions() to have
@@ -532,75 +559,75 @@ public class MainWindow extends JFrame
     private JMenuBar createMenus()
     {
         JMenuBar menuBar = new JMenuBar();
-        fileMenu = new javax.swing.JMenu();
-        machineMenu = new javax.swing.JMenu();
-        configMenu = new javax.swing.JMenu();
-        configureAlphabet = new javax.swing.JMenuItem();
-        configureScheme = new javax.swing.JMenuItem();
-        resetMachineMenuItem = new javax.swing.JMenuItem();
-        stepMenuItem = new javax.swing.JMenuItem();
-        newMachineMenuItem = new javax.swing.JMenuItem();
-        openMachineMenuItem = new javax.swing.JMenuItem();
-        saveMachineMenuItem = new javax.swing.JMenuItem();
-        saveMachineAsMenuItem = new javax.swing.JMenuItem();
-        newTapeMenuItem = new javax.swing.JMenuItem();
-        openTapeMenuItem = new javax.swing.JMenuItem();
-        saveTapeMenuItem = new javax.swing.JMenuItem();
-        saveTapeAsMenuItem = new javax.swing.JMenuItem();
-        undoMenuItem = new javax.swing.JMenuItem();
-        redoMenuItem = new javax.swing.JMenuItem();
-        exitMenuItem = new javax.swing.JMenuItem();
-        editMenu = new javax.swing.JMenu();
-        cutMenuItem = new javax.swing.JMenuItem();
-        copyMenuItem = new javax.swing.JMenuItem();
-        pasteMenuItem = new javax.swing.JMenuItem();
-        deleteMenuItem = new javax.swing.JMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        contentsMenuItem = new javax.swing.JMenuItem();
-        aboutMenuItem = new javax.swing.JMenuItem();
-        fastExecuteMenuItem = new javax.swing.JMenuItem();
-        m_stopExecutionMenuItem = new javax.swing.JMenuItem();
-        m_modeMenu  = new javax.swing.JMenu();
-        m_addNodesMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_addTransitionsMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_makeSelectionMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_eraserMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_chooseStartMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_chooseAcceptingMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_chooseCurrentStateMenuItem = new javax.swing.JRadioButtonMenuItem();
-        m_slowExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
-        m_mediumExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
-        m_fastExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
-        m_superFastExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
-        m_ultraFastExecuteSpeed = new javax.swing.JRadioButtonMenuItem();
-        tapeMenu = new javax.swing.JMenu();
-        eraseTape = new javax.swing.JMenuItem();
-        reloadTape = new javax.swing.JMenuItem();
-        headToStart = new javax.swing.JMenuItem();
+        m_fileMenu = new JMenu();
+        machineMenu = new JMenu();
+        m_configMenu = new JMenu();
+        m_configureAlphabet = new JMenuItem();
+        configureScheme = new JMenuItem();
+        resetMachineMenuItem = new JMenuItem();
+        stepMenuItem = new JMenuItem();
+        m_newMachineMenuItem = new JMenuItem();
+        openMachineMenuItem = new JMenuItem();
+        saveMachineMenuItem = new JMenuItem();
+        saveMachineAsMenuItem = new JMenuItem();
+        newTapeMenuItem = new JMenuItem();
+        openTapeMenuItem = new JMenuItem();
+        saveTapeMenuItem = new JMenuItem();
+        saveTapeAsMenuItem = new JMenuItem();
+        undoMenuItem = new JMenuItem();
+        redoMenuItem = new JMenuItem();
+        exitMenuItem = new JMenuItem();
+        editMenu = new JMenu();
+        cutMenuItem = new JMenuItem();
+        copyMenuItem = new JMenuItem();
+        pasteMenuItem = new JMenuItem();
+        deleteMenuItem = new JMenuItem();
+        helpMenu = new JMenu();
+        contentsMenuItem = new JMenuItem();
+        aboutMenuItem = new JMenuItem();
+        fastExecuteMenuItem = new JMenuItem();
+        m_stopExecutionMenuItem = new JMenuItem();
+        m_modeMenu  = new JMenu();
+        m_addNodesMenuItem = new JRadioButtonMenuItem();
+        m_addTransitionsMenuItem = new JRadioButtonMenuItem();
+        m_makeSelectionMenuItem = new JRadioButtonMenuItem();
+        m_eraserMenuItem = new JRadioButtonMenuItem();
+        m_chooseStartMenuItem = new JRadioButtonMenuItem();
+        m_chooseAcceptingMenuItem = new JRadioButtonMenuItem();
+        m_chooseCurrentStateMenuItem = new JRadioButtonMenuItem();
+        m_slowExecuteSpeed = new JRadioButtonMenuItem();
+        m_mediumExecuteSpeed = new JRadioButtonMenuItem();
+        m_fastExecuteSpeed = new JRadioButtonMenuItem();
+        m_superFastExecuteSpeed = new JRadioButtonMenuItem();
+        m_ultraFastExecuteSpeed = new JRadioButtonMenuItem();
+        tapeMenu = new JMenu();
+        eraseTape = new JMenuItem();
+        reloadTape = new JMenuItem();
+        headToStart = new JMenuItem();
         
         // File menu
-        fileMenu.setText("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        newMachineMenuItem.setAction(m_newMachineAction);
-        fileMenu.add(newMachineMenuItem);
+        m_fileMenu.setText("File");
+        m_fileMenu.setMnemonic(KeyEvent.VK_F);
+        m_newMachineMenuItem.setAction(m_newMachineAction);
+        m_fileMenu.add(m_newMachineMenuItem);
         openMachineMenuItem.setAction(m_openMachineAction);
-        fileMenu.add(openMachineMenuItem);
+        m_fileMenu.add(openMachineMenuItem);
         saveMachineMenuItem.setAction(m_saveMachineAction);
-        fileMenu.add(saveMachineMenuItem);
+        m_fileMenu.add(saveMachineMenuItem);
         saveMachineAsMenuItem.setAction(m_saveMachineAsAction);
-        fileMenu.add(saveMachineAsMenuItem);
+        m_fileMenu.add(saveMachineAsMenuItem);
         
-        fileMenu.add(new JSeparator());
+        m_fileMenu.add(new JSeparator());
         newTapeMenuItem.setAction(m_newTapeAction);
-        fileMenu.add(newTapeMenuItem);
+        m_fileMenu.add(newTapeMenuItem);
         openTapeMenuItem.setAction(m_openTapeAction);
-        fileMenu.add(openTapeMenuItem);
+        m_fileMenu.add(openTapeMenuItem);
         saveTapeMenuItem.setAction(m_saveTapeAction);
-        fileMenu.add(saveTapeMenuItem);
+        m_fileMenu.add(saveTapeMenuItem);
         saveTapeAsMenuItem.setAction(m_saveTapeAsAction);
-        fileMenu.add(saveTapeAsMenuItem);
+        m_fileMenu.add(saveTapeAsMenuItem);
 
-        fileMenu.add(new JSeparator());
+        m_fileMenu.add(new JSeparator());
         exitMenuItem.setText("Exit");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener()
         {
@@ -610,8 +637,8 @@ public class MainWindow extends JFrame
             }
         });
 
-        fileMenu.add(exitMenuItem);
-        menuBar.add(fileMenu);
+        m_fileMenu.add(exitMenuItem);
+        menuBar.add(m_fileMenu);
         
         // Edit menu
         editMenu.setText("Edit");
@@ -733,13 +760,13 @@ public class MainWindow extends JFrame
         menuBar.add(tapeMenu);
        
         // Config menu
-        configMenu.setText("Configuration");
-        configMenu.setMnemonic(KeyEvent.VK_C);
-        configureAlphabet.setAction(m_configureAlphabetAction);
-        configMenu.add(configureAlphabet);
+        m_configMenu.setText("Configuration");
+        m_configMenu.setMnemonic(KeyEvent.VK_C);
+        m_configureAlphabet.setAction(m_configureAlphabetAction);
+        m_configMenu.add(m_configureAlphabet);
         configureScheme.setAction(m_configureSchemeAction);
-        configMenu.add(configureScheme);
-        menuBar.add(configMenu);
+        m_configMenu.add(configureScheme);
+        menuBar.add(m_configMenu);
 
         // Help menu
         helpMenu.setText("Help");
@@ -953,83 +980,6 @@ public class MainWindow extends JFrame
         setUIMode(TM_GUI_Mode.ADDNODES); // Default mode
         
         return returner;
-    }
-    
-    /**
-     * Load all images stored in the images/ directory.
-     */
-    private void loadImages()
-    {
-        java.net.URL imageURL = MainWindow.class.getResource("images/state.gif");
-        if (imageURL != null) 
-        {
-            m_addNodesIcon = new ImageIcon(imageURL);
-        }
-        imageURL = MainWindow.class.getResource("images/transition.gif");
-        m_addTransitionIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/eraser.gif");
-        m_eraserIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/selection.gif");
-        m_selectionIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/startState.gif");
-        m_chooseStartIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/finalState.gif");
-        m_chooseAcceptingIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/currentState.gif");
-        m_chooseCurrentStateIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/step.gif");
-        m_stepIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/fastExecute.gif");
-        m_fastExecuteIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/stop.gif");
-        m_stopIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/pause.gif");
-        m_pauseIcon = new ImageIcon(imageURL);
-        
-        imageURL = MainWindow.class.getResource("images/newMachine.gif");
-        m_newMachineIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/saveMachine.gif");
-        m_saveMachineIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/openMachine.gif");
-        m_openMachineIcon = new ImageIcon(imageURL);
-        
-        imageURL = MainWindow.class.getResource("images/newTape.gif");
-        m_newTapeIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/saveTape.gif");
-        m_saveTapeIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/openTape.gif");
-        m_openTapeIcon = new ImageIcon(imageURL);
-        
-        imageURL = MainWindow.class.getResource("images/cut.gif");
-        m_cutIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/copy.gif");
-        m_copyIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/paste.gif");
-        m_pasteIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/delete.gif");
-        m_deleteIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/emptyIcon.gif");
-        m_emptyIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/undoIcon.gif");
-        m_undoIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/redoIcon.gif");
-        m_redoIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/configureAlphabet.gif");
-        m_configureAlphabetIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/scheme.gif");
-        m_configureSchemeIcon = new ImageIcon(imageURL);
-
-        imageURL = MainWindow.class.getResource("images/tapeStart.gif");
-        m_tapeStartIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/tapeClear.gif");
-        m_tapeClearIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/tapeReload.gif");
-        m_tapeReloadIcon = new ImageIcon(imageURL);
-        
-        imageURL = MainWindow.class.getResource("images/tuatara.gif");
-        m_tuataraIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/tuataraSmall.gif");
-        m_tuataraSmallIcon = new ImageIcon(imageURL);
     }
     
     /**
@@ -1520,8 +1470,8 @@ public class MainWindow extends JFrame
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                asif.setPanel(panel);
-                asif.show();
+                m_asif.setPanel(panel);
+                m_asif.show();
                 getGlassPane().setVisible(true);
             }
         }
@@ -1550,8 +1500,8 @@ public class MainWindow extends JFrame
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                ssif.setPanel(panel);
-                ssif.show();
+                m_ssif.setPanel(panel);
+                m_ssif.show();
                 getGlassPane().setVisible(true);
             }
         }
@@ -2819,298 +2769,11 @@ public class MainWindow extends JFrame
         m_redoToolBarButton.setText("");
     }
     
-    // GUI components
-
-    /**
-     * Menu item for displaying information about this program.
-     */
-    private JMenuItem aboutMenuItem;
-
-    /**
-     * Menu item for displaying user documentation.
-     */
-    private JMenuItem contentsMenuItem;
-
-    /**
-     * Menu item for copying selected items.
-     */
-    private JMenuItem copyMenuItem;
-
-    /**
-     * Menu item for cutting selected items.
-     */
-    private JMenuItem cutMenuItem;
-
-    /**
-     * Menu item for deleting selected items.
-     */
-    private JMenuItem deleteMenuItem;
-
-    /**
-     * Desktop pane for the window, containing all frames.
-     */
-    private JDesktopPane desktopPane;
-
-    /**
-     * Menu containing all items associated with editing.
-     */
-    private JMenu editMenu;
-
-    /**
-     * Menu item for undoing an action.
-     */
-    private JMenuItem undoMenuItem;
-
-    /**
-     * Menu item for redoing an action.
-     */
-    private JMenuItem redoMenuItem;
-
-    /**
-     * Menu item for pasting cut/copied items.
-     */
-    private JMenuItem pasteMenuItem;
-
-    /**
-     * Menu item for exiting the program.
-     */
-    private JMenuItem exitMenuItem;
-
-    /**
-     * Menu containing all items associated with file manipulation.
-     */
-    private JMenu fileMenu;
-
-    /**
-     * Menu containing all items associated with program help.
-     */
-    private JMenu helpMenu;
-
-    /**
-     * Menu containing all items associated with machine simulation.
-     */
-    private JMenu machineMenu;
-
-    /**
-     * Menu containing all items associated with configurement of the machine and environment.
-     */
-    private JMenu configMenu;
-
-    /**
-     * Menu item for configuring the alphabet.
-     */
-    private JMenuItem configureAlphabet;
-
-    /**
-     * Menu item for configuring the naming scheme.
-     */
-    private JMenuItem configureScheme;
-
-    /**
-     * Menu item for resetting machine execution state.
-     */
-    private JMenuItem resetMachineMenuItem;
-
-    /**
-     * Menu item for stepping through machine execution.
-     */
-    private JMenuItem stepMenuItem;
-
-    /**
-     * Menu item for running the machine simulation.
-     */
-    private JMenuItem fastExecuteMenuItem;
-
-    /**
-     * Menu item for pausing machine simulation.
-     */
-    private JMenuItem m_stopExecutionMenuItem;
-
-    /**
-     * Menu bar containing all menus.
-     */
-    private JMenuBar menuBar;
-    
-    /**
-     * Menu containing all items associated with tape manipulation.
-     */
-    private JMenu tapeMenu;
-
-    /**
-     * Menu item for erasing the tape.
-     */
-    private JMenuItem eraseTape;
-
-    /**
-     * Menu item for reloading the tape.
-     */
-    private JMenuItem reloadTape;
-
-    /**
-     * Menu item for resetting the read/write head for the tape.
-     */
-    private JMenuItem headToStart;
-    
-    /**
-     * Menu item for creating a new machine.
-     */
-    private JMenuItem newMachineMenuItem;
-
-    /**
-     * Menu item for opening a machine from file.
-     */
-    private JMenuItem openMachineMenuItem;
-
-    /**
-     * Menu item for saving a machine to a selected file.
-     */
-    private JMenuItem saveMachineAsMenuItem;
-
-    /**
-     * Menu item for saving a machine to an associated file.
-     */
-    private JMenuItem saveMachineMenuItem;
-    
-    /**
-     * Menu item for creating a new tape.
-     */
-    private JMenuItem newTapeMenuItem;
-
-    /**
-     * Menu item for opening a tape from file.
-     */
-    private JMenuItem openTapeMenuItem;
-
-    /**
-     * Menu item for saving a tape to a selected file.
-     */
-    private JMenuItem saveTapeAsMenuItem;
-
-    /**
-     * Menu item for saving a tape to an associated file.
-     */
-    private JMenuItem saveTapeMenuItem;
-
-    /**
-     * Menu containing all items associated with changing GUI mode. 
-     */
-    private JMenu m_modeMenu;
-
-    /**
-     * Menu item for changing GUI mode to ADDNODES.
-     */
-    private JRadioButtonMenuItem m_addNodesMenuItem;
-
-    /**
-     * Menu item for changing GUI mode to ADDTRANSITIONS.
-     */
-    private JRadioButtonMenuItem m_addTransitionsMenuItem;
-
-    /**
-     * Menu item for changing GUI mode to SELECTION.
-     */
-    private JRadioButtonMenuItem m_makeSelectionMenuItem;
-    
-    /**
-     * Menu item for changing GUI mode to ERASER.
-     */
-    private JRadioButtonMenuItem m_eraserMenuItem;
-    
-    /**
-     * Menu item for changing GUI mode to CHOOSESTART.
-     */
-    private JRadioButtonMenuItem m_chooseStartMenuItem;
-    
-    /**
-     * Menu item for changing GUI mode to CHOOSEACCEPTING. 
-     */
-    private JRadioButtonMenuItem m_chooseAcceptingMenuItem;
-    
-    /**
-     * Menu item for changing GUI mode to CHOOSECURRENTSTATE.
-     */
-    private JRadioButtonMenuItem m_chooseCurrentStateMenuItem;
-
-    /**
-     * Menu item for setting execution speed to slow.
-     */
-    private JRadioButtonMenuItem m_slowExecuteSpeed;
-    
-    /**
-     * Menu item for changing execution speed to medium.
-     */
-    private JRadioButtonMenuItem m_mediumExecuteSpeed;
-    
-    /**
-     * Menu item for changing execution speed to fast.
-     */
-    private JRadioButtonMenuItem m_fastExecuteSpeed;
-    
-    /**
-     * Menu item for changing execution speed to superfast.
-     */
-    private JRadioButtonMenuItem m_superFastExecuteSpeed;
-    
-    /**
-     * Menu item for changing execution speed to ultrafast.
-     */
-    private JRadioButtonMenuItem m_ultraFastExecuteSpeed;
-    
-    /**
-     * Menu item for starting machine simulation.
-     */
-    private JButton fastExecute;
-
     /**
      * Current GUI mode.
      */
     private TM_GUI_Mode m_currentMode;
-
-    /**
-     * List of buttons which have an associated GUI mode and action.
-     */
-    private ArrayList<GUIModeButton> toolbarButtons;
-
-    /**
-     * Tape display panel.
-     */
-    private TMTapeDisplayPanel tapeDisp;
-
-    /**
-     * Tape controller.
-     */
-    private TMTapeDisplayControllerPanel tapeDispController;
-
-    /**
-     * Main shared tape.
-     */
-    private final Tape m_tape = new CA_Tape();
-
-    /**
-     * Frame for displaying help information as HTML.
-     */
-    private TMHelpDisplayer m_helpDisp;
-
-    /**
-     * List of copied states.
-     */ 
-    private ArrayList<TM_State> copiedStates;
-
-    /**
-     * List of copied transitions.
-     */
-    private ArrayList<TM_Transition> copiedTransitions;
-
-    /**
-     * Frame for selecting the current alphabet.
-     */
-    private AlphabetSelectorInternalFrame asif;
-
-    /**
-     * Frame for selecting the current naming scheme.
-     */
-    private SchemeSelectorInternalFrame ssif;
-
+    
     /**
      * Whether the keyboard is currently enabled.
      */
@@ -3160,151 +2823,46 @@ public class MainWindow extends JFrame
      * Distance between new frames.
      */
     private int windowLocStepSize = minDistanceForNewWindowLoc;
-
-    /**
-     * Icon for adding states.
-     */
-    private ImageIcon m_addNodesIcon;
-
-    /**
-     * Icon for adding transitions.
-     */
-    private ImageIcon m_addTransitionIcon;
     
     /**
-     * Icon for removing states and transitions.
+     * List of buttons which have an associated GUI mode and action.
      */
-    private ImageIcon m_eraserIcon;
-    
-    /**
-     * Icon for selecting states and transitions.
-     */
-    private ImageIcon m_selectionIcon;
-    
-    /**
-     * Icon for choosing start states.
-     */
-    private ImageIcon m_chooseStartIcon;
-    
-    /**
-     * Icon for choosing accepting states.
-     */
-    private ImageIcon m_chooseAcceptingIcon;
-    
-    /**
-     * Icon for choosing current states.
-     */
-    private ImageIcon m_chooseCurrentStateIcon;
+    private ArrayList<GUIModeButton> toolbarButtons;
 
     /**
-     * Icon for performing a simulation step.
+     * Tape display panel.
      */
-    private ImageIcon m_stepIcon;
+    private TMTapeDisplayPanel tapeDisp;
 
     /**
-     * Icon for running the simulation.
+     * Tape controller.
      */
-    private ImageIcon m_fastExecuteIcon;
+    private TMTapeDisplayControllerPanel tapeDispController;
 
     /**
-     * Icon for stopping the simulation.
+     * Main shared tape.
      */
-    private ImageIcon m_stopIcon;
+    private final Tape m_tape = new CA_Tape();
 
     /**
-     * Icon for pausing the simulation.
-     */
-    private ImageIcon m_pauseIcon;
+     * List of copied states.
+     */ 
+    private ArrayList<TM_State> copiedStates;
 
     /**
-     * Icon for creating a new machine.
+     * List of copied transitions.
      */
-    private ImageIcon m_newMachineIcon;
-
+    private ArrayList<TM_Transition> copiedTransitions;
+      
     /**
-     * Icon for saving a machine
+     * Menu item for starting machine simulation.
      */
-    private ImageIcon m_saveMachineIcon;
-
-    /**
-     * Icon for opening a machine.
-     */
-    private ImageIcon m_openMachineIcon;
-
-    /**
-     * Icon for creating a new tape.
-     */
-    private ImageIcon m_newTapeIcon;
-
-    /**
-     * Icon for saving a tape.
-     */
-    private ImageIcon m_saveTapeIcon;
-
-    /**
-     * Icon for opening a tape.
-     */
-    private ImageIcon m_openTapeIcon;
-
-    /**
-     * Icon for cutting selected states and transitions.
-     */
-    private ImageIcon m_cutIcon;
-
-    /**
-     * Icon for copying selected states and transitions.
-     */
-    private ImageIcon m_copyIcon;
-
-    /**
-     * Icon for pasting selected states and transitions.
-     */
-    private ImageIcon m_pasteIcon;
-
-    /**
-     * Icon for deleting selected states and transitions
-     */
-    private ImageIcon m_deleteIcon;
-
-    /**
-     * Icon for configuring the alphabet.
-     */
-    private ImageIcon m_configureAlphabetIcon;
-
-    /**
-     * Icon for configuring the naming scheme.
-     */
-    private ImageIcon m_configureSchemeIcon;
-
-    /**
-     * Icon for moving the read/write head to the start of the tape.
-     */
-    private ImageIcon m_tapeStartIcon;
-
-    /**
-     * Icon for clearing the tape.
-     */
-    private ImageIcon m_tapeClearIcon;
-
-    /**
-     * Icon for reloading the tape.
-     */
-    private ImageIcon m_tapeReloadIcon;
+    private JButton fastExecute;
 
     /**
      * Icon which does not have any associated image. 
      */
     private ImageIcon m_emptyIcon;
-
-    /**
-     * Icon for undoing an action.
-     */
-    private ImageIcon m_undoIcon;
-
-    /**
-     * Icon for redoing an action.
-     */
-    private ImageIcon m_redoIcon;
 
     /**
      * Icon for the program.
@@ -3317,106 +2875,6 @@ public class MainWindow extends JFrame
     private ImageIcon m_tuataraSmallIcon;
 
     /**
-     * Action for stepping through execution.
-     */
-    private Action m_stepAction;
-
-    /**
-     * Action for stopping a simulation.
-     */
-    private Action m_stopMachineAction;
-
-    /**
-     * Action for configuring the alphabet.
-     */
-    private Action m_configureAlphabetAction;
-
-    /**
-     * Action for configuring the naming scheme.
-     */
-    private Action m_configureSchemeAction;
-
-    /**
-     * Action for creating a new machine.
-     */
-    private Action m_newMachineAction;
-
-    /**
-     * Action for opening a machine.
-     */
-    private Action m_openMachineAction;
-
-    /**
-     * Action for saving a machine to a selected file.
-     */
-    private Action m_saveMachineAsAction;
-
-    /**
-     * Action for saving a machine to an associated file.
-     */
-    private Action m_saveMachineAction; 
-
-    /**
-     * Action for creating a new tape.
-     */
-    private Action m_newTapeAction;
-
-    /**
-     * Action for opening a tape.
-     */
-    private Action m_openTapeAction;
-
-    /**
-     * Action for saving a tape to a selected file.
-     */
-    private Action m_saveTapeAsAction;
-
-    /**
-     * Action for saving a tape to an associated file.
-     */
-    private Action m_saveTapeAction;
-
-    /**
-     * Action for cutting selected states and transitions.
-     */
-    private Action m_cutAction;
-
-    /**
-     * Action for copying selected states and transitions.
-     */
-    private Action m_copyAction;
-
-    /**
-     * Action for pasting selected states and transitions.
-     */
-    private Action m_pasteAction;
-
-    /**
-     * Action for deleting selected states and transitions.
-     */
-    private Action m_deleteAction;
-
-    /**
-     * Action for starting simulation of the machine.
-     */
-    private Action m_fastExecuteAction;
-
-    /**
-     * Action for pausing simulation of the machine.
-     */
-    private Action m_pauseExecutionAction;
-
-    /**
-     * Action for undoing a command.
-     */
-    private Action m_undoAction;
-
-    /**
-     * Action for redoing a command
-     */
-    private Action m_redoAction;
-
-    /**
      * Toolbar button for undoing an action.
      */
     private JButton m_undoToolBarButton;
@@ -3426,78 +2884,409 @@ public class MainWindow extends JFrame
      */
     private JButton m_redoToolBarButton;
 
+    // TODO: Potentially package menu items into a class, since most if not all consist of 
+    // component + action + icon
+
+    // -------------------------------------------------- //
+    
     /**
-     * Action for moving the read/write head to the start of the tape.
+     * Desktop pane for the window, containing all frames.
      */
-    private HeadToStartAction m_headToStartAction;
+    private JDesktopPane desktopPane;
 
     /**
-     * Action for erasing the tape.
+     * Menu bar containing all menus.
      */
-    private EraseTapeAction m_eraseTapeAction;
+    // private JMenuBar m_menuBar;
+   
+    // -------------------------------------------------- //
+   
+    /**
+     * Menu containing all items associated with file manipulation.
+     */
+    private JMenu m_fileMenu;
 
     /**
-     * Action for reloading the tape.
+     * Menu item for creating a new machine.
      */
-    private ReloadTapeAction m_reloadTapeAction;
+    private JMenuItem m_newMachineMenuItem;
+    /**
+     * Action for creating a new machine.
+     */
+    private Action m_newMachineAction;
 
+    /**
+     * Menu item for opening a machine from file.
+     */
+    private JMenuItem openMachineMenuItem;
+    /**
+     * Action for opening a machine.
+     */
+    private Action m_openMachineAction;
+
+    /**
+     * Menu item for saving a machine to an associated file.
+     */
+    private JMenuItem saveMachineMenuItem;
+    /**
+     * Action for saving a machine to an associated file.
+     */
+    private Action m_saveMachineAction; 
+
+    /**
+     * Menu item for saving a machine to a selected file.
+     */
+    private JMenuItem saveMachineAsMenuItem;
+    /**
+     * Action for saving a machine to a selected file.
+     */
+    private Action m_saveMachineAsAction;
+   
+    /**
+     * Menu item for creating a new tape.
+     */
+    private JMenuItem newTapeMenuItem;
+    /**
+     * Action for creating a new tape.
+     */
+    private Action m_newTapeAction;
+
+    /**
+     * Menu item for opening a tape from file.
+     */
+    private JMenuItem openTapeMenuItem;
+    /**
+     * Action for opening a tape.
+     */
+    private Action m_openTapeAction;
+    
+    /**
+     * Menu item for saving a tape to an associated file.
+     */
+    private JMenuItem saveTapeMenuItem;
+    /**
+     * Action for saving a tape to an associated file.
+     */
+    private Action m_saveTapeAction;
+    
+    /**
+     * Menu item for saving a tape to a selected file.
+     */
+    private JMenuItem saveTapeAsMenuItem;
+    /**
+     * Action for saving a tape to a selected file.
+     */
+    private Action m_saveTapeAsAction;    
+    
+    /**
+     * Menu item for exiting the program.
+     */
+    private JMenuItem exitMenuItem;
+
+    // -------------------------------------------------- //
+
+    /**
+     * Menu containing all items associated with editing.
+     */
+    private JMenu editMenu;
+
+    /**
+     * Menu item for undoing an action.
+     */
+    private JMenuItem undoMenuItem;
+    /**
+     * Action for undoing a command.
+     */
+    private Action m_undoAction;
+
+    /**
+     * Menu item for redoing an action.
+     */
+    private JMenuItem redoMenuItem;
+    /**
+     * Action for redoing a command
+     */
+    private Action m_redoAction;
+        
+    /**
+     * Menu item for cutting selected items.
+     */    
+    private JMenuItem cutMenuItem;
+    /**
+     * Action for cutting selected states and transitions.
+     */
+    private Action m_cutAction;
+
+    /**
+     * Menu item for copying selected items.
+     */
+    private JMenuItem copyMenuItem;
+    /**
+     * Action for copying selected states and transitions.
+     */
+    private Action m_copyAction;
+
+    /**
+     * Menu item for pasting cut/copied items.
+     */
+    private JMenuItem pasteMenuItem;
+    /**
+     * Action for pasting selected states and transitions.
+     */
+    private Action m_pasteAction;
+
+    /**
+     * Menu item for deleting selected items.
+     */
+    private JMenuItem deleteMenuItem;
+    /**
+     * Action for deleting selected states and transitions.
+     */
+    private Action m_deleteAction;
+
+    // -------------------------------------------------- //
+
+    /**
+     * Menu containing all items associated with changing GUI mode. 
+     */
+    private JMenu m_modeMenu;
+
+    /**
+     * Menu item for changing GUI mode to ADDNODES.
+     */
+    private JRadioButtonMenuItem m_addNodesMenuItem;
     /**
      * Action associated with ADDNODES.
      */
     private GUI_ModeSelectionAction m_addNodesAction;
-    
+
+    /**
+     * Menu item for changing GUI mode to ADDTRANSITIONS.
+     */
+    private JRadioButtonMenuItem m_addTransitionsMenuItem;
     /**
      * Action associated with ADDTRANSITIONS.
      */
     private GUI_ModeSelectionAction m_addTransitionsAction;
     
     /**
+     * Menu item for changing GUI mode to SELECTION.
+     */
+    private JRadioButtonMenuItem m_makeSelectionMenuItem;
+    /**
+     * Action associated with SELECTION.
+     */
+    private GUI_ModeSelectionAction m_selectionAction;
+       
+    /**
+     * Menu item for changing GUI mode to ERASER.
+     */
+    private JRadioButtonMenuItem m_eraserMenuItem;
+    /**
      * Action associated with ERASER.
      */
     private GUI_ModeSelectionAction m_eraserAction;
     
     /**
-     * Action associated with SELECTION.
+     * Menu item for changing GUI mode to CHOOSESTART.
      */
-    private GUI_ModeSelectionAction m_selectionAction;
-    
+    private JRadioButtonMenuItem m_chooseStartMenuItem;
     /**
      * Action associated with CHOOSESTART.
      */
     private GUI_ModeSelectionAction m_chooseStartAction;
-    
+        
+    /**
+     * Menu item for changing GUI mode to CHOOSEACCEPTING. 
+     */
+    private JRadioButtonMenuItem m_chooseAcceptingMenuItem;
     /**
      * Action associated with CHOOSEACCEPTING.
      */
     private GUI_ModeSelectionAction m_chooseAcceptingAction;
     
     /**
+     * Menu item for changing GUI mode to CHOOSECURRENTSTATE.
+     */
+    private JRadioButtonMenuItem m_chooseCurrentStateMenuItem;
+    /**
      * Action associated with CHOOSECURRENTSTATE.
      */
-    private GUI_ModeSelectionAction m_chooseCurrentStateAction;
+    private GUI_ModeSelectionAction m_chooseCurrentStateAction;     
+    
+    // -------------------------------------------------- //
 
+    /**
+     * Menu containing all items associated with machine simulation.
+     */
+    private JMenu machineMenu;
+
+    /**
+     * Menu item for stepping through machine execution.
+     */
+    private JMenuItem stepMenuItem;
+    /**
+     * Action for stepping through execution.
+     */
+    private Action m_stepAction;
+
+    /**
+     * Menu item for running the machine simulation.
+     */
+    private JMenuItem fastExecuteMenuItem;
+    /**
+     * Action for starting simulation of the machine.
+     */
+    private Action m_fastExecuteAction;
+
+    /**
+     * Menu item for pausing machine simulation.
+     */
+    private JMenuItem m_stopExecutionMenuItem;
+    /**
+     * Action for pausing simulation of the machine.
+     */
+    private Action m_pauseExecutionAction;
+
+    /**
+     * Menu item for resetting machine execution state.
+     */
+    private JMenuItem resetMachineMenuItem;
+    /**
+     * Action for stopping a simulation.
+     */
+    private Action m_stopMachineAction;
+
+    /**
+     * Menu item for setting execution speed to slow.
+     */
+    private JRadioButtonMenuItem m_slowExecuteSpeed;
     /**
      * Action to set execution speed to slow.
      */
     private ExecutionSpeedSelectionAction m_slowExecuteSpeedAction;
     
     /**
+     * Menu item for changing execution speed to medium.
+     */
+    private JRadioButtonMenuItem m_mediumExecuteSpeed;
+    /**
      * Action to set execution speed to medium.
      */
     private ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction;
-    
+        
+    /**
+     * Menu item for changing execution speed to fast.
+     */
+    private JRadioButtonMenuItem m_fastExecuteSpeed;
     /**
      * Action to set execution speed to fast.
      */
     private ExecutionSpeedSelectionAction m_fastExecuteSpeedAction;
     
     /**
+     * Menu item for changing execution speed to superfast.
+     */
+    private JRadioButtonMenuItem m_superFastExecuteSpeed;
+    /**
      * Action to set execution speed to superfast.
      */
-    private ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction; 
+    private ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction;     
     
+    /**
+     * Menu item for changing execution speed to ultrafast.
+     */
+    private JRadioButtonMenuItem m_ultraFastExecuteSpeed;
     /**
      * Action to set execution speed to ultrafast.
      */
     private ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction;
+
+    // -------------------------------------------------- //
+
+    /**
+     * Menu containing all items associated with tape manipulation.
+     */
+    private JMenu tapeMenu;
+
+    /**
+     * Menu item for resetting the read/write head for the tape.
+     */
+    private JMenuItem headToStart;
+    /**
+     * Action for moving the read/write head to the start of the tape.
+     */
+    private HeadToStartAction m_headToStartAction;
+
+    /**
+     * Menu item for reloading the tape.
+     */
+    private JMenuItem reloadTape;
+    /**
+     * Action for reloading the tape.
+     */
+    private ReloadTapeAction m_reloadTapeAction;
+    
+    /**
+     * Menu item for erasing the tape.
+     */
+    private JMenuItem eraseTape;
+    /**
+     * Action for erasing the tape.
+     */
+    private EraseTapeAction m_eraseTapeAction;
+
+    // -------------------------------------------------- //   
+
+    /**
+     * Menu containing all items associated with configurement of the machine and environment.
+     */
+    private JMenu m_configMenu;    
+    
+    /**
+     * Menu item for configuring the alphabet.
+     */
+    private JMenuItem m_configureAlphabet;
+    /**
+     * Action for configuring the alphabet.
+     */
+    private Action m_configureAlphabetAction;
+    /**
+     * Frame for selecting the current alphabet.
+     */
+    private AlphabetSelectorInternalFrame m_asif;
+
+    /**
+     * Menu item for configuring the naming scheme.
+     */
+    private JMenuItem configureScheme;    
+    /**
+     * Action for configuring the naming scheme.
+     */
+    private Action m_configureSchemeAction;
+    /**
+     * Frame for selecting the current naming scheme.
+     */
+    private SchemeSelectorInternalFrame m_ssif;
+
+    // -------------------------------------------------- //
+    
+    /**
+     * Menu containing all items associated with program help.
+     */
+    private JMenu helpMenu;   
+    
+    /**
+     * Menu item for displaying user documentation.
+     */
+    private JMenuItem contentsMenuItem;
+    /**
+     * Frame for displaying help information as HTML.
+     */
+    private TMHelpDisplayer m_helpDisp;
+        
+    /**
+     * Menu item for displaying information about this program.
+     */
+    private JMenuItem aboutMenuItem;
 }
