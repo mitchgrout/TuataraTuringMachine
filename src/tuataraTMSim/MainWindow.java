@@ -326,22 +326,24 @@ public class MainWindow extends JFrame
      */
     private void initComponents()
     {
+        // Set up the main window
         setSize(new Dimension(640, 480));
         setTitle("Tuatara Turing Machine Simulator");
         setIconImage(loadIcon("tuatara.gif").getImage());
 
-        // Create menu objects
+        // Omnibus will be the panel which contains everything barring the toolbar
+        JPanel omnibus = new JPanel();
+ 
+        // Desktop pane holds all internal frames
         m_desktopPane = new JDesktopPane();
         m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
-        JPanel omnibus = new JPanel();
-        
+        // Set up the tape and associated controllers
         m_tape.setWindow(this);
         tapeDisp = new TMTapeDisplayPanel(m_tape);
         tapeDispController = new TMTapeDisplayControllerPanel(tapeDisp, this, 
-                m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction);
-                
+                m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
         tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100); 
         tapeDispController.setVisible(true);
         
@@ -372,7 +374,7 @@ public class MainWindow extends JFrame
             }
         });
         
-        // Build menus
+        // Set up menus
         setJMenuBar(createMenus());
         
         // Set up toolbars
@@ -382,17 +384,21 @@ public class MainWindow extends JFrame
             toolbars.add(tb);
         }
 
+        // Attach the toolbar to the top of the window
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         getContentPane().add(toolbars);
+
+        // Add the desktop pane and tape controller to the omnibus; add that to the bottom of the window
         omnibus.setLayout(new BorderLayout());
         omnibus.add(m_desktopPane, BorderLayout.CENTER);
         omnibus.add(tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
        
+
         // Maximize on startup
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
         
-        // Make a state diagram window.
+        // Make a state diagram window as the default for the desktop pane
         JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
         m_desktopPane.add(iFrame);      
         m_desktopPane.setSelectedFrame(iFrame);
@@ -406,7 +412,7 @@ public class MainWindow extends JFrame
         m_ssif = new SchemeSelectorInternalFrame(this);
         m_ssif.pack();
         
-        // Make the alphabet config internal frame quasi-modal.
+        // Make the internal frames quasi-modal.
         JPanel glass = new JPanel();
         glass.setOpaque(false);
         glass.add(m_asif);
@@ -702,7 +708,7 @@ public class MainWindow extends JFrame
         resetMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         resetMachineToolBarButton.setText("");
 
-        fastExecute = new JButton(m_fastExecuteAction);
+        JButton fastExecute = new JButton(m_fastExecuteAction);
         fastExecute.setFocusable(false);
         fastExecute.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         fastExecute.setText("");
@@ -2797,11 +2803,6 @@ public class MainWindow extends JFrame
      */
     private ArrayList<TM_Transition> copiedTransitions;
       
-    /**
-     * Menu item for starting machine simulation.
-     */
-    private JButton fastExecute;
-
     /**
      * Toolbar button for undoing an action.
      */
