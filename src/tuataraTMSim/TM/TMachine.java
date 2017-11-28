@@ -202,7 +202,7 @@ public class TMachine implements Serializable
                                 "Transition %s has an input which is not in the alphabet.", tr.toString()));
                 }
                 // Output not in the alphabet
-                if(!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out))
+                if(!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out) && out != EMPTY_ACTION_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an action which is not in the alphabet.", tr.toString()));
