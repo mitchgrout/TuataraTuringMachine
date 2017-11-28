@@ -47,8 +47,6 @@ import tuataraTMSim.TM.*;
  */
 public class MainWindow extends JFrame
 {
-    // TODO: Move into a resource class?
-    
     /**
      * Font used for rendering text.
      */
@@ -191,7 +189,7 @@ public class MainWindow extends JFrame
     public MainWindow()
     {
         initComponents();
-        final Container container = this.getContentPane();
+        
         // Handle global keyboard input
         final KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         
@@ -310,7 +308,7 @@ public class MainWindow extends JFrame
             }
         }
 
-        for (GUIModeButton b : toolbarButtons)
+        for (GUIModeButton b : m_toolbarButtons)
         {
             if (b.getGUI_Mode() == mode)
             {
@@ -344,16 +342,7 @@ public class MainWindow extends JFrame
         tapeDispController = new TMTapeDisplayControllerPanel(tapeDisp, this, 
                 m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction);
                 
-        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100);
-        
-        m_headToStartAction.setTapeDP(tapeDisp);
-        m_headToStartAction.setTapeDCP(tapeDispController);
-        m_eraseTapeAction.setTapeDP(tapeDisp);
-        m_eraseTapeAction.setTapeDCP(tapeDispController);
-        m_reloadTapeAction.setTapeDP(tapeDisp);
-        m_reloadTapeAction.setTapeDCP(tapeDispController);
-        
-        
+        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100); 
         tapeDispController.setVisible(true);
         
         // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
@@ -361,15 +350,7 @@ public class MainWindow extends JFrame
         {
             public boolean accept(File f)
             {
-                if (f.isDirectory())
-                {
-                    return true;
-                }
-                if (f.getName().endsWith(".tm"))
-                {
-                    return true;
-                }
-                return false;
+                return f.isDirectory() || f.getName().endsWith(MACHINE_EXTENSION);
             }
             
             public String getDescription()
@@ -382,15 +363,7 @@ public class MainWindow extends JFrame
         {
             public boolean accept(File f)
             {
-                if (f.isDirectory())
-                { 
-                    return true;
-                }
-                if (f.getName().endsWith(".tap"))
-                {
-                    return true;
-                }
-                return false;
+                return f.isDirectory() || f.getName().endsWith(TAPE_EXTENSION);
             }
             
             public String getDescription()
@@ -402,10 +375,9 @@ public class MainWindow extends JFrame
         // Build menus
         setJMenuBar(createMenus());
         
-        //build toolbars
-        JToolBar[] foobar = createToolbar();
+        // Set up toolbars
         ToolBarPanel toolbars = new ToolBarPanel(this, new FlowLayout(FlowLayout.LEFT));
-        for (JToolBar tb : foobar)
+        for (JToolBar tb : createToolbar())
         {
             toolbars.add(tb);
         }
@@ -413,16 +385,16 @@ public class MainWindow extends JFrame
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         getContentPane().add(toolbars);
         omnibus.setLayout(new BorderLayout());
-        omnibus.add(m_desktopPane, java.awt.BorderLayout.CENTER);
+        omnibus.add(m_desktopPane, BorderLayout.CENTER);
         omnibus.add(tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
-        
-        this.setExtendedState(Frame.MAXIMIZED_BOTH); // Maximized on startup
+       
+        // Maximize on startup
+        this.setExtendedState(Frame.MAXIMIZED_BOTH);
         
         // Make a state diagram window.
         JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
         m_desktopPane.add(iFrame);      
-
         m_desktopPane.setSelectedFrame(iFrame);
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
         
@@ -445,9 +417,9 @@ public class MainWindow extends JFrame
         ModalAdapter adapter = new ModalAdapter(glass);
         m_asif.addInternalFrameListener(adapter);
         m_ssif.addInternalFrameListener(adapter);
-        // !!!
 
-        this.setVisible(true);
+        setVisible(true);
+
         try
         {
             // setSelected only works when the component is already displayed, so this must be done
@@ -455,7 +427,8 @@ public class MainWindow extends JFrame
             iFrame.moveToFront();
             iFrame.setSelected(true);
         }
-        catch (PropertyVetoException e2) {}
+        catch (PropertyVetoException e2) { }
+        
         updateUndoActions();
     }
     
@@ -611,156 +584,137 @@ public class MainWindow extends JFrame
     }
     
     /**
-     * Set up a toolbar for quick access to common actions. Requires createActions() to have been
-     * called already.
+     * Set up a toolbar for quick access to common actions.
      * @return An array of created toolbars.
      */
     private JToolBar[] createToolbar()
     {
-        toolbarButtons = new ArrayList<GUIModeButton>();
-        
-        JToolBar[] returner = new JToolBar[3];
-        for (int i = 0; i < returner.length;i++)
-        {
-            returner[i] = new JToolBar();
-        }
-        GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, TM_GUI_Mode.ADDNODES);
-        
-        toolbarButtons.add(addNodesToolBarButton);
-        
-        GUIModeButton addTransitionsToolBarButton = new GUIModeButton(m_addTransitionsAction, TM_GUI_Mode.ADDTRANSITIONS);
-        
-        toolbarButtons.add(addTransitionsToolBarButton);
-        
-        GUIModeButton selectionToolBarButton = new GUIModeButton(m_selectionAction,TM_GUI_Mode.SELECTION);
-        toolbarButtons.add(selectionToolBarButton);
-        
-        GUIModeButton eraserToolBarButton = new GUIModeButton(m_eraserAction, TM_GUI_Mode.ERASER);
-        toolbarButtons.add(eraserToolBarButton);
-        
-        GUIModeButton startStatesToolBarButton = new GUIModeButton(m_chooseStartAction, TM_GUI_Mode.CHOOSESTART);
-        toolbarButtons.add(startStatesToolBarButton);
-        
-        GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, TM_GUI_Mode.CHOOSEACCEPTING);
-        toolbarButtons.add(acceptingStatesToolBarButton);
-        
-        GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, TM_GUI_Mode.CHOOSECURRENTSTATE);
-        toolbarButtons.add(chooseCurrentStateToolBarButton);
-        
-        JButton stepToolBarButton = new JButton();
-        stepToolBarButton.setAction(m_stepAction);
-        stepToolBarButton.setFocusable(false);
-        stepToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        stepToolBarButton.setText("");
-        
-        JButton resetMachineToolBarButton = new JButton();
-        resetMachineToolBarButton.setAction(m_stopMachineAction);
-        resetMachineToolBarButton.setFocusable(false);
-        resetMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        resetMachineToolBarButton.setText("");
+        // Every toolbar button will be registered here for iteration purposes
+        m_toolbarButtons = new ArrayList<GUIModeButton>();
 
-        JButton newMachineToolBarButton = new JButton();
-        newMachineToolBarButton.setAction(m_newMachineAction);
-        newMachineToolBarButton.setFocusable(false);
-        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        newMachineToolBarButton.setText("");
-        
-        JButton openMachineToolBarButton = new JButton();
-        openMachineToolBarButton.setAction(m_openMachineAction);
-        openMachineToolBarButton.setFocusable(false);
-        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        openMachineToolBarButton.setText("");
-        
-        JButton saveMachineToolBarButton = new JButton();
-        saveMachineToolBarButton.setAction(m_saveMachineAction);
-        saveMachineToolBarButton.setFocusable(false);
-        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        saveMachineToolBarButton.setText("");
-        
-        JButton newTapeToolBarButton = new JButton();
-        newTapeToolBarButton.setAction(m_newTapeAction);
+        // Entire toolstrip will be composed of three toolbars
+        JToolBar[] returner = new JToolBar[3];
+
+        // Tape
+        JButton newTapeToolBarButton = new JButton(m_newTapeAction);
         newTapeToolBarButton.setFocusable(false);
         newTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         newTapeToolBarButton.setText("");
         
-        JButton openTapeToolBarButton = new JButton();
-        openTapeToolBarButton.setAction(m_openTapeAction);
+        JButton openTapeToolBarButton = new JButton(m_openTapeAction);
         openTapeToolBarButton.setFocusable(false);
         openTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         openTapeToolBarButton.setText("");
         
-        JButton saveTapeToolBarButton = new JButton();
-        saveTapeToolBarButton.setAction(m_saveTapeAction);
+        JButton saveTapeToolBarButton = new JButton(m_saveTapeAction);
         saveTapeToolBarButton.setFocusable(false);
         saveTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         saveTapeToolBarButton.setText("");
 
-        JButton cutToolBarButton = new JButton();
-        cutToolBarButton.setAction(m_cutAction);
+        // Machine
+        JButton newMachineToolBarButton = new JButton(m_newMachineAction);
+        newMachineToolBarButton.setFocusable(false);
+        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        newMachineToolBarButton.setText("");
+        
+        JButton openMachineToolBarButton = new JButton(m_openMachineAction);
+        openMachineToolBarButton.setFocusable(false);
+        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        openMachineToolBarButton.setText("");
+        
+        JButton saveMachineToolBarButton = new JButton(m_saveMachineAction);
+        saveMachineToolBarButton.setFocusable(false);
+        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        saveMachineToolBarButton.setText("");
+
+        // Edit       
+        JButton cutToolBarButton = new JButton(m_cutAction);
         cutToolBarButton.setFocusable(false);
         cutToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         cutToolBarButton.setText("");
         
-        JButton copyToolBarButton = new JButton();
-        copyToolBarButton.setAction(m_copyAction);
+        JButton copyToolBarButton = new JButton(m_copyAction);
         copyToolBarButton.setFocusable(false);
         copyToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         copyToolBarButton.setText("");
         
-        JButton pasteToolBarButton = new JButton();
-        pasteToolBarButton.setAction(m_pasteAction);
+        JButton pasteToolBarButton = new JButton(m_pasteAction);
         pasteToolBarButton.setFocusable(false);
         pasteToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         pasteToolBarButton.setText("");
         
-        JButton deleteToolBarButton = new JButton();
-        deleteToolBarButton.setAction(m_deleteAction);
+        JButton deleteToolBarButton = new JButton(m_deleteAction);
         deleteToolBarButton.setFocusable(false);
         deleteToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         deleteToolBarButton.setText("");
         
-        m_undoToolBarButton = new JButton();
-        m_undoToolBarButton.setAction(m_undoAction);
+        m_undoToolBarButton = new JButton(m_undoAction);
         m_undoToolBarButton.setFocusable(false);
         m_undoToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         m_undoToolBarButton.setText("");
         
-        m_redoToolBarButton = new JButton();
-        m_redoToolBarButton.setAction(m_redoAction);
+        m_redoToolBarButton = new JButton(m_redoAction);
         m_redoToolBarButton.setFocusable(false);
         m_redoToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         m_redoToolBarButton.setText("");
-        
-        fastExecute = new JButton("fast execute");
-        fastExecute.setAction(m_fastExecuteAction);
-        fastExecute.setFocusable(false);
-        fastExecute.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        fastExecute.setText("");
-        
-        JButton stopExecutionToolBarButton = new JButton();
-        stopExecutionToolBarButton.setAction(m_pauseExecutionAction);
-        stopExecutionToolBarButton.setFocusable(false);
-        stopExecutionToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        stopExecutionToolBarButton.setText("");
-        
-        JButton configureAlphabetToolBarButton = new JButton();
-        configureAlphabetToolBarButton.setAction(m_configureAlphabetAction);
+               
+        // Configuration
+        JButton configureAlphabetToolBarButton = new JButton(m_configureAlphabetAction);
         configureAlphabetToolBarButton.setFocusable(false);
         configureAlphabetToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         configureAlphabetToolBarButton.setText("");
        
-        JButton configureSchemeToolBarButton = new JButton();
-        configureSchemeToolBarButton.setAction(m_configureSchemeAction);
+        JButton configureSchemeToolBarButton = new JButton(m_configureSchemeAction);
         configureSchemeToolBarButton.setFocusable(false);
         configureSchemeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         configureSchemeToolBarButton.setText("");
 
-        for (JToolBar t : returner)
-        {
-            t.setRollover(true);
-        }
+        // GUI mode
+        GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, TM_GUI_Mode.ADDNODES);
+        m_toolbarButtons.add(addNodesToolBarButton);
+        
+        GUIModeButton addTransitionsToolBarButton = new GUIModeButton(m_addTransitionsAction, TM_GUI_Mode.ADDTRANSITIONS);
+        m_toolbarButtons.add(addTransitionsToolBarButton);
+        
+        GUIModeButton selectionToolBarButton = new GUIModeButton(m_selectionAction,TM_GUI_Mode.SELECTION);
+        m_toolbarButtons.add(selectionToolBarButton);
+        
+        GUIModeButton eraserToolBarButton = new GUIModeButton(m_eraserAction, TM_GUI_Mode.ERASER);
+        m_toolbarButtons.add(eraserToolBarButton);
+        
+        GUIModeButton startStatesToolBarButton = new GUIModeButton(m_chooseStartAction, TM_GUI_Mode.CHOOSESTART);
+        m_toolbarButtons.add(startStatesToolBarButton);
+        
+        GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, TM_GUI_Mode.CHOOSEACCEPTING);
+        m_toolbarButtons.add(acceptingStatesToolBarButton);
+        
+        GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, TM_GUI_Mode.CHOOSECURRENTSTATE);
+        m_toolbarButtons.add(chooseCurrentStateToolBarButton);
+ 
+        // Machine
+        JButton stepToolBarButton = new JButton(m_stepAction);
+        stepToolBarButton.setFocusable(false);
+        stepToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        stepToolBarButton.setText("");
+        
+        JButton resetMachineToolBarButton = new JButton(m_stopMachineAction);
+        resetMachineToolBarButton.setFocusable(false);
+        resetMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        resetMachineToolBarButton.setText("");
 
-        returner[0].setName("File/Edit");
+        fastExecute = new JButton(m_fastExecuteAction);
+        fastExecute.setFocusable(false);
+        fastExecute.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        fastExecute.setText("");
+        
+        JButton stopExecutionToolBarButton = new JButton(m_pauseExecutionAction);
+        stopExecutionToolBarButton.setFocusable(false);
+        stopExecutionToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        stopExecutionToolBarButton.setText("");
+
+        // Attach everything to the correct toolbars
+        returner[0] = new JToolBar("File/Edit/Configure");
+        returner[0].setRollover(true);
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
         returner[0].add(saveTapeToolBarButton);
@@ -775,7 +729,9 @@ public class MainWindow extends JFrame
         returner[0].add(m_redoToolBarButton);
         returner[0].add(configureAlphabetToolBarButton);
         returner[0].add(configureSchemeToolBarButton); 
-        returner[1].setName("Mode");
+
+        returner[1] = new JToolBar("Mode");
+        returner[1].setRollover(true);
         returner[1].add(addNodesToolBarButton);
         returner[1].add(addTransitionsToolBarButton);
         returner[1].add(selectionToolBarButton);
@@ -784,13 +740,15 @@ public class MainWindow extends JFrame
         returner[1].add(acceptingStatesToolBarButton);
         returner[1].add(chooseCurrentStateToolBarButton);
         
-        returner[2].setName("Machine");
+        returner[2] = new JToolBar("Machine");
+        returner[2].setRollover(true);
         returner[2].add(stepToolBarButton);
         returner[2].add(fastExecute);
         returner[2].add(stopExecutionToolBarButton);
         returner[2].add(resetMachineToolBarButton);
-        
-        setUIMode(TM_GUI_Mode.ADDNODES); // Default mode
+       
+        // Default mode
+        setUIMode(TM_GUI_Mode.ADDNODES);
         
         return returner;
     }
@@ -2412,37 +2370,9 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e) 
         {
             // Move r/w head to the left end of the tape
-            m_tapeDP.getTape().resetRWHead();
-            m_tapeDCP.repaint();
+            tapeDisp.getTape().resetRWHead();
+            tapeDispController.repaint();
         }
-
-        /**
-         * Set the underlying tape display panel.
-         * @param tapeDP The new tape display panel.
-         */
-        public void setTapeDP(TMTapeDisplayPanel tapeDP)
-        {
-            m_tapeDP = tapeDP;
-        }
-
-        /**
-         * Set the underlying tape controller panel.
-         * @param tapeDCP The new tape controller panel.
-         */
-        public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-        {
-            m_tapeDCP = tapeDCP;
-        }
-
-        /**
-         * The underlying tape display panel.
-         */
-        private TMTapeDisplayPanel m_tapeDP;
-
-        /**
-         * The underlying tape controller panel.
-         */
-        private TMTapeDisplayControllerPanel m_tapeDCP;
     }
 
     /**
@@ -2468,8 +2398,9 @@ public class MainWindow extends JFrame
             // Wipe the tape.
             Object[] options = {"Ok", "Cancel"};
             // TODO: should disable keyboard here
+            // TODO: BUG, CANCELLATION STILL CLEARS TAPE
             int result = 0;
-            if (m_tapeDP.getFile() == null)
+            if (tapeDisp.getFile() == null)
             {
                 JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             }
@@ -2479,38 +2410,10 @@ public class MainWindow extends JFrame
             }
             if (result == JOptionPane.YES_OPTION)
             {
-                m_tapeDP.reloadTape();
-                m_tapeDCP.repaint();
+                tapeDisp.reloadTape();
+                tapeDispController.repaint();
             }
         }
-
-        /**
-         * Set the underlying tape display panel.
-         * @param tapeDP The new tape display panel.
-         */
-        public void setTapeDP(TMTapeDisplayPanel tapeDP)
-        {
-            m_tapeDP = tapeDP;
-        }
-
-        /**
-         * Set the underlying tape controller panel.
-         * @param tapeDCP The new tape controller panel.
-         */
-        public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-        {
-            m_tapeDCP = tapeDCP;
-        }
-
-        /**
-         * The underlying tape display panel.
-         */
-        private TMTapeDisplayPanel m_tapeDP;
-
-        /**
-         * The underlying tape controller panel.
-         */
-        private TMTapeDisplayControllerPanel m_tapeDCP;
     }
     
     /**
@@ -2543,38 +2446,10 @@ public class MainWindow extends JFrame
             int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             if (result == JOptionPane.YES_OPTION)
             {
-                m_tapeDP.getTape().clearTape();
-                m_tapeDCP.repaint();
+                tapeDisp.getTape().clearTape();
+                tapeDispController.repaint();
             }
         }
-
-        /**
-         * Set the underlying tape display panel.
-         * @param tapeDP The new tape display panel.
-         */
-        public void setTapeDP(TMTapeDisplayPanel tapeDP)
-        {
-            m_tapeDP = tapeDP;
-        }
-
-        /**
-         * Set the underlying tape controller panel.
-         * @param tapeDCP The new tape controller panel.
-         */
-        public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-        {
-            m_tapeDCP = tapeDCP;
-        }
-
-        /**
-         * The underlying tape display panel.
-         */
-        private TMTapeDisplayPanel m_tapeDP;
-
-        /**
-         * The underlying tape controller panel.
-         */
-        private TMTapeDisplayControllerPanel m_tapeDCP;
     }
 
     /**
@@ -2895,7 +2770,7 @@ public class MainWindow extends JFrame
     /**
      * List of buttons which have an associated GUI mode and action.
      */
-    private ArrayList<GUIModeButton> toolbarButtons;
+    private ArrayList<GUIModeButton> m_toolbarButtons;
 
     /**
      * Tape display panel.
