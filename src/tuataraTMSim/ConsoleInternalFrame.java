@@ -70,12 +70,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         // Menu bar
         JMenuBar menuBar = new JMenuBar();
-
         menuBar.add(new JButton(new ClearAction("Clear")));
-        menuBar.add(new JButton(new SaveAction("Save")));
-        // Force everything leftward with glue
-        menuBar.add(Box.createGlue());
-
         setJMenuBar(menuBar);
 
         // Text area
@@ -179,27 +174,6 @@ public class ConsoleInternalFrame extends JInternalFrame
             m_text.setText(null);
             m_partial = false;
             m_panel = null;
-        }
-    }
-
-    /**
-     * Action to save the text stored in the console to file.
-     */
-    private class SaveAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of SaveAction.
-         * @param text Description of the action.
-         */
-        public SaveAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        public void actionPerformed(ActionEvent e)
-        {
-            log(null, "TODO");
         }
     }
 

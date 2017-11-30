@@ -33,6 +33,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JEditorPane;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLDocument;
