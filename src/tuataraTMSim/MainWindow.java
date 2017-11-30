@@ -1533,83 +1533,63 @@ public class MainWindow extends JFrame
          * Creates a new instance of SaveMachineAction.
          * @param text Description of the action.
          * @param icon Icon for the action.
+         * @param forceDialog Whether or not this action should always show a file chooser.
+         *                    Setting this to true creates a save-as action, while setting it to
+         *                    false creates a save action.
          */
-        public SaveMachineAction(String text, ImageIcon icon)
+        public SaveMachineAction(String text, ImageIcon icon, boolean forceDialog)
         {
             super(text);
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
+            m_force = forceDialog;
         }
        
         /**
-         * Save the machine to its associated file. If it does not have an associated file, display
-         * a dialog to choose a file.
+         * Save the machine to file. If forceDialog is set to true, or the machine has no associated
+         * file, a dialog is shown. Otherwise, the file is saved to its associated file.
          * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
-        {   
+        {
+            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            if (panel == null)
+            {
+                return;
+            }
+
+            TMachine machine = panel.getSimulator().getMachine();
+            File outFile = panel.getFile();
             try
             {
-                TMGraphicsPanel panel = getSelectedGraphicsPanel();
-                if (panel != null)
+                if (m_force || outFile == null)
                 {
-                    TMachine machine = panel.getSimulator().getMachine();
-                    File outFile = panel.getFile();
-                    if (machine != null)
+                    saveMachineAs(panel);
+                }
+                else
+                {
+                    boolean result = TMachine.saveTMachine(machine, outFile.toString());
+                    if (result == false)
                     {
-                        if (outFile == null)
-                        {
-                            m_saveMachineAsAction.actionPerformed(e);
-                        }
-                        else
-                        {
-                            boolean result = TMachine.saveTMachine(machine, outFile.toString());
-                            if (result = false)
-                            {
-                                throw new IOException(outFile.toString());
-                            }
-                            else
-                            {
-                                panel.setModifiedSinceSave(false);
-                            }
-                        }
+                        throw new IOException(outFile.toString());
+                    }
+                    else
+                    {
+                        panel.setModifiedSinceSave(false);
                     }
                 }
-            } 
+            }
             catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred. Your file has not been saved!");
+                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
             }
         }
-    }
- 
-    /**
-     * Action for saving a machine diagram with a new name.
-     */
-    class SaveMachineAsAction extends AbstractAction
-    {
+
         /**
-         * Creates a new instance of SaveMachineAsAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
+         * Whether or not a file chooser should always be displayed.
          */
-        public SaveMachineAsAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Open a dialog to select a machine file, and save the machine to the given filename.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
-            saveMachineAs(panel);
-        }
+        private final boolean m_force;
     }
  
     /** 
@@ -1713,63 +1693,6 @@ public class MainWindow extends JFrame
         }
     }
     
-    /**
-     * Action for saving a tape. 
-     */
-    class SaveTapeAsAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of SaveTapeAsAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public SaveTapeAsAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Display a dialog, and save the tape to the specified file.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            fcTape.setDialogTitle("Save tape");
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            int returnVal = fcTape.showSaveDialog(MainWindow.this);
-            m_keyboardEnabled = true;
-            
-            if (returnVal == JFileChooser.APPROVE_OPTION)
-            {
-                File outFile = fcTape.getSelectedFile();
-                if (!outFile.exists())
-                {
-                    if (!outFile.toString().endsWith(TAPE_EXTENSION))
-                    {
-                        outFile = new File(outFile.toString() + TAPE_EXTENSION);
-                    }
-                }
-                
-                try
-                {
-                    boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
-
-                    if (result = false)
-                    {
-                        throw new IOException(outFile.toString());
-                    }
-                    tapeDisp.setFile(outFile);
-                }
-                catch (Exception e2)
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
-                }
-            }
-        }
-    }
-    
     /** 
      * Action for saving a tape.
      */
@@ -1780,12 +1703,13 @@ public class MainWindow extends JFrame
          * @param text Description of the action.
          * @param icon Icon for the action.
          */
-        public SaveTapeAction(String text, ImageIcon icon)
+        public SaveTapeAction(String text, ImageIcon icon, boolean forceDialog)
         {
             super(text);
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
+            m_force = forceDialog;
         }
         
         /**
@@ -1794,29 +1718,60 @@ public class MainWindow extends JFrame
          * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
-        {   
+        {
+            Tape tape = tapeDisp.getTape();
+            File outFile = tapeDisp.getFile();
+            // TODO: Justify if this is ever possible
+            if (tape == null)
+            {
+                return;
+            }
+
             try
             {
-                Tape tape = tapeDisp.getTape();
-                File outFile = tapeDisp.getFile();
-                if (tape != null)
+                if (m_force || outFile == null)
                 {
-                    if (outFile == null)
+                    fcTape.setDialogTitle("Save tape");
+                    m_keyboardEnabled = false; 
+                    int returnVal = fcTape.showSaveDialog(MainWindow.this);
+                    m_keyboardEnabled = true;
+
+                    if (returnVal == JFileChooser.APPROVE_OPTION)
                     {
-                        m_saveTapeAsAction.actionPerformed(e);
-                    }
-                    else
-                    {
-                        boolean result = Tape.saveTape(tape, outFile.toString());
-                        if (result = false)
+                        outFile = fcTape.getSelectedFile();
+                        if (!outFile.exists() && !outFile.toString().endsWith(TAPE_EXTENSION))
+                        {
+                            outFile = new File(outFile.toString() + TAPE_EXTENSION);
+                        }
+
+                        boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
+                        if (result == false)
+                        {
                             throw new IOException(outFile.toString());
+                        }
+                        tapeDisp.setFile(outFile);
                     }
                 }
-            } catch (Exception e2)
+                else
+                {
+                    boolean result = Tape.saveTape(tape, outFile.toString());
+                    if (result == false)
+                    {
+                        throw new IOException(outFile.toString());
+                    }
+                }
+            }
+            catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
+                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
             }
         }
+
+
+        /**
+         * Whether or not a file chooser should always be displayed.
+         */
+        private final boolean m_force;
     }
 
     /**
@@ -2806,12 +2761,12 @@ public class MainWindow extends JFrame
     /**
      * Action for saving a machine to an associated file.
      */
-    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"));
+    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
-    private final Action m_saveMachineAsAction = new SaveMachineAsAction("Save Machine As", loadIcon("emptyIcon.gif"));
+    private final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
@@ -2826,12 +2781,12 @@ public class MainWindow extends JFrame
     /**
      * Action for saving a tape to an associated file.
      */
-    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"));
+    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
-    private final Action m_saveTapeAsAction = new SaveTapeAsAction("Save Tape As", loadIcon("emptyIcon.gif"));
+    private final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
