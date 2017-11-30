@@ -75,7 +75,14 @@ public abstract class Tape implements Serializable
      * @return true if the read/write head is in the first cell of the input tape, otherwise false.
      */
     public abstract boolean isParked();
-    
+
+    /**
+     * Determine how long the string on the tape is. Blank characters not belonging to the infinite
+     * sequence of blanks are counted.
+     * @return How long the string on the tape is.
+     */
+    public abstract int getLength();
+
     /**
      * Get the tape contents as a String object.
      * @return The exact characters of the tape, in sequence, with no other text added.

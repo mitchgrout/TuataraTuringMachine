@@ -154,7 +154,27 @@ public class CA_Tape extends Tape implements Serializable
     {
         return m_headLoc == 0;
     }
+   
+    /**
+     * Determine how long the string on the tape is. Blank characters not belonging to the infinite
+     * sequence of blanks are counted.
+     * @return How long the string on the tape is.
+     */
+    public int getLength()
+    {
+        // TODO: Make this more efficient
+        for (int len = m_tapeArray.length; len > 0; len--)
+        {
+            if (m_tapeArray[len - 1] != Tape.BLANK_SYMBOL)
+            {
+                return len;
+            }
+        }
+        return 0;
     
+        // return m_tapeArray.length;
+    }
+
     /**
      * Get the tape contents as a String object.
      * @return The exact characters of the tape, in sequence, with no other text added.
@@ -173,6 +193,11 @@ public class CA_Tape extends Tape implements Serializable
      */
     public String getPartialString(int begin, int length)
     {
+        if (length <= 0)
+        {
+            return "";
+        }
+
         char[] returnCA = new char[length];
         for (int i = 0; i < length; i++)
         {

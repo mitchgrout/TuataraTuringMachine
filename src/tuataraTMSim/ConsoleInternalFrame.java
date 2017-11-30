@@ -48,6 +48,8 @@ import tuataraTMSim.TM.*;
  */
 public class ConsoleInternalFrame extends JInternalFrame
 {
+    public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 16);
+
     public ConsoleInternalFrame()
     {
         // Create a frame with the title "Console", which can be resized, closed, maximized, but
@@ -63,7 +65,7 @@ public class ConsoleInternalFrame extends JInternalFrame
     private void initComponents()
     {
         this.setSize(new Dimension(800, 600));
-   
+
         // Only two components in this frame; a menu bar and text area
 
         // Menu bar
@@ -78,6 +80,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         // Text area
         m_text = new JTextArea();
+        m_text.setFont(FONT_USED);
         m_text.setLineWrap(true);
         m_text.setEditable(false);
         JScrollPane scroll = new JScrollPane(m_text);
@@ -88,17 +91,77 @@ public class ConsoleInternalFrame extends JInternalFrame
     }
 
     /**
-     * Log text to the console.
+     * Get the current timestamp formatted as a string.
+     * @return The current timestamp.
+     */
+    private String timestamp()
+    {
+        return DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now());
+    }
+
+    /**
+     * Log a partial message to the console. Subsequent calls to logPartial will continue on the
+     * same line, without adding a new timestamp.
      * @param panel The panel logging the text.
      * @param s The string to be logged.
      */
-    public void log(String s)
+    public void logPartial(TMGraphicsPanel panel, String s)
     {
-        // Log the text with a given timestamp, plus the panel name
-        m_text.append(String.format("[%s] %s\n",
-                    DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now()), s)); 
+        // Last message was not partial; timestamp and log
+        if (!m_partial)
+        {
+            // Do not add a newline, so we can continue logging after this message.
+            m_text.append(String.format("[%s] %s", timestamp(), s));
+            m_partial = true;
+            m_panel = panel;
+        }
+        // Last message was a partial message; did the given panel send it?
+        else if (m_panel == panel)
+        {
+            // Continue logging on the same line
+            m_text.append(s);
+        }
+        // Last message was partial, and the panel did not send it.
+        else
+        {
+            // TODO: Decide if this is necessary for the user to see
+            m_text.append("Interrupted\n");
+            // Begin logging on a new line
+            m_text.append(String.format("[%s] %s", timestamp(), s));
+            m_partial = true;
+            m_panel = panel;
+        }
     }
 
+    /**
+     * End partial logging. This prints a newline to the end of the current log text.
+     */
+    public void endPartial()
+    {
+        if (m_partial)
+        {
+            m_text.append("\n");
+            m_panel = null;
+            m_partial = false;
+        }
+    }
+
+    /**
+     * Log text to the console. Forces text to appear on a new line.
+     * @param panel The panel logging the text.
+     * @param s The string to be logged.
+     */
+    public void log(TMGraphicsPanel panel, String s)
+    {
+        // Finish any partial messages; log, and then finish the partial message again.
+        endPartial();
+        logPartial(panel, s);
+        endPartial();
+    }
+
+    /**
+     * Action to clear the console of all logged text.
+     */
     private class ClearAction extends AbstractAction
     {
         /**
@@ -110,13 +173,18 @@ public class ConsoleInternalFrame extends JInternalFrame
             super(text);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
- 
+
         public void actionPerformed(ActionEvent e)
         {
             m_text.setText(null);
+            m_partial = false;
+            m_panel = null;
         }
     }
 
+    /**
+     * Action to save the text stored in the console to file.
+     */
     private class SaveAction extends AbstractAction
     {
         /**
@@ -131,7 +199,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         public void actionPerformed(ActionEvent e)
         {
-            log("TODO");
+            log(null, "TODO");
         }
     }
 
@@ -139,4 +207,14 @@ public class ConsoleInternalFrame extends JInternalFrame
      * The underlying text area used to store the logged text.
      */
     private JTextArea m_text;
+
+    /**
+     * Panel currently logging a partial message.
+     */
+    private TMGraphicsPanel m_panel;
+
+    /**
+     * Whether or not we are waiting for more information to add to the log.
+     */
+    private boolean m_partial;
 }

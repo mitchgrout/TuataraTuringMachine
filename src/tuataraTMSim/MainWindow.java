@@ -414,6 +414,11 @@ public class MainWindow extends JFrame
         m_asif.addInternalFrameListener(adapter);
         m_ssif.addInternalFrameListener(adapter);
 
+        // Set up the global console
+        m_console = new ConsoleInternalFrame();
+        m_console.setLayer(60); // !!!
+
+
         setVisible(true);
 
         try
@@ -1377,7 +1382,16 @@ public class MainWindow extends JFrame
         m_undoToolBarButton.setText("");
         m_redoToolBarButton.setText("");
     }
-    
+   
+    /**
+     * Get the current console.
+     * @return The current console.
+     */
+    public ConsoleInternalFrame getConsole()
+    {
+        return m_console;
+    }
+
     /** 
      * Gets the graphics panel for the currently selected machine diagram window.
      * @return A reference to the currently selected graphics panel, or null if there is no such panel.
@@ -2156,41 +2170,50 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
+            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            if (gfxPanel == null)
+            {
+                return;
+            }
+
             try
             {
-                TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-                if (gfxPanel != null)
+                TM_Simulator sim = gfxPanel.getSimulator();
+                sim.step();
+                tapeDisp.repaint();
+                if (sim.getCurrentState().isFinalState())
                 {
-                    gfxPanel.getSimulator().step();
-                    tapeDisp.repaint();
+                    m_console.logPartial(gfxPanel, sim.getConfiguration());
+                }
+                else
+                {
+                    m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
                 }
             }
             catch (NondeterministicException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent, MainWindow.NONDET_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE); 
             }
             catch (UndefinedTransitionException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TRANS_UNDEF_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             }
             catch (TapeBoundsException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
             }
             catch (ComputationCompletedException e2)
             {
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.COMPUTATION_COMPLETED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-                TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-                if (gfxPanel != null)
-                {
-                    gfxPanel.getSimulator().resetMachine();
-                    gfxPanel.repaint();
-                }
-            }
-            catch (Exception e2)
-            {
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.OTHER_ERROR_STR);
-                e2.printStackTrace();
+                gfxPanel.getSimulator().resetMachine();
+                gfxPanel.repaint();
             }
             repaint();
         }
@@ -2532,11 +2555,6 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            if (m_console == null)
-            {
-                m_console = new ConsoleInternalFrame();
-                m_console.setLayer(60); // !!!
-            }
             if (!m_console.isVisible())
             {
                 m_desktopPane.add(m_console);

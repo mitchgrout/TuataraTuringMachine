@@ -94,19 +94,16 @@ public class TM_Simulator
      * @throws ComputationCompletedException If execution halts successfully.
      * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean runUntilHalt(int maxSteps, boolean doConsoleOutput)
+    public boolean runUntilHalt(int maxSteps)
         throws TapeBoundsException, UndefinedTransitionException,
                ComputationCompletedException, NondeterministicException 
     {
+        // TODO: Not required by anything at this stage, however could be useful for almost-instant
+        //       execution of machines. Considered for removal.
+
         int currentStep = 0;
-        
         while (!isHalted())
         {
-            if (doConsoleOutput)
-            {
-                System.out.println("step " + currentStep + ", " + getConfiguration());
-            }
-            
             step();
             currentStep++;
             if (currentStep >= maxSteps && !(maxSteps == 0))
@@ -114,34 +111,7 @@ public class TM_Simulator
                 break;
             }
         }
-        
-        if (doConsoleOutput)
-        {
-            System.out.println("step " + currentStep + ", " + getConfiguration());
-        }
-
-        if (currentStep >= maxSteps)
-        {
-            if (doConsoleOutput)
-            {
-                System.out.println("went too long - exiting");
-            }
-            return false;
-        }
-            
-        if (!isHaltedWithHeadParked())
-        {
-            if (doConsoleOutput)
-            {
-                System.out.println("The system did not halt with the head parked");
-            }
-            return false;
-        }
-        if (doConsoleOutput)
-        {
-            System.out.println("The system successfully halted with the head parked");
-        }
-        return true;
+        return currentStep < maxSteps && isHaltedWithHeadParked();
     }
     
     /** 
@@ -171,12 +141,18 @@ public class TM_Simulator
     }
     
     /**
-     * Gets a string representation of the current configuration ('state') of the machine.
+     * Gets a string representation of the current configuration of the machine.
      * @return A string representation of the current configuration.
      */
     public String getConfiguration()
     {
-        return "\""+ m_tape.toString() + "\", " + m_state.getLabel();
+        final String LAMBDA = "\u03BB";
+        String head = m_tape.getPartialString(0, m_tape.headLocation());
+        String tail = m_tape.getPartialString(m_tape.headLocation(), m_tape.getLength() - m_tape.headLocation());
+        return String.format("(%s, %s, %s)", 
+                head.length() == 0? LAMBDA : head,
+                m_state.getLabel(),
+                tail.length() == 0? LAMBDA : tail);
     }
     
     /**

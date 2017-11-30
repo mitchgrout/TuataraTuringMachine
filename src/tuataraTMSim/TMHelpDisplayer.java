@@ -102,7 +102,7 @@ public class TMHelpDisplayer extends JInternalFrame
         }
         catch(Exception e)
         {
-            System.out.println("Caught exception: " + e.toString());
+            JOptionPane.showMessageDialog(null, "An error occured: " + e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE); 
         }
     }
 }
