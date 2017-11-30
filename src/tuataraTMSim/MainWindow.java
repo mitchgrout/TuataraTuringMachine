@@ -102,16 +102,6 @@ public class MainWindow extends JFrame
     public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
     
     /**
-     * Horizontal padding between toolbar components.
-     */
-    public static final int TOOLBAR_HGAP = 5;
-
-    /**
-     * Vertical padding between toolbar components.
-     */
-    public static final int TOOLBAR_VGAP = 5;
-
-    /**
      * Delay between steps for slow execution speed.
      */
     public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
@@ -424,6 +414,11 @@ public class MainWindow extends JFrame
         m_asif.addInternalFrameListener(adapter);
         m_ssif.addInternalFrameListener(adapter);
 
+        // Set up the global console
+        m_console = new ConsoleInternalFrame();
+        m_console.setLayer(60); // !!!
+
+
         setVisible(true);
 
         try
@@ -582,7 +577,8 @@ public class MainWindow extends JFrame
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);
         menuBar.add(helpMenu);
- 
+
+        helpMenu.add(new JMenuItem(m_showConsoleAction));
         helpMenu.add(new JMenuItem(m_helpAction));
         helpMenu.add(new JMenuItem(m_aboutAction));
 
@@ -1386,7 +1382,16 @@ public class MainWindow extends JFrame
         m_undoToolBarButton.setText("");
         m_redoToolBarButton.setText("");
     }
-    
+   
+    /**
+     * Get the current console.
+     * @return The current console.
+     */
+    public ConsoleInternalFrame getConsole()
+    {
+        return m_console;
+    }
+
     /** 
      * Gets the graphics panel for the currently selected machine diagram window.
      * @return A reference to the currently selected graphics panel, or null if there is no such panel.
@@ -2165,41 +2170,50 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
+            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            if (gfxPanel == null)
+            {
+                return;
+            }
+
             try
             {
-                TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-                if (gfxPanel != null)
+                TM_Simulator sim = gfxPanel.getSimulator();
+                sim.step();
+                tapeDisp.repaint();
+                if (sim.getCurrentState().isFinalState())
                 {
-                    gfxPanel.getSimulator().step();
-                    tapeDisp.repaint();
+                    m_console.logPartial(gfxPanel, sim.getConfiguration());
+                }
+                else
+                {
+                    m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
                 }
             }
             catch (NondeterministicException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent, MainWindow.NONDET_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE); 
             }
             catch (UndefinedTransitionException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TRANS_UNDEF_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             }
             catch (TapeBoundsException e2)
             {
+                m_console.logPartial(gfxPanel, e2.getMessage());
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
             }
             catch (ComputationCompletedException e2)
             {
+                m_console.endPartial();
                 JOptionPane.showMessageDialog(m_parentComponent,MainWindow.COMPUTATION_COMPLETED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-                TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-                if (gfxPanel != null)
-                {
-                    gfxPanel.getSimulator().resetMachine();
-                    gfxPanel.repaint();
-                }
-            }
-            catch (Exception e2)
-            {
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.OTHER_ERROR_STR);
-                e2.printStackTrace();
+                gfxPanel.getSimulator().resetMachine();
+                gfxPanel.repaint();
             }
             repaint();
         }
@@ -2517,7 +2531,41 @@ public class MainWindow extends JFrame
             }
         }
     }
-   
+  
+    /**
+     * Action for displaying the shared console.
+     */
+    class ShowConsoleAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ShowConsoleAction.
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
+        public ShowConsoleAction(String text, ImageIcon icon)
+        {
+            super(text);
+            putValue(Action.SMALL_ICON, icon);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Display the console.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            if (!m_console.isVisible())
+            {
+                m_desktopPane.add(m_console);
+                m_console.setVisible(true);
+            }
+            m_console.moveToFront();
+            try { m_console.setSelected(true); }
+            catch (PropertyVetoException e2) { }
+        }
+    }
+
     /**
      * Action for displaying help contents.
      */
@@ -2588,99 +2636,6 @@ public class MainWindow extends JFrame
         }
     }
     
-    /**
-     * A tool bar component.
-     */
-    private class ToolBarPanel extends JPanel
-    {
-        /**
-         * Creates a new instance of ToolBarPanel.
-         * @param parent The main window.
-         * @param manager The layout manager to use. 
-         */
-        ToolBarPanel(MainWindow parent, LayoutManager manager)
-        {
-            super(manager);
-            m_parent = parent;
-
-            this.addComponentListener(new ComponentAdapter()
-            {
-                public void componentResized(ComponentEvent e)
-                {
-                    validate();
-                }
-            });
-        }
-
-        /**
-         * Get the preferred size for this component.
-         * @return The preferred size for this component.
-         */
-        public Dimension getPreferredSize()
-        {
-            Component[] components = this.getComponents();
-            // Sort from top left to bottom right order.
-            Arrays.sort(components, new Comparator<Component>()
-            {
-                // NOTE: This comparator imposes orderings that are inconsistent with equals
-                public int compare(Component a, Component b)
-                {
-                    if (a.getY() < b.getY())
-                    {
-                        return -1;
-                    }
-                    if (a.getY() > b.getY())
-                    {
-                        return 1;
-                    }
-                    if (a.getX() < b.getX())
-                    {
-                        return -1;
-                    }
-                    if (a.getX() > b.getX())
-                    {
-                        return 1;
-                    }
-                    return 0;
-                }
-            });
-
-            int widthCount = 2 * TOOLBAR_HGAP;
-            int maxHeight = 0;
-            int numRows = 1;
-            final int MINIMUM_SPACE_AT_END_OF_ROW = 2;
-            // This seems to be hard-coded into swing, I had to find it by trial and error.  If
-            // there is not this much space plus the flow layout horizontal gap left at the end, 
-            // a new row is started.
-            // TODO" check this is still correct on linux.
-
-            for (int i = 0; i < components.length; i++)
-            {
-                Component c = components[i];
-
-                widthCount += c.getWidth();
-                if (i != 0)
-                {
-                    widthCount += TOOLBAR_HGAP;
-                }
-                maxHeight = Math.max(c.getHeight(), maxHeight);
-                if (widthCount >= m_parent.getWidth() - MINIMUM_SPACE_AT_END_OF_ROW)
-                {
-                    numRows++;
-                    widthCount = 2 * TOOLBAR_HGAP + c.getWidth();
-                }
-            }
-            numRows = Math.min(numRows, components.length); // No more rows than components
-
-            return new Dimension(m_parent.getWidth(), numRows * (maxHeight + TOOLBAR_VGAP) + TOOLBAR_VGAP);
-        }
-
-        /**
-         * The main window.
-         */
-        private MainWindow m_parent;
-    }
-   
     /** 
      * This class is designed to intercept mouse events in order to make a window modal.
      * It is borrowed from the Sun developer tech tips article at
@@ -2832,6 +2787,11 @@ public class MainWindow extends JFrame
      * Frame for displaying help information as HTML.
      */
     private TMHelpDisplayer m_helpDisp;
+
+    /**
+     * Frame for displaying a console window for logging information.
+     */
+    private ConsoleInternalFrame m_console;
 
     /**
      * Action for creating a new machine.
@@ -3030,6 +2990,11 @@ public class MainWindow extends JFrame
      * Action for configuring the naming scheme.
      */
     private final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
+
+    /**
+     * Action for displaying the shared console.
+     */
+    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("emptyIcon.gif"));
 
     /**
      * Action for displaying help documentation.

@@ -28,6 +28,7 @@ package tuataraTMSim;
 import java.util.TimerTask;
 import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.TM.TM_Simulator;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 
@@ -56,34 +57,47 @@ public class TMExecutionTimerTask extends TimerTask
     {
         try
         {
-            m_panel.getSimulator().step();
+            TM_Simulator sim = m_panel.getSimulator();
+            sim.step();
             m_panel.repaint();
             m_tapeDisp.repaint();
+            if (sim.getCurrentState().isFinalState())
+            {
+                m_mainWindow.getConsole().logPartial(m_panel, sim.getConfiguration());
+            }
+            else
+            {
+                m_mainWindow.getConsole().logPartial(m_panel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb')); 
+            }
         }
         catch (TapeBoundsException e)
         {
+            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
+            m_mainWindow.getConsole().endPartial();
             cancel();
             m_mainWindow.stopExecution();
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
         catch (UndefinedTransitionException e)
         {
+            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
+            m_mainWindow.getConsole().endPartial();
             cancel();
             m_mainWindow.stopExecution();
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TRANS_UNDEF_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
         catch (NondeterministicException e)
         {
+            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
+            m_mainWindow.getConsole().endPartial();
             cancel();
-            
             m_mainWindow.stopExecution();
-            
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.NONDET_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
         }
         catch (ComputationCompletedException e)
         {
+            m_mainWindow.getConsole().endPartial();
             cancel();
-            
             m_mainWindow.stopExecution();
             JOptionPane.showMessageDialog(m_mainWindow,MainWindow.COMPUTATION_COMPLETED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
