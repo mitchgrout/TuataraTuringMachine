@@ -2417,22 +2417,31 @@ public class MainWindow extends JFrame
             // Wipe the tape.
             Object[] options = {"Ok", "Cancel"};
             // TODO: should disable keyboard here
-            // TODO: BUG, CANCELLATION STILL CLEARS TAPE
             int result = 0;
             if (tapeDisp.getFile() == null)
             {
-                JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             }
             else
             {
-                JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                result = JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             }
+
             if (result == JOptionPane.YES_OPTION)
             {
                 tapeDisp.reloadTape();
                 tapeDispController.repaint();
-                m_console.log(String.format("Reloaded tape from file %s", 
-                            tapeDisp.getFile().toString()));
+                
+                File file = tapeDisp.getFile();
+                if (file == null)
+                {
+                    m_console.log("Deleted tape contents");
+                }
+                else
+                {
+                    m_console.log(String.format("Reloaded tape from file %s", 
+                            file.toString()));
+                }
             }
         }
     }
