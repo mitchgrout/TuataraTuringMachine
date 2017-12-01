@@ -350,7 +350,7 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Turing Machine files";
+                return "Machine files (*.tm)";
             }
         });
        
@@ -364,7 +364,7 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Tape files";
+                return "Tape files (*.tap)";
             }
         });
         
@@ -1076,15 +1076,17 @@ public class MainWindow extends JFrame
      * A general function used for displaying save file dialogs. This keeps all behaviours for file
      * choosing consistent across types.
      * @param fc The file chooser to be used.
+     * @param title The title of the dialog.
      * @param ext The file extension.
      * @return The chosen file if one was picked, otherwise null if the user cancelled.
      */
-    public File chooseSaveFile(JFileChooser fc, String ext)
+    public File chooseSaveFile(JFileChooser fc, String title, String ext)
     {
         do
         {
             // Prevent the program from reading from the keyboard while the file dialog is active
             m_keyboardEnabled = false;
+            fc.setDialogTitle(title);
             int returnVal = fc.showSaveDialog(MainWindow.this);
             m_keyboardEnabled = true;
             if (returnVal != JFileChooser.APPROVE_OPTION)
@@ -1111,6 +1113,8 @@ public class MainWindow extends JFrame
                         continue;
                     case JOptionPane.YES_OPTION:
                         return outfile;
+                    default:
+                        return null;
                 }
             }
             // Otherwise return the file chosen
@@ -1123,14 +1127,17 @@ public class MainWindow extends JFrame
      * A general function used for displaying load file dialogs. This keeps all behaviours for file
      * choosing consistent across types.
      * @param fc The file chooser to be used.
+     * @param title The title of the dialog.
+     * @param ext The file extension.
      * @return The chosen file if one was picked, otherwise null if the user cancelled.
      */
-    public File chooseLoadFile(JFileChooser fc, String ext)
+    public File chooseLoadFile(JFileChooser fc, String title, String ext)
     {
         do
         {
             // Prevent the program from reading from the keyboard while the file dialog is active
             m_keyboardEnabled = false;
+            fc.setDialogTitle(title);
             int returnVal = fc.showOpenDialog(MainWindow.this);
             m_keyboardEnabled = true;
             if (returnVal != JFileChooser.APPROVE_OPTION)
@@ -1165,7 +1172,7 @@ public class MainWindow extends JFrame
     {
         try
         {
-            File outFile = chooseSaveFile(fcMachine, MACHINE_EXTENSION);            
+            File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
             if (outFile == null)
             {
                 // User cancelled
@@ -1212,8 +1219,8 @@ public class MainWindow extends JFrame
         {
             return; // Shouldnt happen.
         }
-        JInternalFrame[] iFrames = m_desktopPane.getAllFrames();
-        for (JInternalFrame f : iFrames)
+        
+        for (JInternalFrame f : m_desktopPane.getAllFrames())
         {
             try
             {
@@ -1248,9 +1255,7 @@ public class MainWindow extends JFrame
             return;
         }
 
-        JInternalFrame[] iFrames = m_desktopPane.getAllFrames();
-
-        for (JInternalFrame f : iFrames)
+        for (JInternalFrame f : m_desktopPane.getAllFrames())
         {
             try
             {
@@ -1533,7 +1538,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             // Choose the file to load
-            File inFile = chooseLoadFile(fcMachine, MACHINE_EXTENSION);
+            File inFile = chooseLoadFile(fcMachine, "Load Machine", MACHINE_EXTENSION);
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1552,7 +1557,7 @@ public class MainWindow extends JFrame
                 {
                     iFrame.setSelected(true);
                 }
-                catch (PropertyVetoException e2) {}
+                catch (PropertyVetoException e2) { }
             }
             catch (Exception e2)
             {
@@ -1655,10 +1660,15 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            Object[] options = {"Ok", "Cancel"};
-            int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+            // Prevent the program from reading from the keyboard while the file dialog is active
+            m_keyboardEnabled = false;
+            Object[] options = { "Ok", "Cancel" };
+            int result = JOptionPane.showOptionDialog(null, 
+                    "This will erase the tape. Do you want to continue?", "Clear tape",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
+                    options, options[1]);
             m_keyboardEnabled = true;
+
             if (result == JOptionPane.YES_OPTION)
             {
                 m_tape.copyOther(new CA_Tape());
@@ -1691,7 +1701,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            File inFile = chooseLoadFile(fcTape, TAPE_EXTENSION);
+            File inFile = chooseLoadFile(fcTape, "Load Tape", TAPE_EXTENSION);
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1726,6 +1736,9 @@ public class MainWindow extends JFrame
          * Creates a new instance of SaveTapeAction. 
          * @param text Description of the action.
          * @param icon Icon for the action.
+         * @param forceDialog Whether or not this action should always show a file chooser.
+         *                    Setting this to true creates a save-as action, while setting it to
+         *                    false creates a save action.
          */
         public SaveTapeAction(String text, ImageIcon icon, boolean forceDialog)
         {
@@ -1745,36 +1758,23 @@ public class MainWindow extends JFrame
         {
             Tape tape = tapeDisp.getTape();
             File outFile = tapeDisp.getFile();
-            // TODO: Justify if this is ever possible
-            if (tape == null)
-            {
-                return;
-            }
 
             try
             {
                 if (m_force || outFile == null)
                 {
-                    fcTape.setDialogTitle("Save tape");
-                    m_keyboardEnabled = false; 
-                    int returnVal = fcTape.showSaveDialog(MainWindow.this);
-                    m_keyboardEnabled = true;
-
-                    if (returnVal == JFileChooser.APPROVE_OPTION)
+                    outFile = chooseSaveFile(fcTape, "Save Tape", TAPE_EXTENSION);
+                    if (outFile == null)
                     {
-                        outFile = fcTape.getSelectedFile();
-                        if (!outFile.exists() && !outFile.toString().endsWith(TAPE_EXTENSION))
-                        {
-                            outFile = new File(outFile.toString() + TAPE_EXTENSION);
-                        }
-
-                        boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
-                        if (result == false)
-                        {
-                            throw new IOException(outFile.toString());
-                        }
-                        tapeDisp.setFile(outFile);
+                        // User cancelled
+                        return;
                     }
+                    boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
+                    if (result == false)
+                    {
+                        throw new IOException(outFile.toString());
+                    }
+                    tapeDisp.setFile(outFile);
                 }
                 else
                 {
@@ -2605,13 +2605,14 @@ public class MainWindow extends JFrame
 
         /**
          * Display a message box specifying some meta information about the program.
+         * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
         {
             JOptionPane.showMessageDialog(MainWindow.this,
-                    "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007, " + 
-                    "and extended by Mitchell Grout in 2017-2018, with funding from the " +
-                    "Department of Mathematics at the University of Waikato, New Zealand.");
+                "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
+                "and extended by Mitchell Grout in 2017-2018, with funding from the \n" +
+                "Department of Mathematics at the University of Waikato, New Zealand.");
         }
     }
     

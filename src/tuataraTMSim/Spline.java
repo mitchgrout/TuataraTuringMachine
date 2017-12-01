@@ -130,7 +130,7 @@ public abstract class Spline
     /**
      * Determine the control point of our spline, given a known midpoint, and the start and end
      * points.
-     * @param midpoint The midpoint of the spline.
+     * @param mid The midpoint of the spline.
      * @param from The state the spline is leaving.
      * @param to The state the spline is arriving at.
      * @return The control point of the spline.
