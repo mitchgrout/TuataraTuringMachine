@@ -153,7 +153,6 @@ public class Alphabet implements Serializable, Cloneable
         } 
         catch (CloneNotSupportedException e)
         {
-            System.err.println("Clone failed!");
             return null;
         }
     }

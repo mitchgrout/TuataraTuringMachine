@@ -87,7 +87,6 @@ public class TM_Simulator
      * Runs until the machine halts.
      * @param maxSteps The maximum number of iterations allowed for the computation. A value of zero
      *                 represents no limit. If this number is reached, simulation is aborted.
-     * @param doConsoleOutput Determines if configuration information should be written to stdout.
      * @return true if the machine halts in a finite amount of steps up until maxSteps, false otherwise.
      * @throws TapeBoundsException If the read/write head falls off the tape.
      * @throws UndefinedTransitionException If there is no transition for the machine to take.

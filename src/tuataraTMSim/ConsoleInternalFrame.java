@@ -25,22 +25,12 @@
 
 package tuataraTMSim;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.Font;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
-import java.util.*;
 import javax.swing.*;
-import tuataraTMSim.commands.*;
-import tuataraTMSim.TM.*;
 
 /**
  * A frame for machines to log information to. This panel may be written to by every machine

@@ -28,16 +28,12 @@ package tuataraTMSim;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.GridLayout;
 import java.awt.KeyboardFocusManager;
 import java.beans.PropertyVetoException;
-import java.util.*;
-import javax.swing.BorderFactory;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -45,8 +41,6 @@ import javax.swing.JRadioButton;
 import tuataraTMSim.commands.ChangeSchemeCommand;
 import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.SchemeRelabelCommand;
-import tuataraTMSim.TM.Alphabet;
-import tuataraTMSim.TM.Tape;
 
 /**
  * An frame used to change the naming scheme for new states in a machine.

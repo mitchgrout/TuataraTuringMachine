@@ -218,7 +218,9 @@ public class MainWindow extends JFrame
                    if (gfxPanel != null)
                    {
                        if (gfxPanel.handleKeyEvent(e))
+                       {
                            gfxPanel.repaint();
+                       }
                        else if (tapeDisp != null)
                        {
                            tapeDisp.handleKeyEvent(e);
@@ -338,6 +340,7 @@ public class MainWindow extends JFrame
         tapeDispController.setVisible(true);
         
         // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
+        fcMachine.setDialogTitle("Save machine");
         fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
@@ -347,10 +350,11 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Turing Machine files";
+                return "Machine files (*.tm)";
             }
         });
-        
+       
+        fcTape.setDialogTitle("Save tape");
         fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
@@ -360,7 +364,7 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Tape files";
+                return "Tape files (*.tap)";
             }
         });
         
@@ -416,8 +420,7 @@ public class MainWindow extends JFrame
 
         // Set up the global console
         m_console = new ConsoleInternalFrame();
-        m_console.setLayer(60); // !!!
-
+        m_console.setLayer(50);
 
         setVisible(true);
 
@@ -1068,7 +1071,98 @@ public class MainWindow extends JFrame
         }
         return false;
     }
- 
+
+    /**
+     * A general function used for displaying save file dialogs. This keeps all behaviours for file
+     * choosing consistent across types.
+     * @param fc The file chooser to be used.
+     * @param title The title of the dialog.
+     * @param ext The file extension.
+     * @return The chosen file if one was picked, otherwise null if the user cancelled.
+     */
+    public File chooseSaveFile(JFileChooser fc, String title, String ext)
+    {
+        do
+        {
+            // Prevent the program from reading from the keyboard while the file dialog is active
+            m_keyboardEnabled = false;
+            fc.setDialogTitle(title);
+            int returnVal = fc.showSaveDialog(MainWindow.this);
+            m_keyboardEnabled = true;
+            if (returnVal != JFileChooser.APPROVE_OPTION)
+            {
+                return null;
+            }
+            File outfile = fc.getSelectedFile();
+            // If it's a new file, and doesn't have our extension, append the extension
+            if (!outfile.exists() && !outfile.toString().endsWith(ext))
+            {
+                outfile = new File(outfile.toString() + ext);
+            }
+            // If it exists, confirm overwrite
+            if (outfile.exists())
+            {
+                int overwrite = JOptionPane.showConfirmDialog(MainWindow.this,
+                        String.format("The file '%s' already exists. Overwrite?", outfile.getName()),
+                        "Save As", JOptionPane.YES_NO_CANCEL_OPTION);
+                switch (overwrite)
+                {
+                    case JOptionPane.CANCEL_OPTION: 
+                        return null;
+                    case JOptionPane.NO_OPTION:
+                        continue;
+                    case JOptionPane.YES_OPTION:
+                        return outfile;
+                    default:
+                        return null;
+                }
+            }
+            // Otherwise return the file chosen
+            return outfile;
+        }
+        while (true);
+    }
+
+    /**
+     * A general function used for displaying load file dialogs. This keeps all behaviours for file
+     * choosing consistent across types.
+     * @param fc The file chooser to be used.
+     * @param title The title of the dialog.
+     * @param ext The file extension.
+     * @return The chosen file if one was picked, otherwise null if the user cancelled.
+     */
+    public File chooseLoadFile(JFileChooser fc, String title, String ext)
+    {
+        do
+        {
+            // Prevent the program from reading from the keyboard while the file dialog is active
+            m_keyboardEnabled = false;
+            fc.setDialogTitle(title);
+            int returnVal = fc.showOpenDialog(MainWindow.this);
+            m_keyboardEnabled = true;
+            if (returnVal != JFileChooser.APPROVE_OPTION)
+            {
+                return null;
+            }
+            File infile = fc.getSelectedFile();
+            // If it doesn't exist, try with extension
+            if (!infile.exists())
+            {
+                infile = new File(infile.toString() + ext);
+            }
+            // Still nothing, prompt again
+            if (!infile.exists())
+            {
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        String.format("Cannot find file '%s'", infile.toString()));
+                continue;
+            }
+            // Otherwise return the file chosen
+            return infile;
+        }
+        while (true);
+    }
+
     /**
      * Save the current machine, by displaying a file dialog.
      * @param panel The current graphics panel.
@@ -1076,63 +1170,31 @@ public class MainWindow extends JFrame
      */
     public boolean saveMachineAs(TMGraphicsPanel panel)
     {
-        while (true)
+        try
         {
-            fcMachine.setDialogTitle("Save machine");
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            int returnVal = fcMachine.showSaveDialog(MainWindow.this);
-            m_keyboardEnabled = true;
-
-            if (returnVal == JFileChooser.APPROVE_OPTION)
+            File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
+            if (outFile == null)
             {
-                File outFile = fcMachine.getSelectedFile();
-                try
-                {
-                    if (panel != null)
-                    {
-                        TMachine machine = panel.getSimulator().getMachine();
-                        if (machine != null)
-                        {
-                            if (!outFile.toString().endsWith(MACHINE_EXTENSION))
-                            {
-                                outFile = new File(outFile.toString() + MACHINE_EXTENSION);
-                            }
-                            if (outFile.exists())
-                            {
-                                int overwrite = JOptionPane.showConfirmDialog(MainWindow.this, "The file '" + outFile.getName()
-                                + "' already exists.  Overwrite?", "Save As", JOptionPane.YES_NO_CANCEL_OPTION);
-                                if (overwrite == JOptionPane.CANCEL_OPTION)
-                                    return false;
-                                else if (overwrite == JOptionPane.NO_OPTION)
-                                    continue; // Show dialogue again
-                            }
-                            boolean result = TMachine.saveTMachine(machine, outFile.toString());
-
-                            // TODO: Assignment bug?
-                            if (result = false)
-                            {
-                                throw new IOException(outFile.toString());
-                            }
-                            else
-                            {
-                                panel.setModifiedSinceSave(false);
-                                panel.setFile(outFile);
-                            }
-                        }
-                    }
-                } 
-                catch (Exception e2)
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
-                    return false;
-                }
+                // User cancelled
+                return false;
+            }
+            TMachine machine = panel.getSimulator().getMachine();
+            boolean result = TMachine.saveTMachine(machine, outFile.toString());
+            if (result == false)
+            {
+                throw new IOException(outFile.toString());
             }
             else
             {
-                // User chose not to save
-                return false;
+                panel.setModifiedSinceSave(false);
+                panel.setFile(outFile);
             }
             return true;
+        } 
+        catch (Exception e2)
+        {
+            JOptionPane.showMessageDialog(MainWindow.this, "An error occurred while saving your file.");
+            return false;
         }
     }
     
@@ -1157,8 +1219,8 @@ public class MainWindow extends JFrame
         {
             return; // Shouldnt happen.
         }
-        JInternalFrame[] iFrames = m_desktopPane.getAllFrames();
-        for (JInternalFrame f : iFrames)
+        
+        for (JInternalFrame f : m_desktopPane.getAllFrames())
         {
             try
             {
@@ -1193,9 +1255,7 @@ public class MainWindow extends JFrame
             return;
         }
 
-        JInternalFrame[] iFrames = m_desktopPane.getAllFrames();
-
-        for (JInternalFrame f : iFrames)
+        for (JInternalFrame f : m_desktopPane.getAllFrames())
         {
             try
             {
@@ -1477,49 +1537,32 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            fcMachine.setDialogTitle("Open machine");
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            int returnVal = fcMachine.showOpenDialog(MainWindow.this);
-            m_keyboardEnabled = true;
-            
-            if (returnVal == JFileChooser.APPROVE_OPTION)
+            // Choose the file to load
+            File inFile = chooseLoadFile(fcMachine, "Load Machine", MACHINE_EXTENSION);
+            if (inFile == null)
             {
-                File inFile = fcMachine.getSelectedFile();
-                if (!inFile.exists())
-                {
-                    // Try with extension
-                    inFile = new File(inFile.toString() + MACHINE_EXTENSION);
-                }
-                if (!inFile.exists()) // Still no
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "Cannot find file \"" + inFile.toString() + "\"");
-                }
-                else
-                {
-                    try
-                    {
-                        TMachine machine = TMachine.loadTMachine(inFile.toString());
-                        if (machine == null)
-                        {
-                            throw new IOException(inFile.toString());
-                        }
-                        JInternalFrame iFrame = newMachineWindow(machine, inFile);
-                        m_desktopPane.add(iFrame);
-                        try
-                        {
-                            iFrame.setSelected(true);
-                        }
-                        catch (PropertyVetoException e2) {}
-                    }
-                    catch (Exception e2)
-                    {
-                        JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
-                    }
-                }
+                // Cancelled by user
+                return;
             }
-            else
+            try
             {
-                System.err.println("Approve option didnt occur");
+                TMachine machine = TMachine.loadTMachine(inFile.toString());
+                if (machine == null)
+                {
+                    throw new IOException(inFile.toString());
+                }
+                JInternalFrame iFrame = newMachineWindow(machine, inFile);
+                m_desktopPane.add(iFrame);
+                try
+                {
+                    iFrame.setSelected(true);
+                }
+                catch (PropertyVetoException e2) { }
+            }
+            catch (Exception e2)
+            {
+                JOptionPane.showMessageDialog(MainWindow.this, 
+                        String.format("Error opening file '%s'", inFile.toString()));
             }
         }
     }
@@ -1533,83 +1576,63 @@ public class MainWindow extends JFrame
          * Creates a new instance of SaveMachineAction.
          * @param text Description of the action.
          * @param icon Icon for the action.
+         * @param forceDialog Whether or not this action should always show a file chooser.
+         *                    Setting this to true creates a save-as action, while setting it to
+         *                    false creates a save action.
          */
-        public SaveMachineAction(String text, ImageIcon icon)
+        public SaveMachineAction(String text, ImageIcon icon, boolean forceDialog)
         {
             super(text);
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
+            m_force = forceDialog;
         }
        
         /**
-         * Save the machine to its associated file. If it does not have an associated file, display
-         * a dialog to choose a file.
+         * Save the machine to file. If forceDialog is set to true, or the machine has no associated
+         * file, a dialog is shown. Otherwise, the file is saved to its associated file.
          * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
-        {   
+        {
+            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            if (panel == null)
+            {
+                return;
+            }
+
+            TMachine machine = panel.getSimulator().getMachine();
+            File outFile = panel.getFile();
             try
             {
-                TMGraphicsPanel panel = getSelectedGraphicsPanel();
-                if (panel != null)
+                if (m_force || outFile == null)
                 {
-                    TMachine machine = panel.getSimulator().getMachine();
-                    File outFile = panel.getFile();
-                    if (machine != null)
+                    saveMachineAs(panel);
+                }
+                else
+                {
+                    boolean result = TMachine.saveTMachine(machine, outFile.toString());
+                    if (result == false)
                     {
-                        if (outFile == null)
-                        {
-                            m_saveMachineAsAction.actionPerformed(e);
-                        }
-                        else
-                        {
-                            boolean result = TMachine.saveTMachine(machine, outFile.toString());
-                            if (result = false)
-                            {
-                                throw new IOException(outFile.toString());
-                            }
-                            else
-                            {
-                                panel.setModifiedSinceSave(false);
-                            }
-                        }
+                        throw new IOException(outFile.toString());
+                    }
+                    else
+                    {
+                        panel.setModifiedSinceSave(false);
                     }
                 }
-            } 
+            }
             catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred. Your file has not been saved!");
+                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
             }
         }
-    }
- 
-    /**
-     * Action for saving a machine diagram with a new name.
-     */
-    class SaveMachineAsAction extends AbstractAction
-    {
+
         /**
-         * Creates a new instance of SaveMachineAsAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
+         * Whether or not a file chooser should always be displayed.
          */
-        public SaveMachineAsAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Open a dialog to select a machine file, and save the machine to the given filename.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
-            saveMachineAs(panel);
-        }
+        private final boolean m_force;
     }
  
     /** 
@@ -1637,10 +1660,15 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            Object[] options = {"Ok", "Cancel"};
-            int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+            // Prevent the program from reading from the keyboard while the file dialog is active
+            m_keyboardEnabled = false;
+            Object[] options = { "Ok", "Cancel" };
+            int result = JOptionPane.showOptionDialog(null, 
+                    "This will erase the tape. Do you want to continue?", "Clear tape",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
+                    options, options[1]);
             m_keyboardEnabled = true;
+
             if (result == JOptionPane.YES_OPTION)
             {
                 m_tape.copyOther(new CA_Tape());
@@ -1673,99 +1701,28 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            fcTape.setDialogTitle("Open tape");
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            int returnVal = fcTape.showOpenDialog(MainWindow.this);
-            m_keyboardEnabled = true;
-            
-            if (returnVal == JFileChooser.APPROVE_OPTION)
+            File inFile = chooseLoadFile(fcTape, "Load Tape", TAPE_EXTENSION);
+            if (inFile == null)
             {
-                File inFile = fcTape.getSelectedFile();
-                if (!inFile.exists())
-                {
-                    // Try with extension
-                    inFile = new File(inFile.toString() + TAPE_EXTENSION);
-                }
-                if (!inFile.exists()) // Still no
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "Cannot find file \"" + inFile.toString() + "\"");
-                }
-                else
-                {
-                    try
-                    {
-                        Tape tape = Tape.loadTape(inFile.toString());
-                        if (tape == null)
-                        {
-                            throw new IOException(inFile.toString());
-                        }
-                        tapeDisp.getTape().copyOther(tape);
-                        tapeDisp.setFile(inFile);
-                        tapeDisp.repaint();
-                    }
-                    catch (Exception e2)
-                    {
-                        JOptionPane.showMessageDialog(MainWindow.this, "Error opening file \"" + inFile.toString() + "\"");
-                        System.err.println("error opening file");
-                    }
-                }
+                // Cancelled by user
+                return;
             }
-        }
-    }
-    
-    /**
-     * Action for saving a tape. 
-     */
-    class SaveTapeAsAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of SaveTapeAsAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public SaveTapeAsAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Display a dialog, and save the tape to the specified file.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            fcTape.setDialogTitle("Save tape");
-            m_keyboardEnabled = false; // Disable keyboard input in the main window/tape.
-            int returnVal = fcTape.showSaveDialog(MainWindow.this);
-            m_keyboardEnabled = true;
             
-            if (returnVal == JFileChooser.APPROVE_OPTION)
+            try
             {
-                File outFile = fcTape.getSelectedFile();
-                if (!outFile.exists())
+                Tape tape = Tape.loadTape(inFile.toString());
+                if (tape == null)
                 {
-                    if (!outFile.toString().endsWith(TAPE_EXTENSION))
-                    {
-                        outFile = new File(outFile.toString() + TAPE_EXTENSION);
-                    }
+                    throw new IOException(inFile.toString());
                 }
-                
-                try
-                {
-                    boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
-
-                    if (result = false)
-                    {
-                        throw new IOException(outFile.toString());
-                    }
-                    tapeDisp.setFile(outFile);
-                }
-                catch (Exception e2)
-                {
-                    JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
-                }
+                tapeDisp.getTape().copyOther(tape);
+                tapeDisp.setFile(inFile);
+                tapeDisp.repaint();
+            }
+            catch (Exception e2)
+            {
+                JOptionPane.showMessageDialog(MainWindow.this, 
+                        String.format("Error opening file '%s'", inFile.toString()));
             }
         }
     }
@@ -1779,13 +1736,17 @@ public class MainWindow extends JFrame
          * Creates a new instance of SaveTapeAction. 
          * @param text Description of the action.
          * @param icon Icon for the action.
+         * @param forceDialog Whether or not this action should always show a file chooser.
+         *                    Setting this to true creates a save-as action, while setting it to
+         *                    false creates a save action.
          */
-        public SaveTapeAction(String text, ImageIcon icon)
+        public SaveTapeAction(String text, ImageIcon icon, boolean forceDialog)
         {
             super(text);
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
+            m_force = forceDialog;
         }
         
         /**
@@ -1794,29 +1755,47 @@ public class MainWindow extends JFrame
          * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
-        {   
+        {
+            Tape tape = tapeDisp.getTape();
+            File outFile = tapeDisp.getFile();
+
             try
             {
-                Tape tape = tapeDisp.getTape();
-                File outFile = tapeDisp.getFile();
-                if (tape != null)
+                if (m_force || outFile == null)
                 {
+                    outFile = chooseSaveFile(fcTape, "Save Tape", TAPE_EXTENSION);
                     if (outFile == null)
                     {
-                        m_saveTapeAsAction.actionPerformed(e);
+                        // User cancelled
+                        return;
                     }
-                    else
+                    boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
+                    if (result == false)
                     {
-                        boolean result = Tape.saveTape(tape, outFile.toString());
-                        if (result = false)
-                            throw new IOException(outFile.toString());
+                        throw new IOException(outFile.toString());
+                    }
+                    tapeDisp.setFile(outFile);
+                }
+                else
+                {
+                    boolean result = Tape.saveTape(tape, outFile.toString());
+                    if (result == false)
+                    {
+                        throw new IOException(outFile.toString());
                     }
                 }
-            } catch (Exception e2)
+            }
+            catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error occurred.  Your file has not been saved!");
+                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
             }
         }
+
+
+        /**
+         * Whether or not a file chooser should always be displayed.
+         */
+        private final boolean m_force;
     }
 
     /**
@@ -2050,11 +2029,7 @@ public class MainWindow extends JFrame
                     updateUndoActions();
                 }
             }
-            catch (Exception e2)
-            {
-                System.err.println("deserialization error!");
-                e2.printStackTrace();
-            }
+            catch (Exception e2) { }
         }
     }
     
@@ -2626,13 +2601,14 @@ public class MainWindow extends JFrame
 
         /**
          * Display a message box specifying some meta information about the program.
+         * @param e The generating event.
          */
         public void actionPerformed(ActionEvent e)
         {
             JOptionPane.showMessageDialog(MainWindow.this,
-                    "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007, " + 
-                    "and extended by Mitchell Grout in 2017-2018, with funding from the " +
-                    "Department of Mathematics at the University of Waikato, New Zealand.");
+                "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
+                "and extended by Mitchell Grout in 2017-2018, with funding from the \n" +
+                "Department of Mathematics at the University of Waikato, New Zealand.");
         }
     }
     
@@ -2806,12 +2782,12 @@ public class MainWindow extends JFrame
     /**
      * Action for saving a machine to an associated file.
      */
-    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"));
+    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
-    private final Action m_saveMachineAsAction = new SaveMachineAsAction("Save Machine As", loadIcon("emptyIcon.gif"));
+    private final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
@@ -2826,12 +2802,12 @@ public class MainWindow extends JFrame
     /**
      * Action for saving a tape to an associated file.
      */
-    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"));
+    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
-    private final Action m_saveTapeAsAction = new SaveTapeAsAction("Save Tape As", loadIcon("emptyIcon.gif"));
+    private final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
