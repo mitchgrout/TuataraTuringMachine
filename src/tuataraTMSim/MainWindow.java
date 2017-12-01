@@ -1942,8 +1942,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            m_copyAction.actionPerformed(e);
-            
+            m_copyAction.actionPerformed(e); 
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
@@ -2323,6 +2322,7 @@ public class MainWindow extends JFrame
                 {
                     gfxPanel.getSimulator().resetMachine();
                     gfxPanel.repaint();
+                    m_console.log("Stopped machine");
                 }
             }
             updateUndoActions();
@@ -2431,6 +2431,8 @@ public class MainWindow extends JFrame
             {
                 tapeDisp.reloadTape();
                 tapeDispController.repaint();
+                m_console.log(String.format("Reloaded tape from file %s", 
+                            tapeDisp.getFile().toString()));
             }
         }
     }
@@ -2994,7 +2996,7 @@ public class MainWindow extends JFrame
     /**
      * Action for displaying the shared console.
      */
-    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("emptyIcon.gif"));
+    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
 
     /**
      * Action for displaying help documentation.

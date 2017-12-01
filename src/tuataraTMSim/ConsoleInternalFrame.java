@@ -40,6 +40,8 @@ public class ConsoleInternalFrame extends JInternalFrame
 {
     public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 16);
 
+    public static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator 1.0 <<<";
+
     public ConsoleInternalFrame()
     {
         // Create a frame with the title "Console", which can be resized, closed, maximized, but
@@ -54,7 +56,7 @@ public class ConsoleInternalFrame extends JInternalFrame
      */
     private void initComponents()
     {
-        this.setSize(new Dimension(800, 600));
+        this.setSize(new Dimension(600, 400));
 
         // Only two components in this frame; a menu bar and text area
 
@@ -73,6 +75,9 @@ public class ConsoleInternalFrame extends JInternalFrame
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         getContentPane().add(scroll);
+
+        // Clear and setup any text on m_text
+        clear();
     }
 
     /**
@@ -110,7 +115,7 @@ public class ConsoleInternalFrame extends JInternalFrame
         else
         {
             // TODO: Decide if this is necessary for the user to see
-            m_text.append("Interrupted\n");
+            m_text.append(" -- Interrupted\n");
             // Begin logging on a new line
             m_text.append(String.format("[%s] %s", timestamp(), s));
             m_partial = true;
@@ -143,6 +148,15 @@ public class ConsoleInternalFrame extends JInternalFrame
     }
 
     /**
+     * Clear the text area, and draw the splash text.
+     */
+    private void clear()
+    {
+        endPartial();
+        m_text.setText(SPLASH_TEXT + "\n");
+    }
+
+    /**
      * Action to clear the console of all logged text.
      */
     private class ClearAction extends AbstractAction
@@ -157,11 +171,13 @@ public class ConsoleInternalFrame extends JInternalFrame
             putValue(Action.SHORT_DESCRIPTION, text);
         }
 
+        /**
+         * Clear the text area, and draw the splash text.
+         * @param e The generating event.
+         */
         public void actionPerformed(ActionEvent e)
         {
-            m_text.setText(null);
-            m_partial = false;
-            m_panel = null;
+            clear();
         }
     }
 
