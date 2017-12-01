@@ -22,7 +22,7 @@ This guide explains in detail how to control the simulation of your shiny new Tu
 <h3> Stepping a machine </h3>
 <p>
 To make the current machine step through one single operation, choose the <img src="../images/step.gif"> 
-<I>Step</I> item from the <I>Machine</I> menu or the toolbar.  The machine will complete the
+<i>Step</i> item from the <i>Machine</i> menu or the toolbar.  The machine will complete the
 operation specified by one transition.  The tape and the state of the machine will be updated
 accordingly.
 </p>
@@ -30,16 +30,16 @@ accordingly.
 <br>
 <h3> Executing a machine </h3>
 <p> 
-Select <img src="../images/fastExecute.gif"> <I>Execute</I> from the <i>Machine</I> menu or
+Select <img src="../images/fastExecute.gif"> <i>Execute</i> from the <i>Machine</i> menu or
 toolbar to start the simulation running.  The machine's execution will occur continuously and
 automatically until the computation halts (in error or otherwise) or the user presses the stop or
-pause buttons.  The <img src="../images/stop.gif"> <I>Stop Execution </I> and <img src="../images/pause.gif">
-<I>Pause Execution</I> buttons are also located in the <I>Machine</I> menu and toolbar.</p>
+pause buttons.  The <img src="../images/stop.gif"> <i>Stop Execution </i> and <img src="../images/pause.gif">
+<i>Pause Execution</i> buttons are also located in the <i>Machine</i> menu and toolbar.</p>
 
 <br>
 <h3> Changing Execution Speeds </h3>
 <p>
-The speed of execution can be controlled via the options in the <I>Machine</I> menu.  This is
+The speed of execution can be controlled via the options in the <i>Machine</i> menu.  This is
 useful for debugging or learning purposes, or to reduce the waiting time for a computation to
 complete.  The speed cannot be modified during automatic execution.
 </p>
@@ -48,9 +48,25 @@ complete.  The speed cannot be modified during automatic execution.
 <h3> Choosing the Current State </h3>
 <p>
 The current state of the machine can be modified using the <img src="../images/currentState.gif"> 
-<I>Choose Current State</I> mode, found in the <I>Mode</I> menu and toolbar.  This is useful for
+<i>Choose Current State</i> mode, found in the <i>Mode</i> menu and toolbar.  This is useful for
 debugging and exploring 'what-if' scenarios.  When in this mode, click on a state to select it as
 the current state.  
+</p>
+
+<br>
+<h3> Machine Configurations </h3>
+<p>
+It is possible to describe the state of a Turing machine using a configuration, which is a triple
+(<i>u, q, v</i>), where <i>uv</i> is the current tape content, <i>q</i> is the current state, and
+the read/write head sits above the first letter of <i>v</i>.  Additionally, we write 
+(<i>u, q, v</i>) &#x02eb; (<i>u', q', v'</i>) if the two configurations represent a single valid
+step in the machine.
+</p>
+
+<p>
+Tuatara Turing Machine Simulator will log the configuration sequence of a machine as it executes. 
+The sequence is logged to the console, which can be displayed using the 
+<img src="../images/console.gif"> <i>Show Console</i> button in the <i>Help</i> menu.
 </p>
 
 <br>
