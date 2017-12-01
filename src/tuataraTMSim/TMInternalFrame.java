@@ -65,7 +65,9 @@ public class TMInternalFrame extends JInternalFrame
             public void	internalFrameDeactivated(InternalFrameEvent e)
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
+                m_gfxPanel.deselectSymbol();
             }
+            
             public void	internalFrameDeiconified(InternalFrameEvent e)
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
@@ -75,6 +77,7 @@ public class TMInternalFrame extends JInternalFrame
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
             }
+
             public void	internalFrameOpened(InternalFrameEvent e) 
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
