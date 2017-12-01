@@ -24,8 +24,9 @@
 
 package tuataraTMSim;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.geom.Point2D;
+import java.awt.geom.CubicCurve2D;
+import java.awt.geom.QuadCurve2D;
 import tuataraTMSim.TM.TM_State;
 
 /**
