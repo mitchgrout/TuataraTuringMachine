@@ -2029,11 +2029,7 @@ public class MainWindow extends JFrame
                     updateUndoActions();
                 }
             }
-            catch (Exception e2)
-            {
-                System.err.println("deserialization error!");
-                e2.printStackTrace();
-            }
+            catch (Exception e2) { }
         }
     }
     

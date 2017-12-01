@@ -78,15 +78,9 @@ public class TMHelpDisplayer extends JInternalFrame
                 {
                     jep.setPage(helpURL);
                 }
-                catch (IOException e)
-                {
-                    System.err.println("Attempted to read a bad URL: " + helpURL);
-                }
+                catch (IOException e) { }
             }
-            else
-            {
-                System.err.println("Couldn't find file: help/index.html");
-            }
+            else { }
             
             jep.addHyperlinkListener(new Hyperactive());
             
