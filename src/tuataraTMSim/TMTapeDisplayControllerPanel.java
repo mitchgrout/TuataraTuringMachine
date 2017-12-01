@@ -56,7 +56,7 @@ public class TMTapeDisplayControllerPanel extends JPanel
         m_tapeDP = tapeDP;
         m_mainWindow = windowParent;
         initComponents(headToStartAction, eraseTapeAction, reloadAction);
-    }
+   }
     
     /** 
      * Initialization.
@@ -67,7 +67,25 @@ public class TMTapeDisplayControllerPanel extends JPanel
     public void initComponents(Action headToStartAction, Action eraseTapeAction, Action reloadAction)
     {
         setBackground(Color.WHITE);
-        setFocusable(false); // TODO: make this work
+        setFocusable(!false); // TODO: make this work
+
+        // NOTE: This is attached to all subcomponents so that when the mouse is clicked over this
+        //       component, we receive the focus of the keyboard. We could accomplish something
+        //       similar by using a glass pane, but since there are so few components, this was a
+        //       simpler solution.
+        MouseListener onClick = new MouseAdapter()
+        {
+            public void mousePressed(MouseEvent e)
+            {
+                TMGraphicsPanel gfx = m_mainWindow.getSelectedGraphicsPanel();
+                if (gfx != null)
+                {
+                    gfx.deselectSymbol();
+                }
+            }
+        };
+
+        m_tapeDP.addMouseListener(onClick);
 
         Border currentBorder = getBorder();
         Border innerBorder = BorderFactory.createEmptyBorder(PADDING,PADDING,PADDING,PADDING);
@@ -78,55 +96,16 @@ public class TMTapeDisplayControllerPanel extends JPanel
         imageURL = MainWindow.class.getResource("images/tapeRight.gif");
         ImageIcon tapeRightIcon = new ImageIcon(imageURL);
         
-        
         m_BStart = new JButton();
         m_BStart.setFocusable(false);
-        
+        m_BStart.setAction(headToStartAction);
+        m_BStart.setText("");
+        m_BStart.addMouseListener(onClick);
+
         m_BLeft = new JButton();
         m_BLeft.setFocusable(false);
         m_BLeft.setToolTipText("Move the read/write head to the left.");
         m_BLeft.setIcon(tapeLeftIcon);
-        
-        m_BRight = new JButton();
-        m_BRight.setFocusable(false);
-        m_BRight.setToolTipText("Move the read/write head to the right.");
-        m_BRight.setIcon(tapeRightIcon);
-        
-        m_BClearTape = new JButton();
-        m_BClearTape.setFocusable(false);
-        
-        m_BReloadTape = new JButton();
-        m_BReloadTape.setFocusable(false);
-        
-        setLayout(new BorderLayout());
-        
-        JPanel leftButtonPanel = new JPanel();
-        leftButtonPanel.setBackground(Color.WHITE);
-        leftButtonPanel.setLayout(new BorderLayout());
-        leftButtonPanel.setFocusable(false);
-        leftButtonPanel.add(m_BStart, BorderLayout.WEST);
-        leftButtonPanel.add(m_BLeft, BorderLayout.EAST);
-                
-        JPanel rightButtonPanel = new JPanel();
-        rightButtonPanel.setBackground(Color.WHITE);
-        rightButtonPanel.setLayout(new BorderLayout());
-        rightButtonPanel.setFocusable(false);
-        rightButtonPanel.add(m_BRight, BorderLayout.WEST);
-        rightButtonPanel.add(m_BClearTape, BorderLayout.EAST);
-        rightButtonPanel.add(m_BReloadTape, BorderLayout.CENTER);
-        
-        m_BStart.setAlignmentY(Component.TOP_ALIGNMENT);
-        m_BLeft.setAlignmentY(Component.TOP_ALIGNMENT);
-        m_BRight.setAlignmentY(Component.TOP_ALIGNMENT);
-        m_BClearTape.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        add(leftButtonPanel,BorderLayout.WEST);
-        add(m_tapeDP,BorderLayout.CENTER);
-        add(rightButtonPanel, BorderLayout.EAST);
-
-        m_BStart.setAction(headToStartAction);
-        m_BStart.setText("");
-        
         m_BLeft.addActionListener(new ActionListener() 
         {
              public void actionPerformed(ActionEvent e) 
@@ -140,7 +119,12 @@ public class TMTapeDisplayControllerPanel extends JPanel
                  catch (TapeBoundsException e1) { }
              }
         });
-        
+        m_BLeft.addMouseListener(onClick);
+
+        m_BRight = new JButton();
+        m_BRight.setFocusable(false);
+        m_BRight.setToolTipText("Move the read/write head to the right.");
+        m_BRight.setIcon(tapeRightIcon);
         m_BRight.addActionListener(new ActionListener()
         {    
              public void actionPerformed(ActionEvent e) 
@@ -150,13 +134,47 @@ public class TMTapeDisplayControllerPanel extends JPanel
                  repaint();
              }
         });
-        
+        m_BRight.addMouseListener(onClick);
+
+        m_BClearTape = new JButton();
+        m_BClearTape.setFocusable(false);
         m_BClearTape.setAction(eraseTapeAction);
         m_BClearTape.setText("");
+        m_BClearTape.addMouseListener(onClick);
+
+        m_BReloadTape = new JButton();
+        m_BReloadTape.setFocusable(false);
         m_BReloadTape.setAction(reloadAction);
         m_BReloadTape.setText("");
-    }
-    
+        m_BReloadTape.addMouseListener(onClick);
+
+        setLayout(new BorderLayout());
+        
+        JPanel leftButtonPanel = new JPanel();
+        leftButtonPanel.setBackground(Color.WHITE);
+        leftButtonPanel.setLayout(new BorderLayout());
+        leftButtonPanel.setFocusable(false);
+        leftButtonPanel.add(m_BStart, BorderLayout.WEST);
+        leftButtonPanel.add(m_BLeft, BorderLayout.EAST);
+
+        JPanel rightButtonPanel = new JPanel();
+        rightButtonPanel.setBackground(Color.WHITE);
+        rightButtonPanel.setLayout(new BorderLayout());
+        rightButtonPanel.setFocusable(false);
+        rightButtonPanel.add(m_BRight, BorderLayout.WEST);
+        rightButtonPanel.add(m_BClearTape, BorderLayout.EAST);
+        rightButtonPanel.add(m_BReloadTape, BorderLayout.CENTER);
+
+        m_BStart.setAlignmentY(Component.TOP_ALIGNMENT);
+        m_BLeft.setAlignmentY(Component.TOP_ALIGNMENT);
+        m_BRight.setAlignmentY(Component.TOP_ALIGNMENT);
+        m_BClearTape.setAlignmentY(Component.TOP_ALIGNMENT);
+
+        add(leftButtonPanel,BorderLayout.WEST);
+        add(m_tapeDP,BorderLayout.CENTER);
+        add(rightButtonPanel, BorderLayout.EAST);      
+   }
+
     /** 
      * Enable/disable user editing operations/buttons etc.
      * @param isEnabled true if editing is enabled, false otherwise.
@@ -202,190 +220,4 @@ public class TMTapeDisplayControllerPanel extends JPanel
      * Button for reloading the tape.
      */
     private JButton m_BReloadTape;
-}
-
-/**
- * Action for moving the read/write head to the start of the tape.
- */
-class HeadToStartAction extends AbstractAction
-{
-    /**
-     * Create a new instance of HeadToStartAction.
-     * @param text Description of the action.
-     * @param icon Icon for the action.
-     */
-    public HeadToStartAction(String text, Icon icon)
-    {
-        super(text);
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
-        putValue(Action.SMALL_ICON, icon);
-        putValue(Action.SHORT_DESCRIPTION, "Move the read/write head to the start of the tape.");
-    }
-
-    /**
-     * Move the read/write head to the leftmost end of the tape.
-     * @param e The generating event.
-     */
-    public void actionPerformed(ActionEvent e) 
-    {
-        // Move r/w head to the left end of the tape
-        m_tapeDP.getTape().resetRWHead();
-        m_tapeDCP.repaint();
-    }
-
-    /**
-     * Set the underlying tape display panel.
-     * @param tapeDP The new tape display panel.
-     */
-    public void setTapeDP(TMTapeDisplayPanel tapeDP)
-    {
-        m_tapeDP = tapeDP;
-    }
-
-    /**
-     * Set the underlying tape controller panel.
-     * @param tapeDCP The new tape controller panel.
-     */
-    public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-    {
-        m_tapeDCP = tapeDCP;
-    }
-
-    /**
-     * The underlying tape display panel.
-     */
-    private TMTapeDisplayPanel m_tapeDP;
-
-    /**
-     * The underlying tape controller panel.
-     */
-    private TMTapeDisplayControllerPanel m_tapeDCP;
-}
-
-/**
- * Action for erasing the tape.
- */
-class EraseTapeAction extends AbstractAction
-{
-    /**
-     * Create a new instance of EraseTapeAction.
-     * @param text Description of the action.
-     * @param icon Icon for the action.
-     */
-    public EraseTapeAction(String text, Icon icon)
-    {
-        super(text);
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK));
-        putValue(Action.SMALL_ICON, icon);
-        putValue(Action.SHORT_DESCRIPTION, "Erase the tape.");
-    }
-
-    /**
-     * Erase the tape.
-     * @param e The generating event.
-     */
-    public void actionPerformed(ActionEvent e) 
-    {
-        // Wipe the tape.
-        Object[] options = {"Ok", "Cancel"};
-        // TODO: should disable keyboard here
-        int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-        if (result == JOptionPane.YES_OPTION)
-        {
-            m_tapeDP.getTape().clearTape();
-            m_tapeDCP.repaint();
-        }
-    }
-
-    /**
-     * Set the underlying tape display panel.
-     * @param tapeDP The new tape display panel.
-     */
-    public void setTapeDP(TMTapeDisplayPanel tapeDP)
-    {
-        m_tapeDP = tapeDP;
-    }
-
-    /**
-     * Set the underlying tape controller panel.
-     * @param tapeDCP The new tape controller panel.
-     */
-    public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-    {
-        m_tapeDCP = tapeDCP;
-    }
-
-    /**
-     * The underlying tape display panel.
-     */
-    private TMTapeDisplayPanel m_tapeDP;
-
-    /**
-     * The underlying tape controller panel.
-     */
-    private TMTapeDisplayControllerPanel m_tapeDCP;
-}
-
-/**
- * Action for reloading the tape.
- */
-class ReloadTapeAction extends AbstractAction
-{
-    /**
-     * Create a new instance of HeadToStartAction.
-     * @param text Description of the action.
-     * @param icon Icon for the action.
-     */
-    public ReloadTapeAction(String text, Icon icon)
-    {
-        super(text);
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
-        putValue(Action.SMALL_ICON, icon);
-        putValue(Action.SHORT_DESCRIPTION, "Reload the tape from disk, discarding any changes since the last save.");
-    }
-
-    public void actionPerformed(ActionEvent e) 
-    {
-        // Wipe the tape.
-        Object[] options = {"Ok", "Cancel"};
-        // TODO: should disable keyboard here
-        int result = 0;
-        if (m_tapeDP.getFile() == null)
-            JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-        else
-            JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-        if (result == JOptionPane.YES_OPTION)
-        {
-            m_tapeDP.reloadTape();
-            m_tapeDCP.repaint();
-        }
-    }
-
-    /**
-     * Set the underlying tape display panel.
-     * @param tapeDP The new tape display panel.
-     */
-    public void setTapeDP(TMTapeDisplayPanel tapeDP)
-    {
-        m_tapeDP = tapeDP;
-    }
-
-    /**
-     * Set the underlying tape controller panel.
-     * @param tapeDCP The new tape controller panel.
-     */
-    public void setTapeDCP(TMTapeDisplayControllerPanel tapeDCP)
-    {
-        m_tapeDCP = tapeDCP;
-    }
-
-    /**
-     * The underlying tape display panel.
-     */
-    private TMTapeDisplayPanel m_tapeDP;
-
-    /**
-     * The underlying tape controller panel.
-     */
-    private TMTapeDisplayControllerPanel m_tapeDCP;
 }

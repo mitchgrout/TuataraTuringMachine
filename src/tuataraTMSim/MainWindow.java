@@ -179,7 +179,21 @@ public class MainWindow extends JFrame
     public MainWindow()
     {
         initComponents();
-        
+       
+        // Whenever a mouse click occurs, deselect the selected action. If the action was clicked on
+        // again, it will regain focus.
+        addMouseListener(new MouseAdapter()
+        {
+            public void mousePressed(MouseEvent e)
+            {
+                TMGraphicsPanel gfx = getSelectedGraphicsPanel();
+                if (gfx != null);
+                {
+                    gfx.deselectSymbol();
+                }
+            }
+        });
+
         // Handle global keyboard input
         final KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         
@@ -1467,7 +1481,7 @@ public class MainWindow extends JFrame
      * Gets the graphics panel for the currently selected machine diagram window.
      * @return A reference to the currently selected graphics panel, or null if there is no such panel.
      */
-    private TMGraphicsPanel getSelectedGraphicsPanel()
+    public TMGraphicsPanel getSelectedGraphicsPanel()
     {
         if (m_desktopPane == null)
         {
