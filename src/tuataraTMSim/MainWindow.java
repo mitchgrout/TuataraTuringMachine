@@ -857,21 +857,28 @@ public class MainWindow extends JFrame
             {
                 name = name.substring(2);
             }
-            int result = JOptionPane.showConfirmDialog(null,"The machine '" + name + "' is unsaved.  Do you wish to save it?", "Closing window",JOptionPane.YES_NO_CANCEL_OPTION);
+            
+            int result = JOptionPane.showConfirmDialog(null, 
+                    String.format("The machine '%s' is unsaved. Do you wish to save it?", name),
+                    "Closing window", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
                 TMachine machine = gfxPanel.getSimulator().getMachine();
                 File outFile = gfxPanel.getFile();
                 boolean saveSuccessful = false;
-                if (outFile != null)
+                if (outFile == null)
                 {
-                    saveSuccessful = TMachine.saveTMachine(machine, outFile.toString());
+                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    if (outFile == null)
+                    {
+                        // Cancelled by user
+                        m_console.log("Cancelled saving machine");
+                        return false;
+                    }
                 }
-                else
-                {
-                    saveSuccessful = saveMachineAs(gfxPanel);
-                }
-                if (saveSuccessful)
+
+                saveSuccessful = TMachine.saveTMachine(machine, outFile.toString());
+                if (TMachine.saveTMachine(machine, outFile.toString()))
                 {
                     iFrame.dispose();
                     return true;
@@ -1170,12 +1177,14 @@ public class MainWindow extends JFrame
      */
     public boolean saveMachineAs(TMGraphicsPanel panel)
     {
+        File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
         try
         {
-            File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
+            outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
             if (outFile == null)
             {
-                // User cancelled
+                // Cancelled by user 
+                m_console.log("Cancelled saving machine");
                 return false;
             }
             TMachine machine = panel.getSimulator().getMachine();
@@ -1193,7 +1202,9 @@ public class MainWindow extends JFrame
         } 
         catch (Exception e2)
         {
-            JOptionPane.showMessageDialog(MainWindow.this, "An error occurred while saving your file.");
+            JOptionPane.showMessageDialog(MainWindow.this, 
+                    String.format("Error saving machine to %s", outFile.toString()));
+            
             return false;
         }
     }
@@ -1542,6 +1553,7 @@ public class MainWindow extends JFrame
             if (inFile == null)
             {
                 // Cancelled by user
+                m_console.log("Cancelled loading machine");
                 return;
             }
             try
@@ -1553,6 +1565,7 @@ public class MainWindow extends JFrame
                 }
                 JInternalFrame iFrame = newMachineWindow(machine, inFile);
                 m_desktopPane.add(iFrame);
+                m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
                 try
                 {
                     iFrame.setSelected(true);
@@ -1562,7 +1575,9 @@ public class MainWindow extends JFrame
             catch (Exception e2)
             {
                 JOptionPane.showMessageDialog(MainWindow.this, 
-                        String.format("Error opening file '%s'", inFile.toString()));
+                        String.format("Error opening machine file %s", inFile.toString()));
+                m_console.log(String.format("Encountered an error when loading the machine %s: %s", 
+                            inFile.toString(), e2.getMessage()));
             }
         }
     }
@@ -1599,6 +1614,8 @@ public class MainWindow extends JFrame
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel == null)
             {
+                // Whatever we are looking at isn't a TMGraphicsPanel
+                m_console.log("Current window is not a graphics panel; cannot save");
                 return;
             }
 
@@ -1608,25 +1625,32 @@ public class MainWindow extends JFrame
             {
                 if (m_force || outFile == null)
                 {
-                    saveMachineAs(panel);
+                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    if (outFile == null)
+                    {
+                        // Cancelled by user 
+                        m_console.log("Cancelled saving machine");
+                        return;
+                    }
+                }
+                
+                if (!TMachine.saveTMachine(machine, outFile.toString()))
+                {
+                    throw new IOException(outFile.toString());
                 }
                 else
                 {
-                    boolean result = TMachine.saveTMachine(machine, outFile.toString());
-                    if (result == false)
-                    {
-                        throw new IOException(outFile.toString());
-                    }
-                    else
-                    {
-                        panel.setModifiedSinceSave(false);
-                    }
+                    panel.setModifiedSinceSave(false);
+                    panel.setFile(outFile);
                 }
+                m_console.log(String.format("Successfully saved machine %s", outFile.toString()));
             }
             catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
-            }
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        String.format("Error saving machine to %s", outFile.toString()));
+                m_console.log(String.format("Encountered an error when saving the machine to %s: %s",
+                            outFile.toString(), e2.getMessage())); }
         }
 
         /**
@@ -1705,6 +1729,7 @@ public class MainWindow extends JFrame
             if (inFile == null)
             {
                 // Cancelled by user
+                m_console.log("Cancelled loading tape");
                 return;
             }
             
@@ -1722,7 +1747,9 @@ public class MainWindow extends JFrame
             catch (Exception e2)
             {
                 JOptionPane.showMessageDialog(MainWindow.this, 
-                        String.format("Error opening file '%s'", inFile.toString()));
+                        String.format("Error opening tape file %s", inFile.toString()));
+                m_console.log(String.format("Encountered an error when load the tape %s: %s",
+                            inFile.toString(), e2.getMessage()));
             }
         }
     }
@@ -1766,28 +1793,25 @@ public class MainWindow extends JFrame
                     outFile = chooseSaveFile(fcTape, "Save Tape", TAPE_EXTENSION);
                     if (outFile == null)
                     {
-                        // User cancelled
+                        // Cancelled by user 
+                        m_console.log("Cancelled saving tape");
                         return;
                     }
-                    boolean result = Tape.saveTape(tapeDisp.getTape(), outFile.toString());
-                    if (result == false)
-                    {
-                        throw new IOException(outFile.toString());
-                    }
-                    tapeDisp.setFile(outFile);
                 }
-                else
+                
+                if (!Tape.saveTape(tapeDisp.getTape(), outFile.toString()))
                 {
-                    boolean result = Tape.saveTape(tape, outFile.toString());
-                    if (result == false)
-                    {
-                        throw new IOException(outFile.toString());
-                    }
+                    throw new IOException(outFile.toString());
                 }
+                tapeDisp.setFile(outFile);
+                m_console.log(String.format("Successfully saved tape to %s", outFile.toString()));
             }
             catch (Exception e2)
             {
-                JOptionPane.showMessageDialog(MainWindow.this, "An error has occured while saving; your file has not been saved.\n" + e2.getMessage());
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        String.format("Error saving tape to %s", outFile.toString()));
+                m_console.log(String.format("Encountered an error when saving the tape to %s: %s",
+                            outFile.toString(), e2.getMessage()));
             }
         }
 
@@ -1918,8 +1942,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            m_copyAction.actionPerformed(e);
-            
+            m_copyAction.actionPerformed(e); 
             TMGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
@@ -2299,6 +2322,7 @@ public class MainWindow extends JFrame
                 {
                     gfxPanel.getSimulator().resetMachine();
                     gfxPanel.repaint();
+                    m_console.log("Stopped machine");
                 }
             }
             updateUndoActions();
@@ -2407,6 +2431,8 @@ public class MainWindow extends JFrame
             {
                 tapeDisp.reloadTape();
                 tapeDispController.repaint();
+                m_console.log(String.format("Reloaded tape from file %s", 
+                            tapeDisp.getFile().toString()));
             }
         }
     }
@@ -2970,7 +2996,7 @@ public class MainWindow extends JFrame
     /**
      * Action for displaying the shared console.
      */
-    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("emptyIcon.gif"));
+    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
 
     /**
      * Action for displaying help documentation.
