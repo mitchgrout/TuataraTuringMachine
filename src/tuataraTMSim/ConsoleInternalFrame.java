@@ -133,15 +133,13 @@ public class ConsoleInternalFrame extends JInternalFrame
 
     /**
      * Log text to the console. Forces text to appear on a new line.
-     * @param panel The panel logging the text.
      * @param s The string to be logged.
      */
-    public void log(TMGraphicsPanel panel, String s)
+    public void log(String s)
     {
-        // Finish any partial messages; log, and then finish the partial message again.
+        // Finish any partial messages, then log
         endPartial();
-        logPartial(panel, s);
-        endPartial();
+        m_text.append(String.format("[%s] %s\n", timestamp(), s));
     }
 
     /**
