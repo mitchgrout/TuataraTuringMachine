@@ -25,9 +25,9 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A collection of methods which may be used by internally by various commands. 
@@ -40,7 +40,7 @@ abstract class CommandUtils
      * @param panel The current graphics panel.
      * @param s The state to remove.
      */
-    public static void deleteState(TMGraphicsPanel panel, TM_State s)
+    public static void deleteState(MachineGraphicsPanel panel, State s)
     {
         panel.getSimulator().getMachine().deleteState(s);
         panel.removeLabelFromDictionary(s.getLabel());
@@ -50,10 +50,6 @@ abstract class CommandUtils
         {
             panel.getSimulator().resetMachine();
         }
-        else
-        {
-            panel.getSimulator().computeNextTransition();
-        }
     }
 
     /**
@@ -61,13 +57,12 @@ abstract class CommandUtils
      * @param panel The current graphics panel.
      * @param t The transition to remove.
      */
-    public static void deleteTransition(TMGraphicsPanel panel, TM_Transition t)
+    public static void deleteTransition(MachineGraphicsPanel panel, Transition t)
     {
         panel.getSimulator().getMachine().deleteTransition(t);
         if(panel.getSelectedTransition() == t)
         {
             panel.deselectSymbol();
         }
-        panel.getSimulator().computeNextTransition();
     }
 }

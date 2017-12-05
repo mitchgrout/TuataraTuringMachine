@@ -23,7 +23,7 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.TM;
+package tuataraTMSim.machine.TM;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.*;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.machine.*;
 import tuataraTMSim.NamingScheme;
 import tuataraTMSim.TMGraphicsPanel;
 
@@ -50,14 +51,9 @@ import tuataraTMSim.TMGraphicsPanel;
  * - d(qf, x) is undefined for all x in X
  * @author Jimmy
  */
-public class TMachine implements Serializable
+public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Simulator>
+    implements Serializable
 {
-    /**
-     * Does not match any symbols; instead, this is used to indicate that a transition has not yet
-     * been assigned a value.
-     */
-    public static final char UNDEFINED_SYMBOL = '!';
-
     /**
      * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
      */
@@ -76,9 +72,9 @@ public class TMachine implements Serializable
      */
     public TMachine(ArrayList<TM_State> states, ArrayList<TM_Transition> transitions, Alphabet alphabet)
     {
+        super(alphabet);
         m_states = states;
         m_transitions = transitions;
-        m_alphabet = alphabet;
         m_validated = false;
     }
     
@@ -88,17 +84,6 @@ public class TMachine implements Serializable
     public TMachine()
     {
         this(new ArrayList<TM_State>(), new ArrayList<TM_Transition>(), new Alphabet());
-    }
-
-    /**
-     * Change the state of this TMachine to invalid. This means that the next call to validate()
-     * will force the entire check to be performed, instead of being predicated on m_validated.
-     * This should be called outside this class when one of the underlying states is toggled to be a
-     * start state or accepting state.
-     */
-    public void invalidate()
-    {
-        m_validated = false;
     }
 
     /**
@@ -226,6 +211,17 @@ public class TMachine implements Serializable
         m_validated = true;
     }
 
+    /**
+     * Change the state of this TMachine to invalid. This means that the next call to validate()
+     * will force the entire check to be performed, instead of being predicated on m_validated.
+     * This should be called outside this class when one of the underlying states is toggled to be a
+     * start state or accepting state.
+     */
+    public void invalidate()
+    {
+        m_validated = false;
+    }
+
     /** 
      * Given the current execution state and tape, perform the current action, and update the state.
      * @param tape The current tape.
@@ -240,30 +236,33 @@ public class TMachine implements Serializable
     public TM_State step(Tape tape, TM_State currentState, TM_Transition currentNextTransition)
         throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException
     {
+        TM_State tmState = (TM_State)currentState;
+        TM_Transition tmTrans = (TM_Transition)currentNextTransition;
+
         // TODO: Remove currentNextTransition, as we can figure it out deterministically.
 
         // TODO: handle submachines
         char currentChar = tape.read();
-        ArrayList<TM_Transition> currentTransitions = currentState.getTransitions();
+        ArrayList<TM_Transition> currentTransitions = tmState.getTransitions();
 
-        if (currentNextTransition != null)
+        if (tmTrans != null)
         {
             // Sanity check
-            if (currentState.getTransitions().contains(currentNextTransition))
+            if (tmState.getTransitions().contains(tmTrans))
             {
-                currentNextTransition.getAction().performAction(tape);
-                return currentNextTransition.getToState();
+                tmTrans.getAction().performAction(tape);
+                return tmTrans.getToState();
             }
         }
 
         // Halted
-        if (tape.isParked() && currentState.isFinalState())
+        if (tape.isParked() && tmState.isFinalState())
         {
             throw new ComputationCompletedException();
         }
 
         String message = "";
-        if (!tape.isParked() && !currentState.isFinalState())
+        if (!tape.isParked() && !tmState.isFinalState())
         {
             message = "The r/w head was not parked, and the last state was not an accepting state.";
         }
@@ -279,25 +278,6 @@ public class TMachine implements Serializable
     }
 
     /**
-     *  Get the naming scheme for this machine.
-     *  @return The naming scheme for this machine.
-     */
-    public NamingScheme getNamingScheme()
-    {
-        return m_scheme;
-    }
-
-    /**
-     * Se the naming scheme for this machine.
-     * May cause a rename of all existing states.
-     * @param scheme The new naming scheme to use.
-     */
-    public void setNamingScheme(NamingScheme scheme)
-    {
-        m_scheme = scheme;
-    }
-
-    /**
      * Return a collection containing all states in this machine.
      * @return A collection of all states in this machine.
      */
@@ -306,8 +286,17 @@ public class TMachine implements Serializable
         return m_states;
     }
 
+    /**
+     * Return a collection containing all transitions in this machine.
+     * @return A collection of all transitions in this machine.
+     */
+    public ArrayList<TM_Transition> getTransitions()
+    {
+        return m_transitions;
+    }
+
     /** 
-     * Get the start state. Assumes that validate() has been called.
+     * Get the unique start state. 
      * @return The unique start state of the machine.
      */
     public TM_State getStartState()
@@ -319,27 +308,24 @@ public class TMachine implements Serializable
                 return st;
             }
         }
-
-        // Can never reach this code due to validate() ensuring a unique start state
         return null;
     }
     
     /**
-     * Get the final state. Assumes that validate() has been called.
-     * @return The unique final state of the machine.
+     * Get a set containing all final states.
+     * @return A non-null collection of all final states in this machine.
      */
-    public TM_State getFinalState()
+    public HashSet<TM_State> getFinalStates()
     {
-        for (TM_State st : m_states)
+        HashSet<TM_State> result = new HashSet<TM_State>();
+        for (TM_State s : m_states)
         {
-            if(st.isFinalState())
+            if(s.isFinalState())
             {
-                return st;
+                result.add(s);
             }
         }
-
-        // Can never reach this code due to validate() ensuring a unique final state
-        return null;
+        return result;
     }
     
     /**
@@ -350,7 +336,7 @@ public class TMachine implements Serializable
     {
         // Adding a new state potentially makes our machine invalid.
         invalidate();
-        
+         
         m_states.add(state);
     }
     
@@ -409,7 +395,7 @@ public class TMachine implements Serializable
      * Removes all transitions associated with a state.
      * @param state The state which removed transitions are connected to, either incoming or outgoing.
      */
-    private void removeTransitionsConnectedTo(TM_State state)
+    protected void removeTransitionsConnectedTo(TM_State state)
     {
         // Removing transitions from a valid machine preserves validity;
         // invalidation is not necessary.
@@ -424,185 +410,6 @@ public class TMachine implements Serializable
             }
         }
     }
-    
-    /** 
-     * Serialize a machine, and write it to persistent storage.
-     * @param machine The machine to serialize.
-     * @param file The filename to write to.
-     * @return true if the serialization and write was successful, false otherwise.
-     */
-    public static boolean saveTMachine(TMachine machine, String file)
-    {
-        FileOutputStream fos = null;
-        ObjectOutputStream out = null;
-        try
-        {
-           fos = new FileOutputStream(file);
-           out = new ObjectOutputStream(fos);
-           out.writeObject(machine);
-           out.close();
-        }
-        catch(IOException ex)
-        {
-           ex.printStackTrace();
-           return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Load and deserialize a machine from persistent storage.
-     * @param file The filename where the machine was serialized and written to.
-     * @return The deserialized machine, or null if the machine was not successfully loaded.
-     */
-    public static TMachine loadTMachine(String file)
-    {
-        FileInputStream fis = null;
-        ObjectInputStream in = null;
-        TMachine returner = null;
-        try
-        {
-            fis = new FileInputStream(file);
-            in = new ObjectInputStream(fis);
-            returner = (TMachine)in.readObject();
-            in.close();
-        }
-        catch(IOException ex)
-        {
-            ex.printStackTrace();
-        }
-        catch(ClassNotFoundException ex)
-        {
-            ex.printStackTrace();
-        } 
-        return returner;
-   }
-    
-    /** 
-     * Render the machine to a graphics object.
-     * @param g The graphics object to render to.
-     * @param selectedStates The set of states which are selected by the user.
-     * @param selectedTransitions The set of transitions which are selected by the user.
-     * @param simulator The current machine simulator.
-     */
-    public void paint(Graphics g, Collection<TM_State> selectedStates,
-            Collection<TM_Transition> selectedTransitions, TM_Simulator simulator)
-    {
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.setColor(Color.BLUE);
-        
-        for (TM_Transition tr : m_transitions)
-        {
-            tr.paint(g, selectedTransitions, simulator);
-        }
-        
-        for (TM_State state : m_states)
-        {
-            state.paint(g, selectedStates);
-        }
-    }
-   
-    /**
-     * Determine if there is a state at the given coordinates.
-     * @param clickX The X ordinate.
-     * @param clickY The Y ordinate.
-     * @return The topmost state at the given coordinates, or null if there is no such state.
-     */
-    public TM_State getStateClickedOn(int clickX, int clickY)
-    {
-        TM_State returner = null;
-        
-        // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
-        for (TM_State state : m_states)
-        {
-            if (state.containsPoint(clickX, clickY))
-            {
-                returner = state;
-            }
-        }
-        return returner;
-    }
-    
-    /**
-     * Determine if there is a state label at the given coordinates.
-     * @param g The graphics object, used to measure the label's dimensions.
-     * @param clickX The X ordinate.
-     * @param clickY The Y ordinate.
-     * @return The topmost state at the given coordinates, or null if there is no such state.
-     */
-    public TM_State getStateNameClickedOn(Graphics g, int clickX, int clickY)
-    {
-        TM_State returner = null;
-        
-        // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
-        for (TM_State state : m_states)
-        {
-            if (state.nameContainsPoint(g, clickX, clickY))
-            {
-                returner = state;
-            }
-        }
-        return returner;
-    }
-   
-    /**
-     * Determine if there is a transition a the given coordinates.
-     * @param clickX The X ordinate.
-     * @param clickY The Y ordinate.
-     * @param g The graphics object, used to measure the transition's dimensions.
-     * @return The topmost transition at the given coordinates, or null if there is no such transition.
-     */
-    public TM_Transition getTransitionClickedOn(int clickX, int clickY, Graphics g)
-    {
-        TM_Transition returner = null;
-        
-        // Gets the last one, which should also be the last drawn one, i.e. the topmost state.
-        for (TM_Transition transition : m_transitions)
-        {
-            if (transition.actionContainsPoint(clickX, clickY, g))
-            {
-                returner = transition;
-            }
-            if (transition.arrowContainsPoint(clickX, clickY, g))
-            {
-                returner = transition;
-            }
-        }
-        return returner;
-    }
-    
-    /**
-     * Create a hashtable, mapping every state label to itself.
-     * @return A hashtable containing every state label, mapped to itself.
-     */
-    public Hashtable<String, String> createLabelsHashtable()
-    {
-        Hashtable<String, String> returner = new Hashtable<String, String>();
-        for (TM_State state : m_states)
-        {
-            String label = state.getLabel();
-            returner.put(label, label);
-        }
-        return returner;
-    }
-   
-    /**
-     * Get the alphabet associated with this machine.
-     * @return The alphabet associated with this machine.
-     */
-    public Alphabet getAlphabet()
-    {
-        return m_alphabet;
-    }
-    
-    /**
-     * Set the alphabet associated with this machine.
-     * @param alphabet The new alphabet associated with this machine.
-     */
-    public void setAlphabet(Alphabet alphabet)
-    {
-        m_alphabet = alphabet;
-    }
    
     /**
      * Determine whether a given action is consistent with an alphabet.
@@ -612,7 +419,7 @@ public class TMachine implements Serializable
      *         input or output which is not present in the alphabet and is not a special character,
      *         false otherwise.
      */
-    private boolean isConsistentWithAlphabet(TM_Action act, Alphabet alph)
+    protected boolean isConsistentWithAlphabet(TM_Action act, Alphabet alph)
     {
         char inp = act.getInputChar();
         char out = act.getOutputChar();
@@ -636,153 +443,19 @@ public class TMachine implements Serializable
         return true;
     }
 
-    /** 
-     * Determine if this machine is consistent with the alphabet, i.e. does not have any transitions
-     * with inputs not present in the alphabet.
-     * @param a The alphabet to check consistency with.
-     * @return true if there are no transitions with symbols not in the alphabet, false otherwise.
-     */
-    public boolean isConsistentWithAlphabet(Alphabet a)
-    {
-        for (TM_Transition t: m_transitions)
-        {
-            TM_Action act = t.getAction();
-            if(!isConsistentWithAlphabet(act, a))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-   
-    /**
-     * Determine all transitions which are deemed inconsistent with this machine's alphabet.
-     * @return A collection of transitions which are inconsistent with the alphabet.
-     */
-    public ArrayList<TM_Transition> getInconsistentTransitions()
-    {
-        ArrayList<TM_Transition> purge = new ArrayList<TM_Transition>();
-        for (TM_Transition t: m_transitions)
-        {
-            TM_Action act = t.getAction();
-            if(!isConsistentWithAlphabet(act, m_alphabet))
-            {
-                purge.add(t);
-            }
-        }
-        return purge;
-    }
-
-    /** 
-     * Finds the transitions whose 'to' state is the given state.
-     * A new ArrayList will be generated each time this is called.
-     * The running time complexity is O(m), where m is the number of transitions in the machine.
-     * @param state The state which transitions are connected to.
-     * @return An array list of transitions connected to the specified state.
-     */
-    public ArrayList<TM_Transition> getTransitionsTo(TM_State state)
-    {
-        ArrayList<TM_Transition> returner = new ArrayList<TM_Transition>();
-        for (TM_Transition t: m_transitions)
-        {
-            if (t.getToState() == state)
-            {
-                returner.add(t);
-            }
-        }
-        return returner;
-    }
-    
-    /**
-     * Returns a set of states that are at least partially contained within the specified selection
-     * rectangle.
-     * @param topLeftX The top-left X ordinate of the selection rectangle.
-     * @param topLeftY The top-left Y ordinate of the selection rectagnle.
-     * @param width A non-negative integer, representing the width of the selection rectangle.
-     * @param height A non-negative integer, representing the height of the selection rectangle.
-     * @return The set of states contained within the specified selection rectangle.
-     */
-    public HashSet<TM_State> getSelectedStates(int topLeftX, int topLeftY, int width, int height)
-    {
-        HashSet<TM_State> returner = new HashSet<TM_State>();
-        Rectangle2D container = new Rectangle2D.Float(topLeftX - TM_State.STATE_RENDERING_WIDTH,
-                topLeftY - TM_State.STATE_RENDERING_WIDTH, width + TM_State.STATE_RENDERING_WIDTH,
-                height+ TM_State.STATE_RENDERING_WIDTH);
-        
-        for (TM_State t : m_states)
-        {
-            if (container.contains(t.getX(), t.getY()))
-            {
-                returner.add(t);
-            }
-        }
-        return returner;
-    }
-    
-    /** 
-     * Returns the set of transitions which are connected only to states within selectedStates.
-     * @param selectedStates The set of states to check.
-     * @return A set of transitions, such that every transition is connected to exactly two states
-     *         from selectedStates.
-     */
-    public HashSet<TM_Transition> getSelectedTransitions(HashSet<TM_State> selectedStates)
-    {
-        HashSet<TM_Transition> returner = new HashSet<TM_Transition>();
-        for (TM_Transition t: m_transitions)
-        {
-            if (selectedStates.contains(t.getFromState()) && selectedStates.contains(t.getToState()))
-            {
-                returner.add(t);
-            }
-        }
-        return returner;
-    }
-    
-    /** 
-     * Returns the set of transitions which are connected only at one end to states within
-     * selectedStates. These transitions would not be copied but would be deleted during a cut or
-     * delete selected operation, and need to be replaced when a delete operation is undone.
-     * @param selectedStates The set of states to check.
-     * @return A set of transitions, such that every transition is connected to at least one state
-     *         from selectedStates
-     */
-    public HashSet<TM_Transition> getHalfSelectedTransitions(Collection<TM_State> selectedStates)
-    {
-        HashSet<TM_Transition> returner = new HashSet<TM_Transition>();
-        for (TM_Transition t: m_transitions)
-        {
-            if ((selectedStates.contains(t.getFromState()) && !selectedStates.contains(t.getToState())) ||
-                (!selectedStates.contains(t.getFromState()) && selectedStates.contains(t.getToState())))
-            {
-                returner.add(t);
-            }
-        }
-        return returner;
-    }
-   
     /**
      * The set of states in the machine.
      */
-    private ArrayList<TM_State> m_states;
+    protected ArrayList<TM_State> m_states;
     
     /**
      * The set of transitions in the machine.
      */
-    private ArrayList<TM_Transition> m_transitions;
-
-    /**
-     * The alphabet for the machine.
-     */
-    private Alphabet m_alphabet;
-
-    /**
-     * The naming scheme to use.
-     */
-    private NamingScheme m_scheme = NamingScheme.GENERAL;
+    protected ArrayList<TM_Transition> m_transitions;
 
     /**
      * Determine if this machine has been deemed valid or not.  Will be set to true after successful
      * calls to validate(), and set to false after mutations have occured to the machine.
      */
-    private transient boolean m_validated = false;
+    protected transient boolean m_validated = false;
 }

@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with deleting a transition from a machine.
@@ -39,7 +39,7 @@ public class DeleteTransitionCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param transition The transition to delete.
      */
-    public DeleteTransitionCommand(TMGraphicsPanel panel, TM_Transition transition)
+    public DeleteTransitionCommand(MachineGraphicsPanel panel, Transition transition)
     {
         m_panel = panel;
         m_transition = transition;
@@ -56,7 +56,6 @@ public class DeleteTransitionCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -68,7 +67,6 @@ public class DeleteTransitionCommand implements TMCommand
         m_panel.getSimulator().getMachine().addTransition(m_transition);
         // if (selectedStates.contains(mousePressedState) && selectedStates.contains(mouseReleasedState))
         //     selectedTransitions.add(t);
-        m_panel.getSimulator().computeNextTransition();
     }
    
     /**
@@ -83,10 +81,10 @@ public class DeleteTransitionCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * The transition to delete.
      */
-    private TM_Transition m_transition;
+    private Transition m_transition;
 }

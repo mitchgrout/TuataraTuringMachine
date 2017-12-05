@@ -26,9 +26,9 @@
 package tuataraTMSim.commands;
 
 import java.util.HashSet;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with pasting states and transitions into a machine.
@@ -42,8 +42,8 @@ public class PasteCommand implements TMCommand
      * @param selectedStates A copy of the set of states to paste.
      * @param selectedTransitions A copy of the set of transitions to paste.
      */
-    public PasteCommand(TMGraphicsPanel panel, HashSet<TM_State> selectedStates,
-                        HashSet<TM_Transition> selectedTransitions)
+    public PasteCommand(MachineGraphicsPanel panel, HashSet<? extends State> selectedStates,
+                        HashSet<? extends Transition> selectedTransitions)
     {
         m_panel = panel;
         m_selectedStates = selectedStates;
@@ -55,7 +55,7 @@ public class PasteCommand implements TMCommand
      */
     public void doCommand()
     {
-        for (TM_State s : m_selectedStates)
+        for (State s : m_selectedStates)
         {
             if (m_panel.dictionaryContainsName(s.getLabel()))
             {
@@ -67,13 +67,13 @@ public class PasteCommand implements TMCommand
             m_panel.getSimulator().getMachine().addState(s);
         }
 
-        for (TM_Transition t : m_selectedTransitions)
+        for (Transition t : m_selectedTransitions)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
         }
 
-        m_panel.setSelectedStates((HashSet<TM_State>)m_selectedStates.clone());
-        m_panel.setSelectedTransitions((HashSet<TM_Transition>)m_selectedTransitions.clone());
+        m_panel.setSelectedStates((HashSet<State>)m_selectedStates.clone());
+        m_panel.setSelectedTransitions((HashSet<Transition>)m_selectedTransitions.clone());
     }
     
     /**
@@ -81,18 +81,18 @@ public class PasteCommand implements TMCommand
      */
     public void undoCommand()
     {
-        for (TM_State s : m_selectedStates)
+        for (State s : m_selectedStates)
         {
             CommandUtils.deleteState(m_panel, s);
         }
         
-        for (TM_Transition t : m_selectedTransitions)
+        for (Transition t : m_selectedTransitions)
         {
             CommandUtils.deleteTransition(m_panel, t);
         }
         
-        m_panel.setSelectedStates(new HashSet<TM_State>()); // TODO: is this what should happen?
-        m_panel.setSelectedTransitions(new HashSet<TM_Transition>());
+        m_panel.setSelectedStates(new HashSet<State>()); // TODO: is this what should happen?
+        m_panel.setSelectedTransitions(new HashSet<Transition>());
     }
     
     /**
@@ -107,15 +107,15 @@ public class PasteCommand implements TMCommand
     /**
      * The current graphics panel
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The set of states to paste.
      */
-    private HashSet<TM_State> m_selectedStates;
+    private HashSet<? extends State> m_selectedStates;
 
     /**
      * The set of transitions to paste.
      */
-    private HashSet<TM_Transition> m_selectedTransitions;
+    private HashSet<? extends Transition> m_selectedTransitions;
 }

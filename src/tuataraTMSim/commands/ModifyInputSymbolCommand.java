@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with changing the input symbol of a transition.
@@ -40,7 +40,7 @@ public class ModifyInputSymbolCommand implements TMCommand
      * @param transition The transition to modify.
      * @param symbol The new input symbol for the transition.
      */
-    public ModifyInputSymbolCommand(TMGraphicsPanel panel, TM_Transition transition, char symbol)
+    public ModifyInputSymbolCommand(MachineGraphicsPanel panel, Transition transition, char symbol)
     {
         m_panel = panel;
         m_transition = transition;
@@ -54,7 +54,6 @@ public class ModifyInputSymbolCommand implements TMCommand
     public void doCommand()
     {
         m_transition.getAction().setInputChar(m_symbol);
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -63,7 +62,6 @@ public class ModifyInputSymbolCommand implements TMCommand
     public void undoCommand()
     {
         m_transition.getAction().setInputChar(m_oldSymbol);
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -78,12 +76,12 @@ public class ModifyInputSymbolCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The transition to modify.
      */
-    private TM_Transition m_transition;
+    private Transition m_transition;
     
     /**
      * The new input symbol for m_transition.

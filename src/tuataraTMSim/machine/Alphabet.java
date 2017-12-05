@@ -23,9 +23,10 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.TM;
+package tuataraTMSim.machine;
 
 import java.io.Serializable;
+import tuataraTMSim.machine.TM.TMachine; // !!!
 
 /**
  * Represents a collection of symbols which can appear on a Tape.

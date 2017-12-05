@@ -29,7 +29,7 @@ package tuataraTMSim;
  * An enumeration representing the different user interaction modes that the GUI can be in.
  * @author Jimmy
  */
-public enum TM_GUI_Mode
+public enum GUI_Mode
 { 
     /**
      * Add states to the machine.

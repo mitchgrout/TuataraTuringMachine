@@ -25,9 +25,9 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_Action;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.PreAction;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with changing the action of a transition.
@@ -41,8 +41,8 @@ public class ModifyTransitionActionCommand implements TMCommand
      * @param transition The transition to modify
      * @param action The new action for the transition.
      */
-    public ModifyTransitionActionCommand(TMGraphicsPanel panel, TM_Transition transition,
-                                         TM_Action action)
+    public ModifyTransitionActionCommand(MachineGraphicsPanel panel, Transition transition,
+                                         PreAction action)
     {
         m_panel = panel;
         m_transition = transition;
@@ -78,20 +78,20 @@ public class ModifyTransitionActionCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The transition to modify.
      */
-    private TM_Transition m_transition;
+    private Transition m_transition;
     
     /**
      * The new action for m_transition.
      */
-    private TM_Action m_action;
+    private PreAction m_action;
     
     /**
      * The old action for m_transition.
      */
-    private TM_Action m_oldAction;   
+    private PreAction m_oldAction;   
 }

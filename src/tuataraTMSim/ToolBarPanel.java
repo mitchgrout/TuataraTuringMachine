@@ -38,7 +38,8 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.MouseInputAdapter;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
-import tuataraTMSim.TM.*;
+import tuataraTMSim.machine.*;
+import tuataraTMSim.machine.TM.*;
 
 /**
  * A tool bar component.

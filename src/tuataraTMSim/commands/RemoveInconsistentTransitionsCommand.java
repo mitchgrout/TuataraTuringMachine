@@ -27,8 +27,8 @@ package tuataraTMSim.commands;
 
 import java.util.Collection;
 import java.util.HashSet;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with a set of transitions which are deemed inconsistent with the alphabet.
@@ -41,7 +41,7 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param purge The set of transitions to remove.
      */
-    public RemoveInconsistentTransitionsCommand(TMGraphicsPanel panel, Collection<TM_Transition> purge)
+    public RemoveInconsistentTransitionsCommand(MachineGraphicsPanel panel, Collection<? extends Transition> purge)
     {
         m_panel = panel;
         m_purge = purge;
@@ -52,7 +52,7 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
      */
     public void doCommand()
     {
-        for (TM_Transition t : m_purge)
+        for (Transition t : m_purge)
         {
             CommandUtils.deleteTransition(m_panel, t);
         }
@@ -63,11 +63,10 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
      */
     public void undoCommand()
     {
-        for (TM_Transition t : m_purge)
+        for (Transition t : m_purge)
         {
             m_panel.getSimulator().getMachine().addTransition(t);
         }
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -82,10 +81,10 @@ public class RemoveInconsistentTransitionsCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The set of transitions to remove.
      */
-    private Collection<TM_Transition> m_purge;   
+    private Collection<? extends Transition> m_purge;   
 }

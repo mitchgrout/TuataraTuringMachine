@@ -28,9 +28,9 @@ package tuataraTMSim.commands;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import tuataraTMSim.Spline;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with moving a set of states and transitions.
@@ -46,8 +46,8 @@ public class MoveSelectedCommand implements TMCommand
      * @param moveX The change in X position.
      * @param moveY The change in Y position.
      */
-    public MoveSelectedCommand(TMGraphicsPanel panel, Collection<TM_State> states,
-                               Collection<TM_Transition> transitions, int moveX, int moveY)
+    public MoveSelectedCommand(MachineGraphicsPanel panel, Collection<State> states,
+                               Collection<Transition> transitions, int moveX, int moveY)
     {
         m_panel = panel;
         m_states = states;
@@ -63,7 +63,7 @@ public class MoveSelectedCommand implements TMCommand
      */
     public void doCommand()
     {
-        for (TM_State s : m_states)
+        for (State s : m_states)
         {
             s.setPosition(s.getX() + m_moveX, s.getY() + m_moveY);
         }
@@ -71,7 +71,7 @@ public class MoveSelectedCommand implements TMCommand
         double halfOfTranslatedX = m_moveX / 2.0;
         double halfOfTranslatedY = m_moveY / 2.0;
         
-        for (TM_Transition t : m_transitions)
+        for (Transition t : m_transitions)
         {
             if (t.getFromState() == t.getToState())
             {
@@ -88,14 +88,14 @@ public class MoveSelectedCommand implements TMCommand
         }
 
         // Handle movement of transitions that are connected to the moved states by one end only
-        for (TM_Transition t : m_borderTransitions)
+        for (Transition t : m_borderTransitions)
         {
-            TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
+            MachineGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
         }
         // TODO: Justify this
-        for (TM_Transition t : m_borderTransitions)
+        for (Transition t : m_borderTransitions)
         {
-            TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
+            MachineGraphicsPanel.updateTransitionLocationWhenStateMoved(t, m_moveX, m_moveY);
         }
     }
     
@@ -104,7 +104,7 @@ public class MoveSelectedCommand implements TMCommand
      */
     public void undoCommand()
     {
-        for (TM_State s : m_states)
+        for (State s : m_states)
         {
             s.setPosition(s.getX() - m_moveX, s.getY() - m_moveY);
         }
@@ -112,7 +112,7 @@ public class MoveSelectedCommand implements TMCommand
         double halfOfTranslatedX = m_moveX / 2.0;
         double halfOfTranslatedY = m_moveY / 2.0;
         
-        for (TM_Transition t : m_transitions)
+        for (Transition t : m_transitions)
         {
             if (t.getFromState() == t.getToState())
             {
@@ -129,14 +129,14 @@ public class MoveSelectedCommand implements TMCommand
         }
 
         // Handle movement of transitions that are connected to the moved states by one end only
-        for (TM_Transition t : m_borderTransitions)
+        for (Transition t : m_borderTransitions)
         {
-            TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
+            MachineGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
         }
         // TODO: Justify this
-        for (TM_Transition t : m_borderTransitions)
+        for (Transition t : m_borderTransitions)
         {
-            TMGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
+            MachineGraphicsPanel.updateTransitionLocationWhenStateMoved(t, -m_moveX, -m_moveY);
         }
     }
     
@@ -152,22 +152,22 @@ public class MoveSelectedCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The set of selected states.
      */
-    private Collection<TM_State> m_states;
+    private Collection<? extends State> m_states;
     
     /**
      * The set of selected transitions.
      */
-    private Collection<TM_Transition> m_transitions;
+    private Collection<? extends Transition> m_transitions;
     
     /**
      * The set of half-selected transitions.
      */
-    private Collection<TM_Transition> m_borderTransitions;
+    private Collection<? extends Transition> m_borderTransitions;
     
     /**
      * The change in X position.

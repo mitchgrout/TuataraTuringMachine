@@ -28,7 +28,8 @@ package tuataraTMSim;
 import java.util.TimerTask;
 import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
-import tuataraTMSim.TM.TM_Simulator;
+import tuataraTMSim.machine.Simulator;
+import tuataraTMSim.machine.TM.TM_Simulator;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 

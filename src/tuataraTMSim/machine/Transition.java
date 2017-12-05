@@ -23,20 +23,22 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.TM;
+package tuataraTMSim.machine;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.io.*;
 import java.util.Collection;
+import java.io.Serializable;
 import tuataraTMSim.Spline;
 
 /**
- * Represents a transition in a Turing machine.
- * @author Jimmy
+ * Represents a transition in a machine.
  */
-public class TM_Transition implements Serializable
+public abstract class Transition<
+    PREACTION extends PreAction,
+    STATE extends State<PREACTION, ?, MACHINE, SIMULATOR>,
+    MACHINE extends Machine<PREACTION, ?, STATE, SIMULATOR>,
+    SIMULATOR extends Simulator<PREACTION, ?, STATE, MACHINE>> implements Serializable
 {
     /**
      * Number of pixels for arrowheads on transitions.
@@ -67,44 +69,38 @@ public class TM_Transition implements Serializable
      * Pixels to offset input symbol bounding box.
      */
     public static final double SELECTED_INPUT_SYMBOL_BOX_X_OFFSET = -2;
-                                
-    /**
-     * Creates a new instance of TM_Transition.
-     */
-    protected TM_Transition() { }
-    
-    /** 
-     * Creates a new instance of TM_Transition, given the two connecting states, input symbol, and
-     * action.
-     * @param fromState The state this transition leaves.
-     * @param toState The state this transition arrives at.
-     * @param action The action associated with this transition.
-     */
-    public TM_Transition(TM_State fromState, TM_State toState, TM_Action action)
+
+    public Transition(STATE from, STATE to, PREACTION action)
     {
-        m_fromState = fromState;
-        m_toState = toState;
+        m_fromState = from;
+        m_toState = to;
         m_action = action;
-        if (fromState != toState)
+        if (from != to)
         {
-            // This is using the top-left coordinates of the state's circle,
-            // rather than the centre. The result is a slight upward, leftward curve
-            m_controlPtX = (m_fromState.getX() + m_toState.getX()) / 2;
-            m_controlPtY = (m_fromState.getY() + m_toState.getY()) / 2;
+            m_controlPtX = (from.getX() + to.getX()) / 2;
+            m_controlPtY = (from.getY() + to.getY()) / 2;
         }
         else
         {
-            // Do something nifty
-            m_controlPtX = m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH/2;
-            m_controlPtY = m_fromState.getY() - (int)(TM_State.STATE_RENDERING_WIDTH * 1.5);
+            m_controlPtX = from.getX() + STATE.STATE_RENDERING_WIDTH / 2;
+            m_controlPtY = from.getY() + (int)(STATE.STATE_RENDERING_WIDTH * 1.5);
         }
     }
-    
+
+    public Transition(STATE from, STATE to, PREACTION action, int controlX, int controlY)
+    {
+        m_fromState = from;
+        m_toState = to;
+        m_action = action;
+        m_controlPtX = controlX;
+        m_controlPtY = controlY;
+    }
+
     /**
      * Gets the state that this transition starts from.
      * @return The state this transition leaves.
      */
-    public TM_State getFromState()
+    public STATE getFromState()
     {
         return m_fromState;
     }
@@ -113,7 +109,7 @@ public class TM_Transition implements Serializable
      * Gets the state that this transition ends at.
      * @return The state this transition arrives at.
      */
-    public TM_State getToState()
+    public STATE getToState()
     {
         return m_toState;
     }
@@ -122,7 +118,7 @@ public class TM_Transition implements Serializable
      * Gets the action for this transition.
      * @return The action associated with this action.
      */
-    public TM_Action getAction()
+    public PREACTION getAction()
     {
         return m_action;
     }
@@ -131,7 +127,7 @@ public class TM_Transition implements Serializable
      * Set the action for this transition.
      * @param action The new action.
      */
-    public void setAction(TM_Action action)
+    public void setAction(PREACTION action)
     {
         m_action = action;
     }
@@ -174,7 +170,8 @@ public class TM_Transition implements Serializable
      * @param selectedTransitions The set of transitions selected by the user.
      * @param simulator The current simulator.
      */
-    public void paint(Graphics g, Collection<TM_Transition> selectedTransitions, TM_Simulator simulator)
+    public void paint(Graphics g, Collection<? extends Transition> selectedTransitions, 
+                      SIMULATOR simulator)
     {
         // Get a 2d graphics object
         Graphics2D g2d = (Graphics2D)g;
@@ -184,7 +181,7 @@ public class TM_Transition implements Serializable
         {
             g2d.setColor(Color.RED);
         }
-        else if (simulator.getCurrentNextTransition() == this)
+        else if (simulator.getNextTransition() == this)
         {
             g2d.setColor(Color.PINK);
         }
@@ -208,12 +205,12 @@ public class TM_Transition implements Serializable
         {
             // Get a perpendicular vector
             Point2D perp = new Point2D.Double(
-                    -m_controlPtY + (m_fromState.getY() + TM_State.STATE_RENDERING_WIDTH / 2),
-                     m_controlPtX - (m_fromState.getX() + TM_State.STATE_RENDERING_WIDTH / 2));
+                    -m_controlPtY + (m_fromState.getY() + STATE.STATE_RENDERING_WIDTH / 2),
+                     m_controlPtX - (m_fromState.getX() + STATE.STATE_RENDERING_WIDTH / 2));
 
             // Rescale our perpendicular vector by the scaling factor
             double scaleFactor = 
-                TM_State.STATE_RENDERING_WIDTH * 1.5 / perp.distance(new Point2D.Float(0,0));
+                State.STATE_RENDERING_WIDTH * 1.5 / perp.distance(new Point2D.Float(0,0));
             AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
             scale.transform(perp, perp);
 
@@ -298,7 +295,7 @@ public class TM_Transition implements Serializable
      * @param p2 The second vertex of the triangle.
      * @param p3 The third vertex of the triangle.
      */
-    private void drawTriangle(Graphics g, Point2D p1, Point2D p2, Point2D p3)
+    protected void drawTriangle(Graphics g, Point2D p1, Point2D p2, Point2D p3)
     {
         // Get a 2d graphics object
         Graphics2D g2d = (Graphics2D)g;
@@ -384,7 +381,7 @@ public class TM_Transition implements Serializable
      * Get the midpoint of the spline, represented by the arrow on the transition..
      * @return The location of the midpoint.
      */
-    private Point2D getActionLocation()
+    protected Point2D getActionLocation()
     {
         // Compute the location of the arrow, i.e. the midpoint
         Point2D arrowLoc = getMidpoint();
@@ -490,34 +487,30 @@ public class TM_Transition implements Serializable
      * Get a String representation of this transition.
      * @return A string representation of this transition.
      */
-    public String toString()
-    {
-        return String.format("%s -> %s [%s/%s]", m_fromState.getLabel(), m_toState.getLabel(),
-                                                 m_action.getInputChar(), m_action.getOutputChar());
-    }
+    public abstract String toString();
    
     /**
      * The state this transition leaves.
      */
-    private TM_State m_fromState;
+    protected STATE m_fromState;
     
     /**
      * The state this transition arrives at.
      */
-    private TM_State m_toState;
+    protected STATE m_toState;
     
     /**
      * The action associated with this transition.
      */
-    private TM_Action m_action;
+    protected PREACTION m_action;
     
     /**
      * The X ordinate of the control point for the curve, i.e. the point used to build the spline.
      */
-    private int m_controlPtX = 0;
+    protected int m_controlPtX;
     
     /**
      * The Y ordinate of the control point for the curve, i.e. the point used to build the spline.
      */
-    private int m_controlPtY = 0;
+    protected int m_controlPtY;
 }

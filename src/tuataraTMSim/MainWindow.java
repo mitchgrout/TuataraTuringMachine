@@ -38,7 +38,8 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.MouseInputAdapter;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
-import tuataraTMSim.TM.*;
+import tuataraTMSim.machine.*;
+import tuataraTMSim.machine.TM.*;
 
 /**
  * The main window of the program. An MDI interface for building and running turing machines.
@@ -291,7 +292,7 @@ public class MainWindow extends JFrame
      * This determines the results of user interactions such as clicking on the state diagrams.
      * @param mode The new GUI mode.
      */
-    public void setUIMode(TM_GUI_Mode mode)
+    public void setUIMode(GUI_Mode mode)
     {
         m_currentMode = mode;
         if (m_desktopPane == null)
@@ -304,8 +305,8 @@ public class MainWindow extends JFrame
         {
             try
             {
-                TMInternalFrame tmif = (TMInternalFrame)frame;
-                TMGraphicsPanel panel = tmif.getGfxPanel();
+                MachineInternalFrame tmif = (MachineInternalFrame)frame;
+                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
                 panel.setUIMode(mode);
             }
             catch (ClassCastException e)
@@ -689,25 +690,25 @@ public class MainWindow extends JFrame
         configureSchemeToolBarButton.setText("");
 
         // GUI mode
-        GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, TM_GUI_Mode.ADDNODES);
+        GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, GUI_Mode.ADDNODES);
         m_toolbarButtons.add(addNodesToolBarButton);
         
-        GUIModeButton addTransitionsToolBarButton = new GUIModeButton(m_addTransitionsAction, TM_GUI_Mode.ADDTRANSITIONS);
+        GUIModeButton addTransitionsToolBarButton = new GUIModeButton(m_addTransitionsAction, GUI_Mode.ADDTRANSITIONS);
         m_toolbarButtons.add(addTransitionsToolBarButton);
         
-        GUIModeButton selectionToolBarButton = new GUIModeButton(m_selectionAction,TM_GUI_Mode.SELECTION);
+        GUIModeButton selectionToolBarButton = new GUIModeButton(m_selectionAction,GUI_Mode.SELECTION);
         m_toolbarButtons.add(selectionToolBarButton);
         
-        GUIModeButton eraserToolBarButton = new GUIModeButton(m_eraserAction, TM_GUI_Mode.ERASER);
+        GUIModeButton eraserToolBarButton = new GUIModeButton(m_eraserAction, GUI_Mode.ERASER);
         m_toolbarButtons.add(eraserToolBarButton);
         
-        GUIModeButton startStatesToolBarButton = new GUIModeButton(m_chooseStartAction, TM_GUI_Mode.CHOOSESTART);
+        GUIModeButton startStatesToolBarButton = new GUIModeButton(m_chooseStartAction, GUI_Mode.CHOOSESTART);
         m_toolbarButtons.add(startStatesToolBarButton);
         
-        GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, TM_GUI_Mode.CHOOSEACCEPTING);
+        GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, GUI_Mode.CHOOSEACCEPTING);
         m_toolbarButtons.add(acceptingStatesToolBarButton);
         
-        GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, TM_GUI_Mode.CHOOSECURRENTSTATE);
+        GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, GUI_Mode.CHOOSECURRENTSTATE);
         m_toolbarButtons.add(chooseCurrentStateToolBarButton);
  
         // Machine
@@ -767,7 +768,7 @@ public class MainWindow extends JFrame
         returner[2].add(resetMachineToolBarButton);
        
         // Default mode
-        setUIMode(TM_GUI_Mode.ADDNODES);
+        setUIMode(GUI_Mode.ADDNODES);
         
         return returner;
     }
@@ -778,12 +779,12 @@ public class MainWindow extends JFrame
      * @param file The file associated with the machine.
      * @return A frame used to render the machine.
      */
-    private TMInternalFrame newMachineWindow(TMachine myTM, File file)
+    private MachineInternalFrame newMachineWindow(TMachine myTM, File file)
     {
         final TMGraphicsPanel gfxPanel = new TMGraphicsPanel(myTM, m_tape, file, this);
         gfxPanel.setUIMode(m_currentMode);
         
-        final TMInternalFrame returner = new TMInternalFrame(gfxPanel);
+        final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
         gfxPanel.setWindow(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
         returner.setSize(new Dimension(640, 480));
@@ -859,9 +860,9 @@ public class MainWindow extends JFrame
      * @param iFrame The frame being closed.
      * @return false if the user cancelled, true otherwise.
      */
-    private boolean userConfirmSaveModifiedThenClose(TMInternalFrame iFrame)
+    private boolean userConfirmSaveModifiedThenClose(MachineInternalFrame iFrame)
     {
-        TMGraphicsPanel gfxPanel = iFrame.getGfxPanel();
+        TMGraphicsPanel gfxPanel = (TMGraphicsPanel)iFrame.getGfxPanel();
         iFrame.moveToFront();
         if (gfxPanel.isModifiedSinceSave())
         {
@@ -891,8 +892,7 @@ public class MainWindow extends JFrame
                     }
                 }
 
-                saveSuccessful = TMachine.saveTMachine(machine, outFile.toString());
-                if (TMachine.saveTMachine(machine, outFile.toString()))
+                if (TMachine.saveMachine(machine, outFile))
                 {
                     iFrame.dispose();
                     return true;
@@ -1064,11 +1064,10 @@ public class MainWindow extends JFrame
         {
             try
             {
-                TMInternalFrame tmif = (TMInternalFrame)frame;
-                TMGraphicsPanel panel = tmif.getGfxPanel();
+                MachineInternalFrame tmif = (MachineInternalFrame)frame;
+                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
                 if (panel != null)
                 {
-                    panel.getSimulator().computeNextTransition();
                     panel.repaint();
                 }
             }
@@ -1175,7 +1174,7 @@ public class MainWindow extends JFrame
             if (!infile.exists())
             {
                 JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Cannot find file '%s'", infile.toString()));
+                        String.format("Cannot find file '%s'", infile));
                 continue;
             }
             // Otherwise return the file chosen
@@ -1202,7 +1201,7 @@ public class MainWindow extends JFrame
                 return false;
             }
             TMachine machine = panel.getSimulator().getMachine();
-            boolean result = TMachine.saveTMachine(machine, outFile.toString());
+            boolean result = TMachine.saveMachine(machine, outFile);
             if (result == false)
             {
                 throw new IOException(outFile.toString());
@@ -1249,8 +1248,8 @@ public class MainWindow extends JFrame
         {
             try
             {
-                TMInternalFrame tmif = (TMInternalFrame)f;
-                TMGraphicsPanel gfxPanel = tmif.getGfxPanel();
+                MachineInternalFrame tmif = (MachineInternalFrame)f;
+                TMGraphicsPanel gfxPanel = (TMGraphicsPanel)tmif.getGfxPanel();
                 gfxPanel.setEditingEnabled(isEnabled);
                 tmif.setClosable(isEnabled);
                 m_exitAction.setEnabled(isEnabled); 
@@ -1284,8 +1283,8 @@ public class MainWindow extends JFrame
         {
             try
             {
-                TMInternalFrame tmif = (TMInternalFrame)f;
-                TMGraphicsPanel panel = tmif.getGfxPanel();
+                MachineInternalFrame tmif = (MachineInternalFrame)f;
+                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
                 if (panel.isModifiedSinceSave())
                 {
                     if (!userConfirmSaveModifiedThenClose(tmif))
@@ -1494,8 +1493,8 @@ public class MainWindow extends JFrame
         }
         try
         {
-            TMInternalFrame tmif = (TMInternalFrame)selected;
-            return tmif.getGfxPanel();
+            MachineInternalFrame tmif = (MachineInternalFrame)selected;
+            return (TMGraphicsPanel)tmif.getGfxPanel();
         }
         catch (ClassCastException e)
         {
@@ -1572,7 +1571,7 @@ public class MainWindow extends JFrame
             }
             try
             {
-                TMachine machine = TMachine.loadTMachine(inFile.toString());
+                TMachine machine = (TMachine)TMachine.loadMachine(inFile);
                 if (machine == null)
                 {
                     throw new IOException(inFile.toString());
@@ -1648,7 +1647,7 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!TMachine.saveTMachine(machine, outFile.toString()))
+                if (!TMachine.saveMachine(machine, outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
@@ -1749,7 +1748,7 @@ public class MainWindow extends JFrame
             
             try
             {
-                Tape tape = Tape.loadTape(inFile.toString());
+                Tape tape = Tape.loadTape(inFile);
                 if (tape == null)
                 {
                     throw new IOException(inFile.toString());
@@ -1813,7 +1812,7 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!Tape.saveTape(tapeDisp.getTape(), outFile.toString()))
+                if (!Tape.saveTape(tapeDisp.getTape(), outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
@@ -2037,7 +2036,7 @@ public class MainWindow extends JFrame
                 HashSet<TM_State> selectedStates = (HashSet<TM_State>)restore.readObject();
                 HashSet<TM_Transition> selectedTransitions = (HashSet<TM_Transition>)restore.readObject();
                 Point2D centroid = computeCentroid(selectedStates);
-                TMInternalFrame tmif = (TMInternalFrame)m_desktopPane.getSelectedFrame();
+                MachineInternalFrame tmif = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
                 if (tmif == null)
                 {
                     // Abort
@@ -2046,7 +2045,7 @@ public class MainWindow extends JFrame
                 Point2D centreOfWindow = tmif.getCenterOfViewPort();
                 translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions, centreOfWindow,
                         tmif.getGfxPanel().getLastPastedLocation(), tmif.getGfxPanel().getNumPastesToSameLocation(),
-                        tmif.getGfxPanel());
+                        (TMGraphicsPanel)tmif.getGfxPanel());
                 TMGraphicsPanel panel = getSelectedGraphicsPanel();
                 if (panel != null)
                 {
@@ -2115,7 +2114,7 @@ public class MainWindow extends JFrame
          * @param icon Icon for the action.
          * @param keyShortcut Shortcut associated with the action.
          */
-        public GUI_ModeSelectionAction(String text, TM_GUI_Mode mode, ImageIcon icon, KeyStroke keyShortcut)
+        public GUI_ModeSelectionAction(String text, GUI_Mode mode, ImageIcon icon, KeyStroke keyShortcut)
         {
             super(text);
             m_mode = mode;
@@ -2148,7 +2147,7 @@ public class MainWindow extends JFrame
         /**
          * The GUI mode associated with this action.
          */
-        private TM_GUI_Mode m_mode;
+        private GUI_Mode m_mode;
 
         /**
          * The menu item associated with this action.
@@ -2701,7 +2700,7 @@ public class MainWindow extends JFrame
     /**
      * Current GUI mode.
      */
-    private TM_GUI_Mode m_currentMode;
+    private GUI_Mode m_currentMode;
     
     /**
      * Whether the keyboard is currently enabled.
@@ -2896,44 +2895,44 @@ public class MainWindow extends JFrame
     /**
      * Action associated with ADDNODES.
      */
-    private final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", TM_GUI_Mode.ADDNODES,
+    private final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
             loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
 
     /**
      * Action associated with ADDTRANSITIONS.
      */
-    private final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", TM_GUI_Mode.ADDTRANSITIONS,
+    private final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
             loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 
     /**
      * Action associated with SELECTION.
      */
-    private final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", TM_GUI_Mode.SELECTION,
+    private final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
             loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
 
     /**
      * Action associated with ERASER.
      */
-    private final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", TM_GUI_Mode.ERASER, 
+    private final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
             loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
 
     /**
      * Action associated with CHOOSESTART.
      */
-    private final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", TM_GUI_Mode.CHOOSESTART, 
+    private final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
             loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
      * Action associated with CHOOSEACCEPTING.
      */
-    private final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", TM_GUI_Mode.CHOOSEACCEPTING,
+    private final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
             loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**
      * Action associated with CHOOSECURRENTSTATE.
      */
     private final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
-        new GUI_ModeSelectionAction("Choose Current State", TM_GUI_Mode.CHOOSECURRENTSTATE,
+        new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
                 loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
 
     /**

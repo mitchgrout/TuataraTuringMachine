@@ -23,7 +23,7 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.TM;
+package tuataraTMSim.machine;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.Alphabet;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.Alphabet;
 
 /**
  * A command which deals with manipulating the tape alphabet.
@@ -40,7 +40,7 @@ public class ConfigureAlphabetCommand implements TMCommand
      * @param beforeAlphabet The current tape alphabet.
      * @param afterAlphabet The new tape alphabet.
      */
-    public ConfigureAlphabetCommand(TMGraphicsPanel panel, Alphabet beforeAlphabet, Alphabet afterAlphabet)
+    public ConfigureAlphabetCommand(MachineGraphicsPanel panel, Alphabet beforeAlphabet, Alphabet afterAlphabet)
     {
         m_panel = panel;
         m_beforeAlphabet = beforeAlphabet;
@@ -75,7 +75,7 @@ public class ConfigureAlphabetCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The previous alphabet.
