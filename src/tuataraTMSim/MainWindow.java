@@ -463,8 +463,13 @@ public class MainWindow extends JFrame
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(fileMenu);
-        
-        fileMenu.add(new JMenuItem(m_newMachineAction));
+      
+        JMenu newSubmenu = new JMenu("New Machine");
+        newSubmenu.setIcon(loadIcon("newMachine.gif"));
+        newSubmenu.setMnemonic(KeyEvent.VK_N);
+        newSubmenu.add(new JMenuItem(m_newTuringMachineAction));
+        fileMenu.add(newSubmenu);
+
         fileMenu.add(new JMenuItem(m_openMachineAction));
         fileMenu.add(new JMenuItem(m_saveMachineAction));
         fileMenu.add( new JMenuItem(m_saveMachineAsAction));
@@ -632,7 +637,7 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setText("");
 
         // Machine
-        JButton newMachineToolBarButton = new JButton(m_newMachineAction);
+        JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
         newMachineToolBarButton.setFocusable(false);
         newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         newMachineToolBarButton.setText("");
@@ -1030,7 +1035,7 @@ public class MainWindow extends JFrame
         m_chooseAcceptingAction.setEnabled(isEnabled);
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
-        m_newMachineAction.setEnabled(isEnabled);
+        m_newTuringMachineAction.setEnabled(isEnabled);
         m_openMachineAction.setEnabled(isEnabled);
         m_saveMachineAsAction.setEnabled(isEnabled);
         m_saveMachineAction.setEnabled(isEnabled);
@@ -1504,16 +1509,16 @@ public class MainWindow extends JFrame
     }
  
     /**
-     * Action for creating a new machine in a new window
+     * Action for creating a new Turing Machine in a new window.
      */
-    class NewMachineAction extends AbstractAction
+    class NewTuringMachineAction extends AbstractAction
     {
        /**
-         * Creates a new instance of NewMachineAction. 
+         * Creates a new instance of NewTuringMachineAction. 
          * @param text Description of the action.
          * @param icon Icon for the action.
          */
-        public NewMachineAction(String text, ImageIcon icon)
+        public NewTuringMachineAction(String text, ImageIcon icon)
         {
             super(text);
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
@@ -2820,7 +2825,7 @@ public class MainWindow extends JFrame
     /**
      * Action for creating a new machine.
      */
-    private final Action m_newMachineAction = new NewMachineAction("New Machine", loadIcon("newMachine.gif"));
+    private final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
 
     /**
      * Action for opening a machine.
