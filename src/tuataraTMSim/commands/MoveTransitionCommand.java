@@ -27,8 +27,8 @@ package tuataraTMSim.commands;
 
 import java.awt.geom.Point2D;
 import tuataraTMSim.Spline;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with moving a transition
@@ -43,7 +43,7 @@ public class MoveTransitionCommand implements TMCommand
      * @param moveX The change in X position.
      * @param moveY The change in Y position.
      */
-    public MoveTransitionCommand(TMGraphicsPanel panel, TM_Transition transition, int moveX, int moveY)
+    public MoveTransitionCommand(MachineGraphicsPanel panel, Transition transition, int moveX, int moveY)
     {
         m_panel = panel;
         m_transition = transition;
@@ -89,12 +89,12 @@ public class MoveTransitionCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The transition to move.
      */
-    private TM_Transition m_transition;
+    private Transition m_transition;
     
     /**
      * The change in X position.

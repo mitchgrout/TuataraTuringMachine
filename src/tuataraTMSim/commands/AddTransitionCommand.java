@@ -26,10 +26,11 @@
 package tuataraTMSim.commands;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 import tuataraTMSim.Spline;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with adding new transitions to a machine.
@@ -47,7 +48,7 @@ public class AddTransitionCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param transition The transition to add.
      */
-    public AddTransitionCommand(TMGraphicsPanel panel, TM_Transition transition)
+    public AddTransitionCommand(MachineGraphicsPanel panel, Transition transition)
     {
         m_panel = panel;
         m_transition = transition;
@@ -65,15 +66,21 @@ public class AddTransitionCommand implements TMCommand
 
         // Count how many transitions there are between the two states
         int numTransitions = 1;
-        for (TM_Transition t: m_transition.getFromState().getTransitions())
+
+        // NOTE: Compiler complains about [...].getTransitions() returning na Object, not a
+        //       Transition, if this expression is put directly in the foreach. [ Bug? ]
+        Collection<Transition> transitions = m_transition.getFromState().getTransitions();
+        for (Transition t : transitions)
         {
             if (t.getToState() == m_transition.getToState())
             {
                 numTransitions++;
             }
         }
-        
-        for (TM_Transition t: m_transition.getToState().getTransitions())
+      
+        // Ditto
+        transitions = m_transition.getToState().getTransitions();
+        for (Transition t : transitions)
         {
             if (t.getToState() == m_transition.getFromState())
             {
@@ -83,8 +90,8 @@ public class AddTransitionCommand implements TMCommand
         
         int countOffset = (numTransitions % 2 == 0)? -1 : 0;
         
-        int middleX = (m_transition.getFromState().getX() + m_transition.getToState().getX() + TM_State.STATE_RENDERING_WIDTH) / 2;
-        int middleY = (m_transition.getFromState().getY() + m_transition.getToState().getY() + TM_State.STATE_RENDERING_WIDTH) / 2;
+        int middleX = (m_transition.getFromState().getX() + m_transition.getToState().getX() + State.STATE_RENDERING_WIDTH) / 2;
+        int middleY = (m_transition.getFromState().getY() + m_transition.getToState().getY() + State.STATE_RENDERING_WIDTH) / 2;
 
         int vectorX = Math.abs(m_transition.getFromState().getX() - m_transition.getToState().getX());
         int vectorY = Math.abs(m_transition.getFromState().getY() - m_transition.getToState().getY());
@@ -134,11 +141,11 @@ public class AddTransitionCommand implements TMCommand
         {
             numTransitions /= 2;
             int xOff = 0;
-            int yOff= -(int)(TM_State.STATE_RENDERING_WIDTH * 2);
+            int yOff= -(int)(State.STATE_RENDERING_WIDTH * 2);
             
             if (numTransitions % 4 == 1)
             {
-                xOff = -(int)(TM_State.STATE_RENDERING_WIDTH * 2);
+                xOff = -(int)(State.STATE_RENDERING_WIDTH * 2);
                 yOff = 0;
             }
             else if (numTransitions % 4 == 2)
@@ -148,14 +155,14 @@ public class AddTransitionCommand implements TMCommand
             else if (numTransitions % 4 == 3)
             {
                 yOff = 0;
-                xOff = (int)(TM_State.STATE_RENDERING_WIDTH * 2);
+                xOff = (int)(State.STATE_RENDERING_WIDTH * 2);
             }
             
             xOff *= (1 + numTransitions / 4);
             yOff *= (1 + numTransitions / 4);
             
-            xOff += TM_State.STATE_RENDERING_WIDTH/2;
-            yOff += TM_State.STATE_RENDERING_WIDTH/2;
+            xOff += State.STATE_RENDERING_WIDTH/2;
+            yOff += State.STATE_RENDERING_WIDTH/2;
             
             m_transition.setControlPoint(m_transition.getFromState().getX() + xOff,
                     m_transition.getFromState().getY() + yOff);
@@ -168,7 +175,6 @@ public class AddTransitionCommand implements TMCommand
         {
             m_panel.getSelectedTransitions().add(m_transition);
         }
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -181,7 +187,6 @@ public class AddTransitionCommand implements TMCommand
         {
             m_panel.deselectSymbol();
         }
-        m_panel.getSimulator().computeNextTransition();
     }
     
     /**
@@ -196,10 +201,10 @@ public class AddTransitionCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * The transition to add or remove.
      */
-    private TM_Transition m_transition;
+    private Transition m_transition;
 }

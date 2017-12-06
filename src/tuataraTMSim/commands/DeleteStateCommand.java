@@ -27,9 +27,9 @@ package tuataraTMSim.commands;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with deleting a state from a machine.
@@ -42,7 +42,7 @@ public class DeleteStateCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param state The state to delete.
      */
-    public DeleteStateCommand(TMGraphicsPanel panel, TM_State state)
+    public DeleteStateCommand(MachineGraphicsPanel panel, State state)
     {
         m_panel = panel;
         m_state = state;
@@ -66,7 +66,6 @@ public class DeleteStateCommand implements TMCommand
         }
         else
         {
-            m_panel.getSimulator().computeNextTransition();
         }
     }
     
@@ -75,14 +74,12 @@ public class DeleteStateCommand implements TMCommand
      */
     public void undoCommand()
     {
-        // TODO: Should this also cause a call to computeNextTransition?
-
         m_panel.getSimulator().getMachine().addState(m_state);
         m_panel.addLabelToDictionary(m_state.getLabel());
-        for (TM_Transition t : m_outTransitions)
+        for (Transition t : m_outTransitions)
             m_panel.getSimulator().getMachine().addTransition(t);
         
-        for (TM_Transition t : m_inTransitions)
+        for (Transition t : m_inTransitions)
             m_panel.getSimulator().getMachine().addTransition(t);
     }
     
@@ -98,20 +95,20 @@ public class DeleteStateCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The state to delete.
      */
-    private TM_State m_state;
+    private State m_state;
     
     /**
      * The outgoing transitions associated with m_state.
      */
-    private Collection<TM_Transition> m_outTransitions = new ArrayList<TM_Transition>();
+    private Collection<? extends Transition> m_outTransitions = new ArrayList<Transition>();
     
     /**
      * The incoming transitions associated with m_state.
      */
-    private Collection<TM_Transition> m_inTransitions;
+    private Collection<? extends Transition> m_inTransitions;
 }

@@ -44,9 +44,9 @@ import javax.swing.JPanel;
 import tuataraTMSim.commands.ConfigureAlphabetCommand;
 import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
-import tuataraTMSim.TM.Alphabet;
-import tuataraTMSim.TM.Tape;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.machine.Alphabet;
+import tuataraTMSim.machine.Tape;
+import tuataraTMSim.machine.TM.TM_Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.

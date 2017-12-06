@@ -27,9 +27,9 @@ package tuataraTMSim.commands;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
-import tuataraTMSim.TM.TM_Transition;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
+import tuataraTMSim.machine.Transition;
 
 /**
  * A comand which deals with moving a state.
@@ -45,15 +45,15 @@ public class MoveStateCommand implements TMCommand
      * @param moveY The change in Y position.
      * @param transitionsInto The set of transitions coming into the state.
      */
-    public MoveStateCommand(TMGraphicsPanel panel, TM_State state, int moveX, int moveY,
-                            Collection<TM_Transition> transitionsInto)
+    public MoveStateCommand(MachineGraphicsPanel panel, State state, int moveX, int moveY,
+                            Collection<Transition> transitionsInto)
     {
         m_panel = panel;
         m_state = state;
         m_moveX = moveX;
         m_moveY = moveY;
         m_transitionsInto = transitionsInto;
-        m_transitionsOut = new ArrayList<TM_Transition>();
+        m_transitionsOut = new ArrayList<Transition>();
         m_transitionsOut.addAll(state.getTransitions());
     }
 
@@ -62,7 +62,7 @@ public class MoveStateCommand implements TMCommand
      */
     public void doCommand()
     {
-        TMGraphicsPanel.updateTransitionLocations(m_state,m_moveX, m_moveY, m_transitionsInto, m_transitionsOut);
+        MachineGraphicsPanel.updateTransitionLocations(m_state,m_moveX, m_moveY, m_transitionsInto, m_transitionsOut);
         m_state.setPosition(m_state.getX() + m_moveX, m_state.getY() + m_moveY);
     }
        
@@ -71,7 +71,7 @@ public class MoveStateCommand implements TMCommand
      */
     public void undoCommand()
     {
-        TMGraphicsPanel.updateTransitionLocations(m_state,-m_moveX, -m_moveY, m_transitionsInto, m_transitionsOut);
+        MachineGraphicsPanel.updateTransitionLocations(m_state,-m_moveX, -m_moveY, m_transitionsInto, m_transitionsOut);
         m_state.setPosition(m_state.getX() - m_moveX, m_state.getY() - m_moveY);
     }
     
@@ -87,12 +87,12 @@ public class MoveStateCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The state to move.
      */
-    private TM_State m_state;
+    private State m_state;
     
     /**
      * The change in X position.
@@ -107,10 +107,10 @@ public class MoveStateCommand implements TMCommand
     /**
      * The set of transitions coming into m_state.
      */
-    private Collection<TM_Transition> m_transitionsInto;
+    private Collection<? extends Transition> m_transitionsInto;
     
     /**
      * The set of transitions leaving m_state.
      */
-    private Collection<TM_Transition> m_transitionsOut;
+    private Collection<? extends Transition> m_transitionsOut;
 }

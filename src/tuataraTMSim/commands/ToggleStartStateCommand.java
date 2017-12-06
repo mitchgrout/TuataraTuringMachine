@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the start state of a machine.
@@ -41,7 +41,7 @@ public class ToggleStartStateCommand implements TMCommand
      * @param newState The new accepting state. If newState and oldState are the same state, then we
      *                 toggle the value for the state.
      */
-    public ToggleStartStateCommand(TMGraphicsPanel panel, TM_State oldState, TM_State newState)
+    public ToggleStartStateCommand(MachineGraphicsPanel panel, State oldState, State newState)
     {
         m_panel = panel;
         m_oldState = oldState;
@@ -104,15 +104,15 @@ public class ToggleStartStateCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * The old start state.
      */
-    private TM_State m_oldState;
+    private State m_oldState;
     
     /**
      * The new start state.
      */
-    private TM_State m_newState;
+    private State m_newState;
 }

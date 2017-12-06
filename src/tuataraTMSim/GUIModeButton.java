@@ -41,7 +41,7 @@ public class GUIModeButton extends JButton
      * @param act The abstract action associated with this button.
      * @param mode The mode to switch to after pressing this button.
      */
-    public GUIModeButton(Action act, TM_GUI_Mode mode)
+    public GUIModeButton(Action act, GUI_Mode mode)
     {
         super();
         setAction(act);
@@ -55,7 +55,7 @@ public class GUIModeButton extends JButton
      * Get the GUI mode associated with this button.
      * @return The GUI mode associated with this button.
      */
-    public TM_GUI_Mode getGUI_Mode()
+    public GUI_Mode getGUI_Mode()
     {
         return m_mode;
     }
@@ -63,5 +63,5 @@ public class GUIModeButton extends JButton
     /**
      * The GUI mode associated with this button.
      */
-    private TM_GUI_Mode m_mode;
+    private GUI_Mode m_mode;
 }

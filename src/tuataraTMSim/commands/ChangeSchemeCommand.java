@@ -26,7 +26,7 @@
 package tuataraTMSim.commands;
 
 import tuataraTMSim.NamingScheme;
-import tuataraTMSim.TMGraphicsPanel;
+import tuataraTMSim.MachineGraphicsPanel;
 
 /**
  * A command which deals with changing the naming scheme for a machine. 
@@ -38,7 +38,7 @@ public class ChangeSchemeCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param scheme The new naming scheme.
      */
-    public ChangeSchemeCommand(TMGraphicsPanel panel, NamingScheme scheme) 
+    public ChangeSchemeCommand(MachineGraphicsPanel panel, NamingScheme scheme) 
     {
         m_panel = panel;
         m_oldScheme = m_panel.getSimulator().getMachine().getNamingScheme();
@@ -73,7 +73,7 @@ public class ChangeSchemeCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The previous naming scheme.

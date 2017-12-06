@@ -27,7 +27,7 @@ package tuataraTMSim;
 import java.awt.geom.Point2D;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.QuadCurve2D;
-import tuataraTMSim.TM.TM_State;
+import tuataraTMSim.machine.State;
 
 /**
  * Utility functions for working with splines, which are used to render transitions in this program.
@@ -44,17 +44,17 @@ public abstract class Spline
      * @param from The state the spline is both leaving and arriving at.
      * @return A spline looping to and from the given state.
      */
-    public static CubicCurve2D buildLoopSpline(Point2D ctrl, TM_State from)
+    public static CubicCurve2D buildLoopSpline(Point2D ctrl, State from)
     {
         return new CubicCurve2D.Double(
-                from.getX() + TM_State.STATE_RENDERING_WIDTH / 2, 
-                from.getY() + TM_State.STATE_RENDERING_WIDTH / 2, 
-                ctrl.getX() - TM_State.STATE_RENDERING_WIDTH,
+                from.getX() + State.STATE_RENDERING_WIDTH / 2, 
+                from.getY() + State.STATE_RENDERING_WIDTH / 2, 
+                ctrl.getX() - State.STATE_RENDERING_WIDTH,
                 ctrl.getY(), 
-                ctrl.getX() + TM_State.STATE_RENDERING_WIDTH,
+                ctrl.getX() + State.STATE_RENDERING_WIDTH,
                 ctrl.getY(),
-                from.getX() + TM_State.STATE_RENDERING_WIDTH / 2,
-                from.getY() + TM_State.STATE_RENDERING_WIDTH / 2);
+                from.getX() + State.STATE_RENDERING_WIDTH / 2,
+                from.getY() + State.STATE_RENDERING_WIDTH / 2);
     }
 
     /**
@@ -65,15 +65,15 @@ public abstract class Spline
      * @param from The state the spline is both leaving and arriving at.
      * @return A spline looping to and from the given state.
      */
-    public static CubicCurve2D buildLoopSpline(Point2D ctrl1, Point2D ctrl2, TM_State from)
+    public static CubicCurve2D buildLoopSpline(Point2D ctrl1, Point2D ctrl2, State from)
     {
         return new CubicCurve2D.Double(
-                from.getX() + TM_State.STATE_RENDERING_WIDTH / 2,
-                from.getY() + TM_State.STATE_RENDERING_WIDTH / 2,
+                from.getX() + State.STATE_RENDERING_WIDTH / 2,
+                from.getY() + State.STATE_RENDERING_WIDTH / 2,
                 ctrl1.getX(), ctrl1.getY(),
                 ctrl2.getX(), ctrl2.getY(),
-                from.getX() + TM_State.STATE_RENDERING_WIDTH/2,
-                from.getY() + TM_State.STATE_RENDERING_WIDTH/2);
+                from.getX() + State.STATE_RENDERING_WIDTH/2,
+                from.getY() + State.STATE_RENDERING_WIDTH/2);
     }
     /**
      * Build an arc spline from the given state, to the other state, with the given control point.
@@ -83,14 +83,14 @@ public abstract class Spline
      * @param to The state the spline is arriving at.
      * @return The midpoint of the spline.
      */
-    public static QuadCurve2D buildArcSpline(Point2D ctrl, TM_State from, TM_State to)
+    public static QuadCurve2D buildArcSpline(Point2D ctrl, State from, State to)
     {
         return new QuadCurve2D.Double(
-                from.getX() + TM_State.STATE_RENDERING_WIDTH / 2, 
-                from.getY()+ TM_State.STATE_RENDERING_WIDTH / 2, 
+                from.getX() + State.STATE_RENDERING_WIDTH / 2, 
+                from.getY()+ State.STATE_RENDERING_WIDTH / 2, 
                 ctrl.getX(), ctrl.getY(),
-                to.getX() + TM_State.STATE_RENDERING_WIDTH / 2, 
-                to.getY() + TM_State.STATE_RENDERING_WIDTH / 2);
+                to.getX() + State.STATE_RENDERING_WIDTH / 2, 
+                to.getY() + State.STATE_RENDERING_WIDTH / 2);
     }
 
     /**
@@ -101,7 +101,7 @@ public abstract class Spline
      * @param to The state the spline is arriving at.
      * @return The midpoint of the spline.
      */
-    public static Point2D getMidPointFromControlPoint(Point2D ctrl, TM_State from, TM_State to)
+    public static Point2D getMidPointFromControlPoint(Point2D ctrl, State from, State to)
     {
         // A loop
         if (from == to)
@@ -136,7 +136,7 @@ public abstract class Spline
      * @param to The state the spline is arriving at.
      * @return The control point of the spline.
      */
-    public static Point2D getControlPointFromMidPoint(Point2D mid, TM_State from, TM_State to)
+    public static Point2D getControlPointFromMidPoint(Point2D mid, State from, State to)
     {
         // Creating a loop
         if (from == to)
@@ -144,17 +144,17 @@ public abstract class Spline
             // Cubic bezier curve formula to find the control point given the midpoint, pretending
             // that both inner control points are actually the control point of the transition.
             return new Point2D.Double(
-                4.0 /3.0 * (mid.getX() - (to.getX() + TM_State.STATE_RENDERING_WIDTH / 2) / 4.0),
-                4.0 /3.0 * (mid.getY() - (to.getY() + TM_State.STATE_RENDERING_WIDTH / 2) / 4.0));
+                4.0 /3.0 * (mid.getX() - (to.getX() + State.STATE_RENDERING_WIDTH / 2) / 4.0),
+                4.0 /3.0 * (mid.getY() - (to.getY() + State.STATE_RENDERING_WIDTH / 2) / 4.0));
         }
         else
         {
             // Quadratic curve formula to find the control point given the midpoint
             return new Point2D.Double(
-                2.0 * mid.getX() - 0.5 * (from.getX() + TM_State.STATE_RENDERING_WIDTH / 2 
-                                          + to.getX() + TM_State.STATE_RENDERING_WIDTH / 2), 
-                2.0 * mid.getY() - 0.5 * (from.getY() + TM_State.STATE_RENDERING_WIDTH / 2 
-                                          + to.getY() + TM_State.STATE_RENDERING_WIDTH / 2));
+                2.0 * mid.getX() - 0.5 * (from.getX() + State.STATE_RENDERING_WIDTH / 2 
+                                          + to.getX() + State.STATE_RENDERING_WIDTH / 2), 
+                2.0 * mid.getY() - 0.5 * (from.getY() + State.STATE_RENDERING_WIDTH / 2 
+                                          + to.getY() + State.STATE_RENDERING_WIDTH / 2));
         }
     }
 
@@ -166,7 +166,7 @@ public abstract class Spline
      * @param to The state the spline is arriving at.
      * @return A vector tangent to the midpoint.
      */
-    public static Point2D getMidPointTangentVector(Point2D ctrl, Point2D mid, TM_State from, TM_State to)
+    public static Point2D getMidPointTangentVector(Point2D ctrl, Point2D mid, State from, State to)
     {
         // NOTE: Although we could derive either ctrl or mid from each other, the current decision
         // is to have the user pass both. The reason is, the caller already has ctrl, and needs mid
@@ -178,8 +178,8 @@ public abstract class Spline
             // In a loop, the vector between the state and the control point is tangential to the
             // control point
             Point2D startOfCurve = new Point2D.Double(
-                    from.getX() + TM_State.STATE_RENDERING_WIDTH / 2,
-                    from.getY() + TM_State.STATE_RENDERING_WIDTH /2);
+                    from.getX() + State.STATE_RENDERING_WIDTH / 2,
+                    from.getY() + State.STATE_RENDERING_WIDTH /2);
             Point2D vectorToArrow = new Point2D.Double(
                     mid.getX() - startOfCurve.getX(),
                     mid.getY() - startOfCurve.getY());

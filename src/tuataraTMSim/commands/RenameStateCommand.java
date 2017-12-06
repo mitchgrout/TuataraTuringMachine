@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the label of a state.
@@ -40,7 +40,7 @@ public class RenameStateCommand implements TMCommand
      * @param state The state to rename.
      * @param label The new label for the state.
      */
-    public RenameStateCommand(TMGraphicsPanel panel, TM_State state, String label)
+    public RenameStateCommand(MachineGraphicsPanel panel, State state, String label)
     {
         m_panel = panel;
         m_state = state;
@@ -80,12 +80,12 @@ public class RenameStateCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The state to rename.
      */
-    private TM_State m_state;
+    private State m_state;
     
     /**
      * The new label for m_state.

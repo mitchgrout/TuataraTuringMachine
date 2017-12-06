@@ -38,13 +38,13 @@ import javax.swing.JViewport;
  * An internal frame containing a panel for displaying a machine.
  * @author Jimmy
  */
-public class TMInternalFrame extends JInternalFrame
+public class MachineInternalFrame extends JInternalFrame
 { 
     /** 
-     * Creates a new instance of TMInternalFrame.
+     * Creates a new instance of MachineInternalFrame.
      * @param gfxPanel The current graphics panel.
      */
-    public TMInternalFrame(TMGraphicsPanel gfxPanel)
+    public MachineInternalFrame(MachineGraphicsPanel gfxPanel)
     {
         // TODO: Justify this super call's arguments.
         super("hello",true,true,true, true);
@@ -89,7 +89,7 @@ public class TMInternalFrame extends JInternalFrame
      * Gets the current graphics panel.
      * @return The current graphics panel
      */
-    public TMGraphicsPanel getGfxPanel()
+    public MachineGraphicsPanel getGfxPanel()
     {
         return m_gfxPanel;
     }
@@ -144,7 +144,7 @@ public class TMInternalFrame extends JInternalFrame
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_gfxPanel;
+    private MachineGraphicsPanel m_gfxPanel;
 
     /**
      * The scroll panel to track.

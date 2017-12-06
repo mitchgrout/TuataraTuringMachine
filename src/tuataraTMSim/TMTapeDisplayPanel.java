@@ -30,7 +30,7 @@ import java.awt.event.*;
 import java.awt.geom.*;
 import java.io.File;
 import javax.swing.*;
-import tuataraTMSim.TM.Tape;
+import tuataraTMSim.machine.Tape;
 
 /** 
  * A panel for displaying a Turing machine tape. Does not include any buttons, just the tape.
@@ -310,12 +310,12 @@ public class TMTapeDisplayPanel extends JPanel
     
     /** 
      * Serialize and save the tape to persistent storage.
-     * @param file The filename to save to.
+     * @param file The file to save to.
      * @return true if the tape was saved successfully, false otherwise.
      */
-    public boolean saveTapeAs(String file)
+    public boolean saveTapeAs(File file)
     {
-        m_file = new File(file);
+        m_file = file;
         return Tape.saveTape(m_tape, file);
     }
     
@@ -333,15 +333,15 @@ public class TMTapeDisplayPanel extends JPanel
         {
             return false;
         }
-        return Tape.saveTape(m_tape, m_file.toString());
+        return Tape.saveTape(m_tape, m_file);
     }
 
     /**
      * Load and deserialize a tape from persistent storage.
-     * @param file The filename of the saved tape.
+     * @param file The file of the saved tape.
      * @return true if the tape was loaded successfully, false otherwise.
      */
-    public boolean loadTape(String file)
+    public boolean loadTape(File file)
     {
         Tape t = Tape.loadTape(file);
         if (t == null)
@@ -381,7 +381,7 @@ public class TMTapeDisplayPanel extends JPanel
             m_tape.clearTape();
             return;
         }
-        if (!loadTape(m_file.toString()))
+        if (!loadTape(m_file))
         {
             JOptionPane.showMessageDialog(null, "Error reloading " + m_file.toString(), "Loading tape", JOptionPane.ERROR_MESSAGE);
         }

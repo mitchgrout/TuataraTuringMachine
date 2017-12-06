@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with adding new states to a machine.
@@ -39,7 +39,7 @@ public class AddStateCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param state The state to add.
      */
-    public AddStateCommand(TMGraphicsPanel panel, TM_State state)
+    public AddStateCommand(MachineGraphicsPanel panel, State state)
     {
         m_panel = panel;
         m_state = state;
@@ -68,10 +68,6 @@ public class AddStateCommand implements TMCommand
             // Computation can't continue if we deleted the current state
             m_panel.getSimulator().resetMachine(); 
         }
-        else
-        {
-            m_panel.getSimulator().computeNextTransition();
-        }
     }
     
     /**
@@ -86,10 +82,10 @@ public class AddStateCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * The state to add or remove.
      */
-    private TM_State m_state;
+    private State m_state;
 }

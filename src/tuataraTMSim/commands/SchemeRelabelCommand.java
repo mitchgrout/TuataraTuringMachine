@@ -25,11 +25,11 @@
 
 package tuataraTMSim.commands;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import tuataraTMSim.NamingScheme;
-import tuataraTMSim.TMGraphicsPanel;
-import tuataraTMSim.TM.TM_State;
+import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the label of all states in a machine to conform to the naming
@@ -42,14 +42,18 @@ public class SchemeRelabelCommand implements TMCommand
      * @param panel The current graphics panel.
      * @param scheme The new naming scheme for the machine.
      */
-    public SchemeRelabelCommand(TMGraphicsPanel panel, NamingScheme scheme)
+    public SchemeRelabelCommand(MachineGraphicsPanel panel, NamingScheme scheme)
     {
         m_panel  = panel;
         m_scheme = scheme;
 
         // Keep track of all old labels
-        m_oldLabels = new HashMap<TM_State, String>();
-        for (TM_State s : m_panel.getSimulator().getMachine().getStates())
+        m_oldLabels = new HashMap<State, String>();
+        
+        // NOTE: Compiler complains about [...].getStates() returning an Object, not a State, if
+        //       this expression is put directly in the foreach. [ Bug? ]
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
+        for (State s : states)
         {
             m_oldLabels.put(s, s.getLabel());
         }
@@ -60,13 +64,13 @@ public class SchemeRelabelCommand implements TMCommand
      */
     public void doCommand()
     {
-        ArrayList<TM_State> states = m_panel.getSimulator().getMachine().getStates();
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
         int counter;
         switch(m_scheme)
         {
             case GENERAL:
                 counter = 0;
-                for (TM_State s : states)
+                for (State s : states)
                 {
                     s.setLabel(String.format("q%d", counter));
                     counter++;
@@ -76,7 +80,7 @@ public class SchemeRelabelCommand implements TMCommand
             case NORMALIZED:
                 counter = 1;
                 int size = states.size();
-                for (TM_State s : states)
+                for (State s : states)
                 {
                     if (s.isStartState())
                     {
@@ -103,7 +107,10 @@ public class SchemeRelabelCommand implements TMCommand
      */
     public void undoCommand()
     {
-        for (TM_State s : m_panel.getSimulator().getMachine().getStates())
+        // NOTE: Compiler complains about [...].getStates() returning an Object, not a State, if
+        //       this expression is put directly in the foreach. [ Bug? ]
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
+        for (State s : states)
         {
             s.setLabel(m_oldLabels.get(s));
         }
@@ -121,7 +128,7 @@ public class SchemeRelabelCommand implements TMCommand
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
    
     /**
      * The naming scheme for states.
@@ -131,5 +138,5 @@ public class SchemeRelabelCommand implements TMCommand
     /**
      * A mapping between states and their old labels.
      */
-    private HashMap<TM_State, String> m_oldLabels;
+    private HashMap<State, String> m_oldLabels;
 }

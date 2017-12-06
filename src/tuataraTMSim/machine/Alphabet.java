@@ -23,9 +23,10 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.TM;
+package tuataraTMSim.machine;
 
 import java.io.Serializable;
+import tuataraTMSim.machine.TM.TM_Machine; // !!!
 
 /**
  * Represents a collection of symbols which can appear on a Tape.
@@ -55,9 +56,9 @@ public class Alphabet implements Serializable, Cloneable
         c = Character.toUpperCase(c);
         
         // Can't be in the alphabet
-        if (c == TMachine.EMPTY_ACTION_SYMBOL ||
-            c == TMachine.UNDEFINED_SYMBOL ||
-            c == TMachine.OTHERWISE_SYMBOL)
+        if (c == TM_Machine.EMPTY_ACTION_SYMBOL ||
+            c == TM_Machine.UNDEFINED_SYMBOL ||
+            c == TM_Machine.OTHERWISE_SYMBOL)
         {
             return false;
         }
