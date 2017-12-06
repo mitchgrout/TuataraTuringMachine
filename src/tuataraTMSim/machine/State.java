@@ -227,14 +227,14 @@ public abstract class State<
     public abstract Collection<TRANSITION> getTransitions();
 
     /**
-     * Adds an outgoing transition from this state. It is suggested to use the TMachine object's
+     * Adds an outgoing transition from this state. It is suggested to use the Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to add to the state.
      */
     public abstract void addTransition(TRANSITION tr);
 
     /**
-     * Removes an outgoing transition from this state. It is suggested to use the TMachine object's
+     * Removes an outgoing transition from this state. It is suggested to use the Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to remove from the state.
      */

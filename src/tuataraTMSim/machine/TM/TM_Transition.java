@@ -37,7 +37,7 @@ import tuataraTMSim.Spline;
  * Represents a transition in a Turing machine.
  * @author Jimmy
  */
-public class TM_Transition extends Transition<TM_Action, TM_State, TMachine, TM_Simulator> 
+public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, TM_Simulator> 
     implements Serializable
 {
     /**

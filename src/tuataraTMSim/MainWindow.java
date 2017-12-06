@@ -408,7 +408,7 @@ public class MainWindow extends JFrame
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
         
         // Make a state diagram window as the default for the desktop pane
-        JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
+        JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
         m_desktopPane.add(iFrame);      
         m_desktopPane.setSelectedFrame(iFrame);
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
@@ -784,7 +784,7 @@ public class MainWindow extends JFrame
      * @param file The file associated with the machine.
      * @return A frame used to render the machine.
      */
-    private MachineInternalFrame newMachineWindow(TMachine myTM, File file)
+    private MachineInternalFrame newMachineWindow(TM_Machine myTM, File file)
     {
         final TMGraphicsPanel gfxPanel = new TMGraphicsPanel(myTM, m_tape, file, this);
         gfxPanel.setUIMode(m_currentMode);
@@ -883,7 +883,7 @@ public class MainWindow extends JFrame
                     "Closing window", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
-                TMachine machine = gfxPanel.getSimulator().getMachine();
+                TM_Machine machine = gfxPanel.getSimulator().getMachine();
                 File outFile = gfxPanel.getFile();
                 boolean saveSuccessful = false;
                 if (outFile == null)
@@ -897,7 +897,7 @@ public class MainWindow extends JFrame
                     }
                 }
 
-                if (TMachine.saveMachine(machine, outFile))
+                if (TM_Machine.saveMachine(machine, outFile))
                 {
                     iFrame.dispose();
                     return true;
@@ -1205,8 +1205,8 @@ public class MainWindow extends JFrame
                 m_console.log("Cancelled saving machine");
                 return false;
             }
-            TMachine machine = panel.getSimulator().getMachine();
-            boolean result = TMachine.saveMachine(machine, outFile);
+            TM_Machine machine = panel.getSimulator().getMachine();
+            boolean result = TM_Machine.saveMachine(machine, outFile);
             if (result == false)
             {
                 throw new IOException(outFile.toString());
@@ -1534,7 +1534,7 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = newMachineWindow(new TMachine(), null);
+                JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
                 m_desktopPane.add(iFrame);
                 try { iFrame.setSelected(true); }
                 catch (PropertyVetoException e2) { }
@@ -1576,7 +1576,7 @@ public class MainWindow extends JFrame
             }
             try
             {
-                TMachine machine = (TMachine)TMachine.loadMachine(inFile);
+                TM_Machine machine = (TM_Machine)TM_Machine.loadMachine(inFile);
                 if (machine == null)
                 {
                     throw new IOException(inFile.toString());
@@ -1637,7 +1637,7 @@ public class MainWindow extends JFrame
                 return;
             }
 
-            TMachine machine = panel.getSimulator().getMachine();
+            TM_Machine machine = panel.getSimulator().getMachine();
             File outFile = panel.getFile();
             try
             {
@@ -1652,7 +1652,7 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!TMachine.saveMachine(machine, outFile))
+                if (!TM_Machine.saveMachine(machine, outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
@@ -2054,7 +2054,7 @@ public class MainWindow extends JFrame
                 TMGraphicsPanel panel = getSelectedGraphicsPanel();
                 if (panel != null)
                 {
-                    TMachine machine = panel.getSimulator().getMachine();
+                    TM_Machine machine = panel.getSimulator().getMachine();
                     switch (panel.getSimulator().getMachine().getNamingScheme())
                     {
                         case GENERAL:

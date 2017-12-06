@@ -35,14 +35,14 @@ import tuataraTMSim.machine.*;
  * machine prior to execution.
  * @author Jimmy
  */
-public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, TMachine>
+public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, TM_Machine>
 {  
     /**
      * Creates a new instance of TM_Simulator.
      * @param machine The machine to simulate.
      * @param tape The tape which the machine will read from.
      */
-    public TM_Simulator(TMachine machine, Tape tape)
+    public TM_Simulator(TM_Machine machine, Tape tape)
     {
         super(tape);
         m_machine = machine;
@@ -52,7 +52,7 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
      * Gets the machine that is being simulated.
      * @return The machine being simulated.
      */
-    public TMachine getMachine()
+    public TM_Machine getMachine()
     {
         return m_machine;
     }
@@ -131,7 +131,7 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
                 return t;
             }
             // A non-exact match; we will keep track of this
-            else if (inp == TMachine.OTHERWISE_SYMBOL)
+            else if (inp == TM_Machine.OTHERWISE_SYMBOL)
             {
                 otherwise = t;
             }
@@ -224,7 +224,7 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     /**
      * The machine being simulated.
      */
-    protected TMachine m_machine;
+    protected TM_Machine m_machine;
 
     /**
      * The current state the machine is in.

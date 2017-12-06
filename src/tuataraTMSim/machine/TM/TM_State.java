@@ -37,7 +37,7 @@ import tuataraTMSim.machine.*;
  * Represents a state in a Turing machine.
  * @author Jimmy
  */
-public class TM_State extends State<TM_Action, TM_Transition, TMachine, TM_Simulator>
+public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Simulator>
     implements Serializable
 {
     /**
@@ -85,7 +85,7 @@ public class TM_State extends State<TM_Action, TM_Transition, TMachine, TM_Simul
     }
     
     /**
-     * Adds an outgoing transition from this state. It is suggested to use the TMachine object's
+     * Adds an outgoing transition from this state. It is suggested to use the TM_Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to add to the state.
      */
@@ -95,7 +95,7 @@ public class TM_State extends State<TM_Action, TM_Transition, TMachine, TM_Simul
     }
     
     /**
-     * Removes an outgoing transition from this state. It is suggested to use the TMachine object's
+     * Removes an outgoing transition from this state. It is suggested to use the TM_Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to remove from the state.
      */
@@ -122,5 +122,5 @@ public class TM_State extends State<TM_Action, TM_Transition, TMachine, TM_Simul
     // /**
     //  * The submachine associated with this state.
     //  */
-    // protected TMachine m_subMachine;
+    // protected TM_Machine m_subMachine;
 }

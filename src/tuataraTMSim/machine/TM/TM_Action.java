@@ -106,7 +106,7 @@ public class TM_Action extends PreAction implements Serializable
         {
             t.headRight();
         }
-        else if (m_outputChar != TMachine.EMPTY_ACTION_SYMBOL)
+        else if (m_outputChar != TM_Machine.EMPTY_ACTION_SYMBOL)
         {
             t.write(m_outputChar);
         }

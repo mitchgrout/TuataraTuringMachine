@@ -40,7 +40,7 @@ import tuataraTMSim.TMGraphicsPanel;
  * particular the set of states and transitions, but does not contain any configuration (execution
  * state) information. All simulation interaction should be done via TM_Simulator.  The machine is
  * not guaranteed to be deterministic at all times, but can be assured to be deterministic by
- * calling TMachine.validate().
+ * calling TM_Machine.validate().
  * We will use the following definition for a Turing machine:
  * M = (Q, d, q0, qf, X), where
  * - Q is a finite set of states
@@ -51,7 +51,7 @@ import tuataraTMSim.TMGraphicsPanel;
  * - d(qf, x) is undefined for all x in X
  * @author Jimmy
  */
-public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Simulator>
+public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_Simulator>
     implements Serializable
 {
     /**
@@ -65,12 +65,12 @@ public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Sim
     public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
     
     /**
-     * Creates a new instance of TMachine
+     * Creates a new instance of TM_Machine
      * @param states The set of states.
      * @param transitions The set of transitions.
      * @param alphabet The tape alphabet.
      */
-    public TMachine(ArrayList<TM_State> states, ArrayList<TM_Transition> transitions, Alphabet alphabet)
+    public TM_Machine(ArrayList<TM_State> states, ArrayList<TM_Transition> transitions, Alphabet alphabet)
     {
         super(alphabet);
         m_states = states;
@@ -79,15 +79,15 @@ public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Sim
     }
     
     /**
-     * Creates a new instance of TMachine, with no states, transitions, and a default alphabet.
+     * Creates a new instance of TM_Machine, with no states, transitions, and a default alphabet.
      */
-    public TMachine()
+    public TM_Machine()
     {
         this(new ArrayList<TM_State>(), new ArrayList<TM_Transition>(), new Alphabet());
     }
 
     /**
-     * Ensures this TMachine is valid. This must include the following checks:
+     * Ensures this TM_Machine is valid. This must include the following checks:
      * - There is a unique start state.
      * - There is a unique halt state.
      * - No transitions leave the halt state.
@@ -153,7 +153,7 @@ public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Sim
                 }
             }
 
-            // Ensure no transitions are undefined (TMachine.UNDEFINED_SYMBOL), no duplicate transitions,
+            // Ensure no transitions are undefined (TM_Machine.UNDEFINED_SYMBOL), no duplicate transitions,
             // no transitions outside of our alphabet.
             ArrayList<Character> usedSymbols = new ArrayList<Character>();
             for(TM_Transition tr : transitions)
@@ -212,7 +212,7 @@ public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Sim
     }
 
     /**
-     * Change the state of this TMachine to invalid. This means that the next call to validate()
+     * Change the state of this TM_Machine to invalid. This means that the next call to validate()
      * will force the entire check to be performed, instead of being predicated on m_validated.
      * This should be called outside this class when one of the underlying states is toggled to be a
      * start state or accepting state.
@@ -426,16 +426,16 @@ public class TMachine extends Machine<TM_Action, TM_Transition, TM_State, TM_Sim
 
         // Determine if input is inconsistent
         if (!alph.containsSymbol(inp) &&
-            inp != TMachine.UNDEFINED_SYMBOL &&
-            inp != TMachine.OTHERWISE_SYMBOL)
+            inp != TM_Machine.UNDEFINED_SYMBOL &&
+            inp != TM_Machine.OTHERWISE_SYMBOL)
         {
             return false;
         }
         // Determine if action is inconsistent
         else if (act.movesHead() &&
                  !alph.containsSymbol(out) &&
-                 out != TMachine.UNDEFINED_SYMBOL &&
-                 out != TMachine.EMPTY_ACTION_SYMBOL)
+                 out != TM_Machine.UNDEFINED_SYMBOL &&
+                 out != TM_Machine.EMPTY_ACTION_SYMBOL)
         {
             return false;
         }

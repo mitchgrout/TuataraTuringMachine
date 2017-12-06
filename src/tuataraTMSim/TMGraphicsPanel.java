@@ -43,7 +43,7 @@ import tuataraTMSim.machine.TM.*;
  * @author Jimmy
  */
 public class TMGraphicsPanel 
-    extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TMachine, TM_Simulator>
+    extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TM_Machine, TM_Simulator>
 {
     final float dash1[] = {3.0f};
     final BasicStroke dashed = new BasicStroke(1.0f, 
@@ -60,7 +60,7 @@ public class TMGraphicsPanel
      * @param file The file the machine is associated with.
      * @param mainWindow The main window.
      */
-    public TMGraphicsPanel(TMachine machine, Tape tape, File file, MainWindow mainWindow)
+    public TMGraphicsPanel(TM_Machine machine, Tape tape, File file, MainWindow mainWindow)
     {
         // TODO: Move to MachineGraphicsPanel
         m_sim = new TM_Simulator(machine, tape);
@@ -107,14 +107,14 @@ public class TMGraphicsPanel
                             "' cannot be used as an input symbol!", "Update transition properties", 
                             JOptionPane.WARNING_MESSAGE);
                 }
-                else if (c == TMachine.OTHERWISE_SYMBOL)
+                else if (c == TM_Machine.OTHERWISE_SYMBOL)
                 {
                     doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), 
-                                TMachine.OTHERWISE_SYMBOL));
+                                TM_Machine.OTHERWISE_SYMBOL));
                 }
                 else if (c == 'E' && e.isShiftDown())
                 {
-                    JOptionPane.showMessageDialog(null,"'" + TMachine.EMPTY_ACTION_SYMBOL +
+                    JOptionPane.showMessageDialog(null,"'" + TM_Machine.EMPTY_ACTION_SYMBOL +
                             "' cannot be used as an input symbol!", "Update transition properties", 
                             JOptionPane.WARNING_MESSAGE);
                 }
@@ -159,7 +159,7 @@ public class TMGraphicsPanel
                 {
                     doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(), 
                                 new TM_Action(0, getSelectedTransition().getAction().getInputChar(),
-                                    TMachine.EMPTY_ACTION_SYMBOL)));
+                                    TM_Machine.EMPTY_ACTION_SYMBOL)));
                 }
                 else if (Character.isLetterOrDigit(c)  && getAlphabet().containsSymbol(c))
                 {
