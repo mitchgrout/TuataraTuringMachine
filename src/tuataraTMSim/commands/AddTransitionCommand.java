@@ -26,6 +26,7 @@
 package tuataraTMSim.commands;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 import tuataraTMSim.Spline;
 import tuataraTMSim.MachineGraphicsPanel;
 import tuataraTMSim.machine.State;
@@ -65,18 +66,22 @@ public class AddTransitionCommand implements TMCommand
 
         // Count how many transitions there are between the two states
         int numTransitions = 1;
-        for (Object o : m_transition.getFromState().getTransitions())
+
+        // NOTE: Compiler complains about [...].getTransitions() returning na Object, not a
+        //       Transition, if this expression is put directly in the foreach. [ Bug? ]
+        Collection<Transition> transitions = m_transition.getFromState().getTransitions();
+        for (Transition t : transitions)
         {
-            Transition t = (Transition)o;
             if (t.getToState() == m_transition.getToState())
             {
                 numTransitions++;
             }
         }
-        
-        for (Object o : m_transition.getToState().getTransitions())
+      
+        // Ditto
+        transitions = m_transition.getToState().getTransitions();
+        for (Transition t : transitions)
         {
-            Transition t = (Transition)o;
             if (t.getToState() == m_transition.getFromState())
             {
                 numTransitions++;

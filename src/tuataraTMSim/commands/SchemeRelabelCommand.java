@@ -25,7 +25,7 @@
 
 package tuataraTMSim.commands;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import tuataraTMSim.NamingScheme;
 import tuataraTMSim.MachineGraphicsPanel;
@@ -49,9 +49,12 @@ public class SchemeRelabelCommand implements TMCommand
 
         // Keep track of all old labels
         m_oldLabels = new HashMap<State, String>();
-        for (Object o : m_panel.getSimulator().getMachine().getStates())
+        
+        // NOTE: Compiler complains about [...].getStates() returning an Object, not a State, if
+        //       this expression is put directly in the foreach. [ Bug? ]
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
+        for (State s : states)
         {
-            State s = (State)o;
             m_oldLabels.put(s, s.getLabel());
         }
     }
@@ -61,7 +64,7 @@ public class SchemeRelabelCommand implements TMCommand
      */
     public void doCommand()
     {
-        ArrayList<State> states = (ArrayList<State>)m_panel.getSimulator().getMachine().getStates();
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
         int counter;
         switch(m_scheme)
         {
@@ -104,9 +107,11 @@ public class SchemeRelabelCommand implements TMCommand
      */
     public void undoCommand()
     {
-        for (Object o : m_panel.getSimulator().getMachine().getStates())
+        // NOTE: Compiler complains about [...].getStates() returning an Object, not a State, if
+        //       this expression is put directly in the foreach. [ Bug? ]
+        Collection<State> states = m_panel.getSimulator().getMachine().getStates();
+        for (State s : states)
         {
-            State s = (State)o;
             s.setLabel(m_oldLabels.get(s));
         }
     }
