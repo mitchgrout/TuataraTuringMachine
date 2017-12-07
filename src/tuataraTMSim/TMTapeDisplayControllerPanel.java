@@ -77,7 +77,7 @@ public class TMTapeDisplayControllerPanel extends JPanel
         {
             public void mousePressed(MouseEvent e)
             {
-                TMGraphicsPanel gfx = m_mainWindow.getSelectedGraphicsPanel();
+                MachineGraphicsPanel gfx = m_mainWindow.getSelectedGraphicsPanel();
                 if (gfx != null)
                 {
                     gfx.deselectSymbol();

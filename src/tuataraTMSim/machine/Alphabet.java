@@ -45,7 +45,32 @@ public class Alphabet implements Serializable, Cloneable
         setSymbol('0', true);
         setSymbol('1', true);
     }
-    
+
+    /**
+     * Get a character array containing all symbols which are deemed to be in this alphabet.
+     * @return An array containing all symbols in this alphabet.
+     */
+    public char[] getSymbols()
+    {
+        // TODO: Can we make this better?
+        String buf = "";
+        for (int i = 0; i < m_letters.length; i++)
+        {
+            if (m_letters[i])
+            {
+                buf += (char)(i + 'A');
+            }
+        }
+        for (int i = 0; i < m_digits.length; i++)
+        {
+            if (m_digits[i])
+            {
+                buf += (char)(i + '0');
+            }
+        }
+        return buf.toCharArray();
+    }
+
     /**
      * Determine if this alphabet contains the given symbol.
      * @param c The symbol to check.

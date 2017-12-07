@@ -36,26 +36,26 @@ import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.machine.*;
-import tuataraTMSim.machine.TM.*;
+import tuataraTMSim.machine.DFSA.*;
 
 /**
- * The canvas for drawing a Turing machine state diagram.
+ * The canvas for drawing a DFSA state diagram.
  * @author Jimmy
  */
-public class TMGraphicsPanel 
-    extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TM_Machine, TM_Simulator>
+public class DFSAGraphicsPanel 
+    extends MachineGraphicsPanel<DFSA_Action, DFSA_Transition, DFSA_State, DFSA_Machine, DFSA_Simulator>
 {
     /**
-     * Creates a new instance of TMGraphicsPanel. 
+     * Creates a new instance of DFSAGraphicsPanel. 
      * @param machine A non-null reference to a machine to render.
      * @param tape A non-null reference to a tape for the machine to use.
      * @param file The file the machine is associated with.
      * @param mainWindow The main window.
      */
-    public TMGraphicsPanel(TM_Machine machine, Tape tape, File file, MainWindow mainWindow)
+    public DFSAGraphicsPanel(DFSA_Machine machine, Tape tape, File file, MainWindow mainWindow)
     {
         // TODO: Move to MachineGraphicsPanel
-        m_sim = new TM_Simulator(machine, tape);
+        m_sim = new DFSA_Simulator(machine, tape);
         m_file = file;
         m_labelsUsed = m_sim.getMachine().getLabelHashset();
         m_mainWindow = mainWindow;
@@ -66,7 +66,7 @@ public class TMGraphicsPanel
      * Get the simulator object for the machine associated with this panel.
      * @return The simulator object for the machine.
      */
-    public TM_Simulator getSimulator()
+    public DFSA_Simulator getSimulator()
     {
         return m_sim;
     }
@@ -79,110 +79,39 @@ public class TMGraphicsPanel
      */
     public boolean handleKeyEvent(KeyEvent e)
     {
-        if (selectedSymbolBoundingBox != null && getSelectedTransition() != null)
+        if (selectedSymbolBoundingBox == null || getSelectedTransition() == null)
         {
-            // There is a transition action currently selected by the user.
-            char c = e.getKeyChar();
-            c = Character.toUpperCase(c);
-
-            if (inputSymbolSelected)
-            {
-                if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_LEFT)
-                {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Action.LEFT_ARROW +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                }
-                if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_RIGHT)
-                {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Action.RIGHT_ARROW +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                }
-                else if (c == TM_Machine.OTHERWISE_SYMBOL)
-                {
-                    doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), 
-                                TM_Machine.OTHERWISE_SYMBOL));
-                }
-                else if (c == 'E' && e.isShiftDown())
-                {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Machine.EMPTY_ACTION_SYMBOL +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                }
-                else if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
-                {
-                    doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), c));
-                }
-                else if ((c == ' ' || c == Tape.BLANK_SYMBOL) && getAlphabet().containsSymbol(Tape.BLANK_SYMBOL))
-                {
-                    doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), Tape.BLANK_SYMBOL));
-                }
-                else if (Character.isLetterOrDigit(c))
-                    JOptionPane.showMessageDialog(null,"The input symbol for this transition"
-                            + " cannot be set to the value '" + c + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                else if (c == ' ' || c == Tape.BLANK_SYMBOL)
-                    JOptionPane.showMessageDialog(null,"The input symbol for this transition"
-                            + " cannot be set to the value '" + Tape.BLANK_SYMBOL +"', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-
-            }
-            else
-            {
-                TM_Action actn = getSelectedTransition().getAction();
-                if (e.isActionKey())
-                {
-                    if (e.getKeyCode() == KeyEvent.VK_LEFT)
-                    {
-                        doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(),
-                                    new TM_Action(-1, getSelectedTransition().getAction().getInputChar(), c)));
-                    }
-                    else
-                        if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-                        {
-                            doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(), 
-                                        new TM_Action(1, getSelectedTransition().getAction().getInputChar(), c)));
-                        }
-                }
-                else if (c == 'E' && e.isShiftDown()) //shift + E makes an epsilon transition
-                {
-                    doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(), 
-                                new TM_Action(0, getSelectedTransition().getAction().getInputChar(),
-                                    TM_Machine.EMPTY_ACTION_SYMBOL)));
-                }
-                else if (Character.isLetterOrDigit(c)  && getAlphabet().containsSymbol(c))
-                {
-                    doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(), 
-                                new TM_Action(0, getSelectedTransition().getAction().getInputChar(), 
-                                    c)));
-                }
-                else if ((c == ' ' || c == Tape.BLANK_SYMBOL) && getAlphabet().containsSymbol(Tape.BLANK_SYMBOL))
-                {
-                    doCommand(new ModifyTransitionActionCommand(this, getSelectedTransition(),
-                                new TM_Action(0, getSelectedTransition().getAction().getInputChar(),
-                                    Tape.BLANK_SYMBOL)));
-                }
-                else if (Character.isLetterOrDigit(c))
-                {
-                    JOptionPane.showMessageDialog(null,"The action symbol for this transition"
-                            + " cannot be set to the value '" + c + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                }
-                else if (c == ' ' || c == Tape.BLANK_SYMBOL)
-                {
-                    JOptionPane.showMessageDialog(null,"The action symbol for this transition"
-                            + " cannot be set to the value '" + Tape.BLANK_SYMBOL + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-                }
-            }
-            return true;
+            return false;
         }
-        return false;
+
+        // There is a transition action currently selected by the user.
+        char c = Character.toUpperCase(e.getKeyChar());
+
+        if (!inputSymbolSelected)
+        {
+            return false;
+        }
+
+        // !!!
+        /*
+        if (c == DFSA_Machine.OTHERWISE_SYMBOL)
+        {
+            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), 
+                        DFSA_Machine.OTHERWISE_SYMBOL));
+        }
+        */
+        if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
+        {
+            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), c));
+        }
+        else if (Character.isLetterOrDigit(c))
+        {
+            JOptionPane.showMessageDialog(null,"The input symbol for this transition"
+                    + " cannot be set to the value '" + c + "', as that symbol is not in "
+                    + "the alphabet for this machine.", "Update transition properties", 
+                    JOptionPane.WARNING_MESSAGE);
+        }
+        return true;
     }
 
     /**
@@ -199,18 +128,18 @@ public class TMGraphicsPanel
             return;
         }
 
-        int x = e.getX() - TM_State.STATE_RENDERING_WIDTH / 2;
-        int y = e.getY() - TM_State.STATE_RENDERING_WIDTH / 2;
+        int x = e.getX() - DFSA_State.STATE_RENDERING_WIDTH / 2;
+        int y = e.getY() - DFSA_State.STATE_RENDERING_WIDTH / 2;
         switch (m_sim.getMachine().getNamingScheme())
         {
             case GENERAL:
                 String label = getFirstFreeName();
-                doCommand(new AddStateCommand(this, new TM_State(label, false, false, x, y)));
+                doCommand(new AddStateCommand(this, new DFSA_State(label, false, false, x, y)));
                 break;
 
             case NORMALIZED:
                 doJoinCommand(
-                        new AddStateCommand(this, new TM_State("", false, false, x, y)),
+                        new AddStateCommand(this, new DFSA_State("", false, false, x, y)),
                         new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
                 break;
         }
@@ -225,11 +154,11 @@ public class TMGraphicsPanel
     {
         if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
         {
-            TM_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
+            DFSA_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
             if (mouseReleasedState != null)
             {
-                TM_Transition newTrans = new TM_Transition((TM_State)mousePressedState, mouseReleasedState,
-                        new TM_Action(0, Machine.UNDEFINED_SYMBOL, Machine.UNDEFINED_SYMBOL));
+                DFSA_Transition newTrans = new DFSA_Transition((DFSA_State)mousePressedState, mouseReleasedState,
+                        new DFSA_Action(Machine.UNDEFINED_SYMBOL));
                 doCommand(new AddTransitionCommand(this, newTrans));
                 repaint();
             }
@@ -302,14 +231,14 @@ public class TMGraphicsPanel
      */
     public void handleEraserClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
             deleteState(stateClickedOn);
         }
         else
         {
-            TM_Transition transitionClickedOn = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            DFSA_Transition transitionClickedOn = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
             if (transitionClickedOn != null)
             {
                 deleteTransition(transitionClickedOn);
@@ -324,7 +253,7 @@ public class TMGraphicsPanel
      */
     protected void handleChooseStartClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
 
         if (stateClickedOn != null)
         {
@@ -350,8 +279,8 @@ public class TMGraphicsPanel
      */
     protected void handleChooseAcceptingClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        TM_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
+        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        DFSA_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
                               null : m_sim.getMachine().getFinalStates().iterator().next();
         if (stateClickedOn != null)
         {
@@ -376,7 +305,7 @@ public class TMGraphicsPanel
      */
     protected void handleSelectionClick(MouseEvent e)
     {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
 
         if (!(e.isControlDown() || e.isShiftDown()))
         {
@@ -400,7 +329,7 @@ public class TMGraphicsPanel
      */
     protected void handleChooseCurrentState(MouseEvent e)
     {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
 
         if (stateClickedOn != null)
         {
@@ -412,5 +341,5 @@ public class TMGraphicsPanel
     /**
      * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
      */
-    protected TM_Simulator m_sim;
+    protected DFSA_Simulator m_sim;
 }

@@ -392,7 +392,8 @@ public abstract class Machine<
      * @throws ComputationCompletedException If after this step, we have finished execution.
      */
     public abstract STATE step(Tape tape, STATE currentState, TRANSITION currentNextTransition)
-        throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException;
+        throws TapeBoundsException, UndefinedTransitionException,
+               ComputationCompletedException, ComputationFailedException;
 
     /**
      * Get a collection containing all states in this machine.

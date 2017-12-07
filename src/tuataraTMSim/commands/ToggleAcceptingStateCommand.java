@@ -54,6 +54,7 @@ public class ToggleAcceptingStateCommand implements TMCommand
      */
     public void doCommand()
     {
+        System.out.println("RUNNING");
         // Changing the accepting state of a machine invalidates it.
         m_panel.getSimulator().getMachine().invalidate();
 

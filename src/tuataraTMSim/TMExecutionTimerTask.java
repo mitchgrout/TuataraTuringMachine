@@ -29,7 +29,6 @@ import java.util.TimerTask;
 import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.Simulator;
-import tuataraTMSim.machine.TM.TM_Simulator;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 
@@ -43,7 +42,7 @@ public class TMExecutionTimerTask extends TimerTask
      * @param tapeDisp The current tape panel.
      * @param window The main window.
      */
-    public TMExecutionTimerTask(TMGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
+    public TMExecutionTimerTask(MachineGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
     {
         m_panel = panel;
         m_tapeDisp = tapeDisp;
@@ -58,7 +57,7 @@ public class TMExecutionTimerTask extends TimerTask
     {
         try
         {
-            TM_Simulator sim = m_panel.getSimulator();
+            Simulator sim = m_panel.getSimulator();
             sim.step();
             m_panel.repaint();
             m_tapeDisp.repaint();
@@ -104,13 +103,22 @@ public class TMExecutionTimerTask extends TimerTask
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
         }
+        catch (ComputationFailedException e)
+        {
+            m_mainWindow.getConsole().endPartial();
+            cancel();
+            m_mainWindow.stopExecution();
+            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.COMPUTATION_FAILED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+            m_panel.getSimulator().resetMachine();
+            m_panel.repaint();
+        }
     }
    
     /**
      * Get the current graphics panel.
      * @return The current graphics panel.
      */
-    public TMGraphicsPanel getPanel()
+    public MachineGraphicsPanel getPanel()
     {
         return m_panel;
     }
@@ -129,7 +137,7 @@ public class TMExecutionTimerTask extends TimerTask
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The current tape panel.

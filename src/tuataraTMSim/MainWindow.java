@@ -40,6 +40,7 @@ import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 import tuataraTMSim.machine.TM.*;
+import tuataraTMSim.machine.DFSA.*;
 
 /**
  * The main window of the program. An MDI interface for building and running turing machines.
@@ -103,6 +104,11 @@ public class MainWindow extends JFrame
     public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
     
     /**
+     * String for computation failure.
+     */
+    public static final String COMPUTATION_FAILED_STR = "The machine halted, but did not complete a computation.";
+
+    /**
      * Delay between steps for slow execution speed.
      */
     public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
@@ -140,12 +146,12 @@ public class MainWindow extends JFrame
     /**
      * Horizontal translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_X = TM_State.STATE_RENDERING_WIDTH * 2;
+    public static final int TRANSLATE_TO_AVOID_STACKING_X = State.STATE_RENDERING_WIDTH * 2;
 
     /**
      * Vertical translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_Y = TM_State.STATE_RENDERING_WIDTH * 2;
+    public static final int TRANSLATE_TO_AVOID_STACKING_Y = State.STATE_RENDERING_WIDTH * 2;
     
     /**
      * Maximum horizontal ratio for new window location.
@@ -187,7 +193,7 @@ public class MainWindow extends JFrame
         {
             public void mousePressed(MouseEvent e)
             {
-                TMGraphicsPanel gfx = getSelectedGraphicsPanel();
+                MachineGraphicsPanel gfx = getSelectedGraphicsPanel();
                 if (gfx != null);
                 {
                     gfx.deselectSymbol();
@@ -206,7 +212,7 @@ public class MainWindow extends JFrame
                {
                    return false;
                }
-               TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+               MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                if (gfxPanel != null && !gfxPanel.getKeyboardEnabled())
                {
                    return false;
@@ -306,7 +312,7 @@ public class MainWindow extends JFrame
             try
             {
                 MachineInternalFrame tmif = (MachineInternalFrame)frame;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineGraphicsPanel panel = (MachineGraphicsPanel)tmif.getGfxPanel();
                 panel.setUIMode(mode);
             }
             catch (ClassCastException e)
@@ -408,7 +414,8 @@ public class MainWindow extends JFrame
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
         
         // Make a state diagram window as the default for the desktop pane
-        JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
+        JInternalFrame iFrame = 
+            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, this));
         m_desktopPane.add(iFrame);      
         m_desktopPane.setSelectedFrame(iFrame);
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
@@ -468,6 +475,7 @@ public class MainWindow extends JFrame
         newSubmenu.setIcon(loadIcon("newMachine.gif"));
         newSubmenu.setMnemonic(KeyEvent.VK_N);
         newSubmenu.add(new JMenuItem(m_newTuringMachineAction));
+        newSubmenu.add(new JMenuItem(m_newDFSAAction));
         fileMenu.add(newSubmenu);
 
         fileMenu.add(new JMenuItem(m_openMachineAction));
@@ -637,10 +645,10 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setText("");
 
         // Machine
-        JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
-        newMachineToolBarButton.setFocusable(false);
-        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        newMachineToolBarButton.setText("");
+        //JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
+        //newMachineToolBarButton.setFocusable(false);
+        //newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        //newMachineToolBarButton.setText("");
         
         JButton openMachineToolBarButton = new JButton(m_openMachineAction);
         openMachineToolBarButton.setFocusable(false);
@@ -743,7 +751,7 @@ public class MainWindow extends JFrame
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
         returner[0].add(saveTapeToolBarButton);
-        returner[0].add(newMachineToolBarButton);
+        //returner[0].add(newMachineToolBarButton);
         returner[0].add(openMachineToolBarButton);
         returner[0].add(saveMachineToolBarButton);
         returner[0].add(cutToolBarButton);
@@ -780,15 +788,12 @@ public class MainWindow extends JFrame
     
     /**
      * Creates a new window displaying a machine.
-     * @param myTM The machine to display.
-     * @param file The file associated with the machine.
-     * @return A frame used to render the machine.
+     * @param gfxPanel The underlying graphics panel.
+     * @return A frame containing the graphics panel.
      */
-    private MachineInternalFrame newMachineWindow(TM_Machine myTM, File file)
+    private MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
-        final TMGraphicsPanel gfxPanel = new TMGraphicsPanel(myTM, m_tape, file, this);
-        gfxPanel.setUIMode(m_currentMode);
-        
+        gfxPanel.setUIMode(m_currentMode); 
         final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
         gfxPanel.setWindow(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
@@ -1036,6 +1041,7 @@ public class MainWindow extends JFrame
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
         m_newTuringMachineAction.setEnabled(isEnabled);
+        m_newDFSAAction.setEnabled(isEnabled);
         m_openMachineAction.setEnabled(isEnabled);
         m_saveMachineAsAction.setEnabled(isEnabled);
         m_saveMachineAction.setEnabled(isEnabled);
@@ -1321,8 +1327,8 @@ public class MainWindow extends JFrame
      * @param numTimesPastedToLastLoc The number of times an item has been pasted to the last pasted location.
      * @param panel The current graphics panel.
      */
-    private void translateCentroidToMiddleOfWindow(Collection<TM_State> states,
-            Collection<TM_Transition> transitions, Point2D centreOfWindow,
+    private void translateCentroidToMiddleOfWindow(Collection<? extends State> states,
+            Collection<? extends Transition> transitions, Point2D centreOfWindow,
             Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
     {
         if (states.size() == 0)
@@ -1337,7 +1343,7 @@ public class MainWindow extends JFrame
         int bottomMostY = Integer.MIN_VALUE;
         int topMostY = Integer.MAX_VALUE;
 
-        for (TM_State s : states)
+        for (State s : states)
         {
             if (s.getX() > rightMostX)
             {
@@ -1371,14 +1377,14 @@ public class MainWindow extends JFrame
             translateVectorY -= topMostY + translateVectorY;
         }
 
-        if (rightMostX + translateVectorX > MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH)
+        if (rightMostX + translateVectorX > MACHINE_CANVAS_SIZE_X - State.STATE_RENDERING_WIDTH)
         {
-            translateVectorX -= rightMostX + translateVectorX - (MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH);
+            translateVectorX -= rightMostX + translateVectorX - (MACHINE_CANVAS_SIZE_X - State.STATE_RENDERING_WIDTH);
         }
 
-        if (bottomMostY + translateVectorY >  MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH)
+        if (bottomMostY + translateVectorY >  MACHINE_CANVAS_SIZE_Y - State.STATE_RENDERING_WIDTH)
         {
-            translateVectorY -= bottomMostY + translateVectorY - (MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH);
+            translateVectorY -= bottomMostY + translateVectorY - (MACHINE_CANVAS_SIZE_Y - State.STATE_RENDERING_WIDTH);
         }
 
         if (lastPastedLoc != null && ((int)lastPastedLoc.getX() == (int)centreOfWindow.getX() + translateVectorX
@@ -1395,14 +1401,14 @@ public class MainWindow extends JFrame
         }
 
 
-        for (TM_State s : states)
+        for (State s : states)
         {
             int newX = (int)(s.getX() + translateVectorX);
             int newY = (int)(s.getY() + translateVectorY);
             s.setPosition(newX, newY);
         }
 
-        for (TM_Transition t : transitions)
+        for (Transition t : transitions)
         {
             int newX = (int)(t.getControlPoint().getX() + translateVectorX);
             int newY = (int)(t.getControlPoint().getY() + translateVectorY);
@@ -1415,15 +1421,15 @@ public class MainWindow extends JFrame
      * @param states The set of states.
      * @return The centroid of the states.
      */
-    private static Point2D computeCentroid(Collection<TM_State> states)
+    private static Point2D computeCentroid(Collection<? extends State> states)
     {
         float totalX = 0;
         float totalY = 0;
 
-        for (TM_State s : states)
+        for (State s : states)
         {
-            totalX += s.getX() + TM_State.STATE_RENDERING_WIDTH / 2; // Use middle of state
-            totalY += s.getY() + TM_State.STATE_RENDERING_WIDTH / 2; // instead of top-left
+            totalX += s.getX() + State.STATE_RENDERING_WIDTH / 2; // Use middle of state
+            totalY += s.getY() + State.STATE_RENDERING_WIDTH / 2; // instead of top-left
         }
         return new Point2D.Float(totalX / states.size(), totalY / states.size());
     }
@@ -1433,7 +1439,7 @@ public class MainWindow extends JFrame
      */
     public void updateUndoActions()
     {
-        TMGraphicsPanel panel = getSelectedGraphicsPanel();
+        MachineGraphicsPanel panel = getSelectedGraphicsPanel();
         if (panel != null && isEditingEnabled())
         {
             String undoCommandName = panel.undoCommandName();
@@ -1485,7 +1491,7 @@ public class MainWindow extends JFrame
      * Gets the graphics panel for the currently selected machine diagram window.
      * @return A reference to the currently selected graphics panel, or null if there is no such panel.
      */
-    public TMGraphicsPanel getSelectedGraphicsPanel()
+    public MachineGraphicsPanel getSelectedGraphicsPanel()
     {
         if (m_desktopPane == null)
         {
@@ -1499,7 +1505,7 @@ public class MainWindow extends JFrame
         try
         {
             MachineInternalFrame tmif = (MachineInternalFrame)selected;
-            return (TMGraphicsPanel)tmif.getGfxPanel();
+            return tmif.getGfxPanel();
         }
         catch (ClassCastException e)
         {
@@ -1521,7 +1527,6 @@ public class MainWindow extends JFrame
         public NewTuringMachineAction(String text, ImageIcon icon)
         {
             super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
@@ -1534,14 +1539,49 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
+                JInternalFrame iFrame = 
+                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, MainWindow.this));
                 m_desktopPane.add(iFrame);
                 try { iFrame.setSelected(true); }
                 catch (PropertyVetoException e2) { }
             }
         }
     }
-    
+
+    /**
+     * Action for creating a new DFSA in a new window.
+     */
+    class NewDFSAAction extends AbstractAction
+    {
+       /**
+         * Creates a new instance of NewDFSAAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
+        public NewDFSAAction(String text, ImageIcon icon)
+        {
+            super(text);
+            putValue(Action.SMALL_ICON, icon);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+       
+        /**
+         * Create a new machine, in a new frame.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            if (m_desktopPane != null)
+            {
+                JInternalFrame iFrame = 
+                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null, MainWindow.this));
+                m_desktopPane.add(iFrame);
+                try { iFrame.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
+        }
+    }
+
     /** 
      * Action for opening/loading a machine diagram.
      */
@@ -1581,7 +1621,8 @@ public class MainWindow extends JFrame
                 {
                     throw new IOException(inFile.toString());
                 }
-                JInternalFrame iFrame = newMachineWindow(machine, inFile);
+                JInternalFrame iFrame = 
+                    newMachineWindow(new TMGraphicsPanel(machine, m_tape, inFile, MainWindow.this));
                 m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
                 try
@@ -1629,7 +1670,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
             if (panel == null)
             {
                 // Whatever we are looking at isn't a TMGraphicsPanel
@@ -1892,7 +1933,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.undoCommand();
@@ -1926,7 +1967,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.redoCommand();
@@ -1961,7 +2002,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {   
             m_copyAction.actionPerformed(e); 
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
             if (panel != null)
             {
                 HashSet<TM_State> selectedStatesCopy = (HashSet<TM_State>)panel.getSelectedStates().clone();
@@ -1996,7 +2037,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
             if (panel != null)
             {
                 copiedData = panel.copySelectedToByteArray();
@@ -2051,7 +2092,7 @@ public class MainWindow extends JFrame
                 translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions, centreOfWindow,
                         tmif.getGfxPanel().getLastPastedLocation(), tmif.getGfxPanel().getNumPastesToSameLocation(),
                         (TMGraphicsPanel)tmif.getGfxPanel());
-                TMGraphicsPanel panel = getSelectedGraphicsPanel();
+                TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
                 if (panel != null)
                 {
                     TM_Machine machine = panel.getSimulator().getMachine();
@@ -2098,7 +2139,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.deleteAllSelected();
@@ -2186,7 +2227,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
             if (gfxPanel == null)
             {
                 return;
@@ -2194,7 +2235,7 @@ public class MainWindow extends JFrame
 
             try
             {
-                TM_Simulator sim = gfxPanel.getSimulator();
+                Simulator sim = gfxPanel.getSimulator();
                 sim.step();
                 tapeDisp.repaint();
                 if (sim.getCurrentState().isFinalState())
@@ -2231,6 +2272,15 @@ public class MainWindow extends JFrame
                 gfxPanel.getSimulator().resetMachine();
                 gfxPanel.repaint();
             }
+            catch (ComputationFailedException e2)
+            {
+                m_console.endPartial();
+                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.COMPUTATION_FAILED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                gfxPanel.getSimulator().resetMachine();
+                gfxPanel.repaint();
+ 
+            
+            }
             repaint();
         }
 
@@ -2264,7 +2314,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         { 
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 if (m_timerTask != null)
@@ -2331,7 +2381,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
             boolean wasRunning = stopExecution();
             if (gfxPanel != null)
             {
@@ -2520,7 +2570,7 @@ public class MainWindow extends JFrame
         
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 m_asif.setPanel(panel);
@@ -2550,7 +2600,7 @@ public class MainWindow extends JFrame
 
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 m_ssif.setPanel(panel);
@@ -2823,9 +2873,14 @@ public class MainWindow extends JFrame
     private ConsoleInternalFrame m_console;
 
     /**
-     * Action for creating a new machine.
+     * Action for creating a new Turing Machine.
      */
     private final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
+
+    /**
+     * Action for creating a new DFSA.
+     */
+    private final Action m_newDFSAAction = new NewDFSAAction("New DFSA", loadIcon("newMachine.gif")); 
 
     /**
      * Action for opening a machine.
