@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.NamingScheme;
 import tuataraTMSim.MachineGraphicsPanel;
+import tuataraTMSim.NamingScheme;
 
 /**
  * A command which deals with changing the naming scheme for a machine. 

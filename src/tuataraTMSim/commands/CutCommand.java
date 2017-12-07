@@ -36,7 +36,6 @@ import tuataraTMSim.machine.Transition;
  */
 public class CutCommand implements TMCommand
 {
-    
     /** 
      * Creates a new instance of CutCommand.
      * @param panel The current graphics panel.
