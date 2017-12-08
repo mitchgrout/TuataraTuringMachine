@@ -2227,7 +2227,6 @@ public class MainWindow extends JFrame
                         JOptionPane.WARNING_MESSAGE);
                 
                 gfxPanel.getSimulator().resetMachine();
-                gfxPanel.repaint();
             }
             catch (ComputationFailedException e2)
             {
@@ -2238,7 +2237,6 @@ public class MainWindow extends JFrame
                         JOptionPane.WARNING_MESSAGE);
                 
                 gfxPanel.getSimulator().resetMachine();
-                gfxPanel.repaint();
             }
             catch (NondeterministicException e2)
             {

@@ -176,12 +176,15 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         // Halted and accepted
         if (currentChar == Tape.BLANK_SYMBOL && currentState.isFinalState())
         {
+            // For convenience, reset after finishing
+            tape.resetRWHead();
             throw new ComputationCompletedException();
         }
         // Halted but not accepted
         else if (currentChar == Tape.BLANK_SYMBOL)
         {
-            // TODO: Tidy
+            // For convenience, reset after finishing
+            tape.resetRWHead();
             throw new ComputationFailedException("Input string was not accepted");
         }
         

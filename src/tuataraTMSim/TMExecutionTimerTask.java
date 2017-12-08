@@ -135,6 +135,7 @@ public class TMExecutionTimerTask extends TimerTask
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
+        m_mainWindow.repaint();
     }
    
     /**
