@@ -62,7 +62,7 @@ public class TMExecutionTimerTask extends TimerTask
             sim.step();
             m_panel.repaint();
             m_tapeDisp.repaint();
-            if (sim.getCurrentState().isFinalState())
+            if (sim.isHalted())
             {
                 m_mainWindow.getConsole().logPartial(m_panel, sim.getConfiguration());
             }
@@ -76,8 +76,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
@@ -88,8 +87,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
@@ -100,8 +98,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
@@ -110,8 +107,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
@@ -120,8 +116,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
@@ -130,8 +125,7 @@ public class TMExecutionTimerTask extends TimerTask
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
             JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }

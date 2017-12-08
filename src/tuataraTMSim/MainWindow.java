@@ -2196,7 +2196,7 @@ public class MainWindow extends JFrame
                 Simulator sim = gfxPanel.getSimulator();
                 sim.step();
                 tapeDisp.repaint();
-                if (sim.getCurrentState().isFinalState())
+                if (sim.isHalted())
                 {
                     m_console.logPartial(gfxPanel, sim.getConfiguration());
                 }
@@ -2205,10 +2205,9 @@ public class MainWindow extends JFrame
                     m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
                 }
             }
-            catch (ComputationCompletedException e2)//|ComputationFailedException e2)
+            catch (ComputationCompletedException e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
@@ -2217,8 +2216,7 @@ public class MainWindow extends JFrame
             }
             catch (ComputationFailedException e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
@@ -2227,32 +2225,28 @@ public class MainWindow extends JFrame
             }
             catch (NondeterministicException e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
             }
             catch (TapeBoundsException e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
             }
             catch (UndefinedTransitionException e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
             }
             catch (Exception e2)
             {
-                m_console.logPartial(gfxPanel, gfxPanel.getErrorMessage(e2));
-                m_console.endPartial();
+                m_console.log(gfxPanel.getErrorMessage(e2));
                 JOptionPane.showMessageDialog(m_parentComponent,
                         gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
                         JOptionPane.WARNING_MESSAGE);
