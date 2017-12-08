@@ -36,7 +36,7 @@ import tuataraTMSim.machine.Tape;
  * A panel for displaying a Turing machine tape. Does not include any buttons, just the tape.
  * @author Jimmy
  */
-public class TMTapeDisplayPanel extends JPanel
+public class TapeDisplayPanel extends JPanel
 { 
     /**
      * Horizontal padding around a tape cell.
@@ -59,10 +59,10 @@ public class TMTapeDisplayPanel extends JPanel
     public static final int TAPEPADDING_Y = 2;
     
     /**
-     * Creates a new instance of TMTapeDisplayPanel.
+     * Creates a new instance of TapeDisplayPanel.
      * @param tape The underlying tape.
      */
-    public TMTapeDisplayPanel(Tape tape)
+    public TapeDisplayPanel(Tape tape)
     {
         m_tape = tape;
         m_file = null;
@@ -70,11 +70,11 @@ public class TMTapeDisplayPanel extends JPanel
     }
     
     /**
-     * Creates a new instance of TMTapeDisplayPanel.
+     * Creates a new instance of TapeDisplayPanel.
      * @param tape The underlying tape.
      * @param file The file associated with the tape.
      */
-    public TMTapeDisplayPanel(Tape tape, File file)
+    public TapeDisplayPanel(Tape tape, File file)
     {
         m_tape = tape;
         m_file = file;

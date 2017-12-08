@@ -35,7 +35,7 @@ import tuataraTMSim.exceptions.TapeBoundsException;
  * A panel containing a tape display panel and some buttons to move the read/write head.
  * @author Jimmy
  */
-public class TMTapeDisplayControllerPanel extends JPanel
+public class TapeDisplayControllerPanel extends JPanel
 {
     /**
      * Number of pixels used for padding between subcomponents.
@@ -43,14 +43,14 @@ public class TMTapeDisplayControllerPanel extends JPanel
     public static final int PADDING = 0;
     
     /**
-     * Creates a new instance of TMTapeDisplayControllerPanel.
+     * Creates a new instance of TapeDisplayControllerPanel.
      * @param tapeDP The tape display panel.
      * @param windowParent The main window.
      * @param headToStartAction Action used to move the read/write head to the start.
      * @param eraseTapeAction Action used to erase the entire tape.
      * @param reloadAction Action used to reload the tape.
      */
-    public TMTapeDisplayControllerPanel(TMTapeDisplayPanel tapeDP, MainWindow windowParent,
+    public TapeDisplayControllerPanel(TapeDisplayPanel tapeDP, MainWindow windowParent,
             Action headToStartAction, Action eraseTapeAction, Action reloadAction)
     {
         m_tapeDP = tapeDP;
@@ -189,7 +189,7 @@ public class TMTapeDisplayControllerPanel extends JPanel
     /**
      * The tape display panel.
      */
-    private TMTapeDisplayPanel m_tapeDP;
+    private TapeDisplayPanel m_tapeDP;
     
     /**
      * The main window.

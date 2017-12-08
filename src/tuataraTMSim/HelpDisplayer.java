@@ -44,12 +44,12 @@ import javax.swing.text.html.HTMLFrameHyperlinkEvent;
  * An extension of a frame which displays help information, stored as HTML.
  * @author Jimmy
  */
-public class TMHelpDisplayer extends JInternalFrame
+public class HelpDisplayer extends JInternalFrame
 {    
     /**
-     * Creates a new instance of TMHelpDisplayer.
+     * Creates a new instance of HelpDisplayer.
      */
-    public TMHelpDisplayer()
+    public HelpDisplayer()
     {
         initialize();
     }
@@ -71,7 +71,7 @@ public class TMHelpDisplayer extends JInternalFrame
             jep.setEditorKit(htmlKit);
             jep.setEditable(false);
             
-            java.net.URL helpURL = TMHelpDisplayer.class.getResource("help/index.html");
+            java.net.URL helpURL = HelpDisplayer.class.getResource("help/index.html");
             if (helpURL != null)
             {
                 try

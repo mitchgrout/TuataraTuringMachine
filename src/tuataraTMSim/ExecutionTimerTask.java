@@ -34,15 +34,15 @@ import tuataraTMSim.machine.Simulator;
  * An extension of a timer task which simulates a machine on a timer. 
  * @author Jimmy
  */
-public class TMExecutionTimerTask extends TimerTask
+public class ExecutionTimerTask extends TimerTask
 {
     /**
-     * Creates a new instance of TMExecutionTimerTask.
+     * Creates a new instance of ExecutionTimerTask.
      * @param panel The current graphics panel.
      * @param tapeDisp The current tape panel.
      * @param window The main window.
      */
-    public TMExecutionTimerTask(MachineGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
+    public ExecutionTimerTask(MachineGraphicsPanel panel, TapeDisplayPanel tapeDisp, MainWindow window)
     {
         m_panel = panel;
         m_tapeDisp = tapeDisp;
@@ -160,7 +160,7 @@ public class TMExecutionTimerTask extends TimerTask
     /**
      * The current tape panel.
      */
-    private TMTapeDisplayPanel m_tapeDisp;
+    private TapeDisplayPanel m_tapeDisp;
 
     /**
      * The main window.

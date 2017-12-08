@@ -320,8 +320,8 @@ public class MainWindow extends JFrame
         
         // Set up the tape and associated controllers
         m_tape.setWindow(this);
-        tapeDisp = new TMTapeDisplayPanel(m_tape);
-        tapeDispController = new TMTapeDisplayControllerPanel(tapeDisp, this, 
+        tapeDisp = new TapeDisplayPanel(m_tape);
+        tapeDispController = new TapeDisplayControllerPanel(tapeDisp, this, 
                 m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
         tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100); 
         tapeDispController.setVisible(true);
@@ -2292,7 +2292,7 @@ public class MainWindow extends JFrame
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new TMExecutionTimerTask(panel, tapeDisp, MainWindow.this);
+                m_timerTask = new ExecutionTimerTask(panel, tapeDisp, MainWindow.this);
                 m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }
@@ -2640,7 +2640,7 @@ public class MainWindow extends JFrame
         {
             if (m_helpDisp == null)
             {
-                m_helpDisp = new TMHelpDisplayer();
+                m_helpDisp = new HelpDisplayer();
                 m_helpDisp.setLayer(60);
             }
             if (!m_helpDisp.isVisible())
@@ -2750,7 +2750,7 @@ public class MainWindow extends JFrame
     /**
      * Timer task used for stepping through a machine on a delay.
      */
-    private TMExecutionTimerTask m_timerTask;
+    private ExecutionTimerTask m_timerTask;
     
     /**
      * Simulation delay associated with the machine, used by m_timerTask.
@@ -2785,12 +2785,12 @@ public class MainWindow extends JFrame
     /**
      * Tape display panel.
      */
-    private TMTapeDisplayPanel tapeDisp;
+    private TapeDisplayPanel tapeDisp;
 
     /**
      * Tape controller.
      */
-    private TMTapeDisplayControllerPanel tapeDispController;
+    private TapeDisplayControllerPanel tapeDispController;
 
     /**
      * Main shared tape.
@@ -2835,7 +2835,7 @@ public class MainWindow extends JFrame
     /**
      * Frame for displaying help information as HTML.
      */
-    private TMHelpDisplayer m_helpDisp;
+    private HelpDisplayer m_helpDisp;
 
     /**
      * Frame for displaying a console window for logging information.
