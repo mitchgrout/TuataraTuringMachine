@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.commands.*;
+import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 import tuataraTMSim.machine.DFSA.*;
 
@@ -336,6 +337,33 @@ public class DFSAGraphicsPanel
             m_sim.setCurrentState(stateClickedOn);
         }
 
+    }
+
+    public String getErrorMessage(ComputationCompletedException e)
+    {
+        return "The input string was accepted.";
+    }
+
+    public String getErrorMessage(ComputationFailedException e)
+    {
+        return "The input string was not accepted.";
+    }
+
+    public String getErrorMessage(NondeterministicException e)
+    {
+        return String.format("The machine could not be validated. %s", e.getMessage());
+    }
+
+    public String getErrorMessage(TapeBoundsException e)
+    {
+        // Unused
+        return null;
+    }
+
+    public String getErrorMessage(UndefinedTransitionException e)
+    {
+        // Unused
+        return null;
     }
 
     /**  

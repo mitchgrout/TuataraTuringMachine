@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.commands.*;
+import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 
 /**
@@ -1197,11 +1198,30 @@ public abstract class MachineGraphicsPanel<
      */
     protected abstract void handleChooseCurrentState(MouseEvent e);
 
+    public abstract String getErrorMessage(ComputationCompletedException e);
+    public abstract String getErrorMessage(ComputationFailedException e);
+    public abstract String getErrorMessage(NondeterministicException e);
+    public abstract String getErrorMessage(TapeBoundsException e);
+    public abstract String getErrorMessage(UndefinedTransitionException e);
+    public String getErrorMessage(Exception e)
+    {
+        return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+    }
+
+
+
+    /**
+     * Build an error message using the given exception specifically for the type of machine being
+     * simulated.
+     * @return An error message specific for the type of machine being simulated.
+     */
+    // public abstract String getErrorMessage(Exception e);
+
     /**
      * Get a friendly name for the type of machine this graphics panel renders.
      * @return A friendly name for the type of machine being stored.
      */
-    protected abstract String getMachineType();
+    public abstract String getMachineType();
 
     /**
      * The current GUI mode.
