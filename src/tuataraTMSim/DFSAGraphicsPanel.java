@@ -338,6 +338,15 @@ public class DFSAGraphicsPanel
 
     }
 
+    /**  
+     * Get a friendly name for the type of machine this graphics panel renders.
+     * @return A friendly name for the type of machine being stored.
+     */
+    public String getMachineType()
+    {
+        return "DFSA";
+    }
+
     /**
      * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
      */

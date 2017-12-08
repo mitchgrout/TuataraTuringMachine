@@ -1198,6 +1198,12 @@ public abstract class MachineGraphicsPanel<
     protected abstract void handleChooseCurrentState(MouseEvent e);
 
     /**
+     * Get a friendly name for the type of machine this graphics panel renders.
+     * @return A friendly name for the type of machine being stored.
+     */
+    protected abstract String getMachineType();
+
+    /**
      * The current GUI mode.
      */
     protected GUI_Mode m_currentMode;

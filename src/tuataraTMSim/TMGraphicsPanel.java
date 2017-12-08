@@ -409,6 +409,15 @@ public class TMGraphicsPanel
 
     }
 
+    /**  
+     * Get a friendly name for the type of machine this graphics panel renders.
+     * @return A friendly name for the type of machine being stored.
+     */
+    public String getMachineType()
+    {
+        return "Turing Machine";
+    }
+
     /**
      * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
      */

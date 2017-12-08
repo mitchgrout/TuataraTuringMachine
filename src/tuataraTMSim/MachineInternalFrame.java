@@ -100,20 +100,10 @@ public class MachineInternalFrame extends JInternalFrame
     public void updateTitle()
     {
         File file = m_gfxPanel.getFile();
-        String titleString = "";
-        if (m_gfxPanel.isModifiedSinceSave())
-        {
-            titleString = "* ";
-        }
-        if (file == null)
-        {
-            titleString += "untitled";
-        }
-        else
-        {
-            titleString += file.getName();
-        }
-        setTitle(titleString);
+        setTitle(String.format("%s%s - [%s]", 
+                    m_gfxPanel.isModifiedSinceSave()? "* " : "",
+                    file == null? "untitled" : file.getName(),
+                    m_gfxPanel.getMachineType()));
     }
     
     /**
