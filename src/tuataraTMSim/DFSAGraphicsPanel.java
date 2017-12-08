@@ -296,13 +296,14 @@ public class DFSAGraphicsPanel
         {
             switch (m_sim.getMachine().getNamingScheme())
             {
+                // NOTE: Passing stateClickedOn twice prevents the old final states from being unset
                 case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(this, finalState, stateClickedOn));
+                    doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn));
                     break;
 
                 case NORMALIZED:
                     doJoinCommand(
-                            new ToggleAcceptingStateCommand(this, finalState, stateClickedOn),
+                            new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn),
                             new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
             }
         }
