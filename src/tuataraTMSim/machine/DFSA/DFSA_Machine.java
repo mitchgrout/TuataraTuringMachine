@@ -45,12 +45,15 @@ import tuataraTMSim.NamingScheme;
  * - X is a finite alphabet, consisting of input characters
  * - d is a total function, with QxX mapping to Q
  * - q0 is the unique start state
- * - F is a subset of Q, denoting the halt states
+ * - F is a subset of Q, denoting the accepting states
  */
 public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_State, DFSA_Simulator>
 {
     /**
-     *
+     * Creates a new instance of DFSA_Machine.
+     * @param states The set of states.
+     * @param transitions The set of transitions.
+     * @param alphabet The tape alphabet.
      */
     public DFSA_Machine(ArrayList<DFSA_State> states, ArrayList<DFSA_Transition> transitions, Alphabet alphabet)
     {
@@ -163,9 +166,10 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      * @param currentNextTransition The next transition to be taken, determined by the value at the
      *                              tape, and the current state.
      * @return The new state that the machine is in after this step.
-     * @throws TapeBoundsException If the action causes the read/write head to fall off the tape.
-     * @throws UndefinedTransitionException If there is no transition to take.
-     * @throws ComputationCompletedException If after this step, we have finished execution.
+     * @throws ComputationCompletedException If after this step, we have finish execution, and
+     *                                       finish in an accepting state.
+     * @throws ComputationFailedException If after this step, we finish execution, but do not finish
+     *                                    in an accepting state.
      */
     public DFSA_State step(Tape tape, DFSA_State currentState, DFSA_Transition currentNextTransition)
         throws ComputationCompletedException, ComputationFailedException

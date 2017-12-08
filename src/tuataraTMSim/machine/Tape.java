@@ -126,10 +126,9 @@ public abstract class Tape implements Serializable
      * Serialize a tape, and write it to persistent storage.
      * @param t The tape to serialize.
      * @param file The file to write to.
-     * @throws IOException If something is thrown by the underlying FileOutputStream.
-     * @throws InvalidClassException If there is an issue with the class.
+     * @return true if the tape is saved successfully, false otherwise.
      */
-    public static boolean saveTape(Tape t, File file)// throws IOException, InvalidClassException
+    public static boolean saveTape(Tape t, File file)
     {
         try
         {
@@ -148,10 +147,8 @@ public abstract class Tape implements Serializable
      * Load and deserialize a tape from persistent storage.
      * @param file The file where the tape was serialized and written to.
      * @return The deserialized tape, or null if the tape was not successfully loaded.
-     * @throws IOException If something is wrong with the underlying FileInputStream.
-     * @throws InvalidClassException If there is an issue with the class.
      */
-    public static Tape loadTape(File file)// throws IOException, InvalidClassException
+    public static Tape loadTape(File file)
     {
         try
         {

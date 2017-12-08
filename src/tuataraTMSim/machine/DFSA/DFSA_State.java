@@ -41,8 +41,8 @@ public class DFSA_State extends State<DFSA_Action, DFSA_Transition, DFSA_Machine
      * @param label The label for the state.
      * @param startState Whether or not this state is the start state.
      * @param finalState Whether or not this state is a final state.
-     * @param x The X ordinate of the state.
-     * @param y The Y ordinate of the state.
+     * @param windowX The X ordinate of the state.
+     * @param windowY The Y ordinate of the state.
      */
     public DFSA_State(String label, boolean startState, boolean finalState, int windowX, int windowY)
     {

@@ -37,7 +37,8 @@ public abstract class Simulator<
     MACHINE extends Machine<PREACTION, TRANSITION, STATE, ?>>
 {  
     /**
-     *
+     * Creates an instance of Simulator.
+     * @param tape The underlying tape.
      */
     public Simulator(Tape tape)
     {
@@ -90,6 +91,7 @@ public abstract class Simulator<
     /**
      * Determine if the machine is in an accepting state.
      * @return true if the machine is in an accepting state, false otherwise.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public abstract boolean isAccepted() throws NondeterministicException;
  
@@ -111,6 +113,7 @@ public abstract class Simulator<
      * @throws TapeBoundsException If the read/write head falls off the tape.
      * @throws UndefinedTransitionException If there is no transition for the machine to take.
      * @throws ComputationCompletedException If execution halts successfully.
+     * @throws ComputationFailedException If execution halts, but the input is not accepted.
      * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public abstract void step() 
@@ -121,6 +124,12 @@ public abstract class Simulator<
      * Runs until the machine halts.
      * @param maxSteps The maximum number of iterations allowed for the computation. A value of zero
      *                 represents no limit. If this number is reached, simulation is aborted.
+     * @return true if the machine halts in a finite amount of steps up until maxSteps, false otherwise.
+     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws UndefinedTransitionException If there is no transition for the machine to take.
+     * @throws ComputationCompletedException If execution halts successfully.
+     * @throws ComputationFailedException If execution halts, but the input is not accepted.
+     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
     public abstract boolean runUntilHalt(int maxSteps) 
         throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException,

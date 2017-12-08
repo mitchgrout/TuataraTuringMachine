@@ -65,7 +65,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
     
     /**
-     * Creates a new instance of TM_Machine
+     * Creates a new instance of TM_Machine.
      * @param states The set of states.
      * @param transitions The set of transitions.
      * @param alphabet The tape alphabet.

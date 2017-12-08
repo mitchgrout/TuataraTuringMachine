@@ -52,7 +52,9 @@ public abstract class Machine<
     public static final char UNDEFINED_SYMBOL = '!';
 
     /**
-     *
+     * Creates an instance of Machine.
+     * @param alphabet The tape alphabet.
+     * @param scheme The naming scheme to use.
      */
     public Machine(Alphabet alphabet, NamingScheme scheme)
     {
@@ -61,7 +63,8 @@ public abstract class Machine<
     }
 
     /**
-     *
+     * Creates an instance of Machine. Uses a general naming scheme.
+     * @param alphabet The tape alphabet.
      */
     public Machine(Alphabet alphabet)
     {
@@ -156,7 +159,7 @@ public abstract class Machine<
     /**
      * Finds the transitions whose 'to' state is the given state.
      * A new ArrayList will be generated each time this is called.
-     * @param state The state which transitions are connected to.
+     * @param s The state which transitions are connected to.
      * @return An ArrayList of transitions connected to the specified state.
      */
     public final ArrayList<TRANSITION> getTransitionsTo(STATE s)
@@ -327,10 +330,9 @@ public abstract class Machine<
      * Serialize a machine, and write it to persistent storage.
      * @param machine The machine to serialize.
      * @param file The file to write to.
-     * @throws IOException If something is thrown by the underlying FileOutputStream.
-     * @throws InvalidClassException If there is an issue with the class.
+     * @return true if the machine is saved successfully, false otherwise.
      */
-    public static final boolean saveMachine(Machine machine, File file)// throws IOException, InvalidClassException
+    public static final boolean saveMachine(Machine machine, File file)
     {
         try
         {
@@ -349,10 +351,8 @@ public abstract class Machine<
      * Load and deserialize a machine from persistent storage.
      * @param file The file where the machine was serialized and written to.
      * @return The deserialized machine.
-     * @throws IOException If something is wrong with the underlying FileInputStream.
-     * @throws InvalidClassException If there is an issue with the class.
      */
-    public static final Machine loadMachine(File file)// throws IOException, InvalidClassException
+    public static final Machine loadMachine(File file)
     {
         try
         {
@@ -389,7 +389,10 @@ public abstract class Machine<
      * @return The new state that the machine is in after this step.
      * @throws TapeBoundsException If the action causes the read/write head to fall off the tape.
      * @throws UndefinedTransitionException If there is no transition to take.
-     * @throws ComputationCompletedException If after this step, we have finished execution.
+     * @throws ComputationCompletedException If after this step, we have finished execution, and the
+     *                                       machine accepts the input.
+     * @throws ComputationFailedException If after this step, we have finished execution, but the
+     *                                    machine fails to accept the input
      */
     public abstract STATE step(Tape tape, STATE currentState, TRANSITION currentNextTransition)
         throws TapeBoundsException, UndefinedTransitionException,
