@@ -63,11 +63,7 @@ public class MainWindow extends JFrame
      * File extension for tapes.
      */
     public static final String TAPE_EXTENSION = ".tap";
-    /**
-     * File extension for machines.
-     */
-    public static final String MACHINE_EXTENSION = ".tm";
-    
+
     /**
      * Internal timer.
      */
@@ -332,16 +328,32 @@ public class MainWindow extends JFrame
         
         // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
         fcMachine.setDialogTitle("Save machine");
+        // TM
         fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
-                return f.isDirectory() || f.getName().endsWith(MACHINE_EXTENSION);
+                return f.isDirectory() || f.getName().endsWith(TMGraphicsPanel.MACHINE_EXT);
             }
             
             public String getDescription()
             {
-                return "Machine files (*.tm)";
+                return String.format("%s files (*%s)", 
+                        TMGraphicsPanel.MACHINE_TYPE, TMGraphicsPanel.MACHINE_EXT);
+            }
+        });
+        // DFSA
+        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        {
+            public boolean accept(File f)
+            {
+                return f.isDirectory() || f.getName().endsWith(DFSAGraphicsPanel.MACHINE_EXT);
+            }
+
+            public String getDescription()
+            {
+                return String.format("%s files (*%s)", 
+                        DFSAGraphicsPanel.MACHINE_TYPE, DFSAGraphicsPanel.MACHINE_EXT);
             }
         });
        
@@ -355,7 +367,7 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Tape files (*.tap)";
+                return String.format("Tape files (*%s)", TAPE_EXTENSION);
             }
         });
         
@@ -842,11 +854,11 @@ public class MainWindow extends JFrame
      */
     private boolean userConfirmSaveModifiedThenClose(MachineInternalFrame iFrame)
     {
-        TMGraphicsPanel gfxPanel = (TMGraphicsPanel)iFrame.getGfxPanel();
+        MachineGraphicsPanel gfxPanel = iFrame.getGfxPanel();
         iFrame.moveToFront();
         if (gfxPanel.isModifiedSinceSave())
         {
-            // TODO: specify which machine
+            // Get the title of the frame, including the machine type
             String name = iFrame.getTitle();
             if (name.startsWith("* "))
             {
@@ -858,12 +870,12 @@ public class MainWindow extends JFrame
                     "Closing window", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
-                TM_Machine machine = gfxPanel.getSimulator().getMachine();
+                Machine machine = gfxPanel.getSimulator().getMachine();
                 File outFile = gfxPanel.getFile();
                 boolean saveSuccessful = false;
                 if (outFile == null)
                 {
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    outFile = chooseSaveFile(fcMachine, "Save Machine", gfxPanel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user
@@ -872,7 +884,7 @@ public class MainWindow extends JFrame
                     }
                 }
 
-                if (TM_Machine.saveMachine(machine, outFile))
+                if (Machine.saveMachine(machine, outFile))
                 {
                     iFrame.dispose();
                     return true;
@@ -1164,45 +1176,6 @@ public class MainWindow extends JFrame
         while (true);
     }
 
-    /**
-     * Save the current machine, by displaying a file dialog.
-     * @param panel The current graphics panel.
-     * @return true if the machine is saved successfully, false otherwise.
-     */
-    public boolean saveMachineAs(TMGraphicsPanel panel)
-    {
-        File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
-        try
-        {
-            outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
-            if (outFile == null)
-            {
-                // Cancelled by user 
-                m_console.log("Cancelled saving machine");
-                return false;
-            }
-            TM_Machine machine = panel.getSimulator().getMachine();
-            boolean result = TM_Machine.saveMachine(machine, outFile);
-            if (result == false)
-            {
-                throw new IOException(outFile.toString());
-            }
-            else
-            {
-                panel.setModifiedSinceSave(false);
-                panel.setFile(outFile);
-            }
-            return true;
-        } 
-        catch (Exception e2)
-        {
-            JOptionPane.showMessageDialog(MainWindow.this, 
-                    String.format("Error saving machine to %s", outFile.toString()));
-            
-            return false;
-        }
-    }
-    
     /** 
      * Determine if editing the machine or tape is enabled
      * @return true if editing is enabled, false otherwise.
@@ -1577,7 +1550,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             // Choose the file to load
-            File inFile = chooseLoadFile(fcMachine, "Load Machine", MACHINE_EXTENSION);
+            File inFile = chooseLoadFile(fcMachine, "Load Machine", "");
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1586,13 +1559,25 @@ public class MainWindow extends JFrame
             }
             try
             {
-                TM_Machine machine = (TM_Machine)TM_Machine.loadMachine(inFile);
+                Machine machine = Machine.loadMachine(inFile);
                 if (machine == null)
                 {
-                    throw new IOException(inFile.toString());
+                    throw new IOException("Failed to load " + inFile.toString());
                 }
-                JInternalFrame iFrame = 
-                    newMachineWindow(new TMGraphicsPanel(machine, m_tape, inFile, MainWindow.this));
+ 
+                // TODO: Can we make this nicer?
+                JInternalFrame iFrame = null;
+                if (machine instanceof TM_Machine)
+                {
+                    iFrame = newMachineWindow(new TMGraphicsPanel(
+                                (TM_Machine)machine, m_tape, inFile, MainWindow.this));
+                    
+                }
+                else if (machine instanceof DFSA_Machine)
+                {
+                    iFrame = newMachineWindow(new DFSAGraphicsPanel(
+                                (DFSA_Machine)machine, m_tape, inFile, MainWindow.this));
+                }
                 m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
                 try
@@ -1640,21 +1625,22 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel == null)
             {
-                // Whatever we are looking at isn't a TMGraphicsPanel
+                // Whatever we are looking at isn't a graphics panel
                 m_console.log("Current window is not a graphics panel; cannot save");
                 return;
             }
 
-            TM_Machine machine = panel.getSimulator().getMachine();
+            Machine machine = panel.getSimulator().getMachine();
             File outFile = panel.getFile();
             try
             {
                 if (m_force || outFile == null)
                 {
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    // !!!
+                    outFile = chooseSaveFile(fcMachine, "Save Machine", panel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -1663,7 +1649,7 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!TM_Machine.saveMachine(machine, outFile))
+                if (!Machine.saveMachine(machine, outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
@@ -1679,7 +1665,8 @@ public class MainWindow extends JFrame
                 JOptionPane.showMessageDialog(MainWindow.this,
                         String.format("Error saving machine to %s", outFile.toString()));
                 m_console.log(String.format("Encountered an error when saving the machine to %s: %s",
-                            outFile.toString(), e2.getMessage())); }
+                            outFile.toString(), e2.getMessage())); 
+            }
         }
 
         /**

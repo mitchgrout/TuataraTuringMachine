@@ -41,11 +41,20 @@ import tuataraTMSim.machine.DFSA.*;
 
 /**
  * The canvas for drawing a DFSA state diagram.
- * @author Jimmy
  */
 public class DFSAGraphicsPanel 
     extends MachineGraphicsPanel<DFSA_Action, DFSA_Transition, DFSA_State, DFSA_Machine, DFSA_Simulator>
 {
+    /**
+     * File extension.
+     */
+    public static final String MACHINE_EXT = ".fsa";
+
+    /**
+     * Friendly description.
+     */
+    public static final String MACHINE_TYPE = "DFSA";
+
     /**
      * Creates a new instance of DFSAGraphicsPanel. 
      * @param machine A non-null reference to a machine to render.
@@ -366,13 +375,22 @@ public class DFSAGraphicsPanel
         return null;
     }
 
+    /**
+     * Get the file extension associated with DFSAs.
+     * @return The file extension associated with DFSAs.
+     */
+    public String getMachineExt()
+    {
+        return MACHINE_EXT;
+    }
+
     /**  
      * Get a friendly name for the type of machine this graphics panel renders.
      * @return A friendly name for the type of machine being stored.
      */
     public String getMachineType()
     {
-        return "DFSA";
+        return MACHINE_TYPE;
     }
 
     /**

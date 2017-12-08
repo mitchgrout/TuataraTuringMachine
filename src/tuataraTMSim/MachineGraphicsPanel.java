@@ -1218,7 +1218,15 @@ public abstract class MachineGraphicsPanel<
     // public abstract String getErrorMessage(Exception e);
 
     /**
-     * Get a friendly name for the type of machine this graphics panel renders.
+     * Get the file extension associated with this type of machine. Should return a value from a
+     * symbol named MACHINE_EXT.
+     * @return The file extension associated with this type of machine.
+     */
+    public abstract String getMachineExt();
+
+    /**
+     * Get a friendly name for the type of machine this graphics panel renders. Should return a
+     * value from a symbol named MACHINE_TYPE.
      * @return A friendly name for the type of machine being stored.
      */
     public abstract String getMachineType();

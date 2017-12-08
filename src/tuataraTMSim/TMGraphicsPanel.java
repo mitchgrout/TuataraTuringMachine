@@ -46,6 +46,16 @@ import tuataraTMSim.machine.TM.*;
 public class TMGraphicsPanel 
     extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TM_Machine, TM_Simulator>
 {
+    /**  
+     * File extension.
+     */
+    public static final String MACHINE_EXT = ".tm";
+
+    /**
+     * Friendly description.
+     */
+    public static final String MACHINE_TYPE = "Turing Machine";
+
     /**
      * Creates a new instance of TMGraphicsPanel. 
      * @param machine A non-null reference to a machine to render.
@@ -436,13 +446,22 @@ public class TMGraphicsPanel
         return String.format("The machine did not complete a computation. %s", e.getMessage());
     }
 
+    /**
+     * Get the file extension associated with Turing machines.
+     * @return The file extension associated with Turing machines.
+     */
+    public String getMachineExt()
+    {
+        return MACHINE_EXT;
+    }
+
     /**  
      * Get a friendly name for the type of machine this graphics panel renders.
      * @return A friendly name for the type of machine being stored.
      */
     public String getMachineType()
     {
-        return "Turing Machine";
+        return MACHINE_TYPE;
     }
 
     /**
