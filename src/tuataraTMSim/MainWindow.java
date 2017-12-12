@@ -1057,8 +1057,8 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)frame;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)frame;
+                MachineGraphicsPanel panel = iFrame.getGfxPanel();
                 if (panel != null)
                 {
                     panel.repaint();
@@ -1202,10 +1202,10 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)f;
-                TMGraphicsPanel gfxPanel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)f;
+                MachineGraphicsPanel gfxPanel = iFrame.getGfxPanel();
                 gfxPanel.setEditingEnabled(isEnabled);
-                tmif.setClosable(isEnabled);
+                iFrame.setClosable(isEnabled);
                 m_exitAction.setEnabled(isEnabled); 
             }
             catch (ClassCastException e)
@@ -1237,18 +1237,18 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)f;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)f;
+                MachineGraphicsPanel panel = iFrame.getGfxPanel();
                 if (panel.isModifiedSinceSave())
                 {
-                    if (!userConfirmSaveModifiedThenClose(tmif))
+                    if (!userConfirmSaveModifiedThenClose(iFrame))
                     {
                         return;
                     }
                 }
                 else
                 {
-                    tmif.dispose();
+                    iFrame.dispose();
                 }
             }
             catch (ClassCastException e2)
