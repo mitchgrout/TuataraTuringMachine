@@ -208,15 +208,15 @@ public class MainWindow extends JFrame
                        {
                            gfxPanel.repaint();
                        }
-                       else if (tapeDisp != null)
+                       else if (m_tapeDisp != null)
                        {
-                           tapeDisp.handleKeyEvent(e);
+                           m_tapeDisp.handleKeyEvent(e);
                        }
                    }
                    // No graphics panel, just a tape
-                   else if (tapeDisp != null) 
+                   else if (m_tapeDisp != null) 
                    {
-                       tapeDisp.handleKeyEvent(e);
+                       m_tapeDisp.handleKeyEvent(e);
                    }
                }
                return false;
@@ -320,16 +320,16 @@ public class MainWindow extends JFrame
         
         // Set up the tape and associated controllers
         m_tape.setWindow(this);
-        tapeDisp = new TapeDisplayPanel(m_tape);
-        tapeDispController = new TapeDisplayControllerPanel(tapeDisp, this, 
+        m_tapeDisp = new TapeDisplayPanel(m_tape);
+        m_tapeDispController = new TapeDisplayControllerPanel(m_tapeDisp, this, 
                 m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
-        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100); 
-        tapeDispController.setVisible(true);
+        m_tapeDispController.setBounds(0, getHeight() - m_tapeDispController.getHeight(), getWidth(),100); 
+        m_tapeDispController.setVisible(true);
         
         // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
-        fcMachine.setDialogTitle("Save machine");
+        m_fcMachine.setDialogTitle("Save machine");
         // TM
-        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
@@ -343,7 +343,7 @@ public class MainWindow extends JFrame
             }
         });
         // DFSA
-        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
@@ -357,8 +357,8 @@ public class MainWindow extends JFrame
             }
         });
        
-        fcTape.setDialogTitle("Save tape");
-        fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        m_fcTape.setDialogTitle("Save tape");
+        m_fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
@@ -388,7 +388,7 @@ public class MainWindow extends JFrame
         // Add the desktop pane and tape controller to the omnibus; add that to the bottom of the window
         omnibus.setLayout(new BorderLayout());
         omnibus.add(m_desktopPane, BorderLayout.CENTER);
-        omnibus.add(tapeDispController, java.awt.BorderLayout.SOUTH);
+        omnibus.add(m_tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
        
 
@@ -820,15 +820,15 @@ public class MainWindow extends JFrame
      */
     Point2D.Float nextWindowLocation()
     {
-        int x = lastNewWindowLocX + windowLocStepSize;
-        int y = lastNewWindowLocY + windowLocStepSize;
+        int x = m_lastNewWindowLocX + m_windowLocStepSize;
+        int y = m_lastNewWindowLocY + m_windowLocStepSize;
         
         if (x > maxHorizontalRatioForNewWindowLoc * this.getWidth())
         {
             x %= maxHorizontalRatioForNewWindowLoc * this.getWidth();
             y = x;
             
-            windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
+            m_windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
                 * windowLocRandomStepSize;
         }
         
@@ -837,11 +837,11 @@ public class MainWindow extends JFrame
             y %= maxHorizontalRatioForNewWindowLoc * this.getWidth();
             x = y;
             
-            windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
+            m_windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
                 * windowLocRandomStepSize;
         }
-        lastNewWindowLocX = x;
-        lastNewWindowLocY = y;
+        m_lastNewWindowLocX = x;
+        m_lastNewWindowLocY = y;
         
         return new Point2D.Float((float)x, (float)y);
     }
@@ -875,7 +875,7 @@ public class MainWindow extends JFrame
                 boolean saveSuccessful = false;
                 if (outFile == null)
                 {
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", gfxPanel.getMachineExt());
+                    outFile = chooseSaveFile(m_fcMachine, "Save Machine", gfxPanel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user
@@ -1215,7 +1215,7 @@ public class MainWindow extends JFrame
             }
         }
         setEditingActionsEnabledState(isEnabled);
-        tapeDispController.setEditingEnabled(isEnabled);
+        m_tapeDispController.setEditingEnabled(isEnabled);
     }
  
     /**
@@ -1550,7 +1550,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             // Choose the file to load
-            File inFile = chooseLoadFile(fcMachine, "Load Machine", "");
+            File inFile = chooseLoadFile(m_fcMachine, "Load Machine", "");
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1639,7 +1639,7 @@ public class MainWindow extends JFrame
                 if (m_force || outFile == null)
                 {
                     // !!!
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", panel.getMachineExt());
+                    outFile = chooseSaveFile(m_fcMachine, "Save Machine", panel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -1711,7 +1711,7 @@ public class MainWindow extends JFrame
             if (result == JOptionPane.YES_OPTION)
             {
                 m_tape.copyOther(new CA_Tape());
-                tapeDisp.repaint();
+                m_tapeDisp.repaint();
             }
         }
     }
@@ -1740,7 +1740,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            File inFile = chooseLoadFile(fcTape, "Load Tape", TAPE_EXTENSION);
+            File inFile = chooseLoadFile(m_fcTape, "Load Tape", TAPE_EXTENSION);
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1755,9 +1755,9 @@ public class MainWindow extends JFrame
                 {
                     throw new IOException(inFile.toString());
                 }
-                tapeDisp.getTape().copyOther(tape);
-                tapeDisp.setFile(inFile);
-                tapeDisp.repaint();
+                m_tapeDisp.getTape().copyOther(tape);
+                m_tapeDisp.setFile(inFile);
+                m_tapeDisp.repaint();
             }
             catch (Exception e2)
             {
@@ -1798,14 +1798,14 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            Tape tape = tapeDisp.getTape();
-            File outFile = tapeDisp.getFile();
+            Tape tape = m_tapeDisp.getTape();
+            File outFile = m_tapeDisp.getFile();
 
             try
             {
                 if (m_force || outFile == null)
                 {
-                    outFile = chooseSaveFile(fcTape, "Save Tape", TAPE_EXTENSION);
+                    outFile = chooseSaveFile(m_fcTape, "Save Tape", TAPE_EXTENSION);
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -1814,11 +1814,11 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!Tape.saveTape(tapeDisp.getTape(), outFile))
+                if (!Tape.saveTape(m_tapeDisp.getTape(), outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
-                tapeDisp.setFile(outFile);
+                m_tapeDisp.setFile(outFile);
                 m_console.log(String.format("Successfully saved tape to %s", outFile.toString()));
             }
             catch (Exception e2)
@@ -1995,7 +1995,7 @@ public class MainWindow extends JFrame
             MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                copiedData = panel.copySelectedToByteArray();
+                m_copiedData = panel.copySelectedToByteArray();
             }
         }
     }
@@ -2027,14 +2027,14 @@ public class MainWindow extends JFrame
             try
             {
                 MachineInternalFrame iFrame = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
-                if (copiedData == null || iFrame == null)
+                if (m_copiedData == null || iFrame == null)
                 {
                     // Abort
                     return;
                 }
 
                 // Translate our byte[] back into real data
-                ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(copiedData));
+                ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(m_copiedData));
                 HashSet<State> selectedStates = (HashSet<State>)restore.readObject();
                 HashSet<Transition> selectedTransitions = (HashSet<Transition>)restore.readObject();
                 
@@ -2193,7 +2193,7 @@ public class MainWindow extends JFrame
             {
                 Simulator sim = gfxPanel.getSimulator();
                 sim.step();
-                tapeDisp.repaint();
+                m_tapeDisp.repaint();
                 if (sim.isHalted())
                 {
                     m_console.logPartial(gfxPanel, sim.getConfiguration());
@@ -2290,7 +2290,7 @@ public class MainWindow extends JFrame
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new ExecutionTimerTask(panel, tapeDisp, MainWindow.this);
+                m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp, MainWindow.this);
                 m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }
@@ -2425,8 +2425,8 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e) 
         {
             // Move r/w head to the left end of the tape
-            tapeDisp.getTape().resetRWHead();
-            tapeDispController.repaint();
+            m_tapeDisp.getTape().resetRWHead();
+            m_tapeDispController.repaint();
         }
     }
 
@@ -2454,7 +2454,7 @@ public class MainWindow extends JFrame
             Object[] options = {"Ok", "Cancel"};
             // TODO: should disable keyboard here
             int result = 0;
-            if (tapeDisp.getFile() == null)
+            if (m_tapeDisp.getFile() == null)
             {
                 result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             }
@@ -2465,10 +2465,10 @@ public class MainWindow extends JFrame
 
             if (result == JOptionPane.YES_OPTION)
             {
-                tapeDisp.reloadTape();
-                tapeDispController.repaint();
+                m_tapeDisp.reloadTape();
+                m_tapeDispController.repaint();
                 
-                File file = tapeDisp.getFile();
+                File file = m_tapeDisp.getFile();
                 if (file == null)
                 {
                     m_console.log("Deleted tape contents");
@@ -2512,8 +2512,8 @@ public class MainWindow extends JFrame
             int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             if (result == JOptionPane.YES_OPTION)
             {
-                tapeDisp.getTape().clearTape();
-                tapeDispController.repaint();
+                m_tapeDisp.getTape().clearTape();
+                m_tapeDispController.repaint();
             }
         }
     }
@@ -2738,12 +2738,12 @@ public class MainWindow extends JFrame
     /**
      * Dialog for choosing a file, specifically for machines.
      */
-    private final JFileChooser fcMachine = new JFileChooser();
+    private final JFileChooser m_fcMachine = new JFileChooser();
 
     /**
      * Dialog for choosing a file, specifically for tapes.
      */
-    private final JFileChooser fcTape = new JFileChooser();
+    private final JFileChooser m_fcTape = new JFileChooser();
 
     /**
      * Timer task used for stepping through a machine on a delay.
@@ -2758,22 +2758,22 @@ public class MainWindow extends JFrame
     /**
      * Data which has been copied, used for pasting.
      */
-    private byte[] copiedData = null;
+    private byte[] m_copiedData = null;
 
     /**
      * X ordinate of the last new frame.
      */
-    private int lastNewWindowLocX = 0;
+    private int m_lastNewWindowLocX = 0;
 
     /**
      * Y ordinate of the last new frame.
      */
-    private int lastNewWindowLocY = 0;
+    private int m_lastNewWindowLocY = 0;
 
     /**
      * Distance between new frames.
      */
-    private int windowLocStepSize = minDistanceForNewWindowLoc;
+    private int m_windowLocStepSize = minDistanceForNewWindowLoc;
     
     /**
      * List of buttons which have an associated GUI mode and action.
@@ -2783,28 +2783,18 @@ public class MainWindow extends JFrame
     /**
      * Tape display panel.
      */
-    private TapeDisplayPanel tapeDisp;
+    private TapeDisplayPanel m_tapeDisp;
 
     /**
      * Tape controller.
      */
-    private TapeDisplayControllerPanel tapeDispController;
+    private TapeDisplayControllerPanel m_tapeDispController;
 
     /**
      * Main shared tape.
      */
     private final Tape m_tape = new CA_Tape();
 
-    /**
-     * List of copied states.
-     */ 
-    private ArrayList<TM_State> copiedStates;
-
-    /**
-     * List of copied transitions.
-     */
-    private ArrayList<TM_Transition> copiedTransitions;
-      
     /**
      * Toolbar button for undoing an action.
      */
