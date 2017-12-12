@@ -1272,7 +1272,7 @@ public class MainWindow extends JFrame
      */
     private void translateCentroidToMiddleOfWindow(Collection<? extends State> states,
             Collection<? extends Transition> transitions, Point2D centreOfWindow,
-            Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
+            Point2D lastPastedLoc, int numTimesPastedToLastLoc, MachineGraphicsPanel panel)
     {
         if (states.size() == 0)
         {
@@ -1571,7 +1571,6 @@ public class MainWindow extends JFrame
                 {
                     iFrame = newMachineWindow(new TMGraphicsPanel(
                                 (TM_Machine)machine, m_tape, inFile, MainWindow.this));
-                    
                 }
                 else if (machine instanceof DFSA_Machine)
                 {
@@ -1831,7 +1830,6 @@ public class MainWindow extends JFrame
             }
         }
 
-
         /**
          * Whether or not a file chooser should always be displayed.
          */
@@ -1890,7 +1888,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.undoCommand();
@@ -1924,7 +1922,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.redoCommand();
@@ -1959,12 +1957,12 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {   
             m_copyAction.actionPerformed(e); 
-            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                HashSet<TM_State> selectedStatesCopy = (HashSet<TM_State>)panel.getSelectedStates().clone();
-                HashSet<TM_Transition> selectedTransitionsCopy = (HashSet<TM_Transition>)panel.getSelectedTransitions().clone();
-                panel.doCommand(new CutCommand(panel, selectedStatesCopy, selectedTransitionsCopy));
+                panel.doCommand(new CutCommand(panel, 
+                            (HashSet<? extends State>)panel.getSelectedStates().clone(),
+                            (HashSet<? extends Transition>)panel.getSelectedTransitions().clone()));
                 updateUndoActions();
             }
         }
@@ -1994,14 +1992,13 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 copiedData = panel.copySelectedToByteArray();
             }
         }
     }
-    
     
     /**
      * Action for pasting states and transitions into a machine.
@@ -2029,34 +2026,35 @@ public class MainWindow extends JFrame
         {   
             try
             {
-                if (copiedData == null)
+                MachineInternalFrame iFrame = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
+                if (copiedData == null || iFrame == null)
                 {
                     // Abort
                     return;
                 }
-                ByteArrayInputStream bais = new ByteArrayInputStream(copiedData);
-                ObjectInputStream restore = new ObjectInputStream(bais);
-                HashSet<TM_State> selectedStates = (HashSet<TM_State>)restore.readObject();
-                HashSet<TM_Transition> selectedTransitions = (HashSet<TM_Transition>)restore.readObject();
+
+                // Translate our byte[] back into real data
+                ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(copiedData));
+                HashSet<State> selectedStates = (HashSet<State>)restore.readObject();
+                HashSet<Transition> selectedTransitions = (HashSet<Transition>)restore.readObject();
+                
+                // Figure out roughly the centre-of-mass of the copied data
                 Point2D centroid = computeCentroid(selectedStates);
-                MachineInternalFrame tmif = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
-                if (tmif == null)
-                {
-                    // Abort
-                    return;
-                }
-                Point2D centreOfWindow = tmif.getCenterOfViewPort();
-                translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions, centreOfWindow,
-                        tmif.getGfxPanel().getLastPastedLocation(), tmif.getGfxPanel().getNumPastesToSameLocation(),
-                        (TMGraphicsPanel)tmif.getGfxPanel());
-                TMGraphicsPanel panel = (TMGraphicsPanel)getSelectedGraphicsPanel();
+
+                // Find the centre of the frame
+                Point2D centreOfWindow = iFrame.getCenterOfViewPort();
+                translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions,
+                        centreOfWindow, iFrame.getGfxPanel().getLastPastedLocation(),
+                        iFrame.getGfxPanel().getNumPastesToSameLocation(), iFrame.getGfxPanel());
+
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
                 if (panel != null)
                 {
-                    TM_Machine machine = panel.getSimulator().getMachine();
-                    switch (panel.getSimulator().getMachine().getNamingScheme())
+                    Machine machine = panel.getSimulator().getMachine();
+                    switch (machine.getNamingScheme())
                     {
                         case GENERAL:
-                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
                             break;
 
                         case NORMALIZED:
