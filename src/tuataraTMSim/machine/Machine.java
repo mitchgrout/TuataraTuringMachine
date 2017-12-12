@@ -54,21 +54,10 @@ public abstract class Machine<
     /**
      * Creates an instance of Machine.
      * @param alphabet The tape alphabet.
-     * @param scheme The naming scheme to use.
-     */
-    public Machine(Alphabet alphabet, NamingScheme scheme)
-    {
-        m_alphabet = alphabet;
-        m_scheme = scheme;
-    }
-
-    /**
-     * Creates an instance of Machine. Uses a general naming scheme.
-     * @param alphabet The tape alphabet.
      */
     public Machine(Alphabet alphabet)
     {
-        this(alphabet, NamingScheme.GENERAL);
+        m_alphabet = alphabet;
     }
 
     /**
@@ -90,21 +79,23 @@ public abstract class Machine<
     }
 
     /**
-     *  Get the naming scheme for this machine.
-     *  @return The naming scheme for this machine.
+     * Get the naming scheme for this machine. By default, this always returns GENERAL. Machines
+     * which use different naming schemes should @Override this.
+     * @return The naming scheme for this machine.
      */
     public NamingScheme getNamingScheme()
     {
-        return m_scheme;
+        return NamingScheme.GENERAL;
     }
 
     /**
-     * Se the naming scheme for this machine.
-     * @param scheme The new naming scheme to use.
+     * Set the naming scheme for this machine. By default, this does nothing. Machines which use
+     * different naming schemes should @Override this.
+     * @param scheme The new naming scheme.
      */
     public void setNamingScheme(NamingScheme scheme)
     {
-        m_scheme = scheme;
+        // Do nothing
     }
 
     /**
@@ -467,9 +458,4 @@ public abstract class Machine<
      * The alphabet for the machine.
      */
     protected Alphabet m_alphabet;
-
-    /**
-     * The naming scheme to use.
-     */
-    protected NamingScheme m_scheme;
 }

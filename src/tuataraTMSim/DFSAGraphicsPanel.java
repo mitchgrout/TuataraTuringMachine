@@ -81,6 +81,15 @@ public class DFSAGraphicsPanel
         return m_sim;
     }
 
+    /**
+     *
+     */
+    public void onActivation()
+    {
+        // Naming schemes are not applicable for DFSAs.
+        m_mainWindow.m_configureSchemeAction.setEnabled(false);
+    }
+
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.
@@ -140,19 +149,8 @@ public class DFSAGraphicsPanel
 
         int x = e.getX() - DFSA_State.STATE_RENDERING_WIDTH / 2;
         int y = e.getY() - DFSA_State.STATE_RENDERING_WIDTH / 2;
-        switch (m_sim.getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                String label = getFirstFreeName();
-                doCommand(new AddStateCommand(this, new DFSA_State(label, false, false, x, y)));
-                break;
-
-            case NORMALIZED:
-                doJoinCommand(
-                        new AddStateCommand(this, new DFSA_State("", false, false, x, y)),
-                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                break;
-        }
+        String label = getFirstFreeName();
+        doCommand(new AddStateCommand(this, new DFSA_State(label, false, false, x, y)));
     }
 
     /**
@@ -267,18 +265,7 @@ public class DFSAGraphicsPanel
 
         if (stateClickedOn != null)
         {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                    break;
-            }
+            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
         }
     }
 
@@ -294,18 +281,8 @@ public class DFSAGraphicsPanel
                               null : m_sim.getMachine().getFinalStates().iterator().next();
         if (stateClickedOn != null)
         {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                // NOTE: Passing stateClickedOn twice prevents the old final states from being unset
-                case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-            }
+            // NOTE: Passing stateClickedOn twice prevents the old final states from being unset
+            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn));
         }
     }
 

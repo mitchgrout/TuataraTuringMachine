@@ -362,8 +362,6 @@ public abstract class MachineGraphicsPanel<
         }
     }
 
-
-
     /**
      * Delete a state from the machine.
      * @param s The state to delete.
@@ -1148,6 +1146,12 @@ public abstract class MachineGraphicsPanel<
      */
     public abstract SIMULATOR getSimulator();
 
+    /**
+     * Called when the owning frame is activated. Should deactivate any and all events which are not
+     * used by the simulated machine.
+     */
+    public abstract void onActivation();
+
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.
@@ -1208,14 +1212,11 @@ public abstract class MachineGraphicsPanel<
         return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
     }
 
-
-
     /**
      * Build an error message using the given exception specifically for the type of machine being
      * simulated.
      * @return An error message specific for the type of machine being simulated.
      */
-    // public abstract String getErrorMessage(Exception e);
 
     /**
      * Get the file extension associated with this type of machine. Should return a value from a

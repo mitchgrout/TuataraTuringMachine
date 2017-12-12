@@ -1001,7 +1001,7 @@ public class MainWindow extends JFrame
      * Set whether or not all controls are to be enabled or not.
      * @param isEnabled true if all controls are to be enabled, false otherwise.
      */
-    private void setEditingActionsEnabledState(boolean isEnabled)
+    public void setEditingActionsEnabledState(boolean isEnabled)
     {
         m_stepAction.setEnabled(isEnabled);
         m_configureAlphabetAction.setEnabled(isEnabled);
@@ -2845,218 +2845,218 @@ public class MainWindow extends JFrame
     /**
      * Action for creating a new Turing Machine.
      */
-    private final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
+    public final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
 
     /**
      * Action for creating a new DFSA.
      */
-    private final Action m_newDFSAAction = new NewDFSAAction("New DFSA", loadIcon("newMachine.gif")); 
+    public final Action m_newDFSAAction = new NewDFSAAction("New DFSA", loadIcon("newMachine.gif")); 
 
     /**
      * Action for opening a machine.
      */
-    private final Action m_openMachineAction = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));;
+    public final Action m_openMachineAction = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));;
 
     /**
      * Action for saving a machine to an associated file.
      */
-    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
+    public final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
-    private final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
      */
-    private final Action m_newTapeAction = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
+    public final Action m_newTapeAction = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
 
     /**
      * Action for opening a tape.
      */
-    private final Action m_openTapeAction = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
+    public final Action m_openTapeAction = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
 
     /**
      * Action for saving a tape to an associated file.
      */
-    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
+    public final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
-    private final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
      */
-    private final Action m_exitAction = new ExitAction("Exit", loadIcon("emptyIcon.gif"));
+    public final Action m_exitAction = new ExitAction("Exit", loadIcon("emptyIcon.gif"));
 
     /**
      * Action for undoing a command.
      */
-    private final Action m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
+    public final Action m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
 
     /**
      * Action for redoing a command
      */
-    private final Action m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
+    public final Action m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
 
     /**
      * Action for cutting selected states and transitions.
      */
-    private final Action m_cutAction = new CutSelectedAction("Cut", loadIcon("cut.gif"));
+    public final Action m_cutAction = new CutSelectedAction("Cut", loadIcon("cut.gif"));
 
     /**
      * Action for copying selected states and transitions.
      */
-    private final Action m_copyAction = new CopySelectedAction("Copy", loadIcon("copy.gif"));
+    public final Action m_copyAction = new CopySelectedAction("Copy", loadIcon("copy.gif"));
 
     /**
      * Action for pasting selected states and transitions.
      */
-    private final Action m_pasteAction = new PasteAction("Paste", loadIcon("paste.gif"));
+    public final Action m_pasteAction = new PasteAction("Paste", loadIcon("paste.gif"));
 
     /**
      * Action for deleting selected states and transitions.
      */
-    private final Action m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
+    public final Action m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
 
     /**
      * Action associated with ADDNODES.
      */
-    private final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
+    public final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
             loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
 
     /**
      * Action associated with ADDTRANSITIONS.
      */
-    private final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
+    public final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
             loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 
     /**
      * Action associated with SELECTION.
      */
-    private final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
+    public final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
             loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
 
     /**
      * Action associated with ERASER.
      */
-    private final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
+    public final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
             loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
 
     /**
      * Action associated with CHOOSESTART.
      */
-    private final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
+    public final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
             loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
      * Action associated with CHOOSEACCEPTING.
      */
-    private final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
+    public final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
             loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**
      * Action associated with CHOOSECURRENTSTATE.
      */
-    private final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
+    public final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
         new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
                 loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
 
     /**
      * Action for stepping through execution.
      */
-    private final Action m_stepAction = new StepAction("Step", this, loadIcon("step.gif"));
+    public final Action m_stepAction = new StepAction("Step", this, loadIcon("step.gif"));
 
     /**
      * Action for starting simulation of the machine.
      */
-    private final Action m_fastExecuteAction = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
+    public final Action m_fastExecuteAction = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
 
     /**
      * Action for pausing simulation of the machine.
      */
-    private final Action m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
+    public final Action m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
 
     /**
      * Action for stopping a simulation.
      */
-    private final Action m_stopMachineAction = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
+    public final Action m_stopMachineAction = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
 
     /**
      * Action to set execution speed to slow.
      */
-    private final ExecutionSpeedSelectionAction m_slowExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_slowExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Slow", SLOW_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_1, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to medium.
      */
-    private final ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Medium", MEDIUM_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_2, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to fast.
      */
-    private final ExecutionSpeedSelectionAction m_fastExecuteSpeedAction =
+    public final ExecutionSpeedSelectionAction m_fastExecuteSpeedAction =
         new ExecutionSpeedSelectionAction("Fast", FAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_3, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to superfast.
      */
-    private final ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Super Fast", SUPERFAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_4, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to ultrafast.
      */
-    private final ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Ultra Fast", ULTRAFAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_5, KeyEvent.CTRL_DOWN_MASK)); 
 
     /**
      * Action for moving the read/write head to the start of the tape.
      */
-    private final HeadToStartAction m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
+    public final HeadToStartAction m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
 
     /**
      * Action for reloading the tape.
      */
-    private final ReloadTapeAction m_reloadTapeAction = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
+    public final ReloadTapeAction m_reloadTapeAction = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
 
     /**
      * Action for erasing the tape.
      */
-    private final EraseTapeAction m_eraseTapeAction = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
+    public final EraseTapeAction m_eraseTapeAction = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
 
     /**
      * Action for configuring the alphabet.
      */
-    private final Action m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif")); 
+    public final Action m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif")); 
 
     /**
      * Action for configuring the naming scheme.
      */
-    private final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
+    public final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
 
     /**
      * Action for displaying the shared console.
      */
-    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
+    public final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
 
     /**
      * Action for displaying help documentation.
      */
-    private final Action m_helpAction = new HelpAction("Help", loadIcon("tuatara.gif"));
+    public final Action m_helpAction = new HelpAction("Help", loadIcon("tuatara.gif"));
 
     /**
      * Action for displaying meta information about the program.
      */
-    private final Action m_aboutAction = new AboutAction("About", loadIcon("emptyIcon.gif"));
+    public final Action m_aboutAction = new AboutAction("About", loadIcon("emptyIcon.gif"));
 }

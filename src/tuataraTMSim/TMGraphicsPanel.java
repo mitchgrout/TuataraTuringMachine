@@ -82,6 +82,11 @@ public class TMGraphicsPanel
         return m_sim;
     }
 
+    public void onActivation()
+    {
+        // Do nothing
+    }
+
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.
