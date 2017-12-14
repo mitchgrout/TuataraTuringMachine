@@ -23,83 +23,69 @@
 //
 //  ------------------------------------------------------------------
 
-package tuataraTMSim.machine.TM;
+package tuataraTMSim.machine.DFSA;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.geom.*;
-import java.io.*;
-import java.util.*;
-import javax.swing.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 import tuataraTMSim.machine.*;
 
 /**
- * Represents a state in a Turing machine.
- * @author Jimmy
+ * Represents a state in a machine.
  */
-public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Simulator>
-    implements Serializable
+public class DFSA_State extends State<DFSA_Action, DFSA_Transition, DFSA_Machine, DFSA_Simulator>
 {
     /**
-     * Width of the graphical representation of the state, in pixels.
-     */
-    public static final int STATE_RENDERING_WIDTH = 30;
-    
-    /**
-     * Distance of graphical text below picture of the state.
-     */
-    public static final int TEXT_DISTANCE = 15; 
- 
-    /**
-     * Creates a new instance of TM_State, with a specified location.
+     * Creates a new instance of DFSA_State, with a specified location.
      * @param label The label for the state.
      * @param startState Whether or not this state is the start state.
-     * @param finalState Whether or not this state is the final state.
-     * @param x The X ordinate of the state.
-     * @param y The Y ordinate of the state.
+     * @param finalState Whether or not this state is a final state.
+     * @param windowX The X ordinate of the state.
+     * @param windowY The Y ordinate of the state.
      */
-    public TM_State(String label, boolean startState, boolean finalState, int x, int y)
+    public DFSA_State(String label, boolean startState, boolean finalState, int windowX, int windowY)
     {
-        super(label, startState, finalState, x, y);
-        m_transitions = new ArrayList<TM_Transition>();
+        super(label, startState, finalState, windowX, windowY);
+        m_transitions = new ArrayList<DFSA_Transition>();
     }
-    
+
     /**
-     * Creates a new instance of TM_State.
+     * Creates a new instance of DFSA_State.
      * @param label The label for the state.
      * @param startState Whether or not this state is the start state.
-     * @param finalState Whether or not this state is the final state.
+     * @param finalState Whether or not this state is a final state.
      */
-    public TM_State(String label, boolean startState, boolean finalState)
+    public DFSA_State(String label, boolean startState, boolean finalState)
     {
         this(label, startState, finalState, 0, 0);
     }
-    
+ 
     /**
      * Get the outgoing transitions of this state.
      * @return An array list of all transitions which leave this state.
      */
-    public ArrayList<TM_Transition> getTransitions()
+    public ArrayList<DFSA_Transition> getTransitions()
     {
         return m_transitions;
     }
-    
+
     /**
-     * Adds an outgoing transition from this state. It is suggested to use the TM_Machine object's
+     * Adds an outgoing transition from this state. It is suggested to use the Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to add to the state.
      */
-    public void addTransition(TM_Transition tr)
+    public void addTransition(DFSA_Transition tr)
     {
         m_transitions.add(tr);
     }
-    
+
     /**
-     * Removes an outgoing transition from this state. It is suggested to use the TM_Machine object's
+     * Removes an outgoing transition from this state. It is suggested to use the Machine object's
      * methods to modify the machine, instead of calling this directly.
      * @param tr The transition to remove from the state.
      */
-    public void removeTransition(TM_Transition tr)
+    public void removeTransition(DFSA_Transition tr)
     {
         m_transitions.remove(tr);
     }
@@ -113,14 +99,9 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
     {
         m_transitions.clear();
     }
-    
+
     /**
      * The list of transitions leaving this state.
      */
-    protected ArrayList<TM_Transition> m_transitions;
-   
-    // /**
-    //  * The submachine associated with this state.
-    //  */
-    // protected TM_Machine m_subMachine;
+    protected ArrayList<DFSA_Transition> m_transitions;
 }

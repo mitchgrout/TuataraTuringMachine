@@ -2,65 +2,61 @@
 <h2> Executing Machines </h2>
 
 <p>
-It's all very well designing a Turing machine using a computer program, but typically we want to
-do a little more than this.  We usually would like to know how our machine behaves when given
-certain inputs.
-</p>
+After designing a machine using this program, it may be useful to run it with some given input to
+determine how the machine behaves, and to determine whether or not it is correct.
 
 <p>
 Given that Tuatara Turing Machine Simulator is designed for teaching purposes, frequently we
 also like to see exactly how our machine arrives at its output - what steps were involved, and why
-those steps took place.  Hence, simulating the execution of Turing machines step-by-step is part of
+those steps took place.  Hence, simulating the execution of machines step-by-step is part of
 the core functionality of this program.
 </p>
 
 <p>
-This guide explains in detail how to control the simulation of your shiny new Turing machines. 
+This guide explains in detail how to control the simulation of your shiny new machines. 
 </p>
 
-<br>
-<h3> Stepping a machine </h3>
 <p>
+<h3> Stepping a machine </h3>
 To make the current machine step through one single operation, choose the <img src="../images/step.gif"> 
 <i>Step</i> item from the <i>Machine</i> menu or the toolbar.  The machine will complete the
 operation specified by one transition.  The tape and the state of the machine will be updated
 accordingly.
 </p>
 
-<br>
-<h3> Executing a machine </h3>
-<p> 
+<p>
+<h3> Executing a machine </h3> 
 Select <img src="../images/fastExecute.gif"> <i>Execute</i> from the <i>Machine</i> menu or
 toolbar to start the simulation running.  The machine's execution will occur continuously and
 automatically until the computation halts (in error or otherwise) or the user presses the stop or
 pause buttons.  The <img src="../images/stop.gif"> <i>Stop Execution </i> and <img src="../images/pause.gif">
 <i>Pause Execution</i> buttons are also located in the <i>Machine</i> menu and toolbar.</p>
 
-<br>
-<h3> Changing Execution Speeds </h3>
 <p>
+<h3> Changing Execution Speeds </h3>
 The speed of execution can be controlled via the options in the <i>Machine</i> menu.  This is
 useful for debugging or learning purposes, or to reduce the waiting time for a computation to
 complete.  The speed cannot be modified during automatic execution.
 </p>
 
-<br>
-<h3> Choosing the Current State </h3>
 <p>
+<h3> Choosing the Current State </h3>
 The current state of the machine can be modified using the <img src="../images/currentState.gif"> 
 <i>Choose Current State</i> mode, found in the <i>Mode</i> menu and toolbar.  This is useful for
 debugging and exploring 'what-if' scenarios.  When in this mode, click on a state to select it as
 the current state.  
 </p>
 
-<br>
-<h3> Machine Configurations </h3>
 <p>
-It is possible to describe the state of a Turing machine using a configuration, which is a triple
-(<i>u, q, v</i>), where <i>uv</i> is the current tape content, <i>q</i> is the current state, and
-the read/write head sits above the first letter of <i>v</i>.  Additionally, we write 
-(<i>u, q, v</i>) &#x02eb; (<i>u', q', v'</i>) if the two configurations represent a single valid
-step in the machine.
+<h3> Machine Configurations </h3>
+The execution of a machine can be described by a sequence of configurations.  How these
+configurations are expressed is entirely machine dependent.
+<br><b>Turing machine:</b> The configuration of a Turing machine is a triple, (<i>u, q, v</i>),
+where <i>uv</i> &isin; <i>Y*</i> is the current tape contents, <i>q</i> is the current state, and
+the read/write head sits above the first symbol of <i>v</i>.
+<br><b>DFSA:</b> The configuration of a DFSA is a double, (<i>q, c</i>), where <i>q</i> is the
+current state, and <i>c</i> is the current symbol being read.  If <i>q</i> is an accepting state,
+then <i>c</i> is omitted.
 </p>
 
 <p>
@@ -69,9 +65,8 @@ The sequence is logged to the console, which can be displayed using the
 <img src="../images/console.gif"> <i>Show Console</i> button in the <i>Help</i> menu.
 </p>
 
-<br>
-<h3> Non-deterministic Turing Machines </h3>
-<p> 
+<p>
+<h3> Non-deterministic Machines </h3> 
 This program has no support for non-deterministic machines.  Prior to simulating the machine,
 the machine will be first validated for non-determinism and other inconsistencies, and if none are
 found, will proceed with the simulation.

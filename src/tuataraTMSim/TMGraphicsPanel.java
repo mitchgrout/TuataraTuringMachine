@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.commands.*;
+import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 import tuataraTMSim.machine.TM.*;
 
@@ -45,13 +46,15 @@ import tuataraTMSim.machine.TM.*;
 public class TMGraphicsPanel 
     extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TM_Machine, TM_Simulator>
 {
-    final float dash1[] = {3.0f};
-    final BasicStroke dashed = new BasicStroke(1.0f, 
-            BasicStroke.CAP_BUTT, 
-            BasicStroke.JOIN_MITER, 
-            10.0f, dash1, 0.0f);
-    final Font PANEL_FONT = /*new Font("SansSerif", Font.PLAIN, 14);*/
-        new Font("Monospaced", Font.PLAIN, 14); //TESTING
+    /**  
+     * File extension.
+     */
+    public static final String MACHINE_EXT = ".tm";
+
+    /**
+     * Friendly description.
+     */
+    public static final String MACHINE_TYPE = "Turing Machine";
 
     /**
      * Creates a new instance of TMGraphicsPanel. 
@@ -77,6 +80,11 @@ public class TMGraphicsPanel
     public TM_Simulator getSimulator()
     {
         return m_sim;
+    }
+
+    public void onActivation()
+    {
+        // Do nothing
     }
 
     /** 
@@ -415,6 +423,50 @@ public class TMGraphicsPanel
             m_sim.setCurrentState(stateClickedOn);
         }
 
+    }
+
+    public String getErrorMessage(ComputationCompletedException e)
+    {
+        return "The machine halted correctly with the r/w head parked.";
+    }
+
+    public String getErrorMessage(ComputationFailedException e)
+    {
+        // Unused
+        return null;
+    }
+
+    public String getErrorMessage(NondeterministicException e)
+    {
+        return String.format("The machine could not be validated. %s", e.getMessage()); 
+    }
+
+    public String getErrorMessage(TapeBoundsException e)
+    {
+        return "The machine r/w head went past the start of the tape.";
+    }
+
+    public String getErrorMessage(UndefinedTransitionException e)
+    {
+        return String.format("The machine did not complete a computation. %s", e.getMessage());
+    }
+
+    /**
+     * Get the file extension associated with Turing machines.
+     * @return The file extension associated with Turing machines.
+     */
+    public String getMachineExt()
+    {
+        return MACHINE_EXT;
+    }
+
+    /**  
+     * Get a friendly name for the type of machine this graphics panel renders.
+     * @return A friendly name for the type of machine being stored.
+     */
+    public String getMachineType()
+    {
+        return MACHINE_TYPE;
     }
 
     /**

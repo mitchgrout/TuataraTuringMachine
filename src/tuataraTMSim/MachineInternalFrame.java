@@ -46,8 +46,8 @@ public class MachineInternalFrame extends JInternalFrame
      */
     public MachineInternalFrame(MachineGraphicsPanel gfxPanel)
     {
-        // TODO: Justify this super call's arguments.
-        super("hello",true,true,true, true);
+        // Create a window which can be resized, minimized, maximized, and moved.
+        super("untitled", true, true, true, true);
         m_gfxPanel = gfxPanel;
         
         this.addInternalFrameListener(new InternalFrameAdapter()
@@ -55,6 +55,8 @@ public class MachineInternalFrame extends JInternalFrame
             public void internalFrameActivated(InternalFrameEvent e)
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
+                m_gfxPanel.getMainWindow().setEditingActionsEnabledState(true);
+                m_gfxPanel.onActivation();
             }
             
             public void internalFrameClosed(InternalFrameEvent e)
@@ -81,6 +83,8 @@ public class MachineInternalFrame extends JInternalFrame
             public void	internalFrameOpened(InternalFrameEvent e) 
             {
                 m_gfxPanel.getMainWindow().updateUndoActions();
+                m_gfxPanel.getMainWindow().setEditingActionsEnabledState(true);
+                m_gfxPanel.onActivation();
             }
         });   
     }
@@ -100,20 +104,10 @@ public class MachineInternalFrame extends JInternalFrame
     public void updateTitle()
     {
         File file = m_gfxPanel.getFile();
-        String titleString = "";
-        if (m_gfxPanel.isModifiedSinceSave())
-        {
-            titleString = "* ";
-        }
-        if (file == null)
-        {
-            titleString += "untitled";
-        }
-        else
-        {
-            titleString += file.getName();
-        }
-        setTitle(titleString);
+        setTitle(String.format("%s%s [%s]", 
+                    m_gfxPanel.isModifiedSinceSave()? "* " : "",
+                    file == null? "untitled" : file.getName(),
+                    m_gfxPanel.getMachineType()));
     }
     
     /**

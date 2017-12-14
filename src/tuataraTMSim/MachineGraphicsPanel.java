@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 import tuataraTMSim.commands.*;
+import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 
 /**
@@ -360,8 +361,6 @@ public abstract class MachineGraphicsPanel<
             return false;
         }
     }
-
-
 
     /**
      * Delete a state from the machine.
@@ -1147,6 +1146,12 @@ public abstract class MachineGraphicsPanel<
      */
     public abstract SIMULATOR getSimulator();
 
+    /**
+     * Called when the owning frame is activated. Should deactivate any and all events which are not
+     * used by the simulated machine.
+     */
+    public abstract void onActivation();
+
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.
@@ -1196,6 +1201,36 @@ public abstract class MachineGraphicsPanel<
      * @param e The generating event.
      */
     protected abstract void handleChooseCurrentState(MouseEvent e);
+
+    public abstract String getErrorMessage(ComputationCompletedException e);
+    public abstract String getErrorMessage(ComputationFailedException e);
+    public abstract String getErrorMessage(NondeterministicException e);
+    public abstract String getErrorMessage(TapeBoundsException e);
+    public abstract String getErrorMessage(UndefinedTransitionException e);
+    public String getErrorMessage(Exception e)
+    {
+        return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+    }
+
+    /**
+     * Build an error message using the given exception specifically for the type of machine being
+     * simulated.
+     * @return An error message specific for the type of machine being simulated.
+     */
+
+    /**
+     * Get the file extension associated with this type of machine. Should return a value from a
+     * symbol named MACHINE_EXT.
+     * @return The file extension associated with this type of machine.
+     */
+    public abstract String getMachineExt();
+
+    /**
+     * Get a friendly name for the type of machine this graphics panel renders. Should return a
+     * value from a symbol named MACHINE_TYPE.
+     * @return A friendly name for the type of machine being stored.
+     */
+    public abstract String getMachineType();
 
     /**
      * The current GUI mode.

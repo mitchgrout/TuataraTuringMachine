@@ -40,6 +40,7 @@ import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
 import tuataraTMSim.machine.TM.*;
+import tuataraTMSim.machine.DFSA.*;
 
 /**
  * The main window of the program. An MDI interface for building and running turing machines.
@@ -62,46 +63,17 @@ public class MainWindow extends JFrame
      * File extension for tapes.
      */
     public static final String TAPE_EXTENSION = ".tap";
-    /**
-     * File extension for machines.
-     */
-    public static final String MACHINE_EXTENSION = ".tm";
-    
+
     /**
      * Internal timer.
      */
     private final java.util.Timer m_timer = new java.util.Timer(true);
     
     /**
-     * Error string for nondeterministic errors.
-     */
-    public static final String NONDET_ERR_STR = "The machine could not be validated.";
-
-    /**
-     * Error string for undefined transition errors.
-     */
-    public static final String TRANS_UNDEF_ERR_STR = "The computation did not complete successfully.";
-
-    /**
-     * Error string for tape bound errors.
-     */
-    public static final String TAPE_BOUNDS_ERR_STR= "The machine r/w head went past the start of the tape.";
-
-    /**
-     * Error string for unknown errors.
-     */
-    public static final String OTHER_ERROR_STR = "Error!";
-
-    /**
      * String for execution halting.
      */
     public static final String HALTED_MESSAGE_TITLE_STR  = "Machine halted!";
 
-    /**
-     * String for computation completion.
-     */
-    public static final String COMPUTATION_COMPLETED_STR = "The machine halted correctly with the r/w head parked.";
-    
     /**
      * Delay between steps for slow execution speed.
      */
@@ -140,12 +112,12 @@ public class MainWindow extends JFrame
     /**
      * Horizontal translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_X = TM_State.STATE_RENDERING_WIDTH * 2;
+    public static final int TRANSLATE_TO_AVOID_STACKING_X = State.STATE_RENDERING_WIDTH * 2;
 
     /**
      * Vertical translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_Y = TM_State.STATE_RENDERING_WIDTH * 2;
+    public static final int TRANSLATE_TO_AVOID_STACKING_Y = State.STATE_RENDERING_WIDTH * 2;
     
     /**
      * Maximum horizontal ratio for new window location.
@@ -187,7 +159,7 @@ public class MainWindow extends JFrame
         {
             public void mousePressed(MouseEvent e)
             {
-                TMGraphicsPanel gfx = getSelectedGraphicsPanel();
+                MachineGraphicsPanel gfx = getSelectedGraphicsPanel();
                 if (gfx != null);
                 {
                     gfx.deselectSymbol();
@@ -206,7 +178,7 @@ public class MainWindow extends JFrame
                {
                    return false;
                }
-               TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+               MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
                if (gfxPanel != null && !gfxPanel.getKeyboardEnabled())
                {
                    return false;
@@ -236,15 +208,15 @@ public class MainWindow extends JFrame
                        {
                            gfxPanel.repaint();
                        }
-                       else if (tapeDisp != null)
+                       else if (m_tapeDisp != null)
                        {
-                           tapeDisp.handleKeyEvent(e);
+                           m_tapeDisp.handleKeyEvent(e);
                        }
                    }
                    // No graphics panel, just a tape
-                   else if (tapeDisp != null) 
+                   else if (m_tapeDisp != null) 
                    {
-                       tapeDisp.handleKeyEvent(e);
+                       m_tapeDisp.handleKeyEvent(e);
                    }
                }
                return false;
@@ -306,7 +278,7 @@ public class MainWindow extends JFrame
             try
             {
                 MachineInternalFrame tmif = (MachineInternalFrame)frame;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineGraphicsPanel panel = (MachineGraphicsPanel)tmif.getGfxPanel();
                 panel.setUIMode(mode);
             }
             catch (ClassCastException e)
@@ -348,29 +320,45 @@ public class MainWindow extends JFrame
         
         // Set up the tape and associated controllers
         m_tape.setWindow(this);
-        tapeDisp = new TMTapeDisplayPanel(m_tape);
-        tapeDispController = new TMTapeDisplayControllerPanel(tapeDisp, this, 
+        m_tapeDisp = new TapeDisplayPanel(m_tape);
+        m_tapeDispController = new TapeDisplayControllerPanel(m_tapeDisp, this, 
                 m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
-        tapeDispController.setBounds(0, getHeight() - tapeDispController.getHeight(), getWidth(),100); 
-        tapeDispController.setVisible(true);
+        m_tapeDispController.setBounds(0, getHeight() - m_tapeDispController.getHeight(), getWidth(),100); 
+        m_tapeDispController.setVisible(true);
         
         // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
-        fcMachine.setDialogTitle("Save machine");
-        fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        m_fcMachine.setDialogTitle("Save machine");
+        // TM
+        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
-                return f.isDirectory() || f.getName().endsWith(MACHINE_EXTENSION);
+                return f.isDirectory() || f.getName().endsWith(TMGraphicsPanel.MACHINE_EXT);
             }
             
             public String getDescription()
             {
-                return "Machine files (*.tm)";
+                return String.format("%s files (*%s)", 
+                        TMGraphicsPanel.MACHINE_TYPE, TMGraphicsPanel.MACHINE_EXT);
+            }
+        });
+        // DFSA
+        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        {
+            public boolean accept(File f)
+            {
+                return f.isDirectory() || f.getName().endsWith(DFSAGraphicsPanel.MACHINE_EXT);
+            }
+
+            public String getDescription()
+            {
+                return String.format("%s files (*%s)", 
+                        DFSAGraphicsPanel.MACHINE_TYPE, DFSAGraphicsPanel.MACHINE_EXT);
             }
         });
        
-        fcTape.setDialogTitle("Save tape");
-        fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+        m_fcTape.setDialogTitle("Save tape");
+        m_fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
         {
             public boolean accept(File f)
             {
@@ -379,7 +367,7 @@ public class MainWindow extends JFrame
             
             public String getDescription()
             {
-                return "Tape files (*.tap)";
+                return String.format("Tape files (*%s)", TAPE_EXTENSION);
             }
         });
         
@@ -400,7 +388,7 @@ public class MainWindow extends JFrame
         // Add the desktop pane and tape controller to the omnibus; add that to the bottom of the window
         omnibus.setLayout(new BorderLayout());
         omnibus.add(m_desktopPane, BorderLayout.CENTER);
-        omnibus.add(tapeDispController, java.awt.BorderLayout.SOUTH);
+        omnibus.add(m_tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
        
 
@@ -408,7 +396,8 @@ public class MainWindow extends JFrame
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
         
         // Make a state diagram window as the default for the desktop pane
-        JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
+        JInternalFrame iFrame = 
+            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, this));
         m_desktopPane.add(iFrame);      
         m_desktopPane.setSelectedFrame(iFrame);
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
@@ -468,6 +457,7 @@ public class MainWindow extends JFrame
         newSubmenu.setIcon(loadIcon("newMachine.gif"));
         newSubmenu.setMnemonic(KeyEvent.VK_N);
         newSubmenu.add(new JMenuItem(m_newTuringMachineAction));
+        newSubmenu.add(new JMenuItem(m_newDFSAAction));
         fileMenu.add(newSubmenu);
 
         fileMenu.add(new JMenuItem(m_openMachineAction));
@@ -637,10 +627,10 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setText("");
 
         // Machine
-        JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
-        newMachineToolBarButton.setFocusable(false);
-        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        newMachineToolBarButton.setText("");
+        //JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
+        //newMachineToolBarButton.setFocusable(false);
+        //newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        //newMachineToolBarButton.setText("");
         
         JButton openMachineToolBarButton = new JButton(m_openMachineAction);
         openMachineToolBarButton.setFocusable(false);
@@ -743,7 +733,7 @@ public class MainWindow extends JFrame
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
         returner[0].add(saveTapeToolBarButton);
-        returner[0].add(newMachineToolBarButton);
+        //returner[0].add(newMachineToolBarButton);
         returner[0].add(openMachineToolBarButton);
         returner[0].add(saveMachineToolBarButton);
         returner[0].add(cutToolBarButton);
@@ -780,15 +770,12 @@ public class MainWindow extends JFrame
     
     /**
      * Creates a new window displaying a machine.
-     * @param myTM The machine to display.
-     * @param file The file associated with the machine.
-     * @return A frame used to render the machine.
+     * @param gfxPanel The underlying graphics panel.
+     * @return A frame containing the graphics panel.
      */
-    private MachineInternalFrame newMachineWindow(TM_Machine myTM, File file)
+    private MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
-        final TMGraphicsPanel gfxPanel = new TMGraphicsPanel(myTM, m_tape, file, this);
-        gfxPanel.setUIMode(m_currentMode);
-        
+        gfxPanel.setUIMode(m_currentMode); 
         final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
         gfxPanel.setWindow(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
@@ -833,15 +820,15 @@ public class MainWindow extends JFrame
      */
     Point2D.Float nextWindowLocation()
     {
-        int x = lastNewWindowLocX + windowLocStepSize;
-        int y = lastNewWindowLocY + windowLocStepSize;
+        int x = m_lastNewWindowLocX + m_windowLocStepSize;
+        int y = m_lastNewWindowLocY + m_windowLocStepSize;
         
         if (x > maxHorizontalRatioForNewWindowLoc * this.getWidth())
         {
             x %= maxHorizontalRatioForNewWindowLoc * this.getWidth();
             y = x;
             
-            windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
+            m_windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
                 * windowLocRandomStepSize;
         }
         
@@ -850,11 +837,11 @@ public class MainWindow extends JFrame
             y %= maxHorizontalRatioForNewWindowLoc * this.getWidth();
             x = y;
             
-            windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
+            m_windowLocStepSize = minDistanceForNewWindowLoc + myRandom.nextInt(3)
                 * windowLocRandomStepSize;
         }
-        lastNewWindowLocX = x;
-        lastNewWindowLocY = y;
+        m_lastNewWindowLocX = x;
+        m_lastNewWindowLocY = y;
         
         return new Point2D.Float((float)x, (float)y);
     }
@@ -867,11 +854,11 @@ public class MainWindow extends JFrame
      */
     private boolean userConfirmSaveModifiedThenClose(MachineInternalFrame iFrame)
     {
-        TMGraphicsPanel gfxPanel = (TMGraphicsPanel)iFrame.getGfxPanel();
+        MachineGraphicsPanel gfxPanel = iFrame.getGfxPanel();
         iFrame.moveToFront();
         if (gfxPanel.isModifiedSinceSave())
         {
-            // TODO: specify which machine
+            // Get the title of the frame, including the machine type
             String name = iFrame.getTitle();
             if (name.startsWith("* "))
             {
@@ -883,12 +870,12 @@ public class MainWindow extends JFrame
                     "Closing window", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
-                TM_Machine machine = gfxPanel.getSimulator().getMachine();
+                Machine machine = gfxPanel.getSimulator().getMachine();
                 File outFile = gfxPanel.getFile();
                 boolean saveSuccessful = false;
                 if (outFile == null)
                 {
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    outFile = chooseSaveFile(m_fcMachine, "Save Machine", gfxPanel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user
@@ -897,7 +884,7 @@ public class MainWindow extends JFrame
                     }
                 }
 
-                if (TM_Machine.saveMachine(machine, outFile))
+                if (Machine.saveMachine(machine, outFile))
                 {
                     iFrame.dispose();
                     return true;
@@ -1014,7 +1001,7 @@ public class MainWindow extends JFrame
      * Set whether or not all controls are to be enabled or not.
      * @param isEnabled true if all controls are to be enabled, false otherwise.
      */
-    private void setEditingActionsEnabledState(boolean isEnabled)
+    public void setEditingActionsEnabledState(boolean isEnabled)
     {
         m_stepAction.setEnabled(isEnabled);
         m_configureAlphabetAction.setEnabled(isEnabled);
@@ -1036,6 +1023,7 @@ public class MainWindow extends JFrame
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
         m_newTuringMachineAction.setEnabled(isEnabled);
+        m_newDFSAAction.setEnabled(isEnabled);
         m_openMachineAction.setEnabled(isEnabled);
         m_saveMachineAsAction.setEnabled(isEnabled);
         m_saveMachineAction.setEnabled(isEnabled);
@@ -1069,8 +1057,8 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)frame;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)frame;
+                MachineGraphicsPanel panel = iFrame.getGfxPanel();
                 if (panel != null)
                 {
                     panel.repaint();
@@ -1188,45 +1176,6 @@ public class MainWindow extends JFrame
         while (true);
     }
 
-    /**
-     * Save the current machine, by displaying a file dialog.
-     * @param panel The current graphics panel.
-     * @return true if the machine is saved successfully, false otherwise.
-     */
-    public boolean saveMachineAs(TMGraphicsPanel panel)
-    {
-        File outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
-        try
-        {
-            outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);            
-            if (outFile == null)
-            {
-                // Cancelled by user 
-                m_console.log("Cancelled saving machine");
-                return false;
-            }
-            TM_Machine machine = panel.getSimulator().getMachine();
-            boolean result = TM_Machine.saveMachine(machine, outFile);
-            if (result == false)
-            {
-                throw new IOException(outFile.toString());
-            }
-            else
-            {
-                panel.setModifiedSinceSave(false);
-                panel.setFile(outFile);
-            }
-            return true;
-        } 
-        catch (Exception e2)
-        {
-            JOptionPane.showMessageDialog(MainWindow.this, 
-                    String.format("Error saving machine to %s", outFile.toString()));
-            
-            return false;
-        }
-    }
-    
     /** 
      * Determine if editing the machine or tape is enabled
      * @return true if editing is enabled, false otherwise.
@@ -1253,10 +1202,10 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)f;
-                TMGraphicsPanel gfxPanel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)f;
+                MachineGraphicsPanel gfxPanel = iFrame.getGfxPanel();
                 gfxPanel.setEditingEnabled(isEnabled);
-                tmif.setClosable(isEnabled);
+                iFrame.setClosable(isEnabled);
                 m_exitAction.setEnabled(isEnabled); 
             }
             catch (ClassCastException e)
@@ -1266,7 +1215,7 @@ public class MainWindow extends JFrame
             }
         }
         setEditingActionsEnabledState(isEnabled);
-        tapeDispController.setEditingEnabled(isEnabled);
+        m_tapeDispController.setEditingEnabled(isEnabled);
     }
  
     /**
@@ -1288,18 +1237,18 @@ public class MainWindow extends JFrame
         {
             try
             {
-                MachineInternalFrame tmif = (MachineInternalFrame)f;
-                TMGraphicsPanel panel = (TMGraphicsPanel)tmif.getGfxPanel();
+                MachineInternalFrame iFrame = (MachineInternalFrame)f;
+                MachineGraphicsPanel panel = iFrame.getGfxPanel();
                 if (panel.isModifiedSinceSave())
                 {
-                    if (!userConfirmSaveModifiedThenClose(tmif))
+                    if (!userConfirmSaveModifiedThenClose(iFrame))
                     {
                         return;
                     }
                 }
                 else
                 {
-                    tmif.dispose();
+                    iFrame.dispose();
                 }
             }
             catch (ClassCastException e2)
@@ -1321,9 +1270,9 @@ public class MainWindow extends JFrame
      * @param numTimesPastedToLastLoc The number of times an item has been pasted to the last pasted location.
      * @param panel The current graphics panel.
      */
-    private void translateCentroidToMiddleOfWindow(Collection<TM_State> states,
-            Collection<TM_Transition> transitions, Point2D centreOfWindow,
-            Point2D lastPastedLoc, int numTimesPastedToLastLoc, TMGraphicsPanel panel)
+    private void translateCentroidToMiddleOfWindow(Collection<? extends State> states,
+            Collection<? extends Transition> transitions, Point2D centreOfWindow,
+            Point2D lastPastedLoc, int numTimesPastedToLastLoc, MachineGraphicsPanel panel)
     {
         if (states.size() == 0)
         {
@@ -1337,7 +1286,7 @@ public class MainWindow extends JFrame
         int bottomMostY = Integer.MIN_VALUE;
         int topMostY = Integer.MAX_VALUE;
 
-        for (TM_State s : states)
+        for (State s : states)
         {
             if (s.getX() > rightMostX)
             {
@@ -1371,14 +1320,14 @@ public class MainWindow extends JFrame
             translateVectorY -= topMostY + translateVectorY;
         }
 
-        if (rightMostX + translateVectorX > MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH)
+        if (rightMostX + translateVectorX > MACHINE_CANVAS_SIZE_X - State.STATE_RENDERING_WIDTH)
         {
-            translateVectorX -= rightMostX + translateVectorX - (MACHINE_CANVAS_SIZE_X - TM_State.STATE_RENDERING_WIDTH);
+            translateVectorX -= rightMostX + translateVectorX - (MACHINE_CANVAS_SIZE_X - State.STATE_RENDERING_WIDTH);
         }
 
-        if (bottomMostY + translateVectorY >  MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH)
+        if (bottomMostY + translateVectorY >  MACHINE_CANVAS_SIZE_Y - State.STATE_RENDERING_WIDTH)
         {
-            translateVectorY -= bottomMostY + translateVectorY - (MACHINE_CANVAS_SIZE_Y - TM_State.STATE_RENDERING_WIDTH);
+            translateVectorY -= bottomMostY + translateVectorY - (MACHINE_CANVAS_SIZE_Y - State.STATE_RENDERING_WIDTH);
         }
 
         if (lastPastedLoc != null && ((int)lastPastedLoc.getX() == (int)centreOfWindow.getX() + translateVectorX
@@ -1395,14 +1344,14 @@ public class MainWindow extends JFrame
         }
 
 
-        for (TM_State s : states)
+        for (State s : states)
         {
             int newX = (int)(s.getX() + translateVectorX);
             int newY = (int)(s.getY() + translateVectorY);
             s.setPosition(newX, newY);
         }
 
-        for (TM_Transition t : transitions)
+        for (Transition t : transitions)
         {
             int newX = (int)(t.getControlPoint().getX() + translateVectorX);
             int newY = (int)(t.getControlPoint().getY() + translateVectorY);
@@ -1415,15 +1364,15 @@ public class MainWindow extends JFrame
      * @param states The set of states.
      * @return The centroid of the states.
      */
-    private static Point2D computeCentroid(Collection<TM_State> states)
+    private static Point2D computeCentroid(Collection<? extends State> states)
     {
         float totalX = 0;
         float totalY = 0;
 
-        for (TM_State s : states)
+        for (State s : states)
         {
-            totalX += s.getX() + TM_State.STATE_RENDERING_WIDTH / 2; // Use middle of state
-            totalY += s.getY() + TM_State.STATE_RENDERING_WIDTH / 2; // instead of top-left
+            totalX += s.getX() + State.STATE_RENDERING_WIDTH / 2; // Use middle of state
+            totalY += s.getY() + State.STATE_RENDERING_WIDTH / 2; // instead of top-left
         }
         return new Point2D.Float(totalX / states.size(), totalY / states.size());
     }
@@ -1433,7 +1382,7 @@ public class MainWindow extends JFrame
      */
     public void updateUndoActions()
     {
-        TMGraphicsPanel panel = getSelectedGraphicsPanel();
+        MachineGraphicsPanel panel = getSelectedGraphicsPanel();
         if (panel != null && isEditingEnabled())
         {
             String undoCommandName = panel.undoCommandName();
@@ -1485,7 +1434,7 @@ public class MainWindow extends JFrame
      * Gets the graphics panel for the currently selected machine diagram window.
      * @return A reference to the currently selected graphics panel, or null if there is no such panel.
      */
-    public TMGraphicsPanel getSelectedGraphicsPanel()
+    public MachineGraphicsPanel getSelectedGraphicsPanel()
     {
         if (m_desktopPane == null)
         {
@@ -1499,7 +1448,7 @@ public class MainWindow extends JFrame
         try
         {
             MachineInternalFrame tmif = (MachineInternalFrame)selected;
-            return (TMGraphicsPanel)tmif.getGfxPanel();
+            return tmif.getGfxPanel();
         }
         catch (ClassCastException e)
         {
@@ -1521,7 +1470,6 @@ public class MainWindow extends JFrame
         public NewTuringMachineAction(String text, ImageIcon icon)
         {
             super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
             putValue(Action.SMALL_ICON, icon);
             putValue(Action.SHORT_DESCRIPTION, text);
         }
@@ -1534,14 +1482,49 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = newMachineWindow(new TM_Machine(), null);
+                JInternalFrame iFrame = 
+                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, MainWindow.this));
                 m_desktopPane.add(iFrame);
                 try { iFrame.setSelected(true); }
                 catch (PropertyVetoException e2) { }
             }
         }
     }
-    
+
+    /**
+     * Action for creating a new DFSA in a new window.
+     */
+    class NewDFSAAction extends AbstractAction
+    {
+       /**
+         * Creates a new instance of NewDFSAAction. 
+         * @param text Description of the action.
+         * @param icon Icon for the action.
+         */
+        public NewDFSAAction(String text, ImageIcon icon)
+        {
+            super(text);
+            putValue(Action.SMALL_ICON, icon);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+       
+        /**
+         * Create a new machine, in a new frame.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            if (m_desktopPane != null)
+            {
+                JInternalFrame iFrame = 
+                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null, MainWindow.this));
+                m_desktopPane.add(iFrame);
+                try { iFrame.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
+        }
+    }
+
     /** 
      * Action for opening/loading a machine diagram.
      */
@@ -1567,7 +1550,7 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             // Choose the file to load
-            File inFile = chooseLoadFile(fcMachine, "Load Machine", MACHINE_EXTENSION);
+            File inFile = chooseLoadFile(m_fcMachine, "Load Machine", "");
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1576,12 +1559,24 @@ public class MainWindow extends JFrame
             }
             try
             {
-                TM_Machine machine = (TM_Machine)TM_Machine.loadMachine(inFile);
+                Machine machine = Machine.loadMachine(inFile);
                 if (machine == null)
                 {
-                    throw new IOException(inFile.toString());
+                    throw new IOException("Failed to load " + inFile.toString());
                 }
-                JInternalFrame iFrame = newMachineWindow(machine, inFile);
+ 
+                // TODO: Can we make this nicer?
+                JInternalFrame iFrame = null;
+                if (machine instanceof TM_Machine)
+                {
+                    iFrame = newMachineWindow(new TMGraphicsPanel(
+                                (TM_Machine)machine, m_tape, inFile, MainWindow.this));
+                }
+                else if (machine instanceof DFSA_Machine)
+                {
+                    iFrame = newMachineWindow(new DFSAGraphicsPanel(
+                                (DFSA_Machine)machine, m_tape, inFile, MainWindow.this));
+                }
                 m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
                 try
@@ -1629,21 +1624,22 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel == null)
             {
-                // Whatever we are looking at isn't a TMGraphicsPanel
+                // Whatever we are looking at isn't a graphics panel
                 m_console.log("Current window is not a graphics panel; cannot save");
                 return;
             }
 
-            TM_Machine machine = panel.getSimulator().getMachine();
+            Machine machine = panel.getSimulator().getMachine();
             File outFile = panel.getFile();
             try
             {
                 if (m_force || outFile == null)
                 {
-                    outFile = chooseSaveFile(fcMachine, "Save Machine", MACHINE_EXTENSION);
+                    // !!!
+                    outFile = chooseSaveFile(m_fcMachine, "Save Machine", panel.getMachineExt());
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -1652,7 +1648,7 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!TM_Machine.saveMachine(machine, outFile))
+                if (!Machine.saveMachine(machine, outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
@@ -1668,7 +1664,8 @@ public class MainWindow extends JFrame
                 JOptionPane.showMessageDialog(MainWindow.this,
                         String.format("Error saving machine to %s", outFile.toString()));
                 m_console.log(String.format("Encountered an error when saving the machine to %s: %s",
-                            outFile.toString(), e2.getMessage())); }
+                            outFile.toString(), e2.getMessage())); 
+            }
         }
 
         /**
@@ -1714,7 +1711,7 @@ public class MainWindow extends JFrame
             if (result == JOptionPane.YES_OPTION)
             {
                 m_tape.copyOther(new CA_Tape());
-                tapeDisp.repaint();
+                m_tapeDisp.repaint();
             }
         }
     }
@@ -1743,7 +1740,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            File inFile = chooseLoadFile(fcTape, "Load Tape", TAPE_EXTENSION);
+            File inFile = chooseLoadFile(m_fcTape, "Load Tape", TAPE_EXTENSION);
             if (inFile == null)
             {
                 // Cancelled by user
@@ -1758,9 +1755,9 @@ public class MainWindow extends JFrame
                 {
                     throw new IOException(inFile.toString());
                 }
-                tapeDisp.getTape().copyOther(tape);
-                tapeDisp.setFile(inFile);
-                tapeDisp.repaint();
+                m_tapeDisp.getTape().copyOther(tape);
+                m_tapeDisp.setFile(inFile);
+                m_tapeDisp.repaint();
             }
             catch (Exception e2)
             {
@@ -1801,14 +1798,14 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            Tape tape = tapeDisp.getTape();
-            File outFile = tapeDisp.getFile();
+            Tape tape = m_tapeDisp.getTape();
+            File outFile = m_tapeDisp.getFile();
 
             try
             {
                 if (m_force || outFile == null)
                 {
-                    outFile = chooseSaveFile(fcTape, "Save Tape", TAPE_EXTENSION);
+                    outFile = chooseSaveFile(m_fcTape, "Save Tape", TAPE_EXTENSION);
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -1817,11 +1814,11 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!Tape.saveTape(tapeDisp.getTape(), outFile))
+                if (!Tape.saveTape(m_tapeDisp.getTape(), outFile))
                 {
                     throw new IOException(outFile.toString());
                 }
-                tapeDisp.setFile(outFile);
+                m_tapeDisp.setFile(outFile);
                 m_console.log(String.format("Successfully saved tape to %s", outFile.toString()));
             }
             catch (Exception e2)
@@ -1832,7 +1829,6 @@ public class MainWindow extends JFrame
                             outFile.toString(), e2.getMessage()));
             }
         }
-
 
         /**
          * Whether or not a file chooser should always be displayed.
@@ -1892,7 +1888,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.undoCommand();
@@ -1926,7 +1922,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.redoCommand();
@@ -1961,12 +1957,12 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {   
             m_copyAction.actionPerformed(e); 
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                HashSet<TM_State> selectedStatesCopy = (HashSet<TM_State>)panel.getSelectedStates().clone();
-                HashSet<TM_Transition> selectedTransitionsCopy = (HashSet<TM_Transition>)panel.getSelectedTransitions().clone();
-                panel.doCommand(new CutCommand(panel, selectedStatesCopy, selectedTransitionsCopy));
+                panel.doCommand(new CutCommand(panel, 
+                            (HashSet<? extends State>)panel.getSelectedStates().clone(),
+                            (HashSet<? extends Transition>)panel.getSelectedTransitions().clone()));
                 updateUndoActions();
             }
         }
@@ -1996,14 +1992,13 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
-                copiedData = panel.copySelectedToByteArray();
+                m_copiedData = panel.copySelectedToByteArray();
             }
         }
     }
-    
     
     /**
      * Action for pasting states and transitions into a machine.
@@ -2031,34 +2026,35 @@ public class MainWindow extends JFrame
         {   
             try
             {
-                if (copiedData == null)
+                MachineInternalFrame iFrame = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
+                if (m_copiedData == null || iFrame == null)
                 {
                     // Abort
                     return;
                 }
-                ByteArrayInputStream bais = new ByteArrayInputStream(copiedData);
-                ObjectInputStream restore = new ObjectInputStream(bais);
-                HashSet<TM_State> selectedStates = (HashSet<TM_State>)restore.readObject();
-                HashSet<TM_Transition> selectedTransitions = (HashSet<TM_Transition>)restore.readObject();
+
+                // Translate our byte[] back into real data
+                ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(m_copiedData));
+                HashSet<State> selectedStates = (HashSet<State>)restore.readObject();
+                HashSet<Transition> selectedTransitions = (HashSet<Transition>)restore.readObject();
+                
+                // Figure out roughly the centre-of-mass of the copied data
                 Point2D centroid = computeCentroid(selectedStates);
-                MachineInternalFrame tmif = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
-                if (tmif == null)
-                {
-                    // Abort
-                    return;
-                }
-                Point2D centreOfWindow = tmif.getCenterOfViewPort();
-                translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions, centreOfWindow,
-                        tmif.getGfxPanel().getLastPastedLocation(), tmif.getGfxPanel().getNumPastesToSameLocation(),
-                        (TMGraphicsPanel)tmif.getGfxPanel());
-                TMGraphicsPanel panel = getSelectedGraphicsPanel();
+
+                // Find the centre of the frame
+                Point2D centreOfWindow = iFrame.getCenterOfViewPort();
+                translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions,
+                        centreOfWindow, iFrame.getGfxPanel().getLastPastedLocation(),
+                        iFrame.getGfxPanel().getNumPastesToSameLocation(), iFrame.getGfxPanel());
+
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
                 if (panel != null)
                 {
-                    TM_Machine machine = panel.getSimulator().getMachine();
-                    switch (panel.getSimulator().getMachine().getNamingScheme())
+                    Machine machine = panel.getSimulator().getMachine();
+                    switch (machine.getNamingScheme())
                     {
                         case GENERAL:
-                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions));
+                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
                             break;
 
                         case NORMALIZED:
@@ -2098,7 +2094,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {   
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 panel.deleteAllSelected();
@@ -2186,18 +2182,19 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
             if (gfxPanel == null)
             {
                 return;
             }
 
+            // TODO: Can we use multiple dispatch or similar to tidy this up?
             try
             {
-                TM_Simulator sim = gfxPanel.getSimulator();
+                Simulator sim = gfxPanel.getSimulator();
                 sim.step();
-                tapeDisp.repaint();
-                if (sim.getCurrentState().isFinalState())
+                m_tapeDisp.repaint();
+                if (sim.isHalted())
                 {
                     m_console.logPartial(gfxPanel, sim.getConfiguration());
                 }
@@ -2206,30 +2203,51 @@ public class MainWindow extends JFrame
                     m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
                 }
             }
+            catch (ComputationCompletedException e2)
+            {
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
+                
+                gfxPanel.getSimulator().resetMachine();
+            }
+            catch (ComputationFailedException e2)
+            {
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
+                
+                gfxPanel.getSimulator().resetMachine();
+            }
             catch (NondeterministicException e2)
             {
-                m_console.logPartial(gfxPanel, e2.getMessage());
-                m_console.endPartial();
-                JOptionPane.showMessageDialog(m_parentComponent, MainWindow.NONDET_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE); 
-            }
-            catch (UndefinedTransitionException e2)
-            {
-                m_console.logPartial(gfxPanel, e2.getMessage());
-                m_console.endPartial();
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TRANS_UNDEF_ERR_STR + " " + e2.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
             }
             catch (TapeBoundsException e2)
             {
-                m_console.logPartial(gfxPanel, e2.getMessage());
-                m_console.endPartial();
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR,JOptionPane.WARNING_MESSAGE);
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
             }
-            catch (ComputationCompletedException e2)
+            catch (UndefinedTransitionException e2)
             {
-                m_console.endPartial();
-                JOptionPane.showMessageDialog(m_parentComponent,MainWindow.COMPUTATION_COMPLETED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-                gfxPanel.getSimulator().resetMachine();
-                gfxPanel.repaint();
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            catch (Exception e2)
+            {
+                m_console.log(gfxPanel.getErrorMessage(e2));
+                JOptionPane.showMessageDialog(m_parentComponent,
+                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
+                        JOptionPane.WARNING_MESSAGE);
             }
             repaint();
         }
@@ -2264,7 +2282,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         { 
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 if (m_timerTask != null)
@@ -2272,7 +2290,7 @@ public class MainWindow extends JFrame
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new TMExecutionTimerTask(panel, tapeDisp, MainWindow.this);
+                m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp, MainWindow.this);
                 m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }
@@ -2331,7 +2349,7 @@ public class MainWindow extends JFrame
          */
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
             boolean wasRunning = stopExecution();
             if (gfxPanel != null)
             {
@@ -2407,8 +2425,8 @@ public class MainWindow extends JFrame
         public void actionPerformed(ActionEvent e) 
         {
             // Move r/w head to the left end of the tape
-            tapeDisp.getTape().resetRWHead();
-            tapeDispController.repaint();
+            m_tapeDisp.getTape().resetRWHead();
+            m_tapeDispController.repaint();
         }
     }
 
@@ -2436,7 +2454,7 @@ public class MainWindow extends JFrame
             Object[] options = {"Ok", "Cancel"};
             // TODO: should disable keyboard here
             int result = 0;
-            if (tapeDisp.getFile() == null)
+            if (m_tapeDisp.getFile() == null)
             {
                 result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             }
@@ -2447,10 +2465,10 @@ public class MainWindow extends JFrame
 
             if (result == JOptionPane.YES_OPTION)
             {
-                tapeDisp.reloadTape();
-                tapeDispController.repaint();
+                m_tapeDisp.reloadTape();
+                m_tapeDispController.repaint();
                 
-                File file = tapeDisp.getFile();
+                File file = m_tapeDisp.getFile();
                 if (file == null)
                 {
                     m_console.log("Deleted tape contents");
@@ -2494,8 +2512,8 @@ public class MainWindow extends JFrame
             int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
             if (result == JOptionPane.YES_OPTION)
             {
-                tapeDisp.getTape().clearTape();
-                tapeDispController.repaint();
+                m_tapeDisp.getTape().clearTape();
+                m_tapeDispController.repaint();
             }
         }
     }
@@ -2520,7 +2538,7 @@ public class MainWindow extends JFrame
         
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 m_asif.setPanel(panel);
@@ -2550,7 +2568,7 @@ public class MainWindow extends JFrame
 
         public void actionPerformed(ActionEvent e)
         {
-            TMGraphicsPanel panel = getSelectedGraphicsPanel();
+            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
             if (panel != null)
             {
                 m_ssif.setPanel(panel);
@@ -2620,7 +2638,7 @@ public class MainWindow extends JFrame
         {
             if (m_helpDisp == null)
             {
-                m_helpDisp = new TMHelpDisplayer();
+                m_helpDisp = new HelpDisplayer();
                 m_helpDisp.setLayer(60);
             }
             if (!m_helpDisp.isVisible())
@@ -2720,17 +2738,17 @@ public class MainWindow extends JFrame
     /**
      * Dialog for choosing a file, specifically for machines.
      */
-    private final JFileChooser fcMachine = new JFileChooser();
+    private final JFileChooser m_fcMachine = new JFileChooser();
 
     /**
      * Dialog for choosing a file, specifically for tapes.
      */
-    private final JFileChooser fcTape = new JFileChooser();
+    private final JFileChooser m_fcTape = new JFileChooser();
 
     /**
      * Timer task used for stepping through a machine on a delay.
      */
-    private TMExecutionTimerTask m_timerTask;
+    private ExecutionTimerTask m_timerTask;
     
     /**
      * Simulation delay associated with the machine, used by m_timerTask.
@@ -2740,22 +2758,22 @@ public class MainWindow extends JFrame
     /**
      * Data which has been copied, used for pasting.
      */
-    private byte[] copiedData = null;
+    private byte[] m_copiedData = null;
 
     /**
      * X ordinate of the last new frame.
      */
-    private int lastNewWindowLocX = 0;
+    private int m_lastNewWindowLocX = 0;
 
     /**
      * Y ordinate of the last new frame.
      */
-    private int lastNewWindowLocY = 0;
+    private int m_lastNewWindowLocY = 0;
 
     /**
      * Distance between new frames.
      */
-    private int windowLocStepSize = minDistanceForNewWindowLoc;
+    private int m_windowLocStepSize = minDistanceForNewWindowLoc;
     
     /**
      * List of buttons which have an associated GUI mode and action.
@@ -2765,28 +2783,18 @@ public class MainWindow extends JFrame
     /**
      * Tape display panel.
      */
-    private TMTapeDisplayPanel tapeDisp;
+    private TapeDisplayPanel m_tapeDisp;
 
     /**
      * Tape controller.
      */
-    private TMTapeDisplayControllerPanel tapeDispController;
+    private TapeDisplayControllerPanel m_tapeDispController;
 
     /**
      * Main shared tape.
      */
     private final Tape m_tape = new CA_Tape();
 
-    /**
-     * List of copied states.
-     */ 
-    private ArrayList<TM_State> copiedStates;
-
-    /**
-     * List of copied transitions.
-     */
-    private ArrayList<TM_Transition> copiedTransitions;
-      
     /**
      * Toolbar button for undoing an action.
      */
@@ -2815,7 +2823,7 @@ public class MainWindow extends JFrame
     /**
      * Frame for displaying help information as HTML.
      */
-    private TMHelpDisplayer m_helpDisp;
+    private HelpDisplayer m_helpDisp;
 
     /**
      * Frame for displaying a console window for logging information.
@@ -2823,215 +2831,220 @@ public class MainWindow extends JFrame
     private ConsoleInternalFrame m_console;
 
     /**
-     * Action for creating a new machine.
+     * Action for creating a new Turing Machine.
      */
-    private final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
+    public final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
+
+    /**
+     * Action for creating a new DFSA.
+     */
+    public final Action m_newDFSAAction = new NewDFSAAction("New DFSA", loadIcon("newMachine.gif")); 
 
     /**
      * Action for opening a machine.
      */
-    private final Action m_openMachineAction = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));;
+    public final Action m_openMachineAction = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));;
 
     /**
      * Action for saving a machine to an associated file.
      */
-    private final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
+    public final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
-    private final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
      */
-    private final Action m_newTapeAction = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
+    public final Action m_newTapeAction = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
 
     /**
      * Action for opening a tape.
      */
-    private final Action m_openTapeAction = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
+    public final Action m_openTapeAction = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
 
     /**
      * Action for saving a tape to an associated file.
      */
-    private final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
+    public final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
-    private final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
      */
-    private final Action m_exitAction = new ExitAction("Exit", loadIcon("emptyIcon.gif"));
+    public final Action m_exitAction = new ExitAction("Exit", loadIcon("emptyIcon.gif"));
 
     /**
      * Action for undoing a command.
      */
-    private final Action m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
+    public final Action m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
 
     /**
      * Action for redoing a command
      */
-    private final Action m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
+    public final Action m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
 
     /**
      * Action for cutting selected states and transitions.
      */
-    private final Action m_cutAction = new CutSelectedAction("Cut", loadIcon("cut.gif"));
+    public final Action m_cutAction = new CutSelectedAction("Cut", loadIcon("cut.gif"));
 
     /**
      * Action for copying selected states and transitions.
      */
-    private final Action m_copyAction = new CopySelectedAction("Copy", loadIcon("copy.gif"));
+    public final Action m_copyAction = new CopySelectedAction("Copy", loadIcon("copy.gif"));
 
     /**
      * Action for pasting selected states and transitions.
      */
-    private final Action m_pasteAction = new PasteAction("Paste", loadIcon("paste.gif"));
+    public final Action m_pasteAction = new PasteAction("Paste", loadIcon("paste.gif"));
 
     /**
      * Action for deleting selected states and transitions.
      */
-    private final Action m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
+    public final Action m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
 
     /**
      * Action associated with ADDNODES.
      */
-    private final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
+    public final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
             loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
 
     /**
      * Action associated with ADDTRANSITIONS.
      */
-    private final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
+    public final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
             loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 
     /**
      * Action associated with SELECTION.
      */
-    private final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
+    public final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
             loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
 
     /**
      * Action associated with ERASER.
      */
-    private final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
+    public final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
             loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
 
     /**
      * Action associated with CHOOSESTART.
      */
-    private final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
+    public final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
             loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
      * Action associated with CHOOSEACCEPTING.
      */
-    private final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
+    public final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
             loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**
      * Action associated with CHOOSECURRENTSTATE.
      */
-    private final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
+    public final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
         new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
                 loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
 
     /**
      * Action for stepping through execution.
      */
-    private final Action m_stepAction = new StepAction("Step", this, loadIcon("step.gif"));
+    public final Action m_stepAction = new StepAction("Step", this, loadIcon("step.gif"));
 
     /**
      * Action for starting simulation of the machine.
      */
-    private final Action m_fastExecuteAction = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
+    public final Action m_fastExecuteAction = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
 
     /**
      * Action for pausing simulation of the machine.
      */
-    private final Action m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
+    public final Action m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
 
     /**
      * Action for stopping a simulation.
      */
-    private final Action m_stopMachineAction = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
+    public final Action m_stopMachineAction = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
 
     /**
      * Action to set execution speed to slow.
      */
-    private final ExecutionSpeedSelectionAction m_slowExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_slowExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Slow", SLOW_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_1, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to medium.
      */
-    private final ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_mediumExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Medium", MEDIUM_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_2, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to fast.
      */
-    private final ExecutionSpeedSelectionAction m_fastExecuteSpeedAction =
+    public final ExecutionSpeedSelectionAction m_fastExecuteSpeedAction =
         new ExecutionSpeedSelectionAction("Fast", FAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_3, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to superfast.
      */
-    private final ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_superFastExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Super Fast", SUPERFAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_4, KeyEvent.CTRL_DOWN_MASK));
 
     /**
      * Action to set execution speed to ultrafast.
      */
-    private final ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction = 
+    public final ExecutionSpeedSelectionAction m_ultraFastExecuteSpeedAction = 
         new ExecutionSpeedSelectionAction("Ultra Fast", ULTRAFAST_EXECUTE_SPEED_DELAY,
                 KeyStroke.getKeyStroke(KeyEvent.VK_5, KeyEvent.CTRL_DOWN_MASK)); 
 
     /**
      * Action for moving the read/write head to the start of the tape.
      */
-    private final HeadToStartAction m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
+    public final HeadToStartAction m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
 
     /**
      * Action for reloading the tape.
      */
-    private final ReloadTapeAction m_reloadTapeAction = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
+    public final ReloadTapeAction m_reloadTapeAction = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
 
     /**
      * Action for erasing the tape.
      */
-    private final EraseTapeAction m_eraseTapeAction = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
+    public final EraseTapeAction m_eraseTapeAction = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
 
     /**
      * Action for configuring the alphabet.
      */
-    private final Action m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif")); 
+    public final Action m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif")); 
 
     /**
      * Action for configuring the naming scheme.
      */
-    private final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
+    public final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
 
     /**
      * Action for displaying the shared console.
      */
-    private final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
+    public final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
 
     /**
      * Action for displaying help documentation.
      */
-    private final Action m_helpAction = new HelpAction("Help", loadIcon("tuatara.gif"));
+    public final Action m_helpAction = new HelpAction("Help", loadIcon("tuatara.gif"));
 
     /**
      * Action for displaying meta information about the program.
      */
-    private final Action m_aboutAction = new AboutAction("About", loadIcon("emptyIcon.gif"));
+    public final Action m_aboutAction = new AboutAction("About", loadIcon("emptyIcon.gif"));
 }

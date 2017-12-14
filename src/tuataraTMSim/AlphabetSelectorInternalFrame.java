@@ -377,7 +377,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
      * Must be called before each time this internal frame is set to visible.
      * @param panel The current graphics panel.
      */
-    public void setPanel(TMGraphicsPanel panel)
+    public void setPanel(MachineGraphicsPanel panel)
     {
         m_panel = panel;
         synchronizeToAlphabet();
@@ -465,7 +465,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * The main window.

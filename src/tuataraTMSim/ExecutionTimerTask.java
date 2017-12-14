@@ -29,21 +29,20 @@ import java.util.TimerTask;
 import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.Simulator;
-import tuataraTMSim.machine.TM.TM_Simulator;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 
  * @author Jimmy
  */
-public class TMExecutionTimerTask extends TimerTask
+public class ExecutionTimerTask extends TimerTask
 {
     /**
-     * Creates a new instance of TMExecutionTimerTask.
+     * Creates a new instance of ExecutionTimerTask.
      * @param panel The current graphics panel.
      * @param tapeDisp The current tape panel.
      * @param window The main window.
      */
-    public TMExecutionTimerTask(TMGraphicsPanel panel, TMTapeDisplayPanel tapeDisp, MainWindow window)
+    public ExecutionTimerTask(MachineGraphicsPanel panel, TapeDisplayPanel tapeDisp, MainWindow window)
     {
         m_panel = panel;
         m_tapeDisp = tapeDisp;
@@ -56,13 +55,14 @@ public class TMExecutionTimerTask extends TimerTask
      */
     public void run()
     {
+        // TODO: Can we use multiple dispatch or similar to tidy this up?
         try
         {
-            TM_Simulator sim = m_panel.getSimulator();
+            Simulator sim = m_panel.getSimulator();
             sim.step();
             m_panel.repaint();
             m_tapeDisp.repaint();
-            if (sim.getCurrentState().isFinalState())
+            if (sim.isHalted())
             {
                 m_mainWindow.getConsole().logPartial(m_panel, sim.getConfiguration());
             }
@@ -71,46 +71,72 @@ public class TMExecutionTimerTask extends TimerTask
                 m_mainWindow.getConsole().logPartial(m_panel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb')); 
             }
         }
-        catch (TapeBoundsException e)
-        {
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
-            cancel();
-            m_mainWindow.stopExecution();
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TAPE_BOUNDS_ERR_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-        }
-        catch (UndefinedTransitionException e)
-        {
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
-            cancel();
-            m_mainWindow.stopExecution();
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.TRANS_UNDEF_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-        }
-        catch (NondeterministicException e)
-        {
-            m_mainWindow.getConsole().logPartial(m_panel, e.getMessage());
-            m_mainWindow.getConsole().endPartial();
-            cancel();
-            m_mainWindow.stopExecution();
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.NONDET_ERR_STR + " " + e.getMessage(), MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-        }
         catch (ComputationCompletedException e)
         {
-            m_mainWindow.getConsole().endPartial();
             cancel();
             m_mainWindow.stopExecution();
-            JOptionPane.showMessageDialog(m_mainWindow,MainWindow.COMPUTATION_COMPLETED_STR, MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
         }
+        catch (ComputationFailedException e)
+        {
+            cancel();
+            m_mainWindow.stopExecution();
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+            m_panel.getSimulator().resetMachine();
+            m_panel.repaint();
+        }
+        catch (NondeterministicException e)
+        {
+            cancel();
+            m_mainWindow.stopExecution();
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
+        }
+        catch (TapeBoundsException e)
+        {
+            cancel();
+            m_mainWindow.stopExecution();
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
+        }
+        catch (UndefinedTransitionException e)
+        {
+            cancel();
+            m_mainWindow.stopExecution();
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
+        }
+        catch (Exception e)
+        {
+            cancel();
+            m_mainWindow.stopExecution();
+
+            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
+            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
+        }
+        m_mainWindow.repaint();
     }
    
     /**
      * Get the current graphics panel.
      * @return The current graphics panel.
      */
-    public TMGraphicsPanel getPanel()
+    public MachineGraphicsPanel getPanel()
     {
         return m_panel;
     }
@@ -129,12 +155,12 @@ public class TMExecutionTimerTask extends TimerTask
     /**
      * The current graphics panel.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
     
     /**
      * The current tape panel.
      */
-    private TMTapeDisplayPanel m_tapeDisp;
+    private TapeDisplayPanel m_tapeDisp;
 
     /**
      * The main window.

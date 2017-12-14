@@ -25,8 +25,8 @@
 
 package tuataraTMSim.commands;
 
-import tuataraTMSim.MachineGraphicsPanel;
 import tuataraTMSim.machine.Alphabet;
+import tuataraTMSim.MachineGraphicsPanel;
 
 /**
  * A command which deals with manipulating the tape alphabet.

@@ -95,7 +95,7 @@ public class ConsoleInternalFrame extends JInternalFrame
      * @param panel The panel logging the text.
      * @param s The string to be logged.
      */
-    public void logPartial(TMGraphicsPanel panel, String s)
+    public void logPartial(MachineGraphicsPanel panel, String s)
     {
         // Last message was not partial; timestamp and log
         if (!m_partial)
@@ -189,7 +189,7 @@ public class ConsoleInternalFrame extends JInternalFrame
     /**
      * Panel currently logging a partial message.
      */
-    private TMGraphicsPanel m_panel;
+    private MachineGraphicsPanel m_panel;
 
     /**
      * Whether or not we are waiting for more information to add to the log.
