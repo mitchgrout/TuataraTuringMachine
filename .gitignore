@@ -1,15 +1,9 @@
 # Ignore the build and doc directories
 build/
-doc/
+docs/
 
 # Compiled class file
 *.class
-
-# JavaDoc
-*.html
-package-list
-script.js
-stylesheet.css
 
 # Log file
 *.log

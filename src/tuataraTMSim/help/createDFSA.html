@@ -1,15 +1,12 @@
 <html>
-<h2> Creating and Editing Machines </h2>
+<h2> Creating and Editing a DFSA </h2>
 
-<p> In this section, we present a guide to creating and editing machines. </p>
+<p> In this section, we present a guide to creating and editing a deterministic finite-state automata. </p>
 
-<br>
-<h3> Choosing an Alphabet </h3>
-<p> 
-Each machine has an alphabet assocated with it.  This is the set of symbols that it can read and
-write to the tape.  In this program, unlike in some Turing machine models there are not separate
-alphabets for allowable input ("input alphabet") and symbols that the machine can write to the tape
-("tape alphabet").  Instead, consider the single alphabet to be the union of these two alphabets.
+<p>
+<h3> Choosing an Alphabet </h3> 
+A DFSA has a single alphabet associated with it, &Sigma;. A DFSA is capable of determining if some
+string over &Sigma;* belongs to the language described by the machine.
 </p>
 
 <p>
@@ -18,110 +15,70 @@ In the Configuration menu, click on <img src="../images/configureAlphabet.gif">
 for the symbols that you wish to include in your alphabet, and press <i>Ok</i>.
 </p>
 
-<br>
-<h3> Choosing a Naming Scheme </h3>
-<p> 
-When adding new states, a new label will be selected from a set of potential labels. This pool may
-be configured by choosing a different naming scheme.
-</p>
 <p>
-In the Configuration menu, click on <img src="../images/scheme.gif"> <i>Configure Scheme</i>.  This
-will bring up the naming scheme dialog.  Choose the naming scheme that you would like to use for the
-current machine.  To rename all of your states to fit the new scheme, click <i>OK & Rename</i>, or
-click <i>OK</i> to change the scheme without renaming existing states.  Some naming schemes will
-require a rename of all existing states.
-</p>
-
-<br>
 <h3> Adding States </h3>
-<p>
 To add a state, choose the <img src="../images/state.gif"> <i>Add States</i> mode from the Mode menu
 or from the toolbar.  Now, clicking on an empty space in a machine window will create a state at
 that location.
 </p>
 
-<br>
-<h3> Adding Transitons </h3>
 <p>
+<h3> Adding Transitons </h3>
 Select the <img src="../images/transition.gif"> <i>Add Transitions</i> mode from the Mode menu or
 from the toolbar.  Click on a state, and drag the mouse to another state without releasing the mouse
 button to create a transition between the two states.  Create self-loops by both clicking and
-releasing the mouse on the same state.
+releasing the mouse on the same state. 
 </p>
 
 <p>
-Each transition has an input symbol (to the left of the <i>/</i>), and an action symbol (to the
-right of the <i>/</i>).  When the machine is in the 'from' state of a transition, and the symbol on
-the tape beneath the read/write head matches the input symbol of a transition, the action defined by
-the action symbol may be performed and the machine state is set to the 'to' state of the transition.
+Each transition has an input symbol associated with it.  When the machine is in the 'from' state of 
+a transition, and the symbol on the tape beneath the read/write head matches the input symbol of a
+transition, then the machine follows the transition to the 'to' state, and looks at the next
+character.  If there are no more characters, then the machine halts.
 </p>
 
 <p>
 By default, the transition created has an <i>undefined</i> input symbol, '<i>!</i>', which matches
 nothing, and will prevent the machine from running until replaced with a symbol from the machine
-alphabet.  Similarly, the output action defaults to the <i>undefined</i> action, '<i>!</i>' which
-prevents the machine from running until replaced with a symbol from the machine alphabet.
+alphabet.  Additionally, every state must have exactly one transition leaving it using every symbol
+in &Sigma;.
 </p>
 
-<br>
-<h3> Choosing Transition Symbols </h3>
 <p>
+<h3> Choosing Transition Symbols </h3>
 Click on the input or output symbol of a transition, and on your keyboard type the character that
 you want to change the symbol to be.  You may only change the symbol to characters that belong to
-the alphabet of the machine, or one of the special symbols described below.  If the blank symbol is
-in the alphabet, you may type this character by pressing the spacebar button or the underscore key
-'<i>_</i>'.
-</p>
-
-<p> 
-A useful input symbol is the <i>otherwise</i> symbol, '<i>?</i>', which matches any symbol, but only
-if no other transition's input symbol matches.  A machine cannot have several <i>otherwise</i>
-transitions.
+the alphabet of the machine.
 </p>
 
 <p>
-Empty epsilon actions are created by pressing '<i>Shift + E</i>' when the action symbol is selected.
-These actions cause no change to the tape.
-</p>
-
-<p> 
-Set the action to move the read/write head left or right by typing the <i>left</i> and <i>right</i>
-arrow keys, respectively.
-</p>
-
-<br>
 <h3> Deleting States and Transitions</h3>
-<p>
 Choose the <img src="../images/eraser.gif"> <i>Eraser</i> mode from the Mode menu or toolbar.  Click
 on a state or transition to erase it.
 </p>
 
-<br>
-<h3> Moving States and Transitions </h3>
-<p> 
+<p>
+<h3> Moving States and Transitions </h3> 
 Click on a state and drag it to move it to another location.  Transitions can be moved similarly by
 clicking on their action text or the directional arrows and dragging.
 </p>
 
-<br>
-<h3> Choosing a Start State </h3>
 <p>
+<h3> Choosing a Start State </h3>
 Select the <img src="../images/startState.gif"> <i>Choose Start State</i> mode from the Mode menu.
 Click on a state to toggle whether it is a start state or not.  Only one state may be a start
 state.
 </p>
 
-<br>
-<h3> Choosing an Accepting State </h3>
 <p>
+<h3> Choosing an Accepting State </h3>
 Select the <img src="../images/finalState.gif"> <i>Choose Accepting State</i> mode from the Mode
-menu.  Click on a state to toggle whether it is an accepting state or not.  Only one state may
-be an accepting state.
+menu.  Click on a state to toggle whether it is an accepting state or not.  A DFSA may have any
+number of accepting states.
 </p>
 
-<br>
-<h3> Copying and Pasting </h3>
-<p> 
+<p>
+<h3> Copying and Pasting </h3> 
 A set of states can be selected by dragging a box around them in the <img src="../images/selection.gif">
 <i>Make Selection mode</i>.  To add or remove states from the current set of selected states, click
 on them while holding the shift key.  All transitions that connect only to other states within the
@@ -134,16 +91,14 @@ from the Edit menu.  Pasted states are renamed to the first free name that has n
 this machine to prevent duplication of names.
 </p>
 
-<br>
-<h3> Renaming States </h3>
 <p>
+<h3> Renaming States </h3>
 To give a state a custom name, click once on its name.  This brings up the appropriate dialog box.
 States must be uniquely named within a machine - duplicate names are not allowed.
 </p>
 
-<br>
-<h3> Loading and Saving Machines </h3>
 <p>
+<h3> Loading and Saving Machines </h3>
 Machines can be saved to a hard disk or other storage medium by selecting <img src="../images/saveMachine.gif"> 
 <i> Save Machine </i> from the <i>File</i> menu.  Choose <img src="../images/openMachine.gif">
 <i>Open Machine </i> from the <i>File</i> menu to retrieve a machine later.

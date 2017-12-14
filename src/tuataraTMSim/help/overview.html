@@ -1,45 +1,76 @@
 <html>
 <h2> Overview of Tuatara Turing Machine Simulator </h2>
 <p>
-This program is a graphical toolkit for designing and simulating Turing machines.  It was written by
-Jimmy Foulds during 2006-2007, and later updated and extended by Mitchell Grout during 2017-2018,
-with funding from the Department of Mathematics at the University of Waikato, New Zealand.
+This program is a graphical toolkit for designing and simulating various types of deterministic
+finite-state machines.  It was written by Jimmy Foulds during 2006-2007, and later updated and
+extended by Mitchell Grout during 2017-2018, with funding from the Department of Mathematics at the
+University of Waikato, New Zealand.
 </p>
 
 <p>
-Turing machines are a class of abstract machines which are commonly believed to be capable of
-performing any computation that is specifiable by an algorithm.
+Originally, Tuatara Turing Machine Simulator supported only the design and simulation of
+nondeterministic Turing machines, but has been extended to support more general, strictly
+deterministic machines. 
 </p>
 
 <p>
-A Turing machine operates by reading and modifying a tape of data.  Here, a "tape" is a sequence of
-cells that contain symbols from some alphabet.  This is achieved via a "read/write head", which can
-move left or right along the tape, reading or modifying one cell at a time.
+Deterministic finite-state machines are a mathematical model of computation, with applications
+ranging from string matching to simulating algorithms.  All deterministic finite-state machines
+consist of at least 5 components: A finite alphabet of symbols recognized by the machine, a set of
+states, a start state, a set of final states, and a transition function which maps a state and
+symbol to another state.  Below is a description of all machines currently supported by Tuatara
+Turing Machine Simulator.
 </p>
 
 <p>
-Turing machines consist of a set of states (sometimes known as "nodes"), and a set of transitions
-between the states.  Each transition specifies an "input symbol" and an action.  If the machine is
-in a particular state, and there is an outgoing transition for which the input symbol matches the
-symbol on the tape in the location of the read/write head, the action is performed and the machine
-changes state to the state specified by the transition. 
+<h3> Turing Machines </h3>
+A Turing machine is a class of abstract machine which is considered to be capable of performing any
+computation that is specifiable by an algorithm.  
 </p>
 
 <p>
-If there is no outgoing transition from the current state with an input symbol that matches the
-current symbol on the tape, the computation halts. 
+Formally, we define a Turing machine to be
+<i>M</i> = (<i>Q</i>, <i>&delta;</i>, <i>q<sub>0</sub></i>, <i>q<sub>f</sub></i>),
+with finite tape alphabet <i>Y</i> and input alphabet <i>X</i> &sub; <i>Y</i>, consisting of:
+<ul>
+    <li> A finite set <i>Q</i> of states.
+    <li> A partial function <i>&delta;</i> : <i>Q &times; Y &rarr; Q &times; </i>(<i>Y</i> &cup; {L,R}),
+         the transition function.
+    <li> A start state <i>q<sub>0</sub></i> &isin; <i>Q</i>.
+    <li> A halt state <i>q<sub>f</sub></i> &isin; <i>Q</i>.
+    <li> <i>&delta;</i>(<i>q<sub>f</sub></i>, <i>y</i>) is undefined for all
+         <i>y</i> &isin; <i>Y</i>.
+    <li> There is a symbol <i>b</i> &isin; <i>Y</i> with <i>b</i> &notin; <i>X</i>, called "blank".
+</ul>
 </p>
 
 <p>
-There exist alternate models for Turing machines, where actions are associated with states instead
-of with transitions.  These models are not covered in this piece of software. 
+A Turing machine comes equipped with an infinitely large tape, in which individual cells can be read
+and overwritten.  The tape extends infinitely to the right.  Additionally, we have a read/write head
+which is initially over the left-most cell of the tape, and is capable of reading a symbol from the
+tape, writing a symbol, and moving along the tape.
 </p>
 
 <p>
-In Tuatara Turing Machine Simulator, the tape has a "first" cell at the left end of the tape, but
-has no "last" cell - the tape extends infinitely to the right.  For a computation to complete
-successfully, the machine should "park" the head in the first cell at the end of the computation.
-Other models exist where the tape extends infinitely to the left as well as to the right (a "doubly
-infinite tape"), but this is not the approach taken here.
+<h3> Deterministic Finite-State Automata (DFSA) </h3>
+A DFSA is a class of abstract machine which is capable of determining if a string belongs to some
+regular language.  We denote the language accepted by a DFSA <i>M</i> to be <i>L(M)</i>.
+</p>
+
+<p>
+Formally, we define a DFSA to be 
+<i>M</i> = (<i>Q</i>, <i>&delta;</i>, <i>q<sub>0</sub></i>, <i>F</i>)</i>, 
+with finite alphabet <i>&Sigma;</i>, consisting of:
+<ul>
+    <li> A finite set <i>Q</i> of states.
+    <li> A total function <i>&delta; : Q &times; &Sigma; &rarr; Q</i>, the transition function.
+    <li> A start state <i>q<sub>0</sub></i> &isin; <i>Q</i>.
+    <li> A set of accepting states, <i>F</i> &sube; <i>Q</i>.
+</ul>
+</p>
+
+<p>
+A DFSA takes as input some string <i>u</i> &isin; <i>&Sigma;*</i>, reading each symbol from
+left-to-right, and determines if <i>u</i> &isin; <i>L</i>(<i>M</i>) &sube; <i>&Sigma;*</i>.
 </p>
 </html>
