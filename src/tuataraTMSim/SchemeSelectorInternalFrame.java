@@ -33,11 +33,7 @@ import java.awt.KeyboardFocusManager;
 import java.beans.PropertyVetoException;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.swing.JButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.*;
 import tuataraTMSim.commands.ChangeSchemeCommand;
 import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.SchemeRelabelCommand;
@@ -71,32 +67,19 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
         // Controls for radio buttons
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new GridLayout(1, 2));
-        m_general = new JRadioButton("General");
-        m_normalized = new JRadioButton("Normalized");
-        
-        m_general.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                m_general.setSelected(true);
-                m_normalized.setSelected(false);
-            }
-        });
+        ButtonGroup radioButtons = new ButtonGroup();
 
-        m_normalized.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                m_normalized.setSelected(true);
-                m_general.setSelected(false);
-            }
-        });
+        m_general = new JRadioButton("General");
+        m_general.setSelected(true);
+        radioButtons.add(m_general);
+
+        m_normalized = new JRadioButton("Normalized");
+        radioButtons.add(m_normalized);
 
         radioPanel.add(m_general);
         radioPanel.add(m_normalized);
         getContentPane().add(radioPanel, BorderLayout.NORTH);
-        
-        
+       
         // Controls for buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(1, 3));
@@ -207,15 +190,15 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
     {
         m_panel = panel;
         NamingScheme scheme = m_panel.getSimulator().getMachine().getNamingScheme();
-        if (scheme == NamingScheme.GENERAL)
+        switch (scheme)
         {
-            m_general.setSelected(true);
-            m_normalized.setSelected(false);
-        }
-        else
-        {
-            m_normalized.setSelected(true);
-            m_general.setSelected(false);
+            case GENERAL: 
+                m_general.setSelected(true);
+                break;
+
+            case NORMALIZED:
+                m_normalized.setSelected(true);
+                break;
         }
     }
     
