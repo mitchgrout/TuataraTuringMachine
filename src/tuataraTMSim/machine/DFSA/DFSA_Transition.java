@@ -38,6 +38,11 @@ import tuataraTMSim.Spline;
 public class DFSA_Transition extends Transition<DFSA_Action, DFSA_State, DFSA_Machine, DFSA_Simulator>
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates a new instance of DFSA_Transition.
      */
     public DFSA_Transition()

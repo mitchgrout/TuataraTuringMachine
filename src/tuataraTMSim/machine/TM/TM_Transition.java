@@ -38,8 +38,12 @@ import tuataraTMSim.Spline;
  * @author Jimmy
  */
 public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, TM_Simulator> 
-    implements Serializable
 {
+    /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of TM_Transition.
      */

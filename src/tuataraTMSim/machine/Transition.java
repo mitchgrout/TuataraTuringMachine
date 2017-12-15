@@ -41,6 +41,11 @@ public abstract class Transition<
     SIMULATOR extends Simulator<PREACTION, ?, STATE, MACHINE>> implements Serializable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Number of pixels for arrowheads on transitions.
      */
     public static final double ARROWHEAD_LENGTH = 6;

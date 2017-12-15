@@ -37,6 +37,11 @@ import tuataraTMSim.machine.*;
 public class DFSA_State extends State<DFSA_Action, DFSA_Transition, DFSA_Machine, DFSA_Simulator>
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates a new instance of DFSA_State, with a specified location.
      * @param label The label for the state.
      * @param startState Whether or not this state is the start state.

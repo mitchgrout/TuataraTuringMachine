@@ -36,6 +36,11 @@ import tuataraTMSim.exceptions.TapeBoundsException;
 public abstract class PreAction implements Serializable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates an instance of PreAction.
      * @param dir The direction the read/write head should move.
      * @param input The value for which if read from the tape, the action will occur.

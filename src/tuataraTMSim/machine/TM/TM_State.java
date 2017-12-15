@@ -38,8 +38,12 @@ import tuataraTMSim.machine.*;
  * @author Jimmy
  */
 public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Simulator>
-    implements Serializable
 {
+    /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
     /**
      * Width of the graphical representation of the state, in pixels.
      */

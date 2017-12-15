@@ -40,6 +40,11 @@ public abstract class State<
     SIMULATOR extends Simulator<PREACTION, TRANSITION, ?, MACHINE>> implements Serializable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Width of the graphical representation of the state, in pixels.
      */
     public static final int STATE_RENDERING_WIDTH = 30;

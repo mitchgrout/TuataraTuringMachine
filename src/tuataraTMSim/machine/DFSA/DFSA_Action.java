@@ -36,6 +36,11 @@ import tuataraTMSim.machine.*;
 public class DFSA_Action extends PreAction
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates an instance of DFSA_Action.
      * @param match The character this action matches.
      */

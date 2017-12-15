@@ -40,8 +40,13 @@ import tuataraTMSim.machine.*;
  * writing to the tape.
  * @author Jimmy
  */
-public class TM_Action extends PreAction implements Serializable
+public class TM_Action extends PreAction
 {
+    /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
     /**
      * Character representing a left-shift to the read/write head of the tape.
      */
