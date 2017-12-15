@@ -226,7 +226,7 @@ public class TapeDisplayPanel extends JPanel
         }
         else
         {
-            g2d.fill(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, CELL_WIDTH + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
+            g2d.fill(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, CHAR_WIDTH + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
             g2d.setColor(Color.WHITE);
             g2d.drawString("" + c, x, y);
         } 
