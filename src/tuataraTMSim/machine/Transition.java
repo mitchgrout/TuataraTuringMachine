@@ -260,31 +260,30 @@ public abstract class Transition<
         // and the tangent vector associated with the midpoint
         Point2D tangentVector = 
             Spline.getMidPointTangentVector(getControlPoint(), arrowLoc, m_fromState, m_toState);
-       
-        // Get the magnitude of the tangent, and build a scale factor
-        double length = tangentVector.distance(new Point2D.Double(0, 0));
-        double scaleFactor = 1.0/length * ARROWHEAD_LENGTH;
+    
+        // Find the angle between the tangent vector and horizontal
+        double angle = Math.atan2(tangentVector.getY(), tangentVector.getX());
+        double inc = 13 * Math.PI / 18;
 
-        // Build transforms for scaling, rotation, and translation
-        AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-        AffineTransform rotateClockwise = AffineTransform.getRotateInstance(Math.PI/ 2.0 + Math.PI/4.5, arrowLoc.getX(), arrowLoc.getY());
-        AffineTransform rotateAnticlockwise = AffineTransform.getRotateInstance(-(Math.PI/ 2.0 + Math.PI/4.5), arrowLoc.getX(), arrowLoc.getY());
-        AffineTransform translateToEndpoint = AffineTransform.getTranslateInstance(arrowLoc.getX(), arrowLoc.getY());
-        
-        // Copy the tangent vector, scale, translate, and rotate
-        Point2D p1 = (Point2D)tangentVector.clone();
-        scale.transform(p1, p1);
-        translateToEndpoint.transform(p1, p1);
-        rotateClockwise.transform(p1, p1);
-        
-        // Copy the tangent vector, scale, translate, and rotate
-        Point2D p2 = (Point2D)tangentVector.clone();
-        scale.transform(p2, p2);
-        translateToEndpoint.transform(p2, p2);
-        rotateAnticlockwise.transform(p2, p2);
-        
-        // Render it
-        drawTriangle(g, arrowLoc,p1, p2);
+        // Render a triangle centered at the midpoint. We avoid using an equilateral triangle as
+        // orientation can become confusing to the user at certain angles.
+        GeneralPath triangle = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 3);
+        double x1 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle),
+               y1 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle),
+               x2 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle + inc),
+               y2 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle + inc),
+               x3 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle - inc),
+               y3 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle - inc);
+        triangle.moveTo(x1, y1);
+        triangle.lineTo(x2, y2);
+        triangle.lineTo(x3, y3);
+        triangle.lineTo(x1, y1);
+
+        // Render and fill the path
+        g2d.draw(triangle);
+        g2d.fill(triangle);
+ 
+        // Reset
         g2d.setStroke(originalStroke);
     }
    
