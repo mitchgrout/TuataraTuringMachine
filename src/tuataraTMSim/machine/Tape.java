@@ -35,6 +35,11 @@ import tuataraTMSim.MainWindow;
 public abstract class Tape implements Serializable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * The character used to represent a blank symbol, which fill the tape.
      */
     public static final char BLANK_SYMBOL = '_';

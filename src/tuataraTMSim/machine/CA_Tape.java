@@ -37,6 +37,11 @@ import tuataraTMSim.MainWindow;
 public class CA_Tape extends Tape implements Serializable 
 {   
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates a new instance of CA_Tape.
      */
     public CA_Tape()

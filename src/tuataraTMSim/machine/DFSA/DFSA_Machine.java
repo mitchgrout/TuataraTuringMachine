@@ -50,6 +50,11 @@ import tuataraTMSim.NamingScheme;
 public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_State, DFSA_Simulator>
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates a new instance of DFSA_Machine.
      * @param states The set of states.
      * @param transitions The set of transitions.

@@ -35,6 +35,11 @@ import tuataraTMSim.machine.TM.TM_Machine; // !!!
 public class Alphabet implements Serializable, Cloneable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Creates a new instance of Alphabet. Default is binary alphabet.
      */
     public Alphabet()

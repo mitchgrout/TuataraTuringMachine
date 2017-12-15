@@ -46,6 +46,11 @@ public abstract class Machine<
     SIMULATOR extends Simulator<PREACTION, TRANSITION, STATE, ?>> implements Serializable
 {
     /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
      * Does not match anything; instead, this is used to indicate that an action has not yet been
      * assigned a value.
      */

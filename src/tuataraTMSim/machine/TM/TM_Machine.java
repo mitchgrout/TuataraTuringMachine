@@ -52,8 +52,12 @@ import tuataraTMSim.TMGraphicsPanel;
  * @author Jimmy
  */
 public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_Simulator>
-    implements Serializable
 {
+    /**
+     * Serialization version.
+     */
+    public static final long serialVersionUID = 1L;
+
     /**
      * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
      */
