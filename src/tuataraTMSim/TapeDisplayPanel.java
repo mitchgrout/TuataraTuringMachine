@@ -34,10 +34,21 @@ import tuataraTMSim.machine.Tape;
 
 /** 
  * A panel for displaying a Turing machine tape. Does not include any buttons, just the tape.
+ * Assumes the use of a monospace font.
  * @author Jimmy
  */
 public class TapeDisplayPanel extends JPanel
 { 
+    /**
+     * Monospaced font used by the panel.
+     */
+    protected static final Font MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+
+    /**
+     * Width of a monospaced character, excluding padding. 
+     */
+    protected static final int CHAR_WIDTH = new Canvas().getFontMetrics(MONOSPACE).charWidth('_'); 
+
     /**
      * Horizontal padding around a tape cell.
      */
@@ -64,9 +75,7 @@ public class TapeDisplayPanel extends JPanel
      */
     public TapeDisplayPanel(Tape tape)
     {
-        m_tape = tape;
-        m_file = null;
-        initComponents();
+        this(tape, null);
     }
     
     /**
@@ -94,30 +103,30 @@ public class TapeDisplayPanel extends JPanel
         {
             public void mouseClicked(MouseEvent e)
             {    
-                if (m_isEditingEnabled == false)
+                if (!m_isEditingEnabled)
                 {
                     return;
                 }
 
                 // Shift r/w head to the cell that was clicked on.
+                
+                // Get the current graphics object
                 Graphics g = getGraphics();
                 Graphics2D g2d = (Graphics2D)g;
+
+                // Measure how many cells there are
                 FontMetrics metrics = g2d.getFontMetrics();
-                int charWidth = metrics.charWidth('_') + 2 * CELLPADDING_X;
-                int cellsFromLeft = e.getX() / charWidth;
-                
+                // Need to take into account the 1px boundary
+                int cellsFromLeft = (e.getX() - 1) / (CHAR_WIDTH + 2 * CELLPADDING_X);                
                 int visibleCells = numCellsViewable(g);
-                boolean drawTapeEnd = false;
                 int startPos = m_tape.headLocation() - (visibleCells/2);
-                int takeAccountOfTapeEnd = 0;
                 if (startPos < 0)
                 {
-                    startPos = 0;
-                    drawTapeEnd = true;
+                    startPos = -1;
                     visibleCells--;
-                    takeAccountOfTapeEnd = -1;
                 }
-                int newCell = Math.max(cellsFromLeft + startPos + takeAccountOfTapeEnd, 0);
+                int newCell = Math.max(cellsFromLeft + startPos, 0);
+                
                 while (m_tape.headLocation() < newCell)
                 {
                     m_tape.headRight();
@@ -139,18 +148,13 @@ public class TapeDisplayPanel extends JPanel
      */
     protected void paintComponent(Graphics g)
     {
-        int w = getWidth();
-        int h = getHeight();
-        
         Graphics2D g2d = (Graphics2D)g;
+        FontMetrics metrics = g2d.getFontMetrics();
         
         // Fill background
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, w, h);
-        FontMetrics metrics = g2d.getFontMetrics();
-        int ascent = metrics.getAscent();
-        
-        paintTape(g, TAPEPADDING_X,ascent + TAPEPADDING_Y);
+        g2d.fillRect(0, 0, getWidth(), getHeight());      
+        paintTape(g, TAPEPADDING_X, metrics.getAscent() + TAPEPADDING_Y);
     }
     
     /** 
@@ -161,9 +165,9 @@ public class TapeDisplayPanel extends JPanel
      */
     public void paintTape(Graphics g, int x, int y)
     {
+        // Figure out what cells to render
         int visibleCells = numCellsViewable(g);
         boolean drawTapeEnd = false;
-
         int startPos = m_tape.headLocation() - (visibleCells/2);
         if (startPos < 0)
         {
@@ -171,16 +175,17 @@ public class TapeDisplayPanel extends JPanel
             drawTapeEnd = true;
             visibleCells--;
         }
-        String tapeStr = m_tape.getPartialString(startPos, visibleCells + 1); // Include any partial cell
+
+        // Get the cell contents to render, including partial cells
+        String tapeStr = m_tape.getPartialString(startPos, visibleCells + 1);
         
+        // We need a monospaced font to ensure that the cells are all the same size.  This seemingly
+        // cannot be set in the constructor as the graphics object has not been created until the
+        // component is packed.
         Graphics2D g2d = (Graphics2D)g;
-        
-        // We need a monospaced font to ensure that the cells are all the same size.
-        // I can't seem to set the font in the constructor because the graphics object
-        // associated with the panel has not been created until the component is packed.
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        
+        g2d.setFont(MONOSPACE);
         FontMetrics metrics = g2d.getFontMetrics();
+        
         int height = metrics.getHeight();
         int ascent = metrics.getAscent();
         int descent = metrics.getDescent();
@@ -188,13 +193,13 @@ public class TapeDisplayPanel extends JPanel
         if (drawTapeEnd)
         {
             paintTapeCell(g, '*', false, x + xAccumulator, y, ascent, descent);
-            xAccumulator += metrics.charWidth('*') + 2 * CELLPADDING_X;
+            xAccumulator += CHAR_WIDTH + 2 * CELLPADDING_X;
         }
         for (int i = 0; i < tapeStr.length(); i++)
         {
             boolean isHeadLoc = m_tape.headLocation() == i + startPos;
             paintTapeCell(g, tapeStr.charAt(i), isHeadLoc, x + xAccumulator, y, ascent, descent);
-            xAccumulator += metrics.charWidth(tapeStr.charAt(i)) + 2 * CELLPADDING_X;
+            xAccumulator += CHAR_WIDTH + 2 * CELLPADDING_X;
         }
     }
     
@@ -212,16 +217,16 @@ public class TapeDisplayPanel extends JPanel
     {
         Graphics2D g2d = (Graphics2D)g;
         FontMetrics metrics = g2d.getFontMetrics();
-        int width = metrics.charWidth(c);
+        
         g2d.setColor(Color.BLACK);
-        g2d.draw(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, width + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
+        g2d.draw(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, CHAR_WIDTH + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
         if (!isHeadLocation)
         {
             g2d.drawString("" + c, x, y);
         }
         else
         {
-            g2d.fill(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, width + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
+            g2d.fill(new Rectangle2D.Float(x - CELLPADDING_X, y - CELLPADDING_Y - ascent, CELL_WIDTH + CELLPADDING_X * 2, ascent + descent + CELLPADDING_Y * 2));
             g2d.setColor(Color.WHITE);
             g2d.drawString("" + c, x, y);
         } 
@@ -237,10 +242,7 @@ public class TapeDisplayPanel extends JPanel
     {
         Graphics2D g2d = (Graphics2D)g;
         FontMetrics metrics = g2d.getFontMetrics();
-        int width = metrics.charWidth('_'); // Assumes a monospace font.
-        width += 2 * CELLPADDING_X;
-        
-        return getWidth() / width; // Integer division, rounding down.
+        return getWidth() / (CHAR_WIDTH + 2 * CELLPADDING_X); // Integer division, rounding down.
     }
     
     /**
