@@ -234,84 +234,58 @@ public abstract class Transition<
         // TODO: Justify this conditional
         if (!startEqualsEnd || (m_fromState == m_toState))
         {
-            paintArrowHead(g);
+            // Change the line style 
+            Stroke originalStroke = g2d.getStroke();
+            g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
+
+            // Get the arrowhead
+            GeneralPath triangle = buildArrowHead();
+
+            // Render and fill the path
+            g2d.draw(triangle);
+            g2d.fill(triangle);
+
+            // Reset
+            g2d.setStroke(originalStroke);
         }
 
         // Render the action
         m_action.paint(g, (int)actionLocation.getX(), (int)actionLocation.getY());
     }
-    
-    /** 
-     * Paints the arrowhead of a transition to the graphics object in the graphics object's current
-     * colour.
-     * @param g The graphics object on which to render.
+
+    /**
+     * Build a path with three vertices which represents our arrowhead.
+     * @return A path representing our arrowhead.
      */
-    public void paintArrowHead(Graphics g)
+    protected GeneralPath buildArrowHead()
     {
-        // Get a 2d graphics object
-        Graphics2D g2d = (Graphics2D)g;
-
-        // Change the line style 
-        Stroke originalStroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
-
         // Get the midpoint of the curve
         Point2D arrowLoc = getMidpoint();
         // and the tangent vector associated with the midpoint
         Point2D tangentVector = 
             Spline.getMidPointTangentVector(getControlPoint(), arrowLoc, m_fromState, m_toState);
-       
-        // Get the magnitude of the tangent, and build a scale factor
-        double length = tangentVector.distance(new Point2D.Double(0, 0));
-        double scaleFactor = 1.0/length * ARROWHEAD_LENGTH;
 
-        // Build transforms for scaling, rotation, and translation
-        AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-        AffineTransform rotateClockwise = AffineTransform.getRotateInstance(Math.PI/ 2.0 + Math.PI/4.5, arrowLoc.getX(), arrowLoc.getY());
-        AffineTransform rotateAnticlockwise = AffineTransform.getRotateInstance(-(Math.PI/ 2.0 + Math.PI/4.5), arrowLoc.getX(), arrowLoc.getY());
-        AffineTransform translateToEndpoint = AffineTransform.getTranslateInstance(arrowLoc.getX(), arrowLoc.getY());
-        
-        // Copy the tangent vector, scale, translate, and rotate
-        Point2D p1 = (Point2D)tangentVector.clone();
-        scale.transform(p1, p1);
-        translateToEndpoint.transform(p1, p1);
-        rotateClockwise.transform(p1, p1);
-        
-        // Copy the tangent vector, scale, translate, and rotate
-        Point2D p2 = (Point2D)tangentVector.clone();
-        scale.transform(p2, p2);
-        translateToEndpoint.transform(p2, p2);
-        rotateAnticlockwise.transform(p2, p2);
-        
-        // Render it
-        drawTriangle(g, arrowLoc,p1, p2);
-        g2d.setStroke(originalStroke);
-    }
-   
-    /**
-     * Helper function which renders a triangle at a given triple of points.
-     * @param g The graphics object on which to render.
-     * @param p1 The first vertex of the triangle.
-     * @param p2 The second vertex of the triangle.
-     * @param p3 The third vertex of the triangle.
-     */
-    protected void drawTriangle(Graphics g, Point2D p1, Point2D p2, Point2D p3)
-    {
-        // Get a 2d graphics object
-        Graphics2D g2d = (Graphics2D)g;
+        // Find the angle between the tangent vector and horizontal
+        double angle = Math.atan2(tangentVector.getY(), tangentVector.getX());
+        double inc = 13 * Math.PI / 18;
 
-        // Build the path
+        // Render a triangle centered at the midpoint. We avoid using an equilateral triangle as
+        // orientation can become confusing to the user at certain angles.
         GeneralPath triangle = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 3);
-        triangle.moveTo((float)p1.getX(), (float)p1.getY());
-        triangle.lineTo((float)p2.getX(), (float)p2.getY());
-        triangle.lineTo((float)p3.getX(), (float)p3.getY());
-        triangle.lineTo((float)p1.getX(), (float)p1.getY());
+        double x1 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle),
+               y1 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle),
+               x2 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle + inc),
+               y2 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle + inc),
+               x3 = arrowLoc.getX() + ARROWHEAD_LENGTH * Math.cos(angle - inc),
+               y3 = arrowLoc.getY() + ARROWHEAD_LENGTH * Math.sin(angle - inc);
+        triangle.moveTo(x1, y1);
+        triangle.lineTo(x2, y2);
+        triangle.lineTo(x3, y3);
+        triangle.lineTo(x1, y1);
 
-        // Render and fill the path
-        g2d.draw(triangle);
-        g2d.fill(triangle);
+        return triangle;
     }
-   
+
     /**
      * Determine if the action associated with this transition contains the specified point.
      * @param x The X ordinate.
@@ -347,7 +321,7 @@ public abstract class Transition<
         Shape translated = trans.createTransformedShape(boundingBox);
         return translated.contains(x, y);
     }
-    
+ 
     /**
      * Determine if the arrow associated with this transition contains the specified point.
      * @param x The X ordinate.
@@ -357,24 +331,7 @@ public abstract class Transition<
      */
     public boolean arrowContainsPoint(int x, int y, Graphics g)
     {
-        // Object used to measure string dimensions using the graphics object
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-
-        // Get the text representing the action
-        String actionString = m_action.toString();
-       
-        // Get the size of the action string
-        Rectangle2D boundingBox = metrics.getStringBounds(actionString, g);
-       
-        // Get the midpoint of the spline
-        Point2D arrowLocation = getMidpoint();
-
-        // Translate to the correct position
-        AffineTransform trans = AffineTransform.getTranslateInstance(
-                arrowLocation.getX() - metrics.stringWidth(actionString) / 2,
-                arrowLocation.getY());
-        Shape translated = trans.createTransformedShape(boundingBox);
-        return translated.contains(x, y);
+        return buildArrowHead().contains(new Point2D.Float(x, y));
     }
        
     /**
