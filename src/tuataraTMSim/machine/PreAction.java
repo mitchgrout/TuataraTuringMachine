@@ -26,6 +26,7 @@
 package tuataraTMSim.machine;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
 
@@ -117,7 +118,7 @@ public abstract class PreAction implements Serializable
     }
  
     /**
-     * Render the action to a graphics object.
+     * Render the action to a graphics object. The text will be centered at (x, y).
      * @param g The graphics object to render to.
      * @param x The X ordinate to render to.
      * @param y The Y ordinate to render to.
@@ -131,9 +132,10 @@ public abstract class PreAction implements Serializable
         String outputStr = toString();
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         
-        // stringWidth method doesnt seem to work correctly, using char size instead, assuming monospace
-        x -= (metrics.charWidth('_') * outputStr.length()) / 2;
-        // The vertical position is already ok - the baseline of the text rather than the top-left is specified.
+        // Re-adjust position
+        Rectangle2D bounds = metrics.getStringBounds(outputStr, g);
+        x -= bounds.getWidth() / 2;
+        y += metrics.getAscent() / 2;
         
         g2d.drawString(outputStr, x, y);
     }

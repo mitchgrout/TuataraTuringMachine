@@ -66,6 +66,36 @@ public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, T
     }
 
     /**
+     * Get the bounding box associated with the input symbol.
+     * @param g The graphics object, used to measure the label's dimensions. 
+     * @return The bounding box associated with the input symbol.
+     */
+    public Rectangle2D getInputSymbolBoundingBox(Graphics g)
+    {
+        Point2D mid = getActionLocation();
+        FontMetrics metric = g.getFontMetrics(g.getFont());
+        int width = metric.charWidth('_');
+        return new Rectangle2D.Double(
+                mid.getX() - (3 * width / 2), mid.getY() - metric.getAscent() / 2,
+                width, metric.getAscent());
+    }
+
+    /**
+     * Get the bounding box associated with the action.
+     * @param g The graphics object, used to measure the label's dimensions. 
+     * @return The bounding box associated with the action.
+     */
+    public Rectangle2D getOutputSymbolBoundingBox(Graphics g)
+    {
+        Point2D mid = getActionLocation();
+        FontMetrics metric = g.getFontMetrics(g.getFont());
+        int width = metric.charWidth('_');
+        return new Rectangle2D.Double(
+                mid.getX() + width / 2, mid.getY() - metric.getAscent() / 2,
+                width, metric.getAscent());
+    }
+    
+    /**
      * Get a String representation of this transition.
      * @return A string representation of this transition.
      */

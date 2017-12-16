@@ -53,12 +53,7 @@ public abstract class Transition<
     /**
      * Number of pixels away from transitions actions should be drawn.
      */
-    public static final double ACTION_TEXT_DISTANCE = 10;
-    
-    /**
-     * Number of pixels away from transitions actions should be drawn, if the transition is a loop.
-     */
-    public static final double ACTION_TEXT_DISTANCE_FOR_LOOPS = 15;
+    public static final double ACTION_TEXT_DISTANCE = 20;
     
     /**
      * Width of bounding box used for padding around selected symbols.
@@ -195,9 +190,6 @@ public abstract class Transition<
             g2d.setColor(Color.BLUE);
         }
        
-        // Get the location of the action associated with this transition
-        Point2D actionLocation = getActionLocation();
-
         // An arc
         if (m_fromState != m_toState)
         {
@@ -254,6 +246,9 @@ public abstract class Transition<
             g2d.setStroke(originalStroke);
         }
 
+        // Get the location of the action associated with this transition
+        Point2D actionLocation = getActionLocation();
+
         // Render the action
         m_action.paint(g, (int)actionLocation.getX(), (int)actionLocation.getY());
     }
@@ -300,31 +295,8 @@ public abstract class Transition<
      */
     public boolean actionContainsPoint(int x, int y, Graphics g)
     {
-        // Object used to measure string dimensions using the graphics object
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-        
-        // Assuming monospace, the width of a single character
-        int symbolWidth = metrics.charWidth('_');
-
-        // Get the text representing the action
-        String actionString = m_action.toString();
-        
-        // Get the size of the action string, and create its bounding box
-        Rectangle2D actionDims = metrics.getStringBounds(actionString, g);
-        Rectangle2D boundingBox = new Rectangle2D.Double(
-                actionDims.getX(), actionDims.getY(),
-                actionString.length() * symbolWidth,
-                metrics.getHeight());
-       
-        // Get the location of the action 
-        Point2D actionLocation = getActionLocation();
-   
-        // Translate to the correct position
-        AffineTransform trans = AffineTransform.getTranslateInstance(
-                actionLocation.getX() - ((symbolWidth * actionString.length()) / 2),
-                actionLocation.getY());
-        Shape translated = trans.createTransformedShape(boundingBox);
-        return translated.contains(x, y);
+        return getInputSymbolBoundingBox(g).contains(x, y) ||
+               getOutputSymbolBoundingBox(g).contains(x, y);
     }
  
     /**
@@ -348,7 +320,7 @@ public abstract class Transition<
         // Compute the location of the arrow, i.e. the midpoint
         Point2D arrowLoc = getMidpoint();
         
-        // A loop 
+        // An arc 
         if (m_fromState != m_toState)
         {
             AffineTransform translate = AffineTransform.getTranslateInstance(0, -ACTION_TEXT_DISTANCE);
@@ -356,95 +328,33 @@ public abstract class Transition<
         }
         else
         {
-            // Get the vector between the midpoint and start
-            Point2D startToMidpoint = new Point2D.Double(
-                    arrowLoc.getX() - m_fromState.getX(),
-                    arrowLoc.getY() - m_fromState.getY());
+            // We will place the action on the line running from the centre of the state, through
+            // the midpoint, and place the action location further along on this line so all three
+            // are colinear.
+            double dx = arrowLoc.getX() - (m_fromState.getX() + STATE.STATE_RENDERING_WIDTH / 2),
+                   dy = arrowLoc.getY() - (m_fromState.getY() + STATE.STATE_RENDERING_WIDTH / 2);
+            double angle = Math.atan2(dy, dx);
 
-            // Scale the start to midpoint vector to account for text distance from midpoint
-            double scaleFactor = 
-                (startToMidpoint.distance(new Point2D.Float(0,0)) + ACTION_TEXT_DISTANCE_FOR_LOOPS)
-                / startToMidpoint.distance(new Point2D.Float(0,0));
-           
-            // Scale 
-            AffineTransform scale = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-            Point2D scaled = new Point2D.Float();
-            scale.transform(startToMidpoint, scaled);
-            
             return new Point2D.Double(
-                    m_fromState.getX() + scaled.getX(),
-                    m_fromState.getY() + scaled.getY());
+                    arrowLoc.getX() + ACTION_TEXT_DISTANCE * Math.cos(angle),
+                    arrowLoc.getY() + ACTION_TEXT_DISTANCE * Math.sin(angle));
         }
     }
-   
+      
     /**
      * Get the bounding box associated with the input symbol.
      * @param g The graphics object, used to measure the label's dimensions. 
      * @return The bounding box associated with the input symbol.
      */
-    public Shape getInputSymbolBoundingBox(Graphics g)
-    {
-        // Object used to measure string dimensions using the graphics object
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-
-        // Assuming monospace, the width of a single character
-        int symbolWidth = metrics.charWidth('_');
-
-        // How many symbols are used in drawing the action
-        int actionLen = m_action.toString().length();
-
-        // Bounds for the input character, with added padding
-        Rectangle2D boundingBox = metrics.getStringBounds("" + m_action.getInputChar(), g);
-        boundingBox = new Rectangle2D.Double(
-                boundingBox.getMinX(), boundingBox.getMinY(),
-                symbolWidth + 2 * SELECTED_SYMBOL_BOX_PAD_X,
-                boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y);
-
-        // Get the location of the action
-        Point2D actionLocation = getActionLocation();
-
-        // Translate to the correct position
-        AffineTransform trans = AffineTransform.getTranslateInstance(
-                actionLocation.getX() - (symbolWidth * actionLen) / 2
-                - SELECTED_SYMBOL_BOX_PAD_X + SELECTED_INPUT_SYMBOL_BOX_X_OFFSET,
-                actionLocation.getY() - SELECTED_SYMBOL_BOX_PAD_Y);
-        return trans.createTransformedShape(boundingBox);
-    }
-    
+    public abstract Rectangle2D getInputSymbolBoundingBox(Graphics g);
+ 
     /**
      * Get the bounding box associated with the action.
      * @param g The graphics object, used to measure the label's dimensions. 
      * @return The bounding box associated with the action.
      */
-    public Shape getOutputSymbolBoundingBox(Graphics g)
-    {
-        // Object used to measure string dimensions using the graphics object
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
+    public abstract Rectangle2D getOutputSymbolBoundingBox(Graphics g);
 
-        // Assuming monospace, the width of a single character
-        int symbolWidth = metrics.charWidth('_');
-
-        // How many symbols are used in drawing the action
-        int actionLen = m_action.toString().length();
- 
-        // Bounds for the output character, with added padding
-        Rectangle2D boundingBox = metrics.getStringBounds("" + m_action.getOutputChar(), g);
-        boundingBox = new Rectangle2D.Double(
-            boundingBox.getMinX(), boundingBox.getMinY(), 
-            symbolWidth + 2 * SELECTED_SYMBOL_BOX_PAD_X, 
-            boundingBox.getHeight() + 2 * SELECTED_SYMBOL_BOX_PAD_Y);
-        
-        // Get the location of the action
-        Point2D actionLocation = getActionLocation();
-        
-        // Translate to the correct position
-        AffineTransform trans = AffineTransform.getTranslateInstance(
-            actionLocation.getX() - (symbolWidth * actionLen) / 2
-            + (symbolWidth * 2) - SELECTED_SYMBOL_BOX_PAD_X, 
-            actionLocation.getY() - SELECTED_SYMBOL_BOX_PAD_Y);
-        return trans.createTransformedShape(boundingBox);
-    }
-   
     /**
      * Get a String representation of this transition.
      * @return A string representation of this transition.
