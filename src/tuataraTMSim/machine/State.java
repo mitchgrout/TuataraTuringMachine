@@ -268,12 +268,12 @@ public abstract class State<
     protected boolean m_finalState;
 
     /**
-     * The X ordinate of this state, relative to the window.
+     * The X ordinate of this state, representing the upper-left, relative to the window.
      */
     protected int m_windowX;
 
     /**
-     * The Y ordinate of this state, relative to the window.
+     * The Y ordinate of this state, representing the upper-left, relative to the window.
      */
     protected int m_windowY;
 }

@@ -248,7 +248,7 @@ public abstract class Machine<
         for (TRANSITION t : getTransitions())
         {
             if (t.actionContainsPoint(clickX, clickY, g) || 
-                    t.arrowContainsPoint(clickX, clickY, g))
+                t.arrowContainsPoint(clickX, clickY, g))
             {
                 result = t;
             }

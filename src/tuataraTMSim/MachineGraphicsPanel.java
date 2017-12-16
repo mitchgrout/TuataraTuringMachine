@@ -117,7 +117,6 @@ public abstract class MachineGraphicsPanel<
 
         if (selectedSymbolBoundingBox != null)
         {
-
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
             g2d.setColor(Color.BLACK);
@@ -339,8 +338,8 @@ public abstract class MachineGraphicsPanel<
         TRANSITION transitionClicked = getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
         if (transitionClicked != null)
         {
-            Shape s1 = transitionClicked.getInputSymbolBoundingBox(getGraphics());
-            Shape s2 = transitionClicked.getOutputSymbolBoundingBox(getGraphics());
+            Rectangle2D s1 = transitionClicked.getInputSymbolBoundingBox(getGraphics());
+            Rectangle2D s2 = transitionClicked.getOutputSymbolBoundingBox(getGraphics());
             if (s1.contains(e.getX(), e.getY()))
             {
                 selectedSymbolBoundingBox = s1;
@@ -857,7 +856,7 @@ public abstract class MachineGraphicsPanel<
      */
     public void deselectSymbol()
     {
-        selectedSymbolBoundingBox= null;
+        selectedSymbolBoundingBox = null;
         selectedTransition = null;
         repaint();
     }
@@ -1427,7 +1426,7 @@ public abstract class MachineGraphicsPanel<
     /**
      * Bounding box of the currently selected transition action.
      */
-    protected Shape selectedSymbolBoundingBox = null;
+    protected Rectangle2D selectedSymbolBoundingBox = null;
 
     /**
      * The selected transition.
