@@ -438,7 +438,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     {
         char inp = act.getInputChar();
         char out = act.getOutputChar();
-
+        
         // Determine if input is inconsistent
         if (!alph.containsSymbol(inp) &&
             inp != TM_Machine.UNDEFINED_SYMBOL &&
@@ -446,14 +446,19 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         {
             return false;
         }
+        
         // Determine if action is inconsistent
-        else if (act.movesHead() &&
-                 !alph.containsSymbol(out) &&
+        if (act.movesHead())
+        {
+            return true;
+        }
+        else if (!alph.containsSymbol(out) &&
                  out != TM_Machine.UNDEFINED_SYMBOL &&
                  out != TM_Machine.EMPTY_ACTION_SYMBOL)
         {
             return false;
         }
+
         // Otherwise consistent
         return true;
     }

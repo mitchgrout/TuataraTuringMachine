@@ -136,15 +136,16 @@ public abstract class Machine<
     }
 
     /**
-     * Determine all transitions which are deemed inconsistent with this machine's alphabet.
+     * Determine all transitions which are deemed inconsistent with the given alphabet.
+     * @param a The alphabet to check consistency with.
      * @return A collection of transitions which are inconsistent with the alphabet.
      */
-    public final ArrayList<TRANSITION> getInconsistentTransitions()
+    public final ArrayList<TRANSITION> getInconsistentTransitions(Alphabet a)
     {
         ArrayList<TRANSITION> result = new ArrayList<TRANSITION>();
         for (TRANSITION t : getTransitions())
         {
-            if (!isConsistentWithAlphabet(t.getAction(), m_alphabet))
+            if (!isConsistentWithAlphabet(t.getAction(), a))
             {
                 result.add(t);
             }

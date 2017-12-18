@@ -46,7 +46,7 @@ import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.machine.Alphabet;
 import tuataraTMSim.machine.Tape;
-import tuataraTMSim.machine.TM.TM_Transition;
+import tuataraTMSim.machine.Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.
@@ -307,13 +307,13 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     if (choice == JOptionPane.YES_OPTION)
                     {
                         // Get the set of inconsistent transitions
-                        ArrayList<TM_Transition> purge =
-                            m_panel.getSimulator().getMachine().getInconsistentTransitions();
+                        ArrayList<Transition> purge =
+                            m_panel.getSimulator().getMachine().getInconsistentTransitions(tempA);
 
                         // Change the alphabet, and remove inconsistent transitions
                         m_panel.doJoinCommand(
-                            new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA),
-                            new RemoveInconsistentTransitionsCommand(m_panel, purge));
+                            new RemoveInconsistentTransitionsCommand(m_panel, purge),
+                            new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
 
                         // Hide the frame
                         setVisible(false);
@@ -322,6 +322,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
 
                         // This causes a repaint also
                         m_panel.deselectSymbol();
+                        m_panel.repaint();
                     }
                     else if (choice == JOptionPane.CANCEL_OPTION)
                     {
@@ -329,8 +330,9 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                     }
                     else if (choice == JOptionPane.NO_OPTION)
                     {
-                        // TODO: This may cause problems with determinism
-                        m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+                        // Do not reconfigure alphabet
+                        // TODO: Change message to make this more obvious in meaning
+                        // m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
 
                         setVisible(false);
                         try { setSelected(false); }
