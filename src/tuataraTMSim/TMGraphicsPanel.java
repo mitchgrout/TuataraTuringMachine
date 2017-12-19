@@ -61,15 +61,13 @@ public class TMGraphicsPanel
      * @param machine A non-null reference to a machine to render.
      * @param tape A non-null reference to a tape for the machine to use.
      * @param file The file the machine is associated with.
-     * @param mainWindow The main window.
      */
-    public TMGraphicsPanel(TM_Machine machine, Tape tape, File file, MainWindow mainWindow)
+    public TMGraphicsPanel(TM_Machine machine, Tape tape, File file)
     {
         // TODO: Move to MachineGraphicsPanel
         m_sim = new TM_Simulator(machine, tape);
         m_file = file;
         m_labelsUsed = m_sim.getMachine().getLabelHashset();
-        m_mainWindow = mainWindow;
         initialization();
     }
 

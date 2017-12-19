@@ -1043,7 +1043,7 @@ public abstract class MachineGraphicsPanel<
         undoStack.add(command);
         redoStack.clear();
         setModifiedSinceSave(true);
-        m_mainWindow.updateUndoActions();
+        MainWindow.instance.updateUndoActions();
         repaint();
     }
 
@@ -1066,7 +1066,7 @@ public abstract class MachineGraphicsPanel<
     {
         undoStack.add(command);
         redoStack.clear();
-        m_mainWindow.updateUndoActions();
+        MainWindow.instance.updateUndoActions();
         repaint();
     }
 
@@ -1081,7 +1081,7 @@ public abstract class MachineGraphicsPanel<
             c.undoCommand();
             redoStack.add(c);
             setModifiedSinceSave(true);
-            m_mainWindow.updateUndoActions();
+            MainWindow.instance.updateUndoActions();
             repaint();
         }
         catch (NoSuchElementException e) { }
@@ -1098,7 +1098,7 @@ public abstract class MachineGraphicsPanel<
             c.doCommand();
             undoStack.add(c);
             setModifiedSinceSave(true);
-            m_mainWindow.updateUndoActions();
+            MainWindow.instance.updateUndoActions();
             repaint();
         }
         catch (NoSuchElementException e) { }
@@ -1128,15 +1128,6 @@ public abstract class MachineGraphicsPanel<
             return redoStack.getLast().getName();
         }
         return null;
-    }
-
-    /**
-     * Get the main window.
-     * @return The main window.
-     */
-    public MainWindow getMainWindow()
-    {
-        return m_mainWindow;
     }
 
     /**
@@ -1297,11 +1288,6 @@ public abstract class MachineGraphicsPanel<
      * The owning frame.
      */
     protected MachineInternalFrame m_iFrame;
-
-    /**
-     * The main window.
-     */
-    protected MainWindow m_mainWindow;
 
     /**
      *  The state we last pressed a mouse button on.

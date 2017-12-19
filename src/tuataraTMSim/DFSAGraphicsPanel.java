@@ -60,15 +60,13 @@ public class DFSAGraphicsPanel
      * @param machine A non-null reference to a machine to render.
      * @param tape A non-null reference to a tape for the machine to use.
      * @param file The file the machine is associated with.
-     * @param mainWindow The main window.
      */
-    public DFSAGraphicsPanel(DFSA_Machine machine, Tape tape, File file, MainWindow mainWindow)
+    public DFSAGraphicsPanel(DFSA_Machine machine, Tape tape, File file)
     {
         // TODO: Move to MachineGraphicsPanel
         m_sim = new DFSA_Simulator(machine, tape);
         m_file = file;
         m_labelsUsed = m_sim.getMachine().getLabelHashset();
-        m_mainWindow = mainWindow;
         initialization();
     }
 
@@ -87,7 +85,7 @@ public class DFSAGraphicsPanel
     public void onActivation()
     {
         // Naming schemes are not applicable for DFSAs.
-        m_mainWindow.m_configureSchemeAction.setEnabled(false);
+        MainWindow.instance.m_configureSchemeAction.setEnabled(false);
     }
 
     /** 
@@ -111,7 +109,7 @@ public class DFSAGraphicsPanel
             return false;
         }
 
-        // !!!
+        // TODO: Determine if DFSAs should support wildcards
         /*
         if (c == DFSA_Machine.OTHERWISE_SYMBOL)
         {

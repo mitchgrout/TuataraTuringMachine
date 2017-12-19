@@ -56,12 +56,10 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
 {    
     /**
      * Creates a new instance of AlphabetSelectorInternalFrame.
-     * @param parent The main window.
      * */
-    public AlphabetSelectorInternalFrame(MainWindow parent)
+    public AlphabetSelectorInternalFrame()
     {
         initComponents();
-        m_parent = parent;
     }
    
     /**
@@ -361,8 +359,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         this.addInternalFrameListener(new InternalFrameAdapter()
         {
             public void internalFrameDeactivated(InternalFrameEvent e) {
-                m_parent.handleLostFocus();
-                m_parent.getGlassPane().setVisible(false);
+                MainWindow.instance.handleLostFocus();
+                MainWindow.instance.getGlassPane().setVisible(false);
                 
                 // Fix the bug where pressing spacebar doesnt reach the system
                 // and merely makes an annoying beep instead.
@@ -370,7 +368,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 // when the internal frame was deactivated.
                 KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
                 //kfm.clearGlobalFocusOwner();
-                m_parent.getContentPane().requestFocusInWindow();
+                MainWindow.instance.getContentPane().requestFocusInWindow();
             }
         });
         
@@ -473,9 +471,4 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
      * The current graphics panel.
      */
     private MachineGraphicsPanel m_panel;
-
-    /**
-     * The main window.
-     */
-    private MainWindow m_parent;
 }

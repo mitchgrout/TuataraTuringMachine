@@ -45,16 +45,14 @@ public class TapeDisplayControllerPanel extends JPanel
     /**
      * Creates a new instance of TapeDisplayControllerPanel.
      * @param tapeDP The tape display panel.
-     * @param windowParent The main window.
      * @param headToStartAction Action used to move the read/write head to the start.
      * @param eraseTapeAction Action used to erase the entire tape.
      * @param reloadAction Action used to reload the tape.
      */
-    public TapeDisplayControllerPanel(TapeDisplayPanel tapeDP, MainWindow windowParent,
-            Action headToStartAction, Action eraseTapeAction, Action reloadAction)
+    public TapeDisplayControllerPanel(TapeDisplayPanel tapeDP, Action headToStartAction, 
+                                      Action eraseTapeAction, Action reloadAction)
     {
         m_tapeDP = tapeDP;
-        m_mainWindow = windowParent;
         initComponents(headToStartAction, eraseTapeAction, reloadAction);
    }
     
@@ -77,7 +75,7 @@ public class TapeDisplayControllerPanel extends JPanel
         {
             public void mousePressed(MouseEvent e)
             {
-                MachineGraphicsPanel gfx = m_mainWindow.getSelectedGraphicsPanel();
+                MachineGraphicsPanel gfx = MainWindow.instance.getSelectedGraphicsPanel();
                 if (gfx != null)
                 {
                     gfx.deselectSymbol();
@@ -190,11 +188,6 @@ public class TapeDisplayControllerPanel extends JPanel
      * The tape display panel.
      */
     private TapeDisplayPanel m_tapeDP;
-    
-    /**
-     * The main window.
-     */
-    private MainWindow m_mainWindow;
     
     /**
      * Button for moving the read/write head left.
