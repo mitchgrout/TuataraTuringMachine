@@ -75,9 +75,10 @@ public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, T
         Point2D mid = getActionLocation();
         FontMetrics metric = g.getFontMetrics(g.getFont());
         int width = metric.charWidth('_');
+        int height = metric.getAscent();
         return new Rectangle2D.Double(
-                mid.getX() - (3 * width / 2), mid.getY() - metric.getAscent() / 2,
-                width, metric.getAscent());
+                mid.getX() - 2 * width, mid.getY() - (3 * height) / 4,
+                2 * width, (3 * height) / 2);
     }
 
     /**
@@ -90,9 +91,10 @@ public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, T
         Point2D mid = getActionLocation();
         FontMetrics metric = g.getFontMetrics(g.getFont());
         int width = metric.charWidth('_');
+        int height = metric.getAscent();
         return new Rectangle2D.Double(
-                mid.getX() + width / 2, mid.getY() - metric.getAscent() / 2,
-                width, metric.getAscent());
+                mid.getX(), mid.getY() - (3 * height) / 4,
+                2 * width, (3 * height) / 2);
     }
     
     /**
