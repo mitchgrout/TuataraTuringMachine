@@ -45,12 +45,10 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
 {    
     /**
      * Creates a new instance of SchemeSelectorInternalFrame.
-     * @param parent The main window.
      * */
-    public SchemeSelectorInternalFrame(MainWindow parent)
+    public SchemeSelectorInternalFrame()
     {
         initComponents();
-        m_parent = parent;
     }
 
     /**
@@ -173,11 +171,11 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
         {
             public void internalFrameDeactivated(InternalFrameEvent e)
             {
-                m_parent.handleLostFocus();
-                m_parent.getGlassPane().setVisible(false);
+                MainWindow.instance.handleLostFocus();
+                MainWindow.instance.getGlassPane().setVisible(false);
                 KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
                 // kfm.clearGlobalFocusOwner();
-                m_parent.getContentPane().requestFocusInWindow();
+                MainWindow.instance.getContentPane().requestFocusInWindow();
             }
         });
     }
@@ -216,9 +214,4 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
      * The current graphics panel.
      */
     private MachineGraphicsPanel m_panel;
-
-    /**
-     * The main window.
-     */
-    private MainWindow m_parent;
 }

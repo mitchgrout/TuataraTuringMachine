@@ -49,6 +49,8 @@ import tuataraTMSim.machine.DFSA.*;
  */
 public class MainWindow extends JFrame
 {
+    public static /*final*/ MainWindow instance;
+
     /**
      * Font used for rendering text.
      */
@@ -243,7 +245,7 @@ public class MainWindow extends JFrame
         {
             public void run()
             {
-                new MainWindow().setVisible(true);
+                (instance = new MainWindow()).setVisible(true);
             }
         });
     }
@@ -319,10 +321,9 @@ public class MainWindow extends JFrame
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         // Set up the tape and associated controllers
-        m_tape.setWindow(this);
         m_tapeDisp = new TapeDisplayPanel(m_tape);
-        m_tapeDispController = new TapeDisplayControllerPanel(m_tapeDisp, this, 
-                m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
+        m_tapeDispController = 
+            new TapeDisplayControllerPanel(m_tapeDisp, m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
         m_tapeDispController.setBounds(0, getHeight() - m_tapeDispController.getHeight(), getWidth(),100); 
         m_tapeDispController.setVisible(true);
         
@@ -397,7 +398,7 @@ public class MainWindow extends JFrame
         
         // Make a state diagram window as the default for the desktop pane
         JInternalFrame iFrame = 
-            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, this));
+            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
         m_desktopPane.add(iFrame);      
         m_desktopPane.setSelectedFrame(iFrame);
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
@@ -1483,7 +1484,7 @@ public class MainWindow extends JFrame
             if (m_desktopPane != null)
             {
                 JInternalFrame iFrame = 
-                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null, MainWindow.this));
+                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
                 m_desktopPane.add(iFrame);
                 try { iFrame.setSelected(true); }
                 catch (PropertyVetoException e2) { }
@@ -1517,7 +1518,7 @@ public class MainWindow extends JFrame
             if (m_desktopPane != null)
             {
                 JInternalFrame iFrame = 
-                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null, MainWindow.this));
+                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null));
                 m_desktopPane.add(iFrame);
                 try { iFrame.setSelected(true); }
                 catch (PropertyVetoException e2) { }
@@ -1569,13 +1570,11 @@ public class MainWindow extends JFrame
                 JInternalFrame iFrame = null;
                 if (machine instanceof TM_Machine)
                 {
-                    iFrame = newMachineWindow(new TMGraphicsPanel(
-                                (TM_Machine)machine, m_tape, inFile, MainWindow.this));
+                    iFrame = newMachineWindow(new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile));
                 }
                 else if (machine instanceof DFSA_Machine)
                 {
-                    iFrame = newMachineWindow(new DFSAGraphicsPanel(
-                                (DFSA_Machine)machine, m_tape, inFile, MainWindow.this));
+                    iFrame = newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile));
                 }
                 m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
@@ -2290,7 +2289,7 @@ public class MainWindow extends JFrame
                     m_timerTask.cancel();
                 }
                 setEditingEnabled(false);
-                m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp, MainWindow.this);
+                m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp);
                 m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
             }
         }

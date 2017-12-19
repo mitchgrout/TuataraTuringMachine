@@ -40,13 +40,11 @@ public class ExecutionTimerTask extends TimerTask
      * Creates a new instance of ExecutionTimerTask.
      * @param panel The current graphics panel.
      * @param tapeDisp The current tape panel.
-     * @param window The main window.
      */
-    public ExecutionTimerTask(MachineGraphicsPanel panel, TapeDisplayPanel tapeDisp, MainWindow window)
+    public ExecutionTimerTask(MachineGraphicsPanel panel, TapeDisplayPanel tapeDisp)
     {
         m_panel = panel;
         m_tapeDisp = tapeDisp;
-        m_mainWindow = window;
     }
    
     /**
@@ -55,6 +53,8 @@ public class ExecutionTimerTask extends TimerTask
      */
     public void run()
     {
+        MainWindow m_mainWindow = MainWindow.instance;
+
         // TODO: Can we use multiple dispatch or similar to tidy this up?
         try
         {
@@ -148,7 +148,7 @@ public class ExecutionTimerTask extends TimerTask
     public boolean cancel()
     {
         boolean returner = super.cancel();
-        m_mainWindow.setEditingEnabled(true);
+        MainWindow.instance.setEditingEnabled(true);
         return returner;
     }
     
@@ -161,9 +161,4 @@ public class ExecutionTimerTask extends TimerTask
      * The current tape panel.
      */
     private TapeDisplayPanel m_tapeDisp;
-
-    /**
-     * The main window.
-     */
-    private MainWindow m_mainWindow;
 }

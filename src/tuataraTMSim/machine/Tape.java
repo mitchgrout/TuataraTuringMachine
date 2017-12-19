@@ -27,7 +27,6 @@ package tuataraTMSim.machine;
 
 import java.io.*;
 import tuataraTMSim.exceptions.TapeBoundsException;
-import tuataraTMSim.MainWindow;
 
 /** 
  * A tape for a machine.
@@ -119,13 +118,6 @@ public abstract class Tape implements Serializable
      * @param other The tape to copy.
      */
     public abstract void copyOther(Tape other);
-
-    /**
-     * Set the window that this tape is associated with.
-     * @param window The window to track. If not null, all of the machine panels in window will be
-     *               kept up to date every time the tape is modified.
-     */
-    public abstract void setWindow(MainWindow window);
 
     /**
      * Serialize a tape, and write it to persistent storage.

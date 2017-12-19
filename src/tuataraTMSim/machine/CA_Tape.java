@@ -46,7 +46,7 @@ public class CA_Tape extends Tape implements Serializable
      */
     public CA_Tape()
     {
-        clearTape();
+        this("");
     }
     
     /**
@@ -56,21 +56,7 @@ public class CA_Tape extends Tape implements Serializable
     public CA_Tape(String initialTape)
     {
         setToString(initialTape);
-    }
-    
-    /**
-     * Creates a new instance of CA_Tape, setting the tape contents to a string.
-     * @param initialTape The initial value of the tape.
-     * @param window A reference to the main program window.
-     */
-    public CA_Tape(String initialTape, MainWindow window)
-    {
-        setToString(initialTape);
-        m_mainWindow = window;
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /**
@@ -94,10 +80,7 @@ public class CA_Tape extends Tape implements Serializable
             resetRWHead();
             throw new TapeBoundsException();
         }
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /** 
@@ -120,10 +103,7 @@ public class CA_Tape extends Tape implements Serializable
             }
             m_tapeArray = newArray;
         }
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /**
@@ -133,10 +113,7 @@ public class CA_Tape extends Tape implements Serializable
     public void write(char c)
     {
         m_tapeArray[m_headLoc] = c;
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /**
@@ -145,10 +122,7 @@ public class CA_Tape extends Tape implements Serializable
     public void resetRWHead()
     {
         m_headLoc = 0;
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /**
@@ -239,10 +213,7 @@ public class CA_Tape extends Tape implements Serializable
             m_tapeArray[i] = Tape.BLANK_SYMBOL;
         }
         m_headLoc = 0;
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
     
     /**
@@ -253,10 +224,7 @@ public class CA_Tape extends Tape implements Serializable
     public void copyOther(Tape other)
     {
         setToString(other.toString());
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
+        MainWindow.instance.updateAllSimulators();
     }
    
     /**
@@ -280,20 +248,6 @@ public class CA_Tape extends Tape implements Serializable
     }
     
     /**
-     * Set the window that this tape is associated with. 
-     * @param window The window to track. If not null, all of the machine panels in window will be
-     *               kept up to date every time the tape is modified.
-     */
-    public void setWindow(MainWindow window)
-    {
-        m_mainWindow = window;
-        if (m_mainWindow != null)
-        {
-            m_mainWindow.updateAllSimulators();
-        }
-    }
-   
-    /**
      * Read a CA_Tape into this object from the given stream.
      * @param in The stream to read.
      * @throws IOException If an IO error occurs.
@@ -303,7 +257,6 @@ public class CA_Tape extends Tape implements Serializable
     {
         in.defaultReadObject();
         m_headLoc = 0;
-        m_mainWindow = null;
     }
     
     /**
@@ -315,9 +268,4 @@ public class CA_Tape extends Tape implements Serializable
      * Memory used to store the tape data.
      */
     private char[] m_tapeArray;
-    
-    /**
-     * The main window to track.
-     */
-    private transient MainWindow m_mainWindow = null;
 }
