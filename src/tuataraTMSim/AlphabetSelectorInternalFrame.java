@@ -46,7 +46,7 @@ import tuataraTMSim.commands.JoinCommand;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.machine.Alphabet;
 import tuataraTMSim.machine.Tape;
-import tuataraTMSim.machine.TM.TM_Transition;
+import tuataraTMSim.machine.Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.
@@ -277,64 +277,71 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         {
             public void actionPerformed(ActionEvent e)
             {
-                Alphabet tempA = new Alphabet();
+                // Set up an alphabet object corresponding to these options
+                Alphabet newAlph = new Alphabet();
                 for (JCheckBox d : m_digits)
                 {
-                    tempA.setSymbol(d.getText().charAt(0), d.isSelected());
+                    newAlph.setSymbol(d.getText().charAt(0), d.isSelected());
                 }
                 for (JCheckBox l : m_letters)
                 {
-                    tempA.setSymbol(l.getText().charAt(0), l.isSelected());
+                    newAlph.setSymbol(l.getText().charAt(0), l.isSelected());
                 }
-                tempA.setSymbol(Tape.BLANK_SYMBOL, m_blank.isSelected());
+                newAlph.setSymbol(Tape.BLANK_SYMBOL, m_blank.isSelected());
                 
-                Alphabet oldAlphabet =(Alphabet)m_panel.getSimulator().getMachine().getAlphabet().clone();
+                // Take a deep copy of the old alphabet
+                Alphabet oldAlphabet = (Alphabet)m_panel.getSimulator().getMachine().getAlphabet().clone();
                 
-                if (m_panel.getSimulator().getMachine().isConsistentWithAlphabet(tempA))
+                // Can we copy the new alphabet across without issue?
+                if (m_panel.getSimulator().getMachine().isConsistentWithAlphabet(newAlph))
                 {
                     // Change the alphabet
-                    m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+                    m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, newAlph));
 
                     // Hide the frame
                     setVisible(false);
-                    try {setSelected(false);} catch (PropertyVetoException e2) {}
+                    try { setSelected(false); }
+                    catch (PropertyVetoException e2) { }
                 }
                 else
                 {
-                    int choice = JOptionPane.showOptionDialog(null, "There are transitions containing"
-                            + " symbols that are not in this alphabet.  Delete these transitions?",
-                            "Configure alphabet", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, "Cancel");
-                    if (choice == JOptionPane.YES_OPTION)
+                    int choice = JOptionPane.showOptionDialog(null, 
+                            "There are transitions in this machine contianing symbols not in this alphabet.\n" +
+                            "Delete these transitions?", "Configure alphabet",
+                            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, 
+                            null, null, "Cancel");
+
+                    switch (choice)
                     {
-                        // Get the set of inconsistent transitions
-                        ArrayList<TM_Transition> purge =
-                            m_panel.getSimulator().getMachine().getInconsistentTransitions();
+                        case JOptionPane.YES_OPTION:
+                            // Get the set of inconsistent transitions
+                            ArrayList<Transition> purge =
+                                m_panel.getSimulator().getMachine().getInconsistentTransitions(newAlph);
 
-                        // Change the alphabet, and remove inconsistent transitions
-                        m_panel.doJoinCommand(
-                            new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA),
-                            new RemoveInconsistentTransitionsCommand(m_panel, purge));
+                            // Change the alphabet, and remove inconsistent transitions
+                            m_panel.doJoinCommand(
+                                    new RemoveInconsistentTransitionsCommand(m_panel, purge),
+                                    new ConfigureAlphabetCommand(m_panel, oldAlphabet, newAlph));
 
-                        // Hide the frame
-                        setVisible(false);
-                        try { setSelected(false); }
-                        catch (PropertyVetoException e2) { }
+                            // Hide the frame
+                            setVisible(false);
+                            try { setSelected(false); }
+                            catch (PropertyVetoException e2) { }
 
-                        // This causes a repaint also
-                        m_panel.deselectSymbol();
-                    }
-                    else if (choice == JOptionPane.CANCEL_OPTION)
-                    {
-                        // Leave window open
-                    }
-                    else if (choice == JOptionPane.NO_OPTION)
-                    {
-                        // TODO: This may cause problems with determinism
-                        m_panel.doCommand(new ConfigureAlphabetCommand(m_panel, oldAlphabet, tempA));
+                            // This causes a repaint also
+                            m_panel.deselectSymbol();
+                            break;
 
-                        setVisible(false);
-                        try { setSelected(false); }
-                        catch (PropertyVetoException e2) { }
+                        case JOptionPane.NO_OPTION:
+                            // Do not reconfigure alphabet, hide the frame
+                            setVisible(false);
+                            try { setSelected(false); }
+                            catch (PropertyVetoException e2) { }
+
+                        default:
+                            // Leave window open
+                            break;
+
                     }
                 }
                 m_panel.setModifiedSinceSave(true);
