@@ -71,9 +71,10 @@ public class DFSA_Transition extends Transition<DFSA_Action, DFSA_State, DFSA_Ma
         Point2D mid = getActionLocation();
         FontMetrics metric = g.getFontMetrics(g.getFont());
         int width = metric.charWidth('_');
+        int height = metric.getAscent();
         return new Rectangle2D.Double(
-                mid.getX() - width / 2, mid.getY() - metric.getAscent() / 2,
-                width, metric.getAscent());
+                mid.getX() - width, mid.getY() - (3 * height) / 4,
+                2 * width, (3 * height) / 2);
     }
  
     /**
