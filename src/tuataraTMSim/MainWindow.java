@@ -404,11 +404,11 @@ public class MainWindow extends JFrame
         m_desktopPane.getDesktopManager().activateFrame(iFrame);
         
         // Create the alphabet configuration internal frame
-        m_asif = new AlphabetSelectorInternalFrame(this);
+        m_asif = new AlphabetSelectorInternalFrame();
         m_asif.pack();
 
         // Create the scheme selector internal frame
-        m_ssif = new SchemeSelectorInternalFrame(this);
+        m_ssif = new SchemeSelectorInternalFrame();
         m_ssif.pack();
         
         // Make the internal frames quasi-modal.
