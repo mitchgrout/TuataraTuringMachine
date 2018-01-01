@@ -123,8 +123,8 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
      */
     protected ArrayList<TM_Transition> m_transitions;
    
-    // /**
-    //  * The submachine associated with this state.
-    //  */
-    // protected TM_Machine m_subMachine;
+    /**
+     * The submachine associated with this state.
+     */
+    protected TM_Machine m_subMachine;
 }

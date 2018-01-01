@@ -54,36 +54,36 @@ public class MachineInternalFrame extends JInternalFrame
         {
             public void internalFrameActivated(InternalFrameEvent e)
             {
-                MainWindow.instance.updateUndoActions();
-                MainWindow.instance.setEditingActionsEnabledState(true);
+                MainWindow.getInstance().updateUndoActions();
+                MainWindow.getInstance().setEditingActionsEnabledState(true);
                 m_gfxPanel.onActivation();
             }
             
             public void internalFrameClosed(InternalFrameEvent e)
             {
-                MainWindow.instance.updateUndoActions();
+                MainWindow.getInstance().updateUndoActions();
             }
 
             public void	internalFrameDeactivated(InternalFrameEvent e)
             {
-                MainWindow.instance.updateUndoActions();
+                MainWindow.getInstance().updateUndoActions();
                 m_gfxPanel.deselectSymbol();
             }
             
             public void	internalFrameDeiconified(InternalFrameEvent e)
             {
-                MainWindow.instance.updateUndoActions();
+                MainWindow.getInstance().updateUndoActions();
             }
             
             public void	internalFrameIconified(InternalFrameEvent e)
             {
-                MainWindow.instance.updateUndoActions();
+                MainWindow.getInstance().updateUndoActions();
             }
 
             public void	internalFrameOpened(InternalFrameEvent e) 
             {
-                MainWindow.instance.updateUndoActions();
-                MainWindow.instance.setEditingActionsEnabledState(true);
+                MainWindow.getInstance().updateUndoActions();
+                MainWindow.getInstance().setEditingActionsEnabledState(true);
                 m_gfxPanel.onActivation();
             }
         });   

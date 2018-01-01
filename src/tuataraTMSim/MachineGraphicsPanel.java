@@ -1043,7 +1043,7 @@ public abstract class MachineGraphicsPanel<
         undoStack.add(command);
         redoStack.clear();
         setModifiedSinceSave(true);
-        MainWindow.instance.updateUndoActions();
+        MainWindow.getInstance().updateUndoActions();
         repaint();
     }
 
@@ -1066,7 +1066,7 @@ public abstract class MachineGraphicsPanel<
     {
         undoStack.add(command);
         redoStack.clear();
-        MainWindow.instance.updateUndoActions();
+        MainWindow.getInstance().updateUndoActions();
         repaint();
     }
 
@@ -1081,7 +1081,7 @@ public abstract class MachineGraphicsPanel<
             c.undoCommand();
             redoStack.add(c);
             setModifiedSinceSave(true);
-            MainWindow.instance.updateUndoActions();
+            MainWindow.getInstance().updateUndoActions();
             repaint();
         }
         catch (NoSuchElementException e) { }
@@ -1098,7 +1098,7 @@ public abstract class MachineGraphicsPanel<
             c.doCommand();
             undoStack.add(c);
             setModifiedSinceSave(true);
-            MainWindow.instance.updateUndoActions();
+            MainWindow.getInstance().updateUndoActions();
             repaint();
         }
         catch (NoSuchElementException e) { }

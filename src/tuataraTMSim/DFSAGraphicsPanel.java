@@ -85,7 +85,7 @@ public class DFSAGraphicsPanel
     public void onActivation()
     {
         // Naming schemes are not applicable for DFSAs.
-        MainWindow.instance.m_configureSchemeAction.setEnabled(false);
+        MainWindow.getInstance().m_configureSchemeAction.setEnabled(false);
     }
 
     /** 

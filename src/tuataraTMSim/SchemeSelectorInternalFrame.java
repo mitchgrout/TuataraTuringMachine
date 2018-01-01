@@ -171,11 +171,11 @@ public class SchemeSelectorInternalFrame extends JInternalFrame
         {
             public void internalFrameDeactivated(InternalFrameEvent e)
             {
-                MainWindow.instance.handleLostFocus();
-                MainWindow.instance.getGlassPane().setVisible(false);
+                MainWindow.getInstance().handleLostFocus();
+                MainWindow.getInstance().getGlassPane().setVisible(false);
                 KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
                 // kfm.clearGlobalFocusOwner();
-                MainWindow.instance.getContentPane().requestFocusInWindow();
+                MainWindow.getInstance().getContentPane().requestFocusInWindow();
             }
         });
     }

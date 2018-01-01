@@ -49,8 +49,6 @@ import tuataraTMSim.machine.DFSA.*;
  */
 public class MainWindow extends JFrame
 {
-    public static /*final*/ MainWindow instance;
-
     /**
      * Font used for rendering text.
      */
@@ -153,6 +151,7 @@ public class MainWindow extends JFrame
      */
     public MainWindow()
     {
+        m_instance = this;
         initComponents();
        
         // Whenever a mouse click occurs, deselect the selected action. If the action was clicked on
@@ -245,9 +244,18 @@ public class MainWindow extends JFrame
         {
             public void run()
             {
-                (instance = new MainWindow()).setVisible(true);
+                (new MainWindow()).setVisible(true);
             }
         });
+    }
+
+    /**
+     * Get a reference to the current instance of MainWindow
+     * @return A reference to the current instance of MainWindow
+     */
+    public static MainWindow getInstance()
+    {
+        return m_instance;
     }
 
     /**
@@ -321,6 +329,7 @@ public class MainWindow extends JFrame
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         // Set up the tape and associated controllers
+        m_tape = new CA_Tape();
         m_tapeDisp = new TapeDisplayPanel(m_tape);
         m_tapeDispController = 
             new TapeDisplayControllerPanel(m_tapeDisp, m_headToStartAction, m_eraseTapeAction, m_reloadTapeAction); 
@@ -2718,7 +2727,12 @@ public class MainWindow extends JFrame
          */
         private Component glass;
     }
-    
+   
+    /**
+     * Singleton instance of MainWindow.
+     */
+    private static /*final*/ MainWindow m_instance;
+
     /**
      * Current GUI mode.
      */
@@ -2792,7 +2806,7 @@ public class MainWindow extends JFrame
     /**
      * Main shared tape.
      */
-    private final Tape m_tape = new CA_Tape();
+    private Tape m_tape;
 
     /**
      * Toolbar button for undoing an action.
