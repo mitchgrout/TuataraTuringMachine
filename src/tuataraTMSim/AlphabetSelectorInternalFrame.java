@@ -359,8 +359,8 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
         this.addInternalFrameListener(new InternalFrameAdapter()
         {
             public void internalFrameDeactivated(InternalFrameEvent e) {
-                MainWindow.instance.handleLostFocus();
-                MainWindow.instance.getGlassPane().setVisible(false);
+                MainWindow.getInstance().handleLostFocus();
+                MainWindow.getInstance().getGlassPane().setVisible(false);
                 
                 // Fix the bug where pressing spacebar doesnt reach the system
                 // and merely makes an annoying beep instead.
@@ -368,7 +368,7 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                 // when the internal frame was deactivated.
                 KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
                 //kfm.clearGlobalFocusOwner();
-                MainWindow.instance.getContentPane().requestFocusInWindow();
+                MainWindow.getInstance().getContentPane().requestFocusInWindow();
             }
         });
         

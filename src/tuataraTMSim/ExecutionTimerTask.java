@@ -53,7 +53,7 @@ public class ExecutionTimerTask extends TimerTask
      */
     public void run()
     {
-        MainWindow m_mainWindow = MainWindow.instance;
+        MainWindow m_mainWindow = MainWindow.getInstance();
 
         // TODO: Can we use multiple dispatch or similar to tidy this up?
         try
@@ -148,7 +148,7 @@ public class ExecutionTimerTask extends TimerTask
     public boolean cancel()
     {
         boolean returner = super.cancel();
-        MainWindow.instance.setEditingEnabled(true);
+        MainWindow.getInstance().setEditingEnabled(true);
         return returner;
     }
     

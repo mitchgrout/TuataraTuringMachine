@@ -65,7 +65,7 @@ public class TapeDisplayControllerPanel extends JPanel
     public void initComponents(Action headToStartAction, Action eraseTapeAction, Action reloadAction)
     {
         setBackground(Color.WHITE);
-        setFocusable(!false); // TODO: make this work
+        setFocusable(false); // TODO: make this work
 
         // NOTE: This is attached to all subcomponents so that when the mouse is clicked over this
         //       component, we receive the focus of the keyboard. We could accomplish something
@@ -75,7 +75,7 @@ public class TapeDisplayControllerPanel extends JPanel
         {
             public void mousePressed(MouseEvent e)
             {
-                MachineGraphicsPanel gfx = MainWindow.instance.getSelectedGraphicsPanel();
+                MachineGraphicsPanel gfx = MainWindow.getInstance().getSelectedGraphicsPanel();
                 if (gfx != null)
                 {
                     gfx.deselectSymbol();

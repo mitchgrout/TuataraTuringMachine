@@ -56,7 +56,7 @@ public class CA_Tape extends Tape implements Serializable
     public CA_Tape(String initialTape)
     {
         setToString(initialTape);
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /**
@@ -80,7 +80,7 @@ public class CA_Tape extends Tape implements Serializable
             resetRWHead();
             throw new TapeBoundsException();
         }
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /** 
@@ -103,7 +103,7 @@ public class CA_Tape extends Tape implements Serializable
             }
             m_tapeArray = newArray;
         }
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /**
@@ -113,7 +113,7 @@ public class CA_Tape extends Tape implements Serializable
     public void write(char c)
     {
         m_tapeArray[m_headLoc] = c;
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /**
@@ -122,7 +122,7 @@ public class CA_Tape extends Tape implements Serializable
     public void resetRWHead()
     {
         m_headLoc = 0;
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /**
@@ -213,7 +213,7 @@ public class CA_Tape extends Tape implements Serializable
             m_tapeArray[i] = Tape.BLANK_SYMBOL;
         }
         m_headLoc = 0;
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
     
     /**
@@ -224,7 +224,7 @@ public class CA_Tape extends Tape implements Serializable
     public void copyOther(Tape other)
     {
         setToString(other.toString());
-        MainWindow.instance.updateAllSimulators();
+        MainWindow.getInstance().updateAllSimulators();
     }
    
     /**
