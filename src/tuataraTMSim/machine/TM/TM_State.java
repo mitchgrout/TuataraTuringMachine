@@ -42,7 +42,7 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Width of the graphical representation of the state, in pixels.

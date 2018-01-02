@@ -56,7 +56,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.

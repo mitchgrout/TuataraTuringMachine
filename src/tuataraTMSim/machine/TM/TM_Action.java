@@ -45,7 +45,7 @@ public class TM_Action extends PreAction
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Character representing a left-shift to the read/write head of the tape.
