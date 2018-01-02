@@ -1181,21 +1181,76 @@ public abstract class MachineGraphicsPanel<
      */
     protected abstract void handleChooseCurrentState(MouseEvent e);
 
+    /**
+     * Build an error message for the given ComputationCompletedException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public abstract String getErrorMessage(ComputationCompletedException e);
-    public abstract String getErrorMessage(ComputationFailedException e);
-    public abstract String getErrorMessage(NondeterministicException e);
-    public abstract String getErrorMessage(TapeBoundsException e);
-    public abstract String getErrorMessage(UndefinedTransitionException e);
-    public String getErrorMessage(Exception e)
-    {
-        return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
-    }
 
     /**
-     * Build an error message using the given exception specifically for the type of machine being
-     * simulated.
-     * @return An error message specific for the type of machine being simulated.
+     * Build an error message for the given ComputationFailedException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
      */
+    public abstract String getErrorMessage(ComputationFailedException e);
+
+    /**
+     * Build an error message for the given NondeterministicException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
+    public abstract String getErrorMessage(NondeterministicException e);
+
+    /**
+     * Build an error message for the given TapeBoundsException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
+    public abstract String getErrorMessage(TapeBoundsException e);
+
+    /**
+     * Build an error message for the given UndefinedTransitionException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
+    public abstract String getErrorMessage(UndefinedTransitionException e);
+
+    /**
+     * Build an error message for the given Exception. Automatically checks the type of the
+     * exception to see if it matches any existing definitions of getErrorMessage and dispatches
+     * accordingly.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
+    public String getErrorMessage(Exception e)
+    {
+        // Pretend we have dynamic dispatch
+        if (e instanceof ComputationCompletedException)
+        {
+            return getErrorMessage((ComputationCompletedException) e);
+        }
+        else if (e instanceof ComputationFailedException)
+        {
+            return getErrorMessage((ComputationFailedException) e);
+        }
+        else if (e instanceof NondeterministicException)
+        {
+            return getErrorMessage((NondeterministicException) e);
+        }
+        else if (e instanceof TapeBoundsException)
+        {
+            return getErrorMessage((TapeBoundsException) e);
+        }
+        else if (e instanceof UndefinedTransitionException)
+        {
+            return getErrorMessage((UndefinedTransitionException) e);
+        }
+        else 
+        { 
+            return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+        }
+    }
 
     /**
      * Action to rename a state selected by the context menu.

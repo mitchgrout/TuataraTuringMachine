@@ -55,7 +55,6 @@ public class ExecutionTimerTask extends TimerTask
     {
         MainWindow m_mainWindow = MainWindow.getInstance();
 
-        // TODO: Can we use multiple dispatch or similar to tidy this up?
         try
         {
             Simulator sim = m_panel.getSimulator();
@@ -71,62 +70,26 @@ public class ExecutionTimerTask extends TimerTask
                 m_mainWindow.getConsole().logPartial(m_panel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb')); 
             }
         }
-        catch (ComputationCompletedException e)
+        catch (ComputationCompletedException|ComputationFailedException e)
         {
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+            String msg = m_panel.getErrorMessage(e);
+            m_mainWindow.getConsole().log(msg);
+            JOptionPane.showMessageDialog(m_mainWindow, msg,
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
-        }
-        catch (ComputationFailedException e)
-        {
-            cancel();
-            m_mainWindow.stopExecution();
-
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-            m_panel.getSimulator().resetMachine();
-            m_panel.repaint();
-        }
-        catch (NondeterministicException e)
-        {
-            cancel();
-            m_mainWindow.stopExecution();
-
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
-        }
-        catch (TapeBoundsException e)
-        {
-            cancel();
-            m_mainWindow.stopExecution();
-
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
-        }
-        catch (UndefinedTransitionException e)
-        {
-            cancel();
-            m_mainWindow.stopExecution();
-
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
         catch (Exception e)
         {
             cancel();
             m_mainWindow.stopExecution();
 
-            m_mainWindow.getConsole().log(m_panel.getErrorMessage(e));
-            JOptionPane.showMessageDialog(m_mainWindow, m_panel.getErrorMessage(e),
+            String msg = m_panel.getErrorMessage(e);
+            m_mainWindow.getConsole().log(msg);
+            JOptionPane.showMessageDialog(m_mainWindow, msg,
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
         m_mainWindow.repaint();
