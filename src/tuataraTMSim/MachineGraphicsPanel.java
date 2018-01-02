@@ -133,16 +133,17 @@ public abstract class MachineGraphicsPanel<
             g2d.draw(m_selectedSymbolBoundingBox);
             g2d.setStroke(current);
         }
-        if (m_selectionInProgress)
+
+        // A marquee selection is taking place
+        if (m_selectionBox != null)
         {
             g2d.setColor(Color.BLACK);
-            int topLeftX = Math.min(m_selectionBoxStartX, m_selectionBoxEndX);
-            int topLeftY = Math.min(m_selectionBoxStartY, m_selectionBoxEndY);
-            int width = Math.abs(m_selectionBoxStartX - m_selectionBoxEndX);
-            int height = Math.abs(m_selectionBoxStartY - m_selectionBoxEndY);
+            int topLeftX = Math.min(m_selectionBox.x, m_selectionBox.x + m_selectionBox.width),
+                topLeftY = Math.min(m_selectionBox.y, m_selectionBox.y + m_selectionBox.height),
+                width    = Math.abs(m_selectionBox.width),
+                height   = Math.abs(m_selectionBox.height);
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
-
             g2d.draw(new Rectangle2D.Float(topLeftX, topLeftY,
                         width, height));
             g2d.setStroke(current);
@@ -289,10 +290,10 @@ public abstract class MachineGraphicsPanel<
                         handleStateDrag(e);
                         repaintNeeded = true;
                     }
-                    else if (m_currentMode == GUI_Mode.SELECTION && m_selectionInProgress)
+                    else if (m_currentMode == GUI_Mode.SELECTION && m_selectionBox != null)
                     {
-                        m_selectionBoxEndX = e.getX();
-                        m_selectionBoxEndY = e.getY();
+                        m_selectionBox.width  = e.getX() - m_selectionBox.x;
+                        m_selectionBox.height = e.getY() - m_selectionBox.y;
                         repaintNeeded = true;
                     }
                 }
@@ -426,10 +427,7 @@ public abstract class MachineGraphicsPanel<
         if (m_currentMode == GUI_Mode.SELECTION)
         {
             // Start building a selection bounding box
-            m_madeSelection = false;
-            m_selectionInProgress = true;
-            m_selectionBoxStartX = m_selectionBoxEndX = e.getX();
-            m_selectionBoxStartY = m_selectionBoxEndY = e.getY();
+            m_selectionBox = new Rectangle(e.getX(), e.getY(), 0, 0);
             m_selectionConcatenateMode = (e.isControlDown() || e.isShiftDown());
 
         }
@@ -581,11 +579,11 @@ public abstract class MachineGraphicsPanel<
      */
     protected void updateSelectedStatesAndTransitions()
     {
-        int topLeftX = Math.min(m_selectionBoxStartX, m_selectionBoxEndX);
-        int topLeftY = Math.min(m_selectionBoxStartY, m_selectionBoxEndY);
-        int width = Math.abs(m_selectionBoxStartX - m_selectionBoxEndX);
-        int height = Math.abs(m_selectionBoxStartY - m_selectionBoxEndY);
-
+        int topLeftX = Math.min(m_selectionBox.x, m_selectionBox.x + m_selectionBox.width),
+            topLeftY = Math.min(m_selectionBox.y, m_selectionBox.y + m_selectionBox.height),
+            width    = Math.abs(m_selectionBox.width),
+            height   = Math.abs(m_selectionBox.height);
+ 
         HashSet<STATE> states = getSimulator().getMachine().getSelectedStates(topLeftX, topLeftY, width, height);
 
         if (m_selectionConcatenateMode)
@@ -1319,38 +1317,11 @@ public abstract class MachineGraphicsPanel<
      */
     protected HashSet<TRANSITION> m_selectedTransitions = new HashSet<TRANSITION>();
 
-    // TODO: Replace with java.awt.Rectangle
     /**
-     * The start X ordinate of the selection marquee.
+     * The bounds of the selection marquee. If null, then no selection is in progress.
+     * If width and height are nonzero, then a selection has been made.
      */
-    protected int m_selectionBoxStartX = Integer.MIN_VALUE;
-
-    /** 
-     * The start Y ordinate of the selection marquee.
-     */
-    protected int m_selectionBoxStartY = Integer.MIN_VALUE;
-
-    /**
-     * The end X ordinate of the selection marquee.
-     */
-    protected int m_selectionBoxEndX = Integer.MIN_VALUE;
-
-    /**
-     * The end Y ordinate of the selection marquee.
-     */
-    protected int m_selectionBoxEndY = Integer.MIN_VALUE;
-
-    /**
-     * Whether or not the user has made a marquee selection; determines if the values for
-     * m_selectionBoxStartX, m_selectionBoxStartY, m_selectionBoxEndX, and m_selectionBoxEndY are valid.
-     */
-    protected boolean m_madeSelection = false;
-
-    /**
-     * Whether or not a marquee selection is in progress.
-     */
-    protected boolean m_selectionInProgress = false;
-    // END TODO
+    protected Rectangle m_selectionBox;
 
     /**
      * Whether or not selected items will be concatenated to the list of selected items, or the

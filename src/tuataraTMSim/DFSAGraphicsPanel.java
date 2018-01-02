@@ -158,6 +158,7 @@ public class DFSAGraphicsPanel
      */
     protected void handleMouseReleased(MouseEvent e)
     {
+        // Adding a transition
         if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
         {
             DFSA_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
@@ -169,20 +170,16 @@ public class DFSAGraphicsPanel
                 repaint();
             }
         }
-        else if (m_currentMode == GUI_Mode.SELECTION)
+        // Finishing a selection
+        else if (m_currentMode == GUI_Mode.SELECTION && m_selectionBox != null)
         {
-            if (m_selectionInProgress)
+            if (m_selectionBox.width != 0 && m_selectionBox.height != 0) 
             {
-                m_madeSelection = (m_selectionBoxStartX != m_selectionBoxEndX ||
-                        m_selectionBoxStartY != m_selectionBoxEndY); //true IFF selection not empty
-
-                if (m_madeSelection)
-                {
-                    updateSelectedStatesAndTransitions();
-                }
-                repaint();
+                updateSelectedStatesAndTransitions();
             }
+            repaint();
         }
+
         if (m_mousePressedState != null && m_movedState)
         {
             // Create an undo/redo command object for the move of a state/set of states/transitions.
@@ -218,8 +215,8 @@ public class DFSAGraphicsPanel
             int translateY = (int)(m_mousePressedTransition.getMidpoint().getY() - m_transitionMidPointBeforeMove.getY());
             addCommand(new MoveTransitionCommand(this, m_mousePressedTransition, translateX, translateY));
         }
-        m_selectionInProgress = false;
-
+        
+        m_selectionBox = null;
         m_mousePressedState = null;
         m_mousePressedTransition = null;
         m_transitionMidPointBeforeMove = null;
