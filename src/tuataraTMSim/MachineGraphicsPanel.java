@@ -54,6 +54,16 @@ public abstract class MachineGraphicsPanel<
     private final Font PANEL_FONT = new Font("Monospaced", Font.PLAIN, 14);
 
     /**
+     * Creates a new instance of MachineGraphicsPanel.
+     */
+    public MachineGraphicsPanel()
+    {
+        // Create our context menu
+        m_contextMenu = new JPopupMenu();
+        m_contextMenu.add(new RenameStateAction("Rename State"));
+    }
+
+    /**
      * Determine if this panel is opaque; allows for optomization by Swing.
      * @return true in all cases.
      */
@@ -145,186 +155,167 @@ public abstract class MachineGraphicsPanel<
      */
     protected void initialization()
     {
-        // TODO: If only called by the constructor, of which there is only one, this should be moved
-        //       entirely to the constructor.
         setFocusable(false);
 
-        final Component thisPtr = this;
         // Set up event listeners and their corresponding actions.
         addMouseListener(new MouseAdapter()
+        {
+            public void mouseClicked(MouseEvent e)
+            {   
+                // Do nothing if editing is disabled, or this is not a left-click
+                if (!m_editingEnabled ||
+                    e.getButton() != MouseEvent.BUTTON1)
                 {
-                    public void mouseClicked(MouseEvent e)
-                    {   
-                        if (!m_editingEnabled)
+                    return;
+                }
+
+                // Deselect any selected action symbol
+                selectedSymbolBoundingBox = null;
+                selectedTransition = null;
+
+                // Selecting a transition action
+                if (m_currentMode != GUI_Mode.ERASER && selectCharacterByClicking(e))
+                {
+                    repaint();
+                    return;
+                }
+
+                // Handle GUI mode events
+                switch (m_currentMode)
+                {
+                    case ADDNODES:
+                        handleAddNodesClick(e);
+                        break;
+
+                    case ADDTRANSITIONS:
+                        if ((e.isControlDown() || e.isShiftDown()))
                         {
-                            return;
+                            handleSelectionClick(e);
                         }
+                        break;
 
-                        // Deselect any selected action symbol
-                        selectedSymbolBoundingBox = null;
-                        selectedTransition = null;
+                    case ERASER:
+                        handleEraserClick(e);
+                        break;
 
-                        if (m_currentMode != GUI_Mode.ERASER)
-                        {
-                            // Select characters on transitions by left clicking
-                            // or rename states
-                            if (clickStateName(e) || selectCharacterByClicking(e))
-                            {
-                                repaint();
-                                return;
-                            }
-                        }
+                    case CHOOSESTART:
+                        handleChooseStartClick(e);
+                        break;
 
-                        switch (m_currentMode)
-                        {
-                            case ADDNODES:
-                                handleAddNodesClick(e);
-                                break;
-                            case ADDTRANSITIONS:
-                                if ((e.isControlDown() || e.isShiftDown()))
-                                {
-                                    handleSelectionClick(e);
-                                }
-                                break;
-                            case ERASER:
-                                {
-                                    handleEraserClick(e);
-                                    break;
-                                }
-                            case CHOOSESTART:
-                                {
-                                    handleChooseStartClick(e);
-                                    break;
-                                }
-                            case CHOOSEACCEPTING:
-                                {
-                                    handleChooseAcceptingClick(e);
-                                    break;
-                                }
-                            case SELECTION:
-                                {
-                                    handleSelectionClick(e);
-                                    break;
-                                }
-                            case CHOOSECURRENTSTATE:
-                                {
-                                    handleChooseCurrentState(e);
-                                    break;
-                                }
-                        }
-                        if (getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY())!= null ||
-                                getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
-                        {
-                            setModifiedSinceSave(true);
-                        }
-                        repaint();
+                    case CHOOSEACCEPTING:
+                        handleChooseAcceptingClick(e);
+                        break;
 
-                    }
+                    case SELECTION:
+                        handleSelectionClick(e);
+                        break;
 
-                    public void mousePressed(MouseEvent e)
+                    case CHOOSECURRENTSTATE:
+                        handleChooseCurrentState(e);
+                        break;
+                }
+
+                // Update modified if anything is clicked on
+                MACHINE mac = getSimulator().getMachine();
+                if (mac.getStateClickedOn(e.getX(), e.getY())!= null ||
+                    mac.getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
+                {
+                    setModifiedSinceSave(true);
+                }
+                repaint();
+
+            }
+
+            public void mousePressed(MouseEvent e)
+            {
+                if (!m_editingEnabled)
+                {
+                    return;
+                }
+                else if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    handleMousePressed(e);
+                }
+                else if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    tryShowPopup(e);
+                }
+                repaint();
+            }
+
+            public void mouseReleased(MouseEvent e)
+            {
+                if (!m_editingEnabled)
+                {
+                    return;
+                }
+                else if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    handleMouseReleased(e);
+                }
+                else if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    tryShowPopup(e);
+                }
+                repaint();
+            }
+
+            private void tryShowPopup(MouseEvent e)
+            {
+                if (e.isPopupTrigger())
+                {
+                    m_contextState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
+                    if (m_contextState != null)
                     {
-                        if (!m_editingEnabled)
-                        {
-                            return;
-                        }
-                        handleMousePressed(e);
+                        m_contextMenu.show(e.getComponent(), e.getX(), e.getY());
                     }
-
-                    public void mouseReleased(MouseEvent e)
-                    {
-                        if (!m_editingEnabled)
-                        {
-                            return;
-                        }
-                        handleMouseReleased(e);
-                        repaint();
-                    }
-                });
+                }
+            }
+        });
 
         addMouseMotionListener(new MouseMotionAdapter()
+        {
+            public void mouseDragged(MouseEvent e)
+            {
+                // Deselect any selected action symbol
+                selectedSymbolBoundingBox = null;
+                selectedTransition = null;
+
+                boolean repaintNeeded = false;
+                if (m_currentMode != GUI_Mode.ADDTRANSITIONS)
                 {
-                    public void mouseDragged(MouseEvent e)
+                    if (mousePressedState != null)
                     {
-                        // Deselect any selected action symbol
-                        selectedSymbolBoundingBox = null;
-                        selectedTransition = null;
-
-                        boolean repaintNeeded = false;
-                        if (m_currentMode != GUI_Mode.ADDTRANSITIONS)
-                        {
-                            if (mousePressedState != null)
-                            {
-                                handleStateDrag(e);
-                                repaintNeeded = true;
-                            }
-                            else if (m_currentMode == GUI_Mode.SELECTION && selectionInProgress)
-                            {
-                                selectionBoxEndX = e.getX();
-                                selectionBoxEndY = e.getY();
-                                repaintNeeded = true;
-                            }
-                        }
-                        // Add transitions mode
-                        else
-                        {
-                            drawPosX = e.getX();
-                            drawPosY = e.getY();
-                            repaintNeeded = true;
-                        }
-
-                        if (mousePressedTransition != null)
-                        {
-                            handleTransitionDrag(e);
-                            repaintNeeded = true;
-                        }
-
-                        if (repaintNeeded)
-                        {
-                            repaint();
-                        }
+                        handleStateDrag(e);
+                        repaintNeeded = true;
                     }
-                });
-    }
+                    else if (m_currentMode == GUI_Mode.SELECTION && selectionInProgress)
+                    {
+                        selectionBoxEndX = e.getX();
+                        selectionBoxEndY = e.getY();
+                        repaintNeeded = true;
+                    }
+                }
+                // Add transitions mode
+                else
+                {
+                    drawPosX = e.getX();
+                    drawPosY = e.getY();
+                    repaintNeeded = true;
+                }
 
-    /**
-     * Handle when a mouse click occurs over the label of a state, by bringing up a dialog box
-     * requesting the new value for the label.
-     * @param e The generating event.
-     * @return true if the mouse click created a dialog box, false otherwise.
-     */
-    protected boolean clickStateName(MouseEvent e)
-    {
-        STATE nameClicked = getSimulator().getMachine().getStateLabelClickedOn(getGraphics(),e.getX(), e.getY());
-        if (nameClicked == null)
-        {
-            return false;
-        }
-        m_keyboardEnabled = false; // Disable keyboard while dialog box shows
-        String result = (String)JOptionPane.showInputDialog(null, "What would you like to label the state as?", "", JOptionPane.QUESTION_MESSAGE, null, null, nameClicked.getLabel());
-        m_keyboardEnabled = true;
+                if (mousePressedTransition != null)
+                {
+                    handleTransitionDrag(e);
+                    repaintNeeded = true;
+                }
 
-        if (result == null)
-        {
-            return true;
-        }
-        if (result.equals(""))
-        {
-            JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
-            return true;
-        }
-        if (result.equals(nameClicked.getLabel()))
-        {
-            return true; // Change to the same thing
-        }
-        if (m_labelsUsed.contains(result))
-        {
-            JOptionPane.showMessageDialog(null, "You cannot assign a label that is already being used by another state!");
-            return true;
-        }
-
-        doCommand(new RenameStateCommand(this, nameClicked, result));
-
-        return true;
+                if (repaintNeeded)
+                {
+                    repaint();
+                }
+            }
+        });
     }
 
     /**
@@ -1208,6 +1199,57 @@ public abstract class MachineGraphicsPanel<
      * @return An error message specific for the type of machine being simulated.
      */
 
+    protected class RenameStateAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of RenameStateAction.
+         * @param text Description of the action.
+         */
+        public RenameStateAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Display a dialog to change the state label. If the user accepts the new name, and it
+         * passes relevant checks, fire the command to change the label.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // Should be fired by m_contextMenu, which in turn is only open if we have right clicked
+            // on a state. Hence we have a non-null state to work with.
+            
+            // Disable the keyboard while we prompt for user input
+            m_keyboardEnabled = false;
+            String result = (String) JOptionPane.showInputDialog(null, "Please enter the new state label",
+                                                                 "Rename State", JOptionPane.QUESTION_MESSAGE,
+                                                                 null, null, m_contextState.getLabel());
+            m_keyboardEnabled = true;
+        
+            // User cancelled, or no change
+            if (result == null || result.equals(m_contextState.getLabel()))
+            {
+                // Do nothing
+            }
+            // Blank label not allowed
+            else if (result.equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
+            }
+            // Label already in use
+            else if (m_labelsUsed.contains(result))
+            {
+                JOptionPane.showMessageDialog(null, "Label is already used by another state!");
+            }
+            // Otherwise rename
+            else
+            {
+                doCommand(new RenameStateCommand(MachineGraphicsPanel.this, m_contextState, result));
+            }
+        }
+    }
+
     /**
      * Get the file extension associated with this type of machine. Should return a value from a
      * symbol named MACHINE_EXT.
@@ -1221,6 +1263,18 @@ public abstract class MachineGraphicsPanel<
      * @return A friendly name for the type of machine being stored.
      */
     public abstract String getMachineType();
+
+    /**
+     * The right-click context menu associated with this panel.
+     * Specialized panels should take this menu and add new actions after a separator.
+     */
+    protected JPopupMenu m_contextMenu;
+
+    /**
+     * The state currently selected by the right-click context menu.
+     * If m_contextMenu is displayed, then m_contextState is non-null.
+     */
+    protected STATE m_contextState;
 
     /**
      * The current GUI mode.
