@@ -55,9 +55,16 @@ public abstract class MachineGraphicsPanel<
 
     /**
      * Creates a new instance of MachineGraphicsPanel.
+     * @param sim The simulator, containing the machine to render, and tape.
+     * @param file The file the machine is associated with.
      */
-    public MachineGraphicsPanel()
+    public MachineGraphicsPanel(SIMULATOR sim, File file)
     {
+        // Setup
+        m_sim  = sim;
+        m_file = file;
+        m_labelsUsed = m_sim.getMachine().getLabelHashset();
+
         // Create our context menu
         m_contextMenu = new JPopupMenu();
         m_contextMenu.add(new RenameStateAction("Rename State"));
@@ -73,6 +80,75 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Get the internal frame for this panel.
+     * @return The internal frame for this panel.
+     */
+    public MachineInternalFrame getWindow()
+    {
+        return m_iFrame;
+    }
+
+    /**
+     * Set the internal frame for this panel.
+     * @param iFrame The new internal frame.
+     */
+    public void setWindow(MachineInternalFrame iFrame)
+    {
+        m_iFrame = iFrame;
+        updateTitle();
+    }
+
+    /**
+     * Get the simulator associated with this panel.
+     * @return The simulator for this panel.
+     */
+    public SIMULATOR getSimulator()
+    {
+        return m_sim;
+    }
+
+    /**
+     * Get the file associated with the machine.
+     * @return The file associated with the machine.
+     */
+    public File getFile()
+    {
+        return m_file;
+    }
+
+    /**
+     * Set the file associated with the machine.
+     * @param f The new file associated with the machine.
+     */
+    public void setFile(File f)
+    {
+        m_file = f;
+        updateTitle();
+    }
+
+    /**
+     * Determine if the machine has been modified since its last save.
+     * @return true if it has been modified since its last save, false otherwise.
+     */
+    public boolean isModifiedSinceSave()
+    {
+        return m_modifiedSinceSave;
+    }
+
+    /**
+     * Set whether the machine has been modified since its last save.
+     * @param isModified true if it has been modified since its last save, false otherwise.
+     */
+    public void setModifiedSinceSave(boolean isModified)
+    {
+        m_modifiedSinceSave = isModified;
+        if (m_iFrame != null)
+        {
+            m_iFrame.updateTitle();
+        }
+    }
+
+    /**
      * Set the user interface interaction mode for this panel. This determines the result of a click
      * in the panel.
      * @param currentMode The new GUI mode.
@@ -83,12 +159,150 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Get the set of states selected by the user.
+     * @return The set of states selected by the user.
+     */
+    public HashSet<STATE> getSelectedStates()
+    {
+        return m_selectedStates;
+    }
+
+    /**
+     * Set which states are selected by the user.
+     * @param states The states selected by the user.
+     */
+    public void setSelectedStates(HashSet<STATE> states)
+    {
+        m_selectedStates = states;
+    }
+
+    /**
+     * Get the set of transitions selected by the user.
+     * @return The set of transitions selected by the user.
+     */
+    public HashSet<TRANSITION> getSelectedTransitions()
+    {
+        return m_selectedTransitions;
+    }
+
+    /**
+     * Set which transtions are selected by the user.
+     * @param transitions The transitions selected by the user.
+     */
+    public void setSelectedTransitions(HashSet<TRANSITION> transitions)
+    {
+        m_selectedTransitions = transitions;
+    }
+
+    /**
+     * Get the current transition selected by the user for modification of its input/output symbols,
+     * or null if there is no selected transition one.
+     * @return The current transition selected by the user for modification.
+     */
+    public TRANSITION getSelectedTransition()
+    {
+        return m_selectedTransition;
+    }
+
+    /** 
+     * Find the first unused standard state label in the machine. Standard labels are 'q' followed
+     * by a non-negative integer.
+     * NOTE: Potentially should be abstract.
+     * @return The first unused standard state label.
+     */
+    public String getFirstFreeName()
+    {
+        switch (getSimulator().getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                int current = 0;
+                while (m_labelsUsed.contains("q" + current))
+                {
+                    current++;
+                }
+                return "q" + current;
+
+            case NORMALIZED:
+                // Assume every state name is normalized, hence no naming conflicts
+                return "" + getSimulator().getMachine().getStates().size();
+
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Get the alphabet for the machine associated with this panel.
      * @return The alphabet for the machine.
      */
     public Alphabet getAlphabet()
     {
         return getSimulator().getMachine().getAlphabet();
+    }
+
+    /**
+     * Determine if the keyboard is enabled.
+     * @return true if the keyboard is enabled, false otherwise.
+     */
+    public boolean getKeyboardEnabled()
+    {
+        return m_keyboardEnabled;
+    }
+
+    /**
+     * Determine if editing of the machine is enabled.
+     * @return true if editing is enabled, false otherwise.
+     */
+    public boolean isEditingEnabled()
+    {
+        return m_editingEnabled;
+    }
+
+    /** 
+     * Set if editing of the machine is enabled.
+     * @param enabled true if editing is enabled, false otherwise.
+     */
+    public void setEditingEnabled(boolean enabled)
+    {
+        m_editingEnabled = enabled;
+        m_keyboardEnabled = enabled;
+    }
+
+    /**
+     * Get the location of the last place we pasted to.
+     * @return The location where the last pasted item was placed.
+     */
+    public Point2D getLastPastedLocation()
+    {
+        return m_lastPastedLocation;
+    }
+
+    /** 
+     * Set the location where the last pasted item was placed. This is to prevent pasting multiple
+     * items in the same place.
+     * @param location The location where the last pasted item was placed.
+     */
+    public void setLastPastedLocation(Point2D location)
+    {
+        m_lastPastedLocation = location;
+        m_numPastesToSameLocation = 1;
+    }
+
+    /**
+     * Get the count of the number of times we've pasted to the same location on the canvas.
+     * @return The number of times an item has been pasted to the same location on the canvas.
+     */
+    public int getNumPastesToSameLocation()
+    {
+        return m_numPastesToSameLocation;
+    }
+
+    /**
+     * Increase the count of the number of times we've pasted to the same location on the canvas.
+     */
+    public void incrementNumPastesToSameLocation()
+    {
+        m_numPastesToSameLocation++;
     }
 
     /**
@@ -440,7 +654,6 @@ public abstract class MachineGraphicsPanel<
      */
     protected abstract void handleMouseReleased(MouseEvent e); // !!!
 
-
     /**
      * Handle when a mouse drag occurs while in selection mode. Moves a transition relative to mouse
      * movement.
@@ -726,25 +939,6 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Get the file associated with the machine.
-     * @return The file associated with the machine.
-     */
-    public File getFile()
-    {
-        return m_file;
-    }
-
-    /**
-     * Set the file associated with the machine.
-     * @param f The new file associated with the machine.
-     */
-    public void setFile(File f)
-    {
-        m_file = f;
-        updateTitle();
-    }
-
-    /**
      * Update the title for the frame.
      */
     protected void updateTitle()
@@ -752,33 +946,6 @@ public abstract class MachineGraphicsPanel<
         if (m_iFrame != null)
         {
             m_iFrame.updateTitle();
-        }
-    }
-
-    /** 
-     * Find the first unused standard state label in the machine. Standard labels are 'q' followed
-     * by a non-negative integer.
-     * NOTE: Potentially should be abstract.
-     * @return The first unused standard state label.
-     */
-    public String getFirstFreeName()
-    {
-        switch (getSimulator().getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                int current = 0;
-                while (m_labelsUsed.contains("q" + current))
-                {
-                    current++;
-                }
-                return "q" + current;
-
-            case NORMALIZED:
-                // Assume every state name is normalized, hence no naming conflicts
-                return "" + getSimulator().getMachine().getStates().size();
-
-            default:
-                return null;
         }
     }
 
@@ -813,34 +980,6 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Set the internal frame for this panel.
-     * @param iFrame The new internal frame.
-     */
-    public void setWindow(MachineInternalFrame iFrame)
-    {
-        m_iFrame = iFrame;
-        updateTitle();
-    }
-
-    /**
-     * Get the internal frame for this panel.
-     * @return The internal frame for this panel.
-     */
-    public MachineInternalFrame getWindow()
-    {
-        return m_iFrame;
-    }
-
-    /**
-     * Determine if the keyboard is enabled.
-     * @return true if the keyboard is enabled, false otherwise.
-     */
-    public boolean getKeyboardEnabled()
-    {
-        return m_keyboardEnabled;
-    }
-
-    /**
      * Deselect any transition action character currently selected by the user. Causes a repaint.
      */
     public void deselectSymbol()
@@ -850,35 +989,7 @@ public abstract class MachineGraphicsPanel<
         repaint();
     }
 
-    /**
-     * Get the current transition selected by the user for modification of its input/output symbols,
-     * or null if there is no selected transition one.
-     * @return The current transition selected by the user for modification.
-     */
-    public TRANSITION getSelectedTransition()
-    {
-        return m_selectedTransition;
-    }
-
-    /**
-     * Get the set of transitions selected by the user.
-     * @return The set of transitions selected by the user.
-     */
-    public HashSet<TRANSITION> getSelectedTransitions()
-    {
-        return m_selectedTransitions;
-    }
-
-    /**
-     * Get the set of states selected by the user.
-     * @return The set of states selected by the user.
-     */
-    public HashSet<STATE> getSelectedStates()
-    {
-        return m_selectedStates;
-    }
-
-    /**
+   /**
      * Delete all states and transitions that the user has currently selected.
      */
     public void deleteAllSelected()
@@ -907,7 +1018,7 @@ public abstract class MachineGraphicsPanel<
      * machine are maintained. Returns null if the process fails, which should not occur.
      * @return A byte array representation of the states and transitions.
      */
-    byte[] copySelectedToByteArray() 
+    protected byte[] copySelectedToByteArray() 
     {
         try
         {
@@ -923,102 +1034,6 @@ public abstract class MachineGraphicsPanel<
         {
             return null;
         }
-    }
-
-    /**
-     * Set which states are selected by the user.
-     * @param states The states selected by the user.
-     */
-    public void setSelectedStates(HashSet<STATE> states)
-    {
-        m_selectedStates = states;
-    }
-
-    /**
-     * Set which transtions are selected by the user.
-     * @param transitions The transitions selected by the user.
-     */
-    public void setSelectedTransitions(HashSet<TRANSITION> transitions)
-    {
-        m_selectedTransitions = transitions;
-    }
-
-    /**
-     * Determine if the machine has been modified since its last save.
-     * @return true if it has been modified since its last save, false otherwise.
-     */
-    public boolean isModifiedSinceSave()
-    {
-        return m_modifiedSinceSave;
-    }
-
-    /**
-     * Set whether the machine has been modified since its last save.
-     * @param isModified true if it has been modified since its last save, false otherwise.
-     */
-    public void setModifiedSinceSave(boolean isModified)
-    {
-        m_modifiedSinceSave = isModified;
-        if (m_iFrame != null)
-        {
-            m_iFrame.updateTitle();
-        }
-    }
-
-    /**
-     * Determine if editing of the machine is enabled.
-     * @return true if editing is enabled, false otherwise.
-     */
-    public boolean isEditingEnabled()
-    {
-        return m_editingEnabled;
-    }
-
-    /** 
-     * Set if editing of the machine is enabled.
-     * @param enabled true if editing is enabled, false otherwise.
-     */
-    public void setEditingEnabled(boolean enabled)
-    {
-        m_editingEnabled = enabled;
-        m_keyboardEnabled = enabled;
-    }
-
-    /** 
-     * Set the location where the last pasted item was placed. This is to prevent pasting multiple
-     * items in the same place.
-     * @param location The location where the last pasted item was placed.
-     */
-    public void setLastPastedLocation(Point2D location)
-    {
-        m_lastPastedLocation = location;
-        m_numPastesToSameLocation = 1;
-    }
-
-    /**
-     * Get the location of the last place we pasted to.
-     * @return The location where the last pasted item was placed.
-     */
-    public Point2D getLastPastedLocation()
-    {
-        return m_lastPastedLocation;
-    }
-
-    /**
-     * Increase the count of the number of times we've pasted to the same location on the canvas.
-     */
-    public void incrementNumPastesToSameLocation()
-    {
-        m_numPastesToSameLocation++;
-    }
-
-    /**
-     * Get the count of the number of times we've pasted to the same location on the canvas.
-     * @return The number of times an item has been pasted to the same location on the canvas.
-     */
-    public int getNumPastesToSameLocation()
-    {
-        return m_numPastesToSameLocation;
     }
 
     // Command handing:
@@ -1118,12 +1133,6 @@ public abstract class MachineGraphicsPanel<
         }
         return null;
     }
-
-    /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
-     */
-    public abstract SIMULATOR getSimulator();
 
     /**
      * Called when the owning frame is activated. Should deactivate any and all events which are not
@@ -1326,9 +1335,9 @@ public abstract class MachineGraphicsPanel<
     protected MachineInternalFrame m_iFrame;
 
     /**
-     * The current GUI mode.
+     * The associated simulator
      */
-    protected GUI_Mode m_currentMode;
+    protected SIMULATOR m_sim;
 
     /**
      * The underlying file.
@@ -1339,6 +1348,11 @@ public abstract class MachineGraphicsPanel<
      * Whether or not the machine has been modified since the last save.
      */
     protected boolean m_modifiedSinceSave = false;
+
+    /**
+     * The current GUI mode.
+     */
+    protected GUI_Mode m_currentMode;
 
     /**
      * The right-click context menu associated with this panel.

@@ -63,20 +63,8 @@ public class DFSAGraphicsPanel
      */
     public DFSAGraphicsPanel(DFSA_Machine machine, Tape tape, File file)
     {
-        // TODO: Move to MachineGraphicsPanel
-        m_sim = new DFSA_Simulator(machine, tape);
-        m_file = file;
-        m_labelsUsed = m_sim.getMachine().getLabelHashset();
+        super(new DFSA_Simulator(machine, tape), file);
         initialization();
-    }
-
-    /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
-     */
-    public DFSA_Simulator getSimulator()
-    {
-        return m_sim;
     }
 
     /**
@@ -365,9 +353,4 @@ public class DFSAGraphicsPanel
     {
         return MACHINE_TYPE;
     }
-
-    /**
-     * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
-     */
-    protected DFSA_Simulator m_sim;
 }

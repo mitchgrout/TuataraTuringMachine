@@ -64,20 +64,13 @@ public class TMGraphicsPanel
      */
     public TMGraphicsPanel(TM_Machine machine, Tape tape, File file)
     {
-        // TODO: Move to MachineGraphicsPanel
-        m_sim = new TM_Simulator(machine, tape);
-        m_file = file;
-        m_labelsUsed = m_sim.getMachine().getLabelHashset();
-        initialization();
-    }
+        super(new TM_Simulator(machine, tape), file);
 
-    /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
-     */
-    public TM_Simulator getSimulator()
-    {
-        return m_sim;
+        // Add TM-specific context menu actions
+        m_contextMenu.addSeparator();
+        m_contextMenu.add("Make Submachine");
+
+        initialization();
     }
 
     public void onActivation()
@@ -463,9 +456,4 @@ public class TMGraphicsPanel
     {
         return MACHINE_TYPE;
     }
-
-    /**
-     * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
-     */
-    protected TM_Simulator m_sim;
 }
