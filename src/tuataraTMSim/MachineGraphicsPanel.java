@@ -115,31 +115,31 @@ public abstract class MachineGraphicsPanel<
             g2d.draw(new Ellipse2D.Float(currentState.getX() - 5, currentState.getY() - 5, STATE.STATE_RENDERING_WIDTH + 10, STATE.STATE_RENDERING_WIDTH + 10));
         }
 
-        getSimulator().getMachine().paint(g, selectedStates, selectedTransitions, getSimulator());
-        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
+        getSimulator().getMachine().paint(g, m_selectedStates, m_selectedTransitions, getSimulator());
+        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
         {
-            if (!(drawPosX == Integer.MIN_VALUE) || !(drawPosY == Integer.MIN_VALUE))
+            if (!(m_drawPosX == Integer.MIN_VALUE) || !(m_drawPosY == Integer.MIN_VALUE))
             {
                 g2d.setColor(Color.BLACK);
-                g2d.draw(new Line2D.Float(mousePressedState.getX() + STATE.STATE_RENDERING_WIDTH/2,mousePressedState.getY()+ STATE.STATE_RENDERING_WIDTH/2, drawPosX, drawPosY));
+                g2d.draw(new Line2D.Float(m_mousePressedState.getX() + STATE.STATE_RENDERING_WIDTH/2,m_mousePressedState.getY()+ STATE.STATE_RENDERING_WIDTH/2, m_drawPosX, m_drawPosY));
             }
         }
 
-        if (selectedSymbolBoundingBox != null)
+        if (m_selectedSymbolBoundingBox != null)
         {
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
             g2d.setColor(Color.BLACK);
-            g2d.draw(selectedSymbolBoundingBox);
+            g2d.draw(m_selectedSymbolBoundingBox);
             g2d.setStroke(current);
         }
-        if (selectionInProgress)
+        if (m_selectionInProgress)
         {
             g2d.setColor(Color.BLACK);
-            int topLeftX = Math.min(selectionBoxStartX, selectionBoxEndX);
-            int topLeftY = Math.min(selectionBoxStartY, selectionBoxEndY);
-            int width = Math.abs(selectionBoxStartX - selectionBoxEndX);
-            int height = Math.abs(selectionBoxStartY - selectionBoxEndY);
+            int topLeftX = Math.min(m_selectionBoxStartX, m_selectionBoxEndX);
+            int topLeftY = Math.min(m_selectionBoxStartY, m_selectionBoxEndY);
+            int width = Math.abs(m_selectionBoxStartX - m_selectionBoxEndX);
+            int height = Math.abs(m_selectionBoxStartY - m_selectionBoxEndY);
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
 
@@ -170,8 +170,8 @@ public abstract class MachineGraphicsPanel<
                 }
 
                 // Deselect any selected action symbol
-                selectedSymbolBoundingBox = null;
-                selectedTransition = null;
+                m_selectedSymbolBoundingBox = null;
+                m_selectedTransition = null;
 
                 // Selecting a transition action
                 if (m_currentMode != GUI_Mode.ERASER && selectCharacterByClicking(e))
@@ -278,33 +278,33 @@ public abstract class MachineGraphicsPanel<
             public void mouseDragged(MouseEvent e)
             {
                 // Deselect any selected action symbol
-                selectedSymbolBoundingBox = null;
-                selectedTransition = null;
+                m_selectedSymbolBoundingBox = null;
+                m_selectedTransition = null;
 
                 boolean repaintNeeded = false;
                 if (m_currentMode != GUI_Mode.ADDTRANSITIONS)
                 {
-                    if (mousePressedState != null)
+                    if (m_mousePressedState != null)
                     {
                         handleStateDrag(e);
                         repaintNeeded = true;
                     }
-                    else if (m_currentMode == GUI_Mode.SELECTION && selectionInProgress)
+                    else if (m_currentMode == GUI_Mode.SELECTION && m_selectionInProgress)
                     {
-                        selectionBoxEndX = e.getX();
-                        selectionBoxEndY = e.getY();
+                        m_selectionBoxEndX = e.getX();
+                        m_selectionBoxEndY = e.getY();
                         repaintNeeded = true;
                     }
                 }
                 // Add transitions mode
                 else
                 {
-                    drawPosX = e.getX();
-                    drawPosY = e.getY();
+                    m_drawPosX = e.getX();
+                    m_drawPosY = e.getY();
                     repaintNeeded = true;
                 }
 
-                if (mousePressedTransition != null)
+                if (m_mousePressedTransition != null)
                 {
                     handleTransitionDrag(e);
                     repaintNeeded = true;
@@ -333,21 +333,21 @@ public abstract class MachineGraphicsPanel<
             Rectangle2D s2 = transitionClicked.getOutputSymbolBoundingBox(getGraphics());
             if (s1.contains(e.getX(), e.getY()))
             {
-                selectedSymbolBoundingBox = s1;
-                inputSymbolSelected = true;
+                m_selectedSymbolBoundingBox = s1;
+                m_inputSymbolSelected = true;
             }
             else if (s2.contains(e.getX(), e.getY()))
             {
-                selectedSymbolBoundingBox = s2;
-                inputSymbolSelected = false;
+                m_selectedSymbolBoundingBox = s2;
+                m_inputSymbolSelected = false;
             }
-            selectedTransition = transitionClicked;
+            m_selectedTransition = transitionClicked;
             return true;
         }
         else
         {
-            selectedSymbolBoundingBox = null;
-            selectedTransition = null;
+            m_selectedSymbolBoundingBox = null;
+            m_selectedTransition = null;
             return false;
         }
     }
@@ -390,34 +390,34 @@ public abstract class MachineGraphicsPanel<
         if ((e.isControlDown() || e.isShiftDown()))
         {
             // We don't want to start creating a new transition in this case
-            mousePressedState = null;
+            m_mousePressedState = null;
         }
         else
         {
-            mousePressedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
+            m_mousePressedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
         }
-        if (mousePressedState != null) // Mouse press on a state
+        if (m_mousePressedState != null) // Mouse press on a state
         {
             setModifiedSinceSave(true);
-            moveStateClickOffsetX = mousePressedState.getX() - e.getX();
-            moveStateClickOffsetY = mousePressedState.getY() - e.getY();
-            moveStateLastLocationX = mousePressedState.getX();
-            moveStateLastLocationY = mousePressedState.getY();
-            moveStateStartLocationX = mousePressedState.getX();
-            moveStateStartLocationY = mousePressedState.getY();
-            m_transitionsToMoveState = getSimulator().getMachine().getTransitionsTo(mousePressedState);
+            m_moveStateClickOffsetX = m_mousePressedState.getX() - e.getX();
+            m_moveStateClickOffsetY = m_mousePressedState.getY() - e.getY();
+            m_moveStateLastLocationX = m_mousePressedState.getX();
+            m_moveStateLastLocationY = m_mousePressedState.getY();
+            m_moveStateStartLocationX = m_mousePressedState.getX();
+            m_moveStateStartLocationY = m_mousePressedState.getY();
+            m_transitionsToMoveState = getSimulator().getMachine().getTransitionsTo(m_mousePressedState);
             precomputeSelectedTransitionsToDrag();
             return;
         }
         else
         {
-            mousePressedTransition = getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-            if (mousePressedTransition != null) // Mouse press on a transition
+            m_mousePressedTransition = getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            if (m_mousePressedTransition != null) // Mouse press on a transition
             {
                 setModifiedSinceSave(true);
-                transitionMidPointBeforeMove = mousePressedTransition.getMidpoint();
-                moveTransitionClickOffsetX = (int)transitionMidPointBeforeMove.getX() - e.getX();
-                moveTransitionClickOffsetY = (int)transitionMidPointBeforeMove.getY() - e.getY();
+                m_transitionMidPointBeforeMove = m_mousePressedTransition.getMidpoint();
+                m_moveTransitionClickOffsetX = (int)m_transitionMidPointBeforeMove.getX() - e.getX();
+                m_moveTransitionClickOffsetY = (int)m_transitionMidPointBeforeMove.getY() - e.getY();
 
                 return;
             }
@@ -426,11 +426,11 @@ public abstract class MachineGraphicsPanel<
         if (m_currentMode == GUI_Mode.SELECTION)
         {
             // Start building a selection bounding box
-            madeSelection = false;
-            selectionInProgress = true;
-            selectionBoxStartX = selectionBoxEndX = e.getX();
-            selectionBoxStartY = selectionBoxEndY = e.getY();
-            selectionConcatenateMode = (e.isControlDown() || e.isShiftDown());
+            m_madeSelection = false;
+            m_selectionInProgress = true;
+            m_selectionBoxStartX = m_selectionBoxEndX = e.getX();
+            m_selectionBoxStartY = m_selectionBoxEndY = e.getY();
+            m_selectionConcatenateMode = (e.isControlDown() || e.isShiftDown());
 
         }
     }
@@ -452,20 +452,20 @@ public abstract class MachineGraphicsPanel<
     {
         // Update control point location
         // TODO: enforce area bounds?
-        movedTransition = true;
+        m_movedTransition = true;
 
         // Find the midpoint by correcting for the offset of where the user clicked
-        double correctedMidpointX = e.getX() + moveTransitionClickOffsetX; 
-        double correctedMidpointY = e.getY() + moveTransitionClickOffsetY;
+        double correctedMidpointX = e.getX() + m_moveTransitionClickOffsetX; 
+        double correctedMidpointY = e.getY() + m_moveTransitionClickOffsetY;
 
         Point2D newCP = Spline.getControlPointFromMidPoint(
                 new Point2D.Double(correctedMidpointX, correctedMidpointY),
-                mousePressedTransition.getFromState(), mousePressedTransition.getToState());
+                m_mousePressedTransition.getFromState(), m_mousePressedTransition.getToState());
 
-        mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
+        m_mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
 
         // Move the bounding box for the selected symbol if it is on this transition action
-        if (mousePressedTransition == selectedTransition)
+        if (m_mousePressedTransition == m_selectedTransition)
         {
             updateSelectedSymbolBoundingBox();
         }
@@ -478,8 +478,8 @@ public abstract class MachineGraphicsPanel<
      */
     protected void handleStateDrag(MouseEvent e)
     {
-        int newX = e.getX() + moveStateClickOffsetX;
-        int newY = e.getY() + moveStateClickOffsetY;
+        int newX = e.getX() + m_moveStateClickOffsetX;
+        int newY = e.getY() + m_moveStateClickOffsetY;
 
         // Check that this is within panel bounds.
         // This is complicated in the case where multiple items are selected
@@ -489,13 +489,13 @@ public abstract class MachineGraphicsPanel<
         int maxX = (int)boundaries.getWidth() - STATE.STATE_RENDERING_WIDTH;
         int maxY = (int)boundaries.getHeight() - STATE.STATE_RENDERING_WIDTH;
 
-        if (selectedStates.contains(mousePressedState)) // Clicked on a selected state
+        if (m_selectedStates.contains(m_mousePressedState)) // Clicked on a selected state
         {
-            int rightMostX = mousePressedState.getX();
-            int leftMostX = mousePressedState.getX();
-            int bottomMostY = mousePressedState.getY();
-            int topMostY = mousePressedState.getY();
-            for (STATE s : selectedStates)
+            int rightMostX = m_mousePressedState.getX();
+            int leftMostX = m_mousePressedState.getX();
+            int bottomMostY = m_mousePressedState.getY();
+            int topMostY = m_mousePressedState.getY();
+            for (STATE s : m_selectedStates)
             {
                 if (s.getX() > rightMostX)
                 {
@@ -514,44 +514,44 @@ public abstract class MachineGraphicsPanel<
                     topMostY = s.getY();
                 }
             }
-            maxX -= rightMostX - mousePressedState.getX();
-            maxY -= bottomMostY - mousePressedState.getY();
-            minX += mousePressedState.getX() - leftMostX;
-            minY += mousePressedState.getY() - topMostY;
+            maxX -= rightMostX - m_mousePressedState.getX();
+            maxY -= bottomMostY - m_mousePressedState.getY();
+            minX += m_mousePressedState.getX() - leftMostX;
+            minY += m_mousePressedState.getY() - topMostY;
         }
         newX = Math.min(newX, maxX);
         newY = Math.min(newY, maxY);
         newX = Math.max(minX, newX); // Constrain to accessable bounds of view plane
         newY = Math.max(minY, newY);
 
-        int translateX = newX - moveStateLastLocationX;
-        int translateY = newY - moveStateLastLocationY;
+        int translateX = newX - m_moveStateLastLocationX;
+        int translateY = newY - m_moveStateLastLocationY;
 
         if (translateX == 0 && translateY == 0)
         {
             return;
         }
-        movedState = true;
-        if (!selectedStates.contains(mousePressedState))
+        m_movedState = true;
+        if (!m_selectedStates.contains(m_mousePressedState))
         {
             // Just move the one state
-            updateTransitionLocations(mousePressedState,translateX, translateY,
-                    m_transitionsToMoveState, mousePressedState.getTransitions());
-            mousePressedState.setPosition(mousePressedState.getX() + translateX,
-                    mousePressedState.getY() + translateY);
+            updateTransitionLocations(m_mousePressedState,translateX, translateY,
+                    m_transitionsToMoveState, m_mousePressedState.getTransitions());
+            m_mousePressedState.setPosition(m_mousePressedState.getX() + translateX,
+                    m_mousePressedState.getY() + translateY);
         }
         else
         {
             // Move all selected states
             pullSelectedTransitionsWithState(translateX, translateY);            
-            for (STATE s : selectedStates)
+            for (STATE s : m_selectedStates)
             {
                 s.setPosition(s.getX() + translateX,
                         s.getY() + translateY);
             }
         }
-        moveStateLastLocationX = mousePressedState.getX();
-        moveStateLastLocationY = mousePressedState.getY();
+        m_moveStateLastLocationX = m_mousePressedState.getX();
+        m_moveStateLastLocationY = m_mousePressedState.getY();
         updateSelectedSymbolBoundingBox();
     }
 
@@ -561,17 +561,17 @@ public abstract class MachineGraphicsPanel<
      */
     protected void updateSelectedSymbolBoundingBox()
     {
-        if (selectedSymbolBoundingBox == null || selectedTransition == null)
+        if (m_selectedSymbolBoundingBox == null || m_selectedTransition == null)
         {
             return;
         }
-        if (inputSymbolSelected)
+        if (m_inputSymbolSelected)
         {
-            selectedSymbolBoundingBox = selectedTransition.getInputSymbolBoundingBox(getGraphics());
+            m_selectedSymbolBoundingBox = m_selectedTransition.getInputSymbolBoundingBox(getGraphics());
         }
         else
         {
-            selectedSymbolBoundingBox = selectedTransition.getOutputSymbolBoundingBox(getGraphics());
+            m_selectedSymbolBoundingBox = m_selectedTransition.getOutputSymbolBoundingBox(getGraphics());
         }
     }
 
@@ -581,22 +581,22 @@ public abstract class MachineGraphicsPanel<
      */
     protected void updateSelectedStatesAndTransitions()
     {
-        int topLeftX = Math.min(selectionBoxStartX, selectionBoxEndX);
-        int topLeftY = Math.min(selectionBoxStartY, selectionBoxEndY);
-        int width = Math.abs(selectionBoxStartX - selectionBoxEndX);
-        int height = Math.abs(selectionBoxStartY - selectionBoxEndY);
+        int topLeftX = Math.min(m_selectionBoxStartX, m_selectionBoxEndX);
+        int topLeftY = Math.min(m_selectionBoxStartY, m_selectionBoxEndY);
+        int width = Math.abs(m_selectionBoxStartX - m_selectionBoxEndX);
+        int height = Math.abs(m_selectionBoxStartY - m_selectionBoxEndY);
 
         HashSet<STATE> states = getSimulator().getMachine().getSelectedStates(topLeftX, topLeftY, width, height);
 
-        if (selectionConcatenateMode)
+        if (m_selectionConcatenateMode)
         {
-            selectedStates.addAll(states);
+            m_selectedStates.addAll(states);
         }
         else
         {
-            selectedStates = states;
+            m_selectedStates = states;
         }
-        selectedTransitions = getSimulator().getMachine().getSelectedTransitions(selectedStates);
+        m_selectedTransitions = getSimulator().getMachine().getSelectedTransitions(m_selectedStates);
     }
 
     /**
@@ -608,11 +608,11 @@ public abstract class MachineGraphicsPanel<
         m_outTransitionsToMove = new HashSet<TRANSITION>();
         calcMovedTransitionSets(m_inTransitionsToMove, m_outTransitionsToMove);
 
-        m_TransitionsToMoveintersection = new HashSet<TRANSITION>();
-        m_TransitionsToMoveintersection.addAll(m_inTransitionsToMove);
-        m_TransitionsToMoveintersection.retainAll(m_outTransitionsToMove);
-        m_inTransitionsToMove.removeAll(m_TransitionsToMoveintersection);
-        m_outTransitionsToMove.removeAll(m_TransitionsToMoveintersection);
+        m_transitionsToMoveintersection = new HashSet<TRANSITION>();
+        m_transitionsToMoveintersection.addAll(m_inTransitionsToMove);
+        m_transitionsToMoveintersection.retainAll(m_outTransitionsToMove);
+        m_inTransitionsToMove.removeAll(m_transitionsToMoveintersection);
+        m_outTransitionsToMove.removeAll(m_transitionsToMoveintersection);
     }
 
     /**
@@ -625,7 +625,7 @@ public abstract class MachineGraphicsPanel<
         double halfOfTranslatedX = translateX / 2.0;
         double halfOfTranslatedY = translateY / 2.0;
 
-        for (TRANSITION t : m_TransitionsToMoveintersection)
+        for (TRANSITION t : m_transitionsToMoveintersection)
         {
             if (t.getFromState() == t.getToState())
             {
@@ -718,7 +718,7 @@ public abstract class MachineGraphicsPanel<
     protected void calcMovedTransitionSets(HashSet<TRANSITION> inTransitions,
             HashSet<TRANSITION> outTransitions)
     {
-        for (STATE s : selectedStates)
+        for (STATE s : m_selectedStates)
         {
             Collection<TRANSITION> out = s.getTransitions();
             outTransitions.addAll(out);
@@ -847,8 +847,8 @@ public abstract class MachineGraphicsPanel<
      */
     public void deselectSymbol()
     {
-        selectedSymbolBoundingBox = null;
-        selectedTransition = null;
+        m_selectedSymbolBoundingBox = null;
+        m_selectedTransition = null;
         repaint();
     }
 
@@ -859,7 +859,7 @@ public abstract class MachineGraphicsPanel<
      */
     public TRANSITION getSelectedTransition()
     {
-        return selectedTransition;
+        return m_selectedTransition;
     }
 
     /**
@@ -868,7 +868,7 @@ public abstract class MachineGraphicsPanel<
      */
     public HashSet<TRANSITION> getSelectedTransitions()
     {
-        return selectedTransitions;
+        return m_selectedTransitions;
     }
 
     /**
@@ -877,7 +877,7 @@ public abstract class MachineGraphicsPanel<
      */
     public HashSet<STATE> getSelectedStates()
     {
-        return selectedStates;
+        return m_selectedStates;
     }
 
     /**
@@ -885,8 +885,8 @@ public abstract class MachineGraphicsPanel<
      */
     public void deleteAllSelected()
     {
-        HashSet<STATE> selectedStatesCopy = (HashSet<STATE>)selectedStates.clone();
-        HashSet<TRANSITION> selectedTransitionsCopy = (HashSet<TRANSITION>)selectedTransitions.clone();
+        HashSet<STATE> selectedStatesCopy = (HashSet<STATE>)m_selectedStates.clone();
+        HashSet<TRANSITION> selectedTransitionsCopy = (HashSet<TRANSITION>)m_selectedTransitions.clone();
         switch (getSimulator().getMachine().getNamingScheme())
         {
             case GENERAL:
@@ -915,8 +915,8 @@ public abstract class MachineGraphicsPanel<
         {
             ByteArrayOutputStream returner = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(returner);
-            oos.writeObject(selectedStates);
-            oos.writeObject(selectedTransitions);
+            oos.writeObject(m_selectedStates);
+            oos.writeObject(m_selectedTransitions);
             oos.flush();
 
             return returner.toByteArray();
@@ -933,7 +933,7 @@ public abstract class MachineGraphicsPanel<
      */
     public void setSelectedStates(HashSet<STATE> states)
     {
-        selectedStates = states;
+        m_selectedStates = states;
     }
 
     /**
@@ -942,7 +942,7 @@ public abstract class MachineGraphicsPanel<
      */
     public void setSelectedTransitions(HashSet<TRANSITION> transitions)
     {
-        selectedTransitions = transitions;
+        m_selectedTransitions = transitions;
     }
 
     /**
@@ -1031,8 +1031,8 @@ public abstract class MachineGraphicsPanel<
     public void doCommand(TMCommand command)
     {
         command.doCommand();
-        undoStack.add(command);
-        redoStack.clear();
+        m_undoStack.add(command);
+        m_redoStack.clear();
         setModifiedSinceSave(true);
         MainWindow.getInstance().updateUndoActions();
         repaint();
@@ -1055,8 +1055,8 @@ public abstract class MachineGraphicsPanel<
      */
     public void addCommand(TMCommand command)
     {
-        undoStack.add(command);
-        redoStack.clear();
+        m_undoStack.add(command);
+        m_redoStack.clear();
         MainWindow.getInstance().updateUndoActions();
         repaint();
     }
@@ -1068,9 +1068,9 @@ public abstract class MachineGraphicsPanel<
     {
         try
         {
-            TMCommand c = undoStack.removeLast();
+            TMCommand c = m_undoStack.removeLast();
             c.undoCommand();
-            redoStack.add(c);
+            m_redoStack.add(c);
             setModifiedSinceSave(true);
             MainWindow.getInstance().updateUndoActions();
             repaint();
@@ -1085,9 +1085,9 @@ public abstract class MachineGraphicsPanel<
     {
         try
         {
-            TMCommand c = redoStack.removeLast();
+            TMCommand c = m_redoStack.removeLast();
             c.doCommand();
-            undoStack.add(c);
+            m_undoStack.add(c);
             setModifiedSinceSave(true);
             MainWindow.getInstance().updateUndoActions();
             repaint();
@@ -1101,9 +1101,9 @@ public abstract class MachineGraphicsPanel<
      */
     public String undoCommandName()
     {
-        if (!undoStack.isEmpty())
+        if (!m_undoStack.isEmpty())
         {
-            return undoStack.getLast().getName();
+            return m_undoStack.getLast().getName();
         }
         return null;
     }
@@ -1114,9 +1114,9 @@ public abstract class MachineGraphicsPanel<
      */
     public String redoCommandName()
     {
-        if (!redoStack.isEmpty())
+        if (!m_redoStack.isEmpty())
         {
-            return redoStack.getLast().getName();
+            return m_redoStack.getLast().getName();
         }
         return null;
     }
@@ -1199,6 +1199,9 @@ public abstract class MachineGraphicsPanel<
      * @return An error message specific for the type of machine being simulated.
      */
 
+    /**
+     * Action to rename a state selected by the context menu.
+     */
     protected class RenameStateAction extends AbstractAction
     {
         /**
@@ -1265,6 +1268,26 @@ public abstract class MachineGraphicsPanel<
     public abstract String getMachineType();
 
     /**
+     * The owning frame.
+     */
+    protected MachineInternalFrame m_iFrame;
+
+    /**
+     * The current GUI mode.
+     */
+    protected GUI_Mode m_currentMode;
+
+    /**
+     * The underlying file.
+     */
+    protected File m_file;
+
+    /**
+     * Whether or not the machine has been modified since the last save.
+     */
+    protected boolean m_modifiedSinceSave = false;
+
+    /**
      * The right-click context menu associated with this panel.
      * Specialized panels should take this menu and add new actions after a separator.
      */
@@ -1277,136 +1300,128 @@ public abstract class MachineGraphicsPanel<
     protected STATE m_contextState;
 
     /**
-     * The current GUI mode.
+     * Stack containing commands which can be undone.
      */
-    protected GUI_Mode m_currentMode;
+    protected LinkedList<TMCommand> m_undoStack = new LinkedList<TMCommand>();
+
+    /**
+     * Stack containing commands which can be redone.
+     */
+    protected LinkedList<TMCommand> m_redoStack = new LinkedList<TMCommand>();
 
     /**
      * The set of selected states.
      */
-    protected HashSet<STATE> selectedStates = new HashSet<STATE>();
+    protected HashSet<STATE> m_selectedStates = new HashSet<STATE>();
 
     /**
      * The set of selected transitions.
      */
-    protected HashSet<TRANSITION> selectedTransitions = new HashSet<TRANSITION>();
+    protected HashSet<TRANSITION> m_selectedTransitions = new HashSet<TRANSITION>();
 
+    // TODO: Replace with java.awt.Rectangle
     /**
      * The start X ordinate of the selection marquee.
      */
-    protected int selectionBoxStartX = Integer.MIN_VALUE;
+    protected int m_selectionBoxStartX = Integer.MIN_VALUE;
 
     /** 
      * The start Y ordinate of the selection marquee.
      */
-    protected int selectionBoxStartY = Integer.MIN_VALUE;
+    protected int m_selectionBoxStartY = Integer.MIN_VALUE;
 
     /**
      * The end X ordinate of the selection marquee.
      */
-    protected int selectionBoxEndX = Integer.MIN_VALUE;
+    protected int m_selectionBoxEndX = Integer.MIN_VALUE;
 
     /**
      * The end Y ordinate of the selection marquee.
      */
-    protected int selectionBoxEndY = Integer.MIN_VALUE;
+    protected int m_selectionBoxEndY = Integer.MIN_VALUE;
 
     /**
      * Whether or not the user has made a marquee selection; determines if the values for
-     * selectionBoxStartX, selectionBoxStartY, selectionBoxEndX, and selectionBoxEndY are valid.
+     * m_selectionBoxStartX, m_selectionBoxStartY, m_selectionBoxEndX, and m_selectionBoxEndY are valid.
      */
-    protected boolean madeSelection = false;
+    protected boolean m_madeSelection = false;
 
     /**
      * Whether or not a marquee selection is in progress.
      */
-    protected boolean selectionInProgress = false;
+    protected boolean m_selectionInProgress = false;
+    // END TODO
 
     /**
      * Whether or not selected items will be concatenated to the list of selected items, or the
      * previous selected items overwritten.
      */
-    protected boolean selectionConcatenateMode = false;
-
-    /**
-     * Whether or not the machine has been modified since the last save.
-     */
-    protected boolean m_modifiedSinceSave = false;
-
-    /**
-     * The underlying file.
-     */
-    protected File m_file;
-
-    /**
-     * The owning frame.
-     */
-    protected MachineInternalFrame m_iFrame;
+    protected boolean m_selectionConcatenateMode = false;
 
     /**
      *  The state we last pressed a mouse button on.
      */
-    protected STATE mousePressedState = null;
+    protected STATE m_mousePressedState = null;
 
     /**
      * The transition we last pressed a mouse button on
      */
-    protected TRANSITION mousePressedTransition = null;
+    protected TRANSITION m_mousePressedTransition = null;
 
     /**
      * The X ordinate of the temporary transition to be drawn when the mouse is dragged.
      */
-    protected int drawPosX = Integer.MIN_VALUE;
+    protected int m_drawPosX = Integer.MIN_VALUE;
 
     /**
      * The Y ordinate of the temporary transition to be drawn when the mouse is dragged.
      */
-    protected int drawPosY = Integer.MIN_VALUE;
+    protected int m_drawPosY = Integer.MIN_VALUE;
 
     /**
      * X ordinate from the mouse click to the control point.
      */
-    protected int moveTransitionClickOffsetX = Integer.MIN_VALUE;
+    protected int m_moveTransitionClickOffsetX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate from the mouse click to the control point.
      */
-    protected int moveTransitionClickOffsetY = Integer.MIN_VALUE;
+    protected int m_moveTransitionClickOffsetY = Integer.MIN_VALUE;
 
     /**
      * X ordinate from the mouse click to state location.
      */
-    protected int moveStateClickOffsetX = Integer.MIN_VALUE;
+    protected int m_moveStateClickOffsetX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate from the mouse click to state location.
      */
-    protected int moveStateClickOffsetY = Integer.MIN_VALUE;
+    protected int m_moveStateClickOffsetY = Integer.MIN_VALUE;
 
     /**
      * X ordinate of the last location of the moved state.
      */
-    protected int moveStateLastLocationX = Integer.MIN_VALUE;
+    protected int m_moveStateLastLocationX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate of the last location of the moved state.
      */
-    protected int moveStateLastLocationY = Integer.MIN_VALUE;
+    protected int m_moveStateLastLocationY = Integer.MIN_VALUE;
 
     /**
      * X ordinate of the original position of the state, before movement.
      */
-    protected int moveStateStartLocationX = Integer.MIN_VALUE;
+    protected int m_moveStateStartLocationX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate of the original position of the state, before movement.
      */
-    protected int moveStateStartLocationY = Integer.MIN_VALUE;
+    protected int m_moveStateStartLocationY = Integer.MIN_VALUE;
 
     /**
      * Whether a state has been moved.
      */
-    protected boolean movedState = false;
+    protected boolean m_movedState = false;
 
     /**
      * Cached list of transitions that finish at the state we are dragging.
@@ -1426,17 +1441,17 @@ public abstract class MachineGraphicsPanel<
     /**
      * Intersection of m_inTransitionsToMove and m_outTransitionsToMove.
      */
-    protected HashSet<TRANSITION> m_TransitionsToMoveintersection = new HashSet<TRANSITION>();
+    protected HashSet<TRANSITION> m_transitionsToMoveintersection = new HashSet<TRANSITION>();
 
     /**
      * Midpoint of the currently selected transition, before movement.
      */
-    protected Point2D transitionMidPointBeforeMove = null;
+    protected Point2D m_transitionMidPointBeforeMove = null;
 
     /**
      * Whether a transition has been moved.
      */
-    protected boolean movedTransition = false;
+    protected boolean m_movedTransition = false;
 
     /**
      * Whether the keyboard is enabled.
@@ -1454,29 +1469,19 @@ public abstract class MachineGraphicsPanel<
     protected HashSet<String> m_labelsUsed = new HashSet<String>();
 
     /**
-     * Stack containing commands which can be undone.
-     */
-    protected LinkedList<TMCommand> undoStack = new LinkedList<TMCommand>();
-
-    /**
-     * Stack containing commands which can be redone.
-     */
-    protected LinkedList<TMCommand> redoStack = new LinkedList<TMCommand>();
-
-    /**
      * Bounding box of the currently selected transition action.
      */
-    protected Rectangle2D selectedSymbolBoundingBox = null;
+    protected Rectangle2D m_selectedSymbolBoundingBox = null;
 
     /**
      * The selected transition.
      */
-    protected TRANSITION selectedTransition = null;
+    protected TRANSITION m_selectedTransition = null;
 
     /**
      * Whether a transition action has been selected.
      */
-    protected boolean inputSymbolSelected = false;
+    protected boolean m_inputSymbolSelected = false;
 
     /**
      * Last location a value was pasted.

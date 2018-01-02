@@ -93,13 +93,13 @@ public class TMGraphicsPanel
      */
     public boolean handleKeyEvent(KeyEvent e)
     {
-        if (selectedSymbolBoundingBox != null && getSelectedTransition() != null)
+        if (m_selectedSymbolBoundingBox != null && getSelectedTransition() != null)
         {
             // There is a transition action currently selected by the user.
             char c = e.getKeyChar();
             c = Character.toUpperCase(c);
 
-            if (inputSymbolSelected)
+            if (m_inputSymbolSelected)
             {
                 if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_LEFT)
                 {
@@ -237,12 +237,12 @@ public class TMGraphicsPanel
      */
     protected void handleMouseReleased(MouseEvent e)
     {
-        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
+        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
         {
             TM_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
             if (mouseReleasedState != null)
             {
-                TM_Transition newTrans = new TM_Transition((TM_State)mousePressedState, mouseReleasedState,
+                TM_Transition newTrans = new TM_Transition((TM_State)m_mousePressedState, mouseReleasedState,
                         new TM_Action(0, Machine.UNDEFINED_SYMBOL, Machine.UNDEFINED_SYMBOL));
                 doCommand(new AddTransitionCommand(this, newTrans));
                 repaint();
@@ -250,31 +250,31 @@ public class TMGraphicsPanel
         }
         else if (m_currentMode == GUI_Mode.SELECTION)
         {
-            if (selectionInProgress)
+            if (m_selectionInProgress)
             {
-                madeSelection = (selectionBoxStartX != selectionBoxEndX ||
-                        selectionBoxStartY != selectionBoxEndY); //true IFF selection not empty
+                m_madeSelection = (m_selectionBoxStartX != m_selectionBoxEndX ||
+                        m_selectionBoxStartY != m_selectionBoxEndY); //true IFF selection not empty
 
-                if (madeSelection)
+                if (m_madeSelection)
                 {
                     updateSelectedStatesAndTransitions();
                 }
                 repaint();
             }
         }
-        if (mousePressedState != null && movedState)
+        if (m_mousePressedState != null && m_movedState)
         {
             // Create an undo/redo command object for the move of a state/set of states/transitions.
-            int translateX = mousePressedState.getX() - moveStateStartLocationX;
-            int translateY = mousePressedState.getY() - moveStateStartLocationY;
+            int translateX = m_mousePressedState.getX() - m_moveStateStartLocationX;
+            int translateY = m_mousePressedState.getY() - m_moveStateStartLocationY;
 
             if (translateX != 0 || translateY != 0)
             {
-                if (selectedStates.contains(mousePressedState))
+                if (m_selectedStates.contains(m_mousePressedState))
                 {
                     // Moved a set of states
-                    Collection<State> statesCopy = (HashSet<State>)selectedStates.clone();
-                    Collection<Transition> transitionsCopy = (HashSet<Transition>)selectedTransitions.clone();
+                    Collection<State> statesCopy = (HashSet<State>)m_selectedStates.clone();
+                    Collection<Transition> transitionsCopy = (HashSet<Transition>)m_selectedTransitions.clone();
                     addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy,
                                 translateX,  translateY));
                 }
@@ -283,29 +283,29 @@ public class TMGraphicsPanel
                     // Moved one state
                     Collection<Transition> transitions = new ArrayList<Transition>();
                     transitions.addAll(m_transitionsToMoveState);
-                    addCommand(new MoveStateCommand(this, mousePressedState, translateX, 
+                    addCommand(new MoveStateCommand(this, m_mousePressedState, translateX, 
                                 translateY, transitions));
                 }
             }
         }
 
-        if (mousePressedTransition != null && movedTransition)
+        if (m_mousePressedTransition != null && m_movedTransition)
         {
             // Create an undo/redo command object for the move of a transition
 
-            int translateX = (int)(mousePressedTransition.getMidpoint().getX() - transitionMidPointBeforeMove.getX());
-            int translateY = (int)(mousePressedTransition.getMidpoint().getY() - transitionMidPointBeforeMove.getY());
-            addCommand(new MoveTransitionCommand(this, mousePressedTransition, translateX, translateY));
+            int translateX = (int)(m_mousePressedTransition.getMidpoint().getX() - m_transitionMidPointBeforeMove.getX());
+            int translateY = (int)(m_mousePressedTransition.getMidpoint().getY() - m_transitionMidPointBeforeMove.getY());
+            addCommand(new MoveTransitionCommand(this, m_mousePressedTransition, translateX, translateY));
         }
-        selectionInProgress = false;
+        m_selectionInProgress = false;
 
-        mousePressedState = null;
-        mousePressedTransition = null;
-        transitionMidPointBeforeMove = null;
-        movedTransition = false;
-        movedState = false;
-        drawPosX = Integer.MIN_VALUE; // Reset these values so that the line is not drawn.
-        drawPosY = Integer.MIN_VALUE;
+        m_mousePressedState = null;
+        m_mousePressedTransition = null;
+        m_transitionMidPointBeforeMove = null;
+        m_movedTransition = false;
+        m_movedState = false;
+        m_drawPosX = Integer.MIN_VALUE; // Reset these values so that the line is not drawn.
+        m_drawPosY = Integer.MIN_VALUE;
     }
 
 
@@ -394,17 +394,17 @@ public class TMGraphicsPanel
 
         if (!(e.isControlDown() || e.isShiftDown()))
         {
-            selectedStates.clear();
-            selectedTransitions.clear();
+            m_selectedStates.clear();
+            m_selectedTransitions.clear();
         }
         if (stateClickedOn != null)
         {
-            if (!selectedStates.remove(stateClickedOn))
+            if (!m_selectedStates.remove(stateClickedOn))
             {
-                selectedStates.add(stateClickedOn);
+                m_selectedStates.add(stateClickedOn);
             }
         }
-        selectedTransitions = m_sim.getMachine().getSelectedTransitions(selectedStates);
+        m_selectedTransitions = m_sim.getMachine().getSelectedTransitions(m_selectedStates);
     }
 
     /**
