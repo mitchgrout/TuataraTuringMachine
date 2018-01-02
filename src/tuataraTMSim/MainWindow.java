@@ -161,7 +161,7 @@ public class MainWindow extends JFrame
             public void mousePressed(MouseEvent e)
             {
                 MachineGraphicsPanel gfx = getSelectedGraphicsPanel();
-                if (gfx != null);
+                if (gfx != null)
                 {
                     gfx.deselectSymbol();
                 }
