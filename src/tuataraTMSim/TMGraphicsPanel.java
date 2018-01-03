@@ -28,6 +28,7 @@ package tuataraTMSim;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class TMGraphicsPanel
 
         // Add TM-specific context menu actions
         m_contextMenu.addSeparator();
-        m_contextMenu.add("Make Submachine");
+        m_contextMenu.add(new SubmachineAction("Make Submachine"));
 
         initialization();
     }
@@ -455,5 +456,46 @@ public class TMGraphicsPanel
     public String getMachineType()
     {
         return MACHINE_TYPE;
+    }
+
+    /**
+     * Action to open a frame to edit a submachine.
+     */
+    protected class SubmachineAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of SubmachineAction.
+         * @param text Description of the action.
+         */ 
+        public SubmachineAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+
+            // TODO: Create a JFrame to allow blitting across an existing machine
+        }
+
+        /**
+         * If no existing submachine, prompt the user to copy across an existing machine, or start
+         * blank. Otherwise, load the machine into a new frame with no backing file.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // Spawn a new frame containing the submachine
+            if (m_contextState.getSubmachine() == null)
+            {
+                m_contextState.setSubmachine(new TM_Machine( 
+                            new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
+                            getAlphabet())); 
+            }
+            MainWindow inst = MainWindow.getInstance();
+            JInternalFrame iFrame = inst.newMachineWindow(new TMGraphicsPanel(
+                        m_contextState.getSubmachine(), MainWindow.getInstance().getTape(), null));
+            inst.getDesktopPane().add(iFrame);
+            iFrame.setVisible(true);
+            try { iFrame.setSelected(true); }
+            catch (PropertyVetoException e2) { }
+        }
     }
 }

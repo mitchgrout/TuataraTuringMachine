@@ -250,6 +250,60 @@ public class MainWindow extends JFrame
     }
 
     /**
+     * Get the desktop pane in use by the window.
+     * @return The desktop pane in use.
+     */
+    public JDesktopPane getDesktopPane()
+    {
+        return m_desktopPane;
+    }
+
+    /**
+     * Get the current console.
+     * @return The current console.
+     */
+    public ConsoleInternalFrame getConsole()
+    {
+        return m_console;
+    }
+
+    /** 
+     * Gets the graphics panel for the currently selected machine diagram window.
+     * @return A reference to the currently selected graphics panel, or null if there is no such panel.
+     */
+    public MachineGraphicsPanel getSelectedGraphicsPanel()
+    {
+        if (m_desktopPane == null)
+        {
+            return null;
+        }
+        JInternalFrame selected = m_desktopPane.getSelectedFrame();
+        if (selected == null)
+        {
+            return null;
+        }
+        try
+        {
+            MachineInternalFrame tmif = (MachineInternalFrame)selected;
+            return tmif.getGfxPanel();
+        }
+        catch (ClassCastException e)
+        {
+            // Wrong window type
+            return null;
+        }
+    }
+
+    /**
+     * Get the tape currently in use.
+     * @return The tape.
+     */
+    public Tape getTape()
+    {
+        return m_tape;
+    }
+
+    /**
      * Get a reference to the current instance of MainWindow
      * @return A reference to the current instance of MainWindow
      */
@@ -777,13 +831,13 @@ public class MainWindow extends JFrame
         
         return returner;
     }
-    
+   
     /**
      * Creates a new window displaying a machine.
      * @param gfxPanel The underlying graphics panel.
      * @return A frame containing the graphics panel.
      */
-    private MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
+    public MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
         gfxPanel.setUIMode(m_currentMode); 
         final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
@@ -1431,42 +1485,6 @@ public class MainWindow extends JFrame
         m_redoToolBarButton.setText("");
     }
    
-    /**
-     * Get the current console.
-     * @return The current console.
-     */
-    public ConsoleInternalFrame getConsole()
-    {
-        return m_console;
-    }
-
-    /** 
-     * Gets the graphics panel for the currently selected machine diagram window.
-     * @return A reference to the currently selected graphics panel, or null if there is no such panel.
-     */
-    public MachineGraphicsPanel getSelectedGraphicsPanel()
-    {
-        if (m_desktopPane == null)
-        {
-            return null;
-        }
-        JInternalFrame selected = m_desktopPane.getSelectedFrame();
-        if (selected == null)
-        {
-            return null;
-        }
-        try
-        {
-            MachineInternalFrame tmif = (MachineInternalFrame)selected;
-            return tmif.getGfxPanel();
-        }
-        catch (ClassCastException e)
-        {
-            // Wrong window type
-            return null;
-        }
-    }
- 
     /**
      * Action for creating a new Turing Machine in a new window.
      */

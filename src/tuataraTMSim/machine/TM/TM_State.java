@@ -78,7 +78,25 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
     {
         this(label, startState, finalState, 0, 0);
     }
-    
+
+    /**
+     * Get the submachine associated with this state.
+     * @return The submachine associated with this state.
+     */
+    public TM_Machine getSubmachine()
+    {
+        return m_subMachine;
+    }
+
+    /**
+     * Set the submachine associated with this state.
+     * @param mac The new submachine associated with this state.
+     */
+    public void setSubmachine(TM_Machine mac)
+    {
+        m_subMachine = mac;
+    }
+
     /**
      * Get the outgoing transitions of this state.
      * @return An array list of all transitions which leave this state.
