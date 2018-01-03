@@ -648,13 +648,6 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Handle when a mouse button is released. Creates any new transitions if a transition creating
-     * drag has occured.
-     * @param e The generating event.
-     */
-    protected abstract void handleMouseReleased(MouseEvent e); // !!!
-
-    /**
      * Handle when a mouse drag occurs while in selection mode. Moves a transition relative to mouse
      * movement.
      * @param e The generating event.
@@ -1135,6 +1128,195 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Handle when a mouse button is released. Creates any new transitions if a transition creating
+     * drag has occured.
+     * @param e The generating event.
+     */
+    protected void handleMouseReleased(MouseEvent e)
+    {
+        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
+        {
+            STATE mouseReleasedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+            if (mouseReleasedState != null)
+            {
+                TRANSITION newTrans = makeTransition(m_mousePressedState, mouseReleasedState);
+                doCommand(new AddTransitionCommand(this, newTrans));
+                repaint();
+            }
+        }
+        else if (m_currentMode == GUI_Mode.SELECTION && m_selectionBox != null)
+        {
+            if (m_selectionBox.width != 0 && m_selectionBox.height != 0)
+            {
+                updateSelectedStatesAndTransitions();
+            }
+            repaint();
+        }
+
+        if (m_mousePressedState != null && m_movedState)
+        {
+            // Create an undo/redo command object for the move of a state/set of states/transitions.
+            int translateX = m_mousePressedState.getX() - m_moveStateStartLocationX,
+                translateY = m_mousePressedState.getY() - m_moveStateStartLocationY;
+
+            if (translateX != 0 || translateY != 0)
+            {
+                if (m_selectedStates.contains(m_mousePressedState))
+                {
+                    // Moved a set of states
+                    Collection<State> statesCopy = (Collection<State>)m_selectedStates.clone();
+                    Collection<Transition> transitionsCopy = (Collection<Transition>)m_selectedTransitions.clone();
+                    addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy, translateX, translateY));
+                }
+                else
+                {
+                    // Moved one state
+                    Collection<Transition> transitions = new ArrayList<Transition>();
+                    transitions.addAll(m_transitionsToMoveState);
+                    addCommand(new MoveStateCommand(this, m_mousePressedState, translateX, translateY, transitions));
+                }
+            }
+        }
+
+        if (m_mousePressedTransition != null && m_movedTransition)
+        {
+            // Create an undo/redo command object for the move of a transition
+            int translateX = (int)(m_mousePressedTransition.getMidpoint().getX() - m_transitionMidPointBeforeMove.getX()),
+                translateY = (int)(m_mousePressedTransition.getMidpoint().getY() - m_transitionMidPointBeforeMove.getY());
+            addCommand(new MoveTransitionCommand(this, m_mousePressedTransition, translateX, translateY));
+        }
+
+        m_selectionBox = null;
+        m_mousePressedState = null;
+        m_mousePressedTransition = null;
+        m_transitionMidPointBeforeMove = null;
+        m_movedTransition = false;
+        m_movedState = false;
+        m_drawPosX = Integer.MIN_VALUE;
+        m_drawPosY = Integer.MIN_VALUE;
+    }
+
+    /**
+     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
+     * state, or creating a new state.
+     * @param e The generating event.
+     */
+    protected void handleAddNodesClick(MouseEvent e)
+    {
+        // Clicking on another state should just select the existing state
+        if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY()) != null)
+        {
+            // Adding states on top of states is not allowed
+            handleSelectionClick(e);
+            return;
+        }
+
+        int x = e.getX() - STATE.STATE_RENDERING_WIDTH / 2,
+            y = e.getY() - STATE.STATE_RENDERING_WIDTH / 2;
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                String label = getFirstFreeName();
+                doCommand(new AddStateCommand(this, makeState(label, x, y)));
+                break;
+            
+            case NORMALIZED:
+                doJoinCommand(
+                        new AddStateCommand(this, makeState("", x, y)),
+                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+                break;
+        }
+    }
+
+    /** 
+     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
+     * state, it is deleted, and if it is over a transition, that is deleted.
+     * @param e The generating event.
+     */
+    protected void handleEraserClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            deleteState(stateClickedOn);
+        }
+        else
+        {
+            TRANSITION transitionClickedOn = m_sim.getMachine()
+                .getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            if (transitionClickedOn != null)
+            {
+                deleteTransition(transitionClickedOn);
+            }
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
+     * over a state, the start state of the machine is changed.
+     * @param e The generating event.
+     */
+    protected void handleChooseStartClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            switch (m_sim.getMachine().getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
+                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+            }
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
+     * state, the state is either added or removed from the selected state set, depending on context.
+     * @param e The generating event.
+     */
+    protected void handleSelectionClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (!(e.isControlDown() || e.isShiftDown()))
+        {
+            m_selectedStates.clear();
+            m_selectedTransitions.clear();
+        }
+        if (stateClickedOn != null && !m_selectedStates.remove(stateClickedOn))
+        {
+            m_selectedStates.add(stateClickedOn);
+        }
+        m_selectedTransitions = m_sim.getMachine().getSelectedTransitions(m_selectedStates);
+    }
+
+    /**
+     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
+     * occurs over a state, the state is made to be the current state.
+     * @param e The generating event.
+     */
+    protected void handleChooseCurrentState(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            m_sim.setCurrentState(stateClickedOn);
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
+     * occurs over a state, the accepting state of the machine is changed.
+     * @param e The generating event.
+     */
+    protected abstract void handleChooseAcceptingClick(MouseEvent e);
+
+    /**
      * Called when the owning frame is activated. Should deactivate any and all events which are not
      * used by the simulated machine.
      */
@@ -1149,46 +1331,21 @@ public abstract class MachineGraphicsPanel<
     public abstract boolean handleKeyEvent(KeyEvent e);
 
     /**
-     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
-     * state, or creating a new state.
-     * @param e The generating event.
+     * Create a STATE object with the given label at the specified location.
+     * @param label The state label.
+     * @param x The x-ordinate of the state.
+     * @param y The y-ordinate of the state.
+     * @return A new STATE object.
      */
-    protected abstract void handleAddNodesClick(MouseEvent e);
-
-    /** 
-     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
-     * state, it is deleted, and if it is over a transition, that is deleted.
-     * @param e The generating event.
-     */
-    public abstract void handleEraserClick(MouseEvent e);
+    protected abstract STATE makeState(String label, int x, int y);
 
     /**
-     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
-     * over a state, the start state of the machine is changed.
-     * @param e The generating event.
+     * Create a TRANSITION object with a default action, attached to the two specified states.
+     * @param start The state the transition leaves.
+     * @param end The state the transition arrives at.
+     * @return A new TRANSITION object.
      */
-    protected abstract void handleChooseStartClick(MouseEvent e);
-
-    /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected abstract void handleChooseAcceptingClick(MouseEvent e);
-
-    /**
-     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
-     * state, the state is either added or removed from the selected state set, depending on context.
-     * @param e The generating event.
-     */
-    protected abstract void handleSelectionClick(MouseEvent e);
-
-    /**
-     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
-     * occurs over a state, the state is made to be the current state.
-     * @param e The generating event.
-     */
-    protected abstract void handleChooseCurrentState(MouseEvent e);
+    protected abstract TRANSITION makeTransition(STATE start, STATE end);
 
     /**
      * Build an error message for the given ComputationCompletedException.
