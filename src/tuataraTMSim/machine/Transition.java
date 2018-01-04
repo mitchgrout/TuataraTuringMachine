@@ -163,7 +163,20 @@ public abstract class Transition<
     {
         return Spline.getMidPointFromControlPoint(getControlPoint(), m_fromState, m_toState);
     }
- 
+
+    /**
+     * Get the color to paint this object.
+     * @param isSelected Whether or not this transition is selected.
+     * @param isCurrent Whether or not this transition is the next transition to be taken.
+     * @return The color to paint this object.
+     */
+    protected Paint getPaint(boolean isSelected, boolean isCurrent)
+    {
+        return isSelected? Color.RED
+             : isCurrent?  Color.PINK
+             : Color.BLUE;
+    }
+
     /**
      * Render the transition to a graphics object.
      * @param g The graphics object on which to render.
@@ -177,18 +190,7 @@ public abstract class Transition<
         Graphics2D g2d = (Graphics2D)g;
 
         // Choose color based off of this transitions state
-        if (selectedTransitions.contains(this))
-        {
-            g2d.setColor(Color.RED);
-        }
-        else if (simulator.getNextTransition() == this)
-        {
-            g2d.setColor(Color.PINK);
-        }
-        else
-        {
-            g2d.setColor(Color.BLUE);
-        }
+        g2d.setPaint(getPaint(selectedTransitions.contains(this), simulator.getNextTransition() == this));
        
         // An arc
         if (m_fromState != m_toState)
