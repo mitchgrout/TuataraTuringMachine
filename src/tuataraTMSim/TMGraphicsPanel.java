@@ -318,8 +318,18 @@ public class TMGraphicsPanel
                             getAlphabet())); 
             }
             MainWindow inst = MainWindow.getInstance();
-            JInternalFrame iFrame = inst.newMachineWindow(new TMGraphicsPanel(
-                        m_contextState.getSubmachine(), MainWindow.getInstance().getTape(), null));
+            JInternalFrame iFrame = inst.newMachineWindow(
+                    new TMGraphicsPanel(m_contextState.getSubmachine(), MainWindow.getInstance().getTape(), null)
+                    {
+                        // Submachines do not need to be explicitly saved; they are automatically
+                        // saved by the parent. Hence a save to the parent frame is a save to this
+                        // frame.
+                        public boolean isModifiedSinceSave()
+                        {
+                            return false;
+                        }
+
+                    });
             inst.getDesktopPane().add(iFrame);
             iFrame.setVisible(true);
             try { iFrame.setSelected(true); }
