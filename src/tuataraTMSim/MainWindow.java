@@ -840,7 +840,7 @@ public class MainWindow extends JFrame
     public MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
         gfxPanel.setUIMode(m_currentMode); 
-        final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
+        final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel, ++m_windowCount);
         gfxPanel.setWindow(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
         returner.setSize(new Dimension(640, 480));
@@ -2754,6 +2754,11 @@ public class MainWindow extends JFrame
      * Simulation delay associated with the machine, used by m_timerTask.
      */
     private int m_executionDelayTime;
+
+    /**
+     * How many machine internal frames have been created since the program started.
+     */
+    private int m_windowCount = 0;
 
     /**
      * Data which has been copied, used for pasting.
