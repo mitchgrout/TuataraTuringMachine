@@ -74,6 +74,24 @@ public class TMGraphicsPanel
         initialization();
     }
 
+    /**
+     * Get the filename associated with the machine. If getFile() is null, then this value is a
+     * temporary name for the machine.
+     * @return The filename associated with the machine.
+     */
+    public String getFilename()
+    {
+        // Submachines should just reflect their parents names
+        if (m_parent != null)
+        {
+            return m_parent.getFilename() + "-SUBMACHINE";
+        }
+        else
+        {
+            return super.getFilename();
+        }
+    }
+
     public void onActivation()
     {
         // Do nothing
@@ -318,22 +336,84 @@ public class TMGraphicsPanel
                             getAlphabet())); 
             }
             MainWindow inst = MainWindow.getInstance();
-            JInternalFrame iFrame = inst.newMachineWindow(
-                    new TMGraphicsPanel(m_contextState.getSubmachine(), MainWindow.getInstance().getTape(), null)
-                    {
-                        // Submachines do not need to be explicitly saved; they are automatically
-                        // saved by the parent. Hence a save to the parent frame is a save to this
-                        // frame.
-                        public boolean isModifiedSinceSave()
-                        {
-                            return false;
-                        }
+            TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null)
+            {
+                public boolean isModifiedSinceSave()
+                {
+                    // Submachines should not indicate that they have been modified;
+                    // this should be pushed all the way up to the owning machine.
+                    return false;
+                }
 
-                    });
+                public void setModifiedSinceSave(boolean isModified)
+                {
+                    // Push the notif. upwards
+                    TMGraphicsPanel owner = m_parent;
+                    while (owner.m_parent != null)
+                    {
+                        owner = owner.m_parent;
+                    }
+                    owner.setModifiedSinceSave(isModified);
+                    if (owner.m_iFrame != null)
+                    {
+                        owner.m_iFrame.updateTitle();
+                    }
+                }
+
+            };
+            addChild(gfx);
+            JInternalFrame iFrame = inst.newMachineWindow(gfx);
             inst.getDesktopPane().add(iFrame);
             iFrame.setVisible(true);
             try { iFrame.setSelected(true); }
             catch (PropertyVetoException e2) { }
         }
     }
+
+    /**
+     * Set the parent of this panel.
+     * @param parent The new parent
+     */ 
+    public void setParent(TMGraphicsPanel parent)
+    {
+        m_parent = parent;
+    }
+
+    /**
+     * Add a child to this panel. Additionally calls child.setParent(this).
+     * @param child The child to add.
+     */
+    public void addChild(TMGraphicsPanel child)
+    {
+        m_children.add(child);
+        child.setParent(this);
+    }
+
+    /**
+     * Remove a child from this panel. Additionally calls child.setParent(null).
+     * @param child The child to remove.
+     * @return true if the child is removed, false otherwise.
+     */
+    public boolean removeChild(TMGraphicsPanel child)
+    {
+        if (m_children.remove(child))
+        {
+            child.setParent(null);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * The parent of this panel.
+     */
+    protected TMGraphicsPanel m_parent;
+
+    /**
+     * The children of this panel.
+     */
+    protected ArrayList<TMGraphicsPanel> m_children = new ArrayList<TMGraphicsPanel>();
 }
