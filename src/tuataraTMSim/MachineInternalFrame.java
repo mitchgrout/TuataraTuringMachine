@@ -99,16 +99,26 @@ public class MachineInternalFrame extends JInternalFrame
     {
         return m_gfxPanel;
     }
+
+    /**
+     * Get the frame index.
+     * @return The frame index.
+     */
+    public int getIndex()
+    {
+        return m_idx;
+    }
    
     /**
      * Update the title of the frame to reflect the filename of the underlying machine.
      */
     public void updateTitle()
     {
+        // TODO: Maybe move some of this to MachineGraphicsPanel
         File file = m_gfxPanel.getFile();
-        setTitle(String.format("%s%s [%s]", 
+        setTitle(String.format("%s%s [%s]",
                     m_gfxPanel.isModifiedSinceSave()? "* " : "",
-                    file == null? String.format("untitled-%d", m_idx) : file.getName(),
+                    m_gfxPanel.getFilename(),
                     m_gfxPanel.getMachineType()));
     }
     

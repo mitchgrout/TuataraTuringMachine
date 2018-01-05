@@ -127,6 +127,23 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Get the filename associated with the machine. If getFile() is null, then this value is a
+     * temporary name for the machine.
+     * @return The filename associated with the machine.
+     */
+    public String getFilename()
+    {
+        if (m_file == null)
+        {
+            return String.format("untitled-%d", m_iFrame.getIndex()); 
+        }
+        else
+        {
+            return m_file.getName();
+        }
+    }       
+
+    /**
      * Determine if the machine has been modified since its last save.
      * @return true if it has been modified since its last save, false otherwise.
      */
