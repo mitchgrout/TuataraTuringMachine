@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
@@ -91,6 +93,28 @@ public class TMGraphicsPanel
             return super.getFilename();
         }
     }
+
+    /**
+     * Set the internal frame for this panel.
+     * @param iFrame The new internal frame.
+     */
+    public void setWindow(MachineInternalFrame iFrame)
+    {
+        m_iFrame = iFrame;
+        updateTitle();
+        super.setWindow(iFrame);
+        iFrame.addInternalFrameListener(new InternalFrameAdapter()
+        {
+            public void internalFrameClosed(InternalFrameEvent e)
+            {
+                for (TMGraphicsPanel child : m_children)
+                {
+                    child.m_iFrame.dispose();
+                }
+            }
+        });
+    }
+
 
     public void onActivation()
     {
@@ -363,6 +387,8 @@ public class TMGraphicsPanel
             };
             addChild(gfx);
             JInternalFrame iFrame = inst.newMachineWindow(gfx);
+
+
             inst.getDesktopPane().add(iFrame);
             iFrame.setVisible(true);
             try { iFrame.setSelected(true); }
