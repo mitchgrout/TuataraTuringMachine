@@ -483,6 +483,9 @@ public class MainWindow extends JFrame
         m_console = new ConsoleInternalFrame();
         m_console.setLayer(50);
 
+        // Disable all toolbars (no default machine)
+        setEnabledActionsThatRequireAMachine(false); 
+        
         setVisible(true);
         updateUndoActions();
     }
@@ -656,6 +659,37 @@ public class MainWindow extends JFrame
 
         // Entire toolstrip will be composed of three toolbars
         JToolBar[] returner = new JToolBar[3];
+        
+        // Machine
+        // SPECIAL: newMachine causes a JPopupMenu to show, which contains all new***MachineAction's
+        JButton newMachineToolBarButton = new JButton(loadIcon("newMachine.gif"));
+        JPopupMenu machineMenu = new JPopupMenu();
+        machineMenu.add(m_newTuringMachineAction);
+        machineMenu.add(m_newDFSAAction);
+        newMachineToolBarButton.addMouseListener(new MouseAdapter()
+        {
+            // Show the popup menu when clicked
+            public void mouseClicked(MouseEvent e)
+            {
+                if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    machineMenu.show(e.getComponent(), newMachineToolBarButton.getX() - newMachineToolBarButton.getWidth() / 2, newMachineToolBarButton.getY() + newMachineToolBarButton.getHeight()); // e.getX(), e.getY());
+                }
+            }
+        });
+        newMachineToolBarButton.setFocusable(false);
+        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        newMachineToolBarButton.setText("");
+        
+        JButton openMachineToolBarButton = new JButton(m_openMachineAction);
+        openMachineToolBarButton.setFocusable(false);
+        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        openMachineToolBarButton.setText("");
+        
+        JButton saveMachineToolBarButton = new JButton(m_saveMachineAction);
+        saveMachineToolBarButton.setFocusable(false);
+        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        saveMachineToolBarButton.setText("");
 
         // Tape
         JButton newTapeToolBarButton = new JButton(m_newTapeAction);
@@ -672,22 +706,6 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setFocusable(false);
         saveTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         saveTapeToolBarButton.setText("");
-
-        // Machine
-        //JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
-        //newMachineToolBarButton.setFocusable(false);
-        //newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        //newMachineToolBarButton.setText("");
-        
-        JButton openMachineToolBarButton = new JButton(m_openMachineAction);
-        openMachineToolBarButton.setFocusable(false);
-        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        openMachineToolBarButton.setText("");
-        
-        JButton saveMachineToolBarButton = new JButton(m_saveMachineAction);
-        saveMachineToolBarButton.setFocusable(false);
-        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        saveMachineToolBarButton.setText("");
 
         // Edit       
         JButton cutToolBarButton = new JButton(m_cutAction);
@@ -777,12 +795,12 @@ public class MainWindow extends JFrame
         // Attach everything to the correct toolbars
         returner[0] = new JToolBar("File/Edit/Configure");
         returner[0].setRollover(true);
+        returner[0].add(newMachineToolBarButton);
+        returner[0].add(openMachineToolBarButton);
+        returner[0].add(saveMachineToolBarButton);
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
         returner[0].add(saveTapeToolBarButton);
-        //returner[0].add(newMachineToolBarButton);
-        returner[0].add(openMachineToolBarButton);
-        returner[0].add(saveMachineToolBarButton);
         returner[0].add(cutToolBarButton);
         returner[0].add(copyToolBarButton);
         returner[0].add(pasteToolBarButton);
@@ -822,7 +840,7 @@ public class MainWindow extends JFrame
      */
     public MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
-        gfxPanel.setUIMode(m_currentMode); 
+        gfxPanel.setUIMode(m_currentMode);
         final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel, ++m_windowCount);
         gfxPanel.setFrame(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
