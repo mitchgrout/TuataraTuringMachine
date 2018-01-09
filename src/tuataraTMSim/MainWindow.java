@@ -824,7 +824,7 @@ public class MainWindow extends JFrame
     {
         gfxPanel.setUIMode(m_currentMode); 
         final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel, ++m_windowCount);
-        gfxPanel.setWindow(returner);
+        gfxPanel.setFrame(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
         returner.setSize(new Dimension(640, 480));
         Point2D loc = nextWindowLocation();
@@ -1521,7 +1521,7 @@ public class MainWindow extends JFrame
             {
                 TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
                 MachineInternalFrame frame = newMachineWindow(panel);
-                panel.setWindow(frame);
+                panel.setFrame(frame);
                 addFrame(frame);
             }
         }
@@ -1603,7 +1603,7 @@ public class MainWindow extends JFrame
                 {
                     TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
                     MachineInternalFrame frame = newMachineWindow(panel);
-                    panel.setWindow(frame);
+                    panel.setFrame(frame);
                     addFrame(frame);
                 }
                 else if (machine instanceof DFSA_Machine)

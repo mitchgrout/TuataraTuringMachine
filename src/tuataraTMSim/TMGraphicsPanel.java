@@ -145,9 +145,9 @@ public class TMGraphicsPanel
      * Set the internal frame for this panel.
      * @param iFrame The new internal frame.
      */
-    public void setWindow(MachineInternalFrame iFrame)
+    public void setFrame(MachineInternalFrame iFrame)
     {
-        super.setWindow(iFrame);
+        super.setFrame(iFrame);
         iFrame.addInternalFrameListener(new InternalFrameAdapter()
         {
             public void internalFrameClosed(InternalFrameEvent e)
@@ -433,7 +433,7 @@ public class TMGraphicsPanel
             addChild(gfx);
             
             MachineInternalFrame frame = inst.newMachineWindow(gfx);
-            gfx.setWindow(frame);
+            gfx.setFrame(frame);
             inst.addFrame(frame);
         }
     }

@@ -83,7 +83,7 @@ public abstract class MachineGraphicsPanel<
      * Get the internal frame for this panel.
      * @return The internal frame for this panel.
      */
-    public MachineInternalFrame getWindow()
+    public MachineInternalFrame getFrame()
     {
         return m_iFrame;
     }
@@ -92,7 +92,7 @@ public abstract class MachineGraphicsPanel<
      * Set the internal frame for this panel.
      * @param iFrame The new internal frame.
      */
-    public void setWindow(MachineInternalFrame iFrame)
+    public void setFrame(MachineInternalFrame iFrame)
     {
         m_iFrame = iFrame;
         updateTitle();
