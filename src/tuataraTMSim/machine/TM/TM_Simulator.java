@@ -28,6 +28,7 @@ package tuataraTMSim.machine.TM;
 import java.util.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
+import tuataraTMSim.TMGraphicsPanel;
 
 /**
  * Encapsulates the whole system for a Turing machine, including the machine and its configuration.
@@ -73,6 +74,15 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     public void setCurrentState(TM_State state)
     {
         m_state = state;
+    }
+
+    /**
+     * Set the graphics panel associated with this simulator.
+     * @param panel The graphics panel associated with this simulator.
+     */
+    public void setPanel(TMGraphicsPanel panel)
+    {
+        m_panel = panel;
     }
 
     /** 
@@ -179,7 +189,34 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
         }
         else
         {
-            m_state = m_machine.step(m_tape, m_state, getNextTransition());
+            // Topmost machine
+            if (m_panel.getParentPanel() == null)
+            {
+                m_state = m_machine.step(m_tape, m_state, getNextTransition());
+            }
+            // Submachine
+            else
+            {
+                try
+                {
+                    m_state = m_machine.step(m_tape, m_state, getNextTransition());
+                }
+                catch (ComputationCompletedException ex) 
+                { 
+                    // Return focus to the owner
+                }
+                catch (Exception ex) 
+                { 
+                    // Pass the exception up
+                    throw ex; 
+                }
+            }
+
+            // If our new state is a submachine, open its frame and switch focus
+            if (m_state.getSubmachine() != null)
+            {
+                
+            }
         }
     }
 
@@ -230,4 +267,9 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
      * The current state the machine is in.
      */
     protected TM_State m_state;
+
+    /**
+     * The owning graphics panel.
+     */
+    protected TMGraphicsPanel m_panel;
 }

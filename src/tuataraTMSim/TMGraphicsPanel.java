@@ -77,6 +77,53 @@ public class TMGraphicsPanel
     }
 
     /**
+     * Get the owning graphics panel.
+     * @return The owning graphics panel.
+     */
+    public TMGraphicsPanel getParentPanel()
+    {
+        return m_parent;
+    }
+
+    /**
+     * Set the parent of this panel.
+     * @param parent The new parent
+     */ 
+    public void setParentPanel(TMGraphicsPanel parent)
+    {
+        m_parent = parent;
+    }
+
+    /**
+     * Add a child to this panel. Additionally calls child.setParentPanel(this).
+     * @param child The child to add.
+     */
+    public void addChild(TMGraphicsPanel child)
+    {
+        m_children.add(child);
+        child.setParentPanel(this);
+    }
+
+    /**
+     * Remove a child from this panel. Additionally calls child.setParentPanel(null).
+     * @param child The child to remove.
+     * @return true if the child is removed, false otherwise.
+     */
+    public boolean removeChild(TMGraphicsPanel child)
+    {
+        if (m_children.remove(child))
+        {
+            child.setParentPanel(null);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    /**
      * Get the filename associated with the machine. If getFile() is null, then this value is a
      * temporary name for the machine.
      * @return The filename associated with the machine.
@@ -100,8 +147,6 @@ public class TMGraphicsPanel
      */
     public void setWindow(MachineInternalFrame iFrame)
     {
-        m_iFrame = iFrame;
-        updateTitle();
         super.setWindow(iFrame);
         iFrame.addInternalFrameListener(new InternalFrameAdapter()
         {
@@ -109,7 +154,7 @@ public class TMGraphicsPanel
             {
                 for (TMGraphicsPanel child : m_children)
                 {
-                    child.m_iFrame.dispose();
+                    MainWindow.getInstance().removeFrame(child.m_iFrame);
                 }
             }
         });
@@ -386,50 +431,10 @@ public class TMGraphicsPanel
 
             };
             addChild(gfx);
-            JInternalFrame iFrame = inst.newMachineWindow(gfx);
-
-
-            inst.getDesktopPane().add(iFrame);
-            iFrame.setVisible(true);
-            try { iFrame.setSelected(true); }
-            catch (PropertyVetoException e2) { }
-        }
-    }
-
-    /**
-     * Set the parent of this panel.
-     * @param parent The new parent
-     */ 
-    public void setParent(TMGraphicsPanel parent)
-    {
-        m_parent = parent;
-    }
-
-    /**
-     * Add a child to this panel. Additionally calls child.setParent(this).
-     * @param child The child to add.
-     */
-    public void addChild(TMGraphicsPanel child)
-    {
-        m_children.add(child);
-        child.setParent(this);
-    }
-
-    /**
-     * Remove a child from this panel. Additionally calls child.setParent(null).
-     * @param child The child to remove.
-     * @return true if the child is removed, false otherwise.
-     */
-    public boolean removeChild(TMGraphicsPanel child)
-    {
-        if (m_children.remove(child))
-        {
-            child.setParent(null);
-            return true;
-        }
-        else
-        {
-            return false;
+            
+            MachineInternalFrame frame = inst.newMachineWindow(gfx);
+            gfx.setWindow(frame);
+            inst.addFrame(frame);
         }
     }
 

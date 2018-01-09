@@ -458,14 +458,7 @@ public class MainWindow extends JFrame
 
         // Maximize on startup
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
-        
-        // Make a state diagram window as the default for the desktop pane
-        JInternalFrame iFrame = 
-            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
-        m_desktopPane.add(iFrame);      
-        m_desktopPane.setSelectedFrame(iFrame);
-        m_desktopPane.getDesktopManager().activateFrame(iFrame);
-        
+
         // Create the alphabet configuration internal frame
         m_asif = new AlphabetSelectorInternalFrame();
         m_asif.pack();
@@ -491,16 +484,6 @@ public class MainWindow extends JFrame
         m_console.setLayer(50);
 
         setVisible(true);
-
-        try
-        {
-            // setSelected only works when the component is already displayed, so this must be done
-            // after the this.setVisible call.
-            iFrame.moveToFront();
-            iFrame.setSelected(true);
-        }
-        catch (PropertyVetoException e2) { }
-        
         updateUndoActions();
     }
     
@@ -877,12 +860,38 @@ public class MainWindow extends JFrame
         
         return returner;
     }
+
+    /**
+     * Add an internal frame to the window. 
+     * @param frame The frame to add.
+     */
+    public void addFrame(JInternalFrame frame)
+    {
+        // Add and select
+        m_desktopPane.add(frame);
+        m_desktopPane.setSelectedFrame(frame);
+        m_desktopPane.getDesktopManager().activateFrame(frame);
+        frame.moveToFront();
+        try { frame.setSelected(true); }
+        catch (PropertyVetoException e2) { }
+    }
+    
+    /**
+     * Remove an internal frame from the window.
+     * @param frame The frame to remove.
+     */
+    public void removeFrame(MachineInternalFrame frame)
+    {
+        frame.dispose();
+        // Is this necessary?
+        m_desktopPane.remove(frame);
+    }
    
     /**
      * Compute the next location to place a new window.
      * @return The next location to place a new window.
      */
-    Point2D.Float nextWindowLocation()
+    private Point2D.Float nextWindowLocation()
     {
         int x = m_lastNewWindowLocX + m_windowLocStepSize;
         int y = m_lastNewWindowLocY + m_windowLocStepSize;
@@ -1510,11 +1519,10 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = 
-                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
-                m_desktopPane.add(iFrame);
-                try { iFrame.setSelected(true); }
-                catch (PropertyVetoException e2) { }
+                TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
+                MachineInternalFrame frame = newMachineWindow(panel);
+                panel.setWindow(frame);
+                addFrame(frame);
             }
         }
     }
@@ -1544,11 +1552,7 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = 
-                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null));
-                m_desktopPane.add(iFrame);
-                try { iFrame.setSelected(true); }
-                catch (PropertyVetoException e2) { }
+                addFrame(newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null)));
             }
         }
     }
@@ -1597,19 +1601,16 @@ public class MainWindow extends JFrame
                 JInternalFrame iFrame = null;
                 if (machine instanceof TM_Machine)
                 {
-                    iFrame = newMachineWindow(new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile));
+                    TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
+                    MachineInternalFrame frame = newMachineWindow(panel);
+                    panel.setWindow(frame);
+                    addFrame(frame);
                 }
                 else if (machine instanceof DFSA_Machine)
                 {
-                    iFrame = newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile));
+                    addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
                 }
-                m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
-                try
-                {
-                    iFrame.setSelected(true);
-                }
-                catch (PropertyVetoException e2) { }
             }
             catch (Exception e2)
             {
@@ -2598,12 +2599,14 @@ public class MainWindow extends JFrame
         {
             if (!m_console.isVisible())
             {
-                m_desktopPane.add(m_console);
-                m_console.setVisible(true);
+                addFrame(m_console);
             }
-            m_console.moveToFront();
-            try { m_console.setSelected(true); }
-            catch (PropertyVetoException e2) { }
+            else
+            {
+                m_console.moveToFront();
+                try { m_console.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
         }
     }
 
@@ -2638,12 +2641,14 @@ public class MainWindow extends JFrame
             }
             if (!m_helpDisp.isVisible())
             {
-                m_desktopPane.add(m_helpDisp);
-                m_helpDisp.setVisible(true);
+                addFrame(m_helpDisp);
             }
-            m_helpDisp.moveToFront();
-            try { m_helpDisp.setSelected(true); }
-            catch (PropertyVetoException e2) { }
+            else
+            {
+                m_helpDisp.moveToFront();
+                try { m_helpDisp.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
         }
     }
 
