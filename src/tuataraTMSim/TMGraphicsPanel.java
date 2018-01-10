@@ -201,7 +201,21 @@ public class TMGraphicsPanel
         {
             public void internalFrameClosed(InternalFrameEvent e)
             {
-                for (TMGraphicsPanel child : m_children)
+                // If we have an empty machine, destroy this frame
+                if (m_parent != null && m_sim.getMachine().getStates().size() == 0)
+                {
+                    for (TM_State state : m_parent.getSimulator().getMachine().getStates())
+                    {
+                        if (state.getSubmachine() == m_sim.getMachine())
+                        {
+                            state.setSubmachine(null);
+                            break;
+                        }
+                    }
+                    m_parent.removeChild(TMGraphicsPanel.this);
+                }
+                // Otherwise, close all children, but do not delete their references
+                else for (TMGraphicsPanel child : m_children)
                 {
                     MainWindow.getInstance().removeFrame(child.m_iFrame);
                 }
