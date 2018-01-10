@@ -1431,6 +1431,7 @@ public abstract class MachineGraphicsPanel<
         }
         else 
         { 
+            e.printStackTrace();
             return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
         }
     }

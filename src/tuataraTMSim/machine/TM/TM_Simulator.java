@@ -25,9 +25,12 @@
 
 package tuataraTMSim.machine.TM;
 
+import java.beans.PropertyVetoException;
 import java.util.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
+import tuataraTMSim.MachineInternalFrame;
+import tuataraTMSim.MainWindow;
 import tuataraTMSim.TMGraphicsPanel;
 
 /**
@@ -94,7 +97,7 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     {
         // Guarantee that there is a unique halting state, hence guarantee the result makes sense.
         m_machine.validate();
-        return m_state.isFinalState();
+        return m_state != null && m_state.isFinalState();
     }
 
     /**
@@ -182,40 +185,63 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
         // expensive call in general.
         m_machine.validate();
 
+        // Machine has just started
         if (m_state == null)
         {
             // Guaranteed to exist by m_machine.validate()
             m_state = m_machine.getStartState();
         }
-        else
+        // Already running
+        else try
         {
-            // Topmost machine
-            if (m_panel.getParentPanel() == null)
+            // No problems with regular states
+            if (m_state.getSubmachine() == null)
             {
                 m_state = m_machine.step(m_tape, m_state, getNextTransition());
             }
-            // Submachine
+            // Search for the frame for this submachine; if nonexistent, create one
             else
             {
-                try
+                MainWindow inst = MainWindow.getInstance();
+                TMGraphicsPanel gfx = null;
+                for (TMGraphicsPanel child : m_panel.getChildren())
                 {
-                    m_state = m_machine.step(m_tape, m_state, getNextTransition());
+                    if (child.getSimulator().getMachine() == m_state.getSubmachine())
+                    {
+                        gfx = child;
+                        break;
+                    }
                 }
-                catch (ComputationCompletedException ex) 
-                { 
-                    // Return focus to the owner
+
+                if (gfx == null)
+                {
+                    gfx = new TMGraphicsPanel(m_state.getSubmachine(), inst.getTape(), null);
+                    m_panel.addChild(gfx);
+                    MachineInternalFrame frame = inst.newMachineWindow(gfx);
+                    gfx.setFrame(frame);
                 }
-                catch (Exception ex) 
-                { 
-                    // Pass the exception up
-                    throw ex; 
+
+                // No reason to actually display the frame; the user may opt to show it if they wish
+                // If the submachine has halted, we carry on in our machine, resetting the
+                // submachine. Otherwise continue submachine execution.
+                if (gfx.getSimulator().isHalted())
+                {
+                    m_state = m_machine.step(m_tape, m_state, getNextTransition());   
+                    gfx.getSimulator().resetMachine();
+                }
+                else
+                {
+                    gfx.getSimulator().step();
                 }
             }
-
-            // If our new state is a submachine, open its frame and switch focus
-            if (m_state.getSubmachine() != null)
+        }
+        catch (ComputationCompletedException e)
+        {
+            // Topmost machine should throw everything; submachines should not throw
+            // ComputationCompletedException.
+            if (m_panel.getParentPanel() == null)
             {
-                
+                throw e;
             }
         }
     }

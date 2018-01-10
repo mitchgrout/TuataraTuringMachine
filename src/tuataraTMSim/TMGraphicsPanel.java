@@ -69,11 +69,51 @@ public class TMGraphicsPanel
     {
         super(new TM_Simulator(machine, tape), file);
 
+        // Turing machines need to know about their owning panels
+        m_sim.setPanel(this);
+
         // Add TM-specific context menu actions
         m_contextMenu.addSeparator();
         m_contextMenu.add(new SubmachineAction("Make Submachine"));
 
         initialization();
+    }
+
+    /**
+     * Determine if the machine has been modified since its last save.
+     * @return true if it has been modified since its last save, false otherwise.
+     */
+    public boolean isModifiedSinceSave()
+    {
+        // Submachines should not indicate that they are modified; this should instead be pushed to
+        // the topmost machine
+        return m_parent != null? false : super.isModifiedSinceSave(); 
+    }
+
+    /**
+     * Set whether the machine has been modified since its last save.
+     * @param isModified true if it has been modified since its last save, false otherwise.
+     */
+    public void setModifiedSinceSave(boolean isModified)
+    {
+        if (m_parent == null)
+        {
+            super.setModifiedSinceSave(isModified);
+        }
+        else
+        {
+            // Push notification upwards
+            TMGraphicsPanel owner = m_parent;
+            while (owner.m_parent != null)
+            {
+                owner = owner.m_parent;
+            }
+            owner.setModifiedSinceSave(isModified);
+            if (owner.m_iFrame != null)
+            {
+                owner.m_iFrame.updateTitle();
+            }
+        }
     }
 
     /**
@@ -92,6 +132,15 @@ public class TMGraphicsPanel
     public void setParentPanel(TMGraphicsPanel parent)
     {
         m_parent = parent;
+    }
+
+    /**
+     * Get the children of this panel.
+     * @return The children of this panel.
+     */
+    public ArrayList<TMGraphicsPanel> getChildren()
+    {
+        return m_children;
     }
 
     /**
@@ -397,44 +446,44 @@ public class TMGraphicsPanel
          */
         public void actionPerformed(ActionEvent e)
         {
-            // Spawn a new frame containing the submachine
+            // For safety reasons, we can only ever have one instance of a frame for a submachine
+            // due to machines being shared by reference. Before spawning a frame, check if one
+            // exists.
+            MainWindow inst = MainWindow.getInstance();
+
+            // Create a new machine if necessary
             if (m_contextState.getSubmachine() == null)
             {
                 m_contextState.setSubmachine(new TM_Machine( 
                             new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
                             getAlphabet())); 
             }
-            MainWindow inst = MainWindow.getInstance();
-            TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null)
+
+            // Determine if a MachineInternalFrame already exists
+            MachineInternalFrame frame = null;
+            for (TMGraphicsPanel child : m_children)
             {
-                public boolean isModifiedSinceSave()
+                if (child.getSimulator().getMachine() == m_contextState.getSubmachine())
                 {
-                    // Submachines should not indicate that they have been modified;
-                    // this should be pushed all the way up to the owning machine.
-                    return false;
+                    frame = child.getFrame();
+                    break;
                 }
+            }
 
-                public void setModifiedSinceSave(boolean isModified)
-                {
-                    // Push the notif. upwards
-                    TMGraphicsPanel owner = m_parent;
-                    while (owner.m_parent != null)
-                    {
-                        owner = owner.m_parent;
-                    }
-                    owner.setModifiedSinceSave(isModified);
-                    if (owner.m_iFrame != null)
-                    {
-                        owner.m_iFrame.updateTitle();
-                    }
-                }
+            // No frame present
+            if (frame == null)
+            {
+                TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null);
+                addChild(gfx);
+                frame = inst.newMachineWindow(gfx);
+                gfx.setFrame(frame);
+                inst.addFrame(frame);
+            }
 
-            };
-            addChild(gfx);
-            
-            MachineInternalFrame frame = inst.newMachineWindow(gfx);
-            gfx.setFrame(frame);
-            inst.addFrame(frame);
+            if (!frame.isVisible())
+            {
+                inst.addFrame(frame);
+            }
         }
     }
 
