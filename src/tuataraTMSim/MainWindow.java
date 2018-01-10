@@ -673,7 +673,9 @@ public class MainWindow extends JFrame
             {
                 if (e.getButton() == MouseEvent.BUTTON1)
                 {
-                    machineMenu.show(e.getComponent(), newMachineToolBarButton.getX() - newMachineToolBarButton.getWidth() / 2, newMachineToolBarButton.getY() + newMachineToolBarButton.getHeight()); // e.getX(), e.getY());
+                    machineMenu.show(e.getComponent(), 
+                            newMachineToolBarButton.getX() - newMachineToolBarButton.getWidth() / 2, 
+                            newMachineToolBarButton.getY() + newMachineToolBarButton.getHeight());
                 }
             }
         });
@@ -885,13 +887,22 @@ public class MainWindow extends JFrame
      */
     public void addFrame(JInternalFrame frame)
     {
+        // Unselect any existing frame
+        JInternalFrame currentFrame = m_desktopPane.getSelectedFrame();
+        if (currentFrame != null)
+        {
+            try { currentFrame.setSelected(false); }
+            catch (PropertyVetoException e) { }
+        }
+
         // Add and select
         m_desktopPane.add(frame);
         m_desktopPane.setSelectedFrame(frame);
         m_desktopPane.getDesktopManager().activateFrame(frame);
-        frame.moveToFront();
+        frame.setVisible(true);
         try { frame.setSelected(true); }
-        catch (PropertyVetoException e2) { }
+        catch (PropertyVetoException e) { }
+
     }
     
     /**
