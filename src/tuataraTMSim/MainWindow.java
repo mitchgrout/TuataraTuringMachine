@@ -1630,7 +1630,7 @@ public class MainWindow extends JFrame
                 JInternalFrame iFrame = null;
                 if (machine instanceof TM_Machine)
                 {
-                    TMGraphicsPanel panel = new TMGraphicsPanel((TM_Machine)machine, m_tape, null);
+                    TMGraphicsPanel panel = new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile);
                     MachineInternalFrame frame = newMachineWindow(panel);
                     panel.setFrame(frame);
                     addFrame(frame);

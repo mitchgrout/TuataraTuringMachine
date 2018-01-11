@@ -135,6 +135,30 @@ public class TMGraphicsPanel
     }
 
     /**
+     * Get the state that owns this panel, and by extension the underlying simulator and machine.
+     * @return The owning state.
+     */
+    public TM_State getParentState()
+    {
+        // No parent means no parent state
+        if (m_parent == null)
+        {
+            return null;
+        }
+
+        // Iterate through all states searching for our machine
+        for (TM_State state : m_parent.getSimulator().getMachine().getStates())
+        {
+            if (state.getSubmachine() == m_sim.getMachine())
+            {
+                return state;
+            }
+        }
+        // Not reachable
+        return null;
+    }
+
+    /**
      * Get the children of this panel.
      * @return The children of this panel.
      */
@@ -179,10 +203,11 @@ public class TMGraphicsPanel
      */
     public String getFilename()
     {
-        // Submachines should just reflect their parents names
+        // Submachines should just reflect their parents names, plus the state they belong to
         if (m_parent != null)
         {
-            return m_parent.getFilename() + "-SUBMACHINE";
+            TM_State owner = getParentState();
+            return String.format("%s - %s submachine", m_parent.getFilename(), owner.getLabel());
         }
         else
         {
@@ -204,14 +229,9 @@ public class TMGraphicsPanel
                 // If we have an empty machine, destroy this frame
                 if (m_parent != null && m_sim.getMachine().getStates().size() == 0)
                 {
-                    for (TM_State state : m_parent.getSimulator().getMachine().getStates())
-                    {
-                        if (state.getSubmachine() == m_sim.getMachine())
-                        {
-                            state.setSubmachine(null);
-                            break;
-                        }
-                    }
+                    // m_parent != null => getParentState() != null
+                    TM_State owner = getParentState();
+                    owner.setSubmachine(null);
                     m_parent.removeChild(TMGraphicsPanel.this);
                 }
                 // Otherwise, close all children, but do not delete their references
