@@ -120,23 +120,6 @@ public class DFSAGraphicsPanel
     }
 
     /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseAcceptingClick(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        DFSA_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
-                              null : m_sim.getMachine().getFinalStates().iterator().next();
-        if (stateClickedOn != null)
-        {
-            // NOTE: Passing stateClickedOn twice prevents the old final states from being unset
-            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn));
-        }
-    }
-
-    /**
      * Create a DFSA_State object with the given label at the specified location.
      * @param label The state label.
      * @param x The x-ordinate of the state.

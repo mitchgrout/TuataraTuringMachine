@@ -364,32 +364,6 @@ public class TMGraphicsPanel
     }
 
     /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseAcceptingClick(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        TM_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
-                              null : m_sim.getMachine().getFinalStates().iterator().next();
-        if (stateClickedOn != null)
-        {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(this, finalState, stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleAcceptingStateCommand(this, finalState, stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-            }
-        }
-    }
-
-    /**
      * Create a TM_State object with the given label at the specified location.
      * @param label The state label.
      * @param x The x-ordinate of the state.

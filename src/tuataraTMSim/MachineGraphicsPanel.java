@@ -68,6 +68,8 @@ public abstract class MachineGraphicsPanel<
         // Create our context menu
         m_contextMenu = new JPopupMenu();
         m_contextMenu.add(new RenameStateAction("Rename State"));
+        m_contextMenu.add(new ToggleStartAction("Toggle Start"));
+        m_contextMenu.add(new ToggleAcceptingAction("Toggle Accepting"));
     }
 
     /**
@@ -1293,6 +1295,39 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
+     * occurs over a state, the accepting state of the machine is changed.
+     * @param e The generating event.
+     */
+    protected void handleChooseAcceptingClick(MouseEvent e)
+    {
+        // Get all relevant objects
+        MACHINE mac          = m_sim.getMachine();
+        STATE stateClickedOn = mac.getStateClickedOn(e.getX(), e.getY()),
+              finalState     = mac.getFinalStates().isEmpty()?
+                               null : mac.getFinalStates().iterator().next();
+
+        if (stateClickedOn != null)
+        {
+            // Generalized for all machines; if the machine should have a unique halt state, then
+            // ensure only 1 is ever selected at a time, otherwise toggle.
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleAcceptingStateCommand(this, 
+                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleAcceptingStateCommand(this, 
+                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn),
+                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+            }
+        }
+    }
+
+    /**
      * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
      * state, the state is either added or removed from the selected state set, depending on context.
      * @param e The generating event.
@@ -1325,13 +1360,6 @@ public abstract class MachineGraphicsPanel<
             m_sim.setCurrentState(stateClickedOn);
         }
     }
-
-    /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected abstract void handleChooseAcceptingClick(MouseEvent e);
 
     /**
      * Called when the owning frame is activated. Should deactivate any and all events which are not
@@ -1486,6 +1514,88 @@ public abstract class MachineGraphicsPanel<
             else
             {
                 doCommand(new RenameStateCommand(MachineGraphicsPanel.this, m_contextState, result));
+            }
+        }
+    }
+
+    /**
+     * Action to toggle whether or not a state is the start state.
+     */
+    protected class ToggleStartAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ToggleStartAction.
+         * @param text Description of the action.
+         */
+        public ToggleStartAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Toggle whether or not this state is the start state. Unsets the current start state.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            MACHINE mac = m_sim.getMachine();
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState),
+                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
+                    break;
+            }
+        }
+    } 
+
+    /**
+     * Action to toggle whether or not a state is the accepting state.
+     */
+    protected class ToggleAcceptingAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ToggleAcceptingAction.
+         * @param text Description of the action.
+         */
+        public ToggleAcceptingAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Toggle whether or not this state is an accepting state. If the underlying machine
+         * indicates it should have a unique halt state, unsets the existing accepting state.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // Get all relevant objects
+            MACHINE mac      = m_sim.getMachine();
+            STATE finalState = mac.getFinalStates().isEmpty()?
+                               null : mac.getFinalStates().iterator().next();
+
+            // Generalized for all machines; if the machine should have a unique halt state, then
+            // ensure only 1 is ever selected at a time, otherwise toggle.
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
+                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
             }
         }
     }

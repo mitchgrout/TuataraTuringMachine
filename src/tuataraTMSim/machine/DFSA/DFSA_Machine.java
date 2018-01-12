@@ -268,6 +268,16 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
     }
 
     /**
+     * Determine whether or not this type of machine should have a unique halt state. If true, then
+     * getFinalStates() should never return more than one element.
+     * @return true if this machine should have a unique halt state, false otherwise.
+     */
+    public boolean hasUniqueFinalState()
+    {
+        return false;
+    }
+
+    /**
      * Add a state to the machine.
      * @param state The state to add.
      */
