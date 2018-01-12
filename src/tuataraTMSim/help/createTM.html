@@ -129,8 +129,18 @@ this machine to prevent duplication of names.
 
 <p>
 <h3> Renaming States </h3>
-To give a state a custom name, click once on its name.  This brings up the appropriate dialog box.
-States must be uniquely named within a machine - duplicate names are not allowed.
+To give a state a custom name, right click on the state.  This brings up the appropriate context
+menu from which the state may be renamed.  States must be uniquely named within a machine -
+duplicate names are not allowed.
+</p>
+
+<p>
+<h3> Submachines </h3>
+Every state in a machine may be assigned a submachine; a valid Turing machine belonging to a state.
+When execution of a machine reaches a state with a submachine, execution of the submachine begins.
+When the submachine halts, execution of the owning machine begins again.  Before a machine can be
+run, both it and all submachines must be valid.  Submachines in turn may have their own submachines,
+but no cyclic machines are permitted, i.e. no machine may contain itself as a submachine.
 </p>
 
 <p>

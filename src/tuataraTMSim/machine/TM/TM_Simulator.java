@@ -239,7 +239,8 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
         {
             // Topmost machine should throw everything; submachines should not throw
             // ComputationCompletedException.
-            if (m_panel.getParentPanel() == null)
+            if (m_panel.getParentPanel() == null || 
+                m_panel.getParentPanel().getSimulator().m_state == null)
             {
                 throw e;
             }
