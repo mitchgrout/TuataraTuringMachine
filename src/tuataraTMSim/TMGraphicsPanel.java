@@ -35,8 +35,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.*;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
@@ -461,10 +460,44 @@ public class TMGraphicsPanel
 
             // Create a new machine if necessary
             if (m_contextState.getSubmachine() == null)
+            switch (JOptionPane.showConfirmDialog(MainWindow.getInstance(), 
+                        "Would you like to clone an existing machine?", "Make Submachine",
+                        JOptionPane.YES_NO_CANCEL_OPTION))
             {
-                m_contextState.setSubmachine(new TM_Machine( 
-                            new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
-                            getAlphabet())); 
+                case JOptionPane.YES_OPTION: 
+                    // Show a file dialog and clone the given machine
+                    JFileChooser fc = new JFileChooser();
+                    fc.setDialogTitle("Clone Submachine");
+                    fc.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+                    {
+                        public boolean accept(File f)
+                        {
+                            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
+                        }
+
+                        public String getDescription()
+                        {
+                            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
+                        }
+                    });
+                    if (fc.showOpenDialog(MainWindow.getInstance()) != JFileChooser.APPROVE_OPTION)
+                    {
+                        // Cancel
+                        return;
+                    }
+                    m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile()));
+                    break;
+
+                case JOptionPane.NO_OPTION:
+                    // Add a blank machine
+                    m_contextState.setSubmachine(new TM_Machine( 
+                                new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
+                                getAlphabet())); 
+                    break;
+
+                default: 
+                    // Cancel creating a submachine
+                    return;
             }
 
             // Determine if a MachineInternalFrame already exists
