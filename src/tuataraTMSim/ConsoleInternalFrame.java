@@ -62,7 +62,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         // Menu bar
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(new JButton(new ClearAction("Clear")));
+        menuBar.add(new JButton(m_clearAction));
         setJMenuBar(menuBar);
 
         // Text area
@@ -157,31 +157,6 @@ public class ConsoleInternalFrame extends JInternalFrame
     }
 
     /**
-     * Action to clear the console of all logged text.
-     */
-    private class ClearAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of SaveAction.
-         * @param text Description of the action.
-         */
-        public ClearAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Clear the text area, and draw the splash text.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            clear();
-        }
-    }
-
-    /**
      * The underlying text area used to store the logged text.
      */
     private JTextArea m_text;
@@ -195,4 +170,16 @@ public class ConsoleInternalFrame extends JInternalFrame
      * Whether or not we are waiting for more information to add to the log.
      */
     private boolean m_partial;
+
+    /**
+     * Action to clear the current console window.
+     */
+    private Action m_clearAction =
+        new AbstractAction("Clear")
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                clear();
+            }
+        };
 }

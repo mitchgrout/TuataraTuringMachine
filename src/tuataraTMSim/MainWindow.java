@@ -1524,137 +1524,31 @@ public class MainWindow extends JFrame
     }
    
     /**
-     * Action for creating a new Turing Machine in a new window.
+     * A wrapper around AbstractAction which exposes a more useful constructor, more easily allowing
+     * for anonymous actions.
      */
-    class NewTuringMachineAction extends AbstractAction
+    protected abstract class MenuAction extends AbstractAction
     {
-       /**
-         * Creates a new instance of NewTuringMachineAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
+        /**
+         * Creates a new instance of MenuAction
+         * @param text A name for the action.
+         * @param icon A image for the action.
+         * @param desc A description of the action.
+         * @param accel The accelerator key for this action. Null if no accelerator.
          */
-        public NewTuringMachineAction(String text, ImageIcon icon)
+        public MenuAction(String text, ImageIcon icon, String desc, KeyStroke accel)
         {
             super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Create a new machine, in a new frame.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            if (m_desktopPane != null)
-            {
-                TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
-                MachineInternalFrame frame = newMachineWindow(panel);
-                panel.setFrame(frame);
-                addFrame(frame);
-            }
+            putValue(SMALL_ICON, icon);
+            putValue(SHORT_DESCRIPTION, desc != null? desc : text);
+            putValue(ACCELERATOR_KEY, accel);
         }
     }
 
-    /**
-     * Action for creating a new DFSA in a new window.
-     */
-    class NewDFSAAction extends AbstractAction
-    {
-       /**
-         * Creates a new instance of NewDFSAAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public NewDFSAAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Create a new machine, in a new frame.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            if (m_desktopPane != null)
-            {
-                addFrame(newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null)));
-            }
-        }
-    }
-
-    /** 
-     * Action for opening/loading a machine diagram.
-     */
-    class OpenMachineAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of OpenMachineAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public OpenMachineAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Open a dialog to select a machine file, load the file, and display in new frame.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            // Choose the file to load
-            File inFile = chooseLoadFile(m_fcMachine, "Load Machine", "");
-            if (inFile == null)
-            {
-                // Cancelled by user
-                m_console.log("Cancelled loading machine");
-                return;
-            }
-            try
-            {
-                Machine machine = Machine.loadMachine(inFile);
-                if (machine == null)
-                {
-                    throw new IOException("Failed to load " + inFile.toString());
-                }
- 
-                // TODO: Can we make this nicer?
-                JInternalFrame iFrame = null;
-                if (machine instanceof TM_Machine)
-                {
-                    TMGraphicsPanel panel = new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile);
-                    MachineInternalFrame frame = newMachineWindow(panel);
-                    panel.setFrame(frame);
-                    addFrame(frame);
-                }
-                else if (machine instanceof DFSA_Machine)
-                {
-                    addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
-                }
-                m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
-            }
-            catch (Exception e2)
-            {
-                JOptionPane.showMessageDialog(MainWindow.this, 
-                        String.format("Error opening machine file %s", inFile.toString()));
-                m_console.log(String.format("Encountered an error when loading the machine %s: %s", 
-                            inFile.toString(), e2.getMessage()));
-            }
-        }
-    }
-       
     /**
      * Action for saving a machine diagram.
      */
-    class SaveMachineAction extends AbstractAction
+    class SaveMachineAction extends MenuAction
     {
         /**
          * Creates a new instance of SaveMachineAction.
@@ -1666,10 +1560,7 @@ public class MainWindow extends JFrame
          */
         public SaveMachineAction(String text, ImageIcon icon, boolean forceDialog)
         {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
+            super(text, icon, null, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
             m_force = forceDialog;
         }
        
@@ -1731,104 +1622,9 @@ public class MainWindow extends JFrame
     }
  
     /** 
-     * Action for creating a new tape, which will be displayed in the tape display panel and used by
-     * all machines.
-     */
-    class NewTapeAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of NewTapeAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public NewTapeAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Display a confirmation dialog, then clear the tape.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            // Prevent the program from reading from the keyboard while the file dialog is active
-            m_keyboardEnabled = false;
-            Object[] options = { "Ok", "Cancel" };
-            int result = JOptionPane.showOptionDialog(null, 
-                    "This will erase the tape. Do you want to continue?", "Clear tape",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
-                    options, options[1]);
-            m_keyboardEnabled = true;
-
-            if (result == JOptionPane.YES_OPTION)
-            {
-                m_tape.copyOther(new CA_Tape());
-                m_tapeDisp.repaint();
-            }
-        }
-    }
-    
-    /**
-     * Action for opening a tape.
-     */
-    class OpenTapeAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of OpenTapeAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public OpenTapeAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Display a dialog, and load the selected tape file.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            File inFile = chooseLoadFile(m_fcTape, "Load Tape", TAPE_EXTENSION);
-            if (inFile == null)
-            {
-                // Cancelled by user
-                m_console.log("Cancelled loading tape");
-                return;
-            }
-            
-            try
-            {
-                Tape tape = Tape.loadTape(inFile);
-                if (tape == null)
-                {
-                    throw new IOException(inFile.toString());
-                }
-                m_tapeDisp.getTape().copyOther(tape);
-                m_tapeDisp.setFile(inFile);
-                m_tapeDisp.repaint();
-            }
-            catch (Exception e2)
-            {
-                JOptionPane.showMessageDialog(MainWindow.this, 
-                        String.format("Error opening tape file %s", inFile.toString()));
-                m_console.log(String.format("Encountered an error when load the tape %s: %s",
-                            inFile.toString(), e2.getMessage()));
-            }
-        }
-    }
-    
-    /** 
      * Action for saving a tape.
      */
-    class SaveTapeAction extends AbstractAction
+    class SaveTapeAction extends MenuAction
     {
         /**
          * Creates a new instance of SaveTapeAction. 
@@ -1840,10 +1636,7 @@ public class MainWindow extends JFrame
          */
         public SaveTapeAction(String text, ImageIcon icon, boolean forceDialog)
         {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
+            super(text, icon, null, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
             m_force = forceDialog;
         }
         
@@ -1893,276 +1686,10 @@ public class MainWindow extends JFrame
     }
 
     /**
-     * Action for exiting the program.
-     */
-    class ExitAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ExitAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public ExitAction(String text, ImageIcon icon)
-        {
-            super(text);
-            // putValue(ACCELERATOR_KEY, ...);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Prompt the user to exit the program.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            userRequestToExit();
-        }
-    }
-        
-    /**
-     * Action for undoing a command.
-     */
-    class UndoAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of UndoAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public UndoAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Undo the last action on the undo stack.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                panel.undoCommand();
-                updateUndoActions();
-                panel.repaint();
-            }
-        }
-    }
-    
-    /**
-     * Action for redoing a command.
-     */
-    class RedoAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of RedoAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public RedoAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Redo the last command on the redo stack
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                panel.redoCommand();
-                updateUndoActions();
-                panel.repaint();
-            }
-        }
-    }
-
-    /**
-     * Action for cutting states and transitions from a machine.
-     */
-    class CutSelectedAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of CutSelectedAction. 
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public CutSelectedAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Cut the selected states and transitions from the machine.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            m_copyAction.actionPerformed(e); 
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                panel.doCommand(new CutCommand(panel, 
-                            (HashSet<? extends State>)panel.getSelectedStates().clone(),
-                            (HashSet<? extends Transition>)panel.getSelectedTransitions().clone()));
-                updateUndoActions();
-            }
-        }
-    }
-    
-    /**
-     * Action for copying states and transitions from a machine.
-     */
-    class CopySelectedAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of CopySelectedAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public CopySelectedAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Copy the selected states and transitions from a machine.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                m_copiedData = panel.copySelectedToByteArray();
-            }
-        }
-    }
-    
-    /**
-     * Action for pasting states and transitions into a machine.
-     */
-    class PasteAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of PasteAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public PasteAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Paste previously cut/copied states and transitions into the machine.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            try
-            {
-                MachineInternalFrame iFrame = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
-                if (m_copiedData == null || iFrame == null)
-                {
-                    // Abort
-                    return;
-                }
-
-                // Translate our byte[] back into real data
-                ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(m_copiedData));
-                HashSet<State> selectedStates = (HashSet<State>)restore.readObject();
-                HashSet<Transition> selectedTransitions = (HashSet<Transition>)restore.readObject();
-                
-                // Figure out roughly the centre-of-mass of the copied data
-                Point2D centroid = computeCentroid(selectedStates);
-
-                // Find the centre of the frame
-                Point2D centreOfWindow = iFrame.getCenterOfViewPort();
-                translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions,
-                        centreOfWindow, iFrame.getGfxPanel().getLastPastedLocation(),
-                        iFrame.getGfxPanel().getNumPastesToSameLocation(), iFrame.getGfxPanel());
-
-                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-                if (panel != null)
-                {
-                    Machine machine = panel.getSimulator().getMachine();
-                    switch (machine.getNamingScheme())
-                    {
-                        case GENERAL:
-                            panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
-                            break;
-
-                        case NORMALIZED:
-                            panel.doJoinCommand(
-                                new PasteCommand(panel, selectedStates, selectedTransitions),
-                                new SchemeRelabelCommand(panel, NamingScheme.NORMALIZED));
-                            break;
-                    }
-                    updateUndoActions();
-                }
-            }
-            catch (Exception e2) { }
-        }
-    }
-    
-    /**
-     * Action for deleting selected states and transitions from a machine.
-     */
-    class DeleteSelectedAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of DeleteSelectedAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public DeleteSelectedAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Delete the selected states and transitions from the machine.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {   
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                panel.deleteAllSelected();
-            }
-        }
-    }
- 
-    /**
      * An action for selecting user interface interaction modes.
      * @author Jimmy
      */
-    class GUI_ModeSelectionAction extends AbstractAction
+    class GUI_ModeSelectionAction extends MenuAction
     {
         /**
          * Creates a new instance of GUI_ModeSelectionAction.
@@ -2173,11 +1700,8 @@ public class MainWindow extends JFrame
          */
         public GUI_ModeSelectionAction(String text, GUI_Mode mode, ImageIcon icon, KeyStroke keyShortcut)
         {
-            super(text);
+            super(text, icon, null, keyShortcut);
             m_mode = mode;
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-            putValue(ACCELERATOR_KEY, keyShortcut);
         }
 
         /**
@@ -2212,189 +1736,11 @@ public class MainWindow extends JFrame
         private JRadioButtonMenuItem m_menuItem = null;
     }
    
-    /** 
-     * Action for stepping the selected machine one iteration.
-     */
-    class StepAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of StepAction.
-         * @param text Description of the action. 
-         * @param parentComponent The owner component.
-         * @param icon Icon for the action.
-         */
-        public StepAction(String text, Component parentComponent, ImageIcon icon)
-        {
-            super(text);
-            m_parentComponent = parentComponent;
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Step through one iteration of the machine simulation.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-            if (gfxPanel == null)
-            {
-                return;
-            }
-
-            // TODO: Can we use multiple dispatch or similar to tidy this up?
-            try
-            {
-                Simulator sim = gfxPanel.getSimulator();
-                sim.step();
-                m_tapeDisp.repaint();
-                if (sim.isHalted())
-                {
-                    m_console.logPartial(gfxPanel, sim.getConfiguration());
-                }
-                else
-                {
-                    m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
-                }
-            }
-            catch (ComputationCompletedException|ComputationFailedException e2)
-            {
-                String msg = gfxPanel.getErrorMessage(e2);
-                m_console.log(msg);
-                JOptionPane.showMessageDialog(m_parentComponent, msg, 
-                        MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-                gfxPanel.getSimulator().resetMachine();
-            }
-            catch (Exception e2)
-            {
-                String msg = gfxPanel.getErrorMessage(e2);
-                m_console.log(msg);
-                JOptionPane.showMessageDialog(m_parentComponent, msg,
-                        MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
-            }
-            repaint();
-        }
-
-        /**
-         * The owning component.
-         */
-        private Component m_parentComponent;
-    }
-
-    /**
-     * Action for executing a machine.
-     */
-    class FastExecuteAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of FastExecuteAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public FastExecuteAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Begin simulating the machine at the specified delay.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        { 
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                if (m_timerTask != null)
-                {
-                    m_timerTask.cancel();
-                }
-                setEditingEnabled(false);
-                m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp);
-                m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
-            }
-        }
-    }
-    
-    /**
-     * Action for pausing execution of a machine.
-     */
-    class PauseExecutionAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of PauseExecutionAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public PauseExecutionAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-       
-        /**
-         * Pause the execution of the machine.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            stopExecution();
-            updateUndoActions();
-        }
-    }
-    
-    /** 
-     * Action for resetting the selected machine.
-     */
-    class StopMachineAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of StopMachineAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public StopMachineAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-        
-        /**
-         * Stop the execution of the current machine, resetting all associated state.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
-            boolean wasRunning = stopExecution();
-            if (gfxPanel != null)
-            {
-                // TODO: reset it even if not running
-                if (m_timerTask == null || !wasRunning || gfxPanel == m_timerTask.getPanel())
-                {
-                    gfxPanel.getSimulator().resetMachine();
-                    gfxPanel.repaint();
-                    m_console.log("Stopped machine");
-                }
-            }
-            updateUndoActions();
-        }
-    }
-
     /**
      * An action for selecting speeds for automatic execution of machines.
      * @author Jimmy
      */
-    class ExecutionSpeedSelectionAction extends AbstractAction
+    class ExecutionSpeedSelectionAction extends MenuAction
     {
         /**
          * Creates a new instance of ExecutionSpeedSelectionAction.
@@ -2404,9 +1750,7 @@ public class MainWindow extends JFrame
         */
         public ExecutionSpeedSelectionAction(String text, int delay, KeyStroke keyShortcut)
         {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-            putValue(ACCELERATOR_KEY, keyShortcut);
+            super(text, null, null, keyShortcut);
             m_delay = delay;
         }
 
@@ -2425,293 +1769,6 @@ public class MainWindow extends JFrame
         private int m_delay;
     }
 
-    /**
-     * Action for moving the read/write head to the start of the tape.
-     */
-    class HeadToStartAction extends AbstractAction
-    {
-        /**
-         * Create a new instance of HeadToStartAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public HeadToStartAction(String text, Icon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, "Move the read/write head to the start of the tape.");
-        }
-
-        /**
-         * Move the read/write head to the leftmost end of the tape.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e) 
-        {
-            // Move r/w head to the left end of the tape
-            m_tapeDisp.getTape().resetRWHead();
-            m_tapeDispController.repaint();
-        }
-    }
-
-    /**
-     * Action for reloading the tape.
-     */
-    class ReloadTapeAction extends AbstractAction
-    {
-        /**
-         * Create a new instance of HeadToStartAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public ReloadTapeAction(String text, Icon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, "Reload the tape from disk, discarding any changes since the last save.");
-        }
-
-        public void actionPerformed(ActionEvent e) 
-        {
-            // Wipe the tape.
-            Object[] options = {"Ok", "Cancel"};
-            // TODO: should disable keyboard here
-            int result = 0;
-            if (m_tapeDisp.getFile() == null)
-            {
-                result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-            }
-            else
-            {
-                result = JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-            }
-
-            if (result == JOptionPane.YES_OPTION)
-            {
-                m_tapeDisp.reloadTape();
-                m_tapeDispController.repaint();
-                
-                File file = m_tapeDisp.getFile();
-                if (file == null)
-                {
-                    m_console.log("Deleted tape contents");
-                }
-                else
-                {
-                    m_console.log(String.format("Reloaded tape from file %s", 
-                            file.toString()));
-                }
-            }
-        }
-    }
-    
-    /**
-     * Action for erasing the tape.
-     */
-    class EraseTapeAction extends AbstractAction
-    {
-        /**
-         * Create a new instance of EraseTapeAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public EraseTapeAction(String text, Icon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, "Erase the tape.");
-        }
-
-        /**
-         * Erase the tape.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e) 
-        {
-            // Wipe the tape.
-            Object[] options = {"Ok", "Cancel"};
-            // TODO: should disable keyboard here
-            int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-            if (result == JOptionPane.YES_OPTION)
-            {
-                m_tapeDisp.getTape().clearTape();
-                m_tapeDispController.repaint();
-            }
-        }
-    }
-
-    /**
-     * Action for configuring the current alphabet.
-     */
-    class ConfigureAlphabetAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ConfigureAlphabetAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public ConfigureAlphabetAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-        }
-        
-        public void actionPerformed(ActionEvent e)
-        {
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                m_asif.setPanel(panel);
-                m_asif.show();
-                getGlassPane().setVisible(true);
-            }
-        }
-    }
-
-    /**
-     * Action for configuring the current naming scheme.
-     */
-    class ConfigureSchemeAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ConfigureSchemeAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public ConfigureSchemeAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
-        }
-
-        public void actionPerformed(ActionEvent e)
-        {
-            MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-            if (panel != null)
-            {
-                m_ssif.setPanel(panel);
-                m_ssif.show();
-                getGlassPane().setVisible(true);
-            }
-        }
-    }
-  
-    /**
-     * Action for displaying the shared console.
-     */
-    class ShowConsoleAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ShowConsoleAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public ShowConsoleAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Display the console.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            if (!m_console.isVisible())
-            {
-                addFrame(m_console);
-            }
-            else
-            {
-                m_console.moveToFront();
-                try { m_console.setSelected(true); }
-                catch (PropertyVetoException e2) { }
-            }
-        }
-    }
-
-    /**
-     * Action for displaying help contents.
-     */
-    class HelpAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of HelpAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */
-        public HelpAction(String text, ImageIcon icon)
-        {
-            super(text);
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Display a new frame which renders help documentation.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            if (m_helpDisp == null)
-            {
-                m_helpDisp = new HelpDisplayer();
-                m_helpDisp.setLayer(60);
-            }
-            if (!m_helpDisp.isVisible())
-            {
-                addFrame(m_helpDisp);
-            }
-            else
-            {
-                m_helpDisp.moveToFront();
-                try { m_helpDisp.setSelected(true); }
-                catch (PropertyVetoException e2) { }
-            }
-        }
-    }
-
-    /**
-     * Action for displaying the about contents of the program.
-     */
-    class AboutAction extends AbstractAction
-    {
-        /**
-         * Creates a new instances of AboutAction.
-         * @param text Description of the action.
-         * @param icon Icon for the action.
-         */ 
-        public AboutAction(String text, ImageIcon icon)
-        {
-            super(text);
-            // putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_???, KeyEvent.CTRL_DOWN_MASK));
-            putValue(Action.SMALL_ICON, icon);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Display a message box specifying some meta information about the program.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            JOptionPane.showMessageDialog(MainWindow.this,
-                "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
-                "and extended by Mitchell Grout in 2017-2018, with funding from the \n" +
-                "Department of Mathematics at the University of Waikato, New Zealand.");
-        }
-    }
-    
     /** 
      * This class is designed to intercept mouse events in order to make a window modal.
      * It is borrowed from the Sun developer tech tips article at
@@ -2872,117 +1929,374 @@ public class MainWindow extends JFrame
     /**
      * Action for creating a new Turing Machine.
      */
-    public final Action m_newTuringMachineAction = new NewTuringMachineAction("New Turing Machine", loadIcon("newMachine.gif"));
+    public final Action m_newTuringMachineAction = 
+        new MenuAction("New Turing Machine", loadIcon("newMachine.gif"), null, null)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                if (m_desktopPane != null)
+                {
+                    TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
+                    MachineInternalFrame frame = newMachineWindow(panel);
+                    panel.setFrame(frame);
+                    addFrame(frame);
+                }
+            }
+        };
 
     /**
      * Action for creating a new DFSA.
      */
-    public final Action m_newDFSAAction = new NewDFSAAction("New DFSA", loadIcon("newMachine.gif")); 
+    public final Action m_newDFSAAction = 
+        new MenuAction("New DFSA", loadIcon("newMachine.gif"), null, null)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                if (m_desktopPane != null)
+                {
+                    addFrame(newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null)));
+                }
+            }
+        };
 
     /**
      * Action for opening a machine.
      */
-    public final Action m_openMachineAction = new OpenMachineAction("Open Machine", loadIcon("openMachine.gif"));;
+    public final Action m_openMachineAction = 
+        new MenuAction("Open Machine", loadIcon("openMachine.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Choose the file to load
+                File inFile = chooseLoadFile(m_fcMachine, "Load Machine", "");
+                if (inFile == null)
+                {
+                    // Cancelled by user
+                    m_console.log("Cancelled loading machine");
+                    return;
+                }
+                try
+                {
+                    Machine machine = Machine.loadMachine(inFile);
+                    if (machine == null)
+                    {
+                        throw new IOException("Failed to load " + inFile.toString());
+                    }
+
+                    // TODO: Can we make this nicer?
+                    JInternalFrame iFrame = null;
+                    if (machine instanceof TM_Machine)
+                    {
+                        TMGraphicsPanel panel = new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile);
+                        MachineInternalFrame frame = newMachineWindow(panel);
+                        panel.setFrame(frame);
+                        addFrame(frame);
+                    }
+                    else if (machine instanceof DFSA_Machine)
+                    {
+                        addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
+                    }
+                    m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
+                }
+                catch (Exception e2)
+                {
+                    JOptionPane.showMessageDialog(MainWindow.this, 
+                            String.format("Error opening machine file %s", inFile.toString()));
+                    m_console.log(String.format("Encountered an error when loading the machine %s: %s", 
+                                inFile.toString(), e2.getMessage()));
+                }
+            }
+        };
 
     /**
      * Action for saving a machine to an associated file.
      */
-    public final Action m_saveMachineAction = new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
+    public final Action m_saveMachineAction = 
+        new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
-    public final Action m_saveMachineAsAction = new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveMachineAsAction = 
+        new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
      */
-    public final Action m_newTapeAction = new NewTapeAction("New Tape", loadIcon("newTape.gif"));
+    public final Action m_newTapeAction = 
+        new MenuAction("New Tape", loadIcon("newTape.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Prevent the program from reading from the keyboard while the file dialog is active
+                m_keyboardEnabled = false;
+                Object[] options = { "Ok", "Cancel" };
+                int result = JOptionPane.showOptionDialog(null, 
+                        "This will erase the tape. Do you want to continue?", "Clear tape",
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
+                        options, options[1]);
+                m_keyboardEnabled = true;
+
+                if (result == JOptionPane.YES_OPTION)
+                {
+                    m_tape.copyOther(new CA_Tape());
+                    m_tapeDisp.repaint();
+                }
+            }
+        };
 
     /**
      * Action for opening a tape.
      */
-    public final Action m_openTapeAction = new OpenTapeAction("Open Tape", loadIcon("openTape.gif"));
+    public final Action m_openTapeAction = 
+        new MenuAction("Open Tape", loadIcon("openTape.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                File inFile = chooseLoadFile(m_fcTape, "Load Tape", TAPE_EXTENSION);
+                if (inFile == null)
+                {
+                    // Cancelled by user
+                    m_console.log("Cancelled loading tape");
+                    return;
+                }
+
+                try
+                {
+                    Tape tape = Tape.loadTape(inFile);
+                    if (tape == null)
+                    {
+                        throw new IOException(inFile.toString());
+                    }
+                    m_tapeDisp.getTape().copyOther(tape);
+                    m_tapeDisp.setFile(inFile);
+                    m_tapeDisp.repaint();
+                }
+                catch (Exception e2)
+                {
+                    JOptionPane.showMessageDialog(MainWindow.this, 
+                            String.format("Error opening tape file %s", inFile.toString()));
+                    m_console.log(String.format("Encountered an error when load the tape %s: %s",
+                                inFile.toString(), e2.getMessage()));
+                }
+            }
+        };
 
     /**
      * Action for saving a tape to an associated file.
      */
-    public final Action m_saveTapeAction = new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
+    public final Action m_saveTapeAction = 
+        new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
-    public final Action m_saveTapeAsAction = new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
+    public final Action m_saveTapeAsAction = 
+        new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
      */
-    public final Action m_exitAction = new ExitAction("Exit", loadIcon("emptyIcon.gif"));
+    public final Action m_exitAction = 
+        new MenuAction("Exit", loadIcon("emptyIcon.gif"), null, null)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                userRequestToExit();
+            }
+        };
 
     /**
      * Action for undoing a command.
      */
-    public final Action m_undoAction = new UndoAction("Undo", loadIcon("undoIcon.gif"));
+    public final Action m_undoAction = 
+        new MenuAction("Undo", loadIcon("undoIcon.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    panel.undoCommand();
+                    updateUndoActions();
+                    panel.repaint();
+                }
+            }
+        };
 
     /**
      * Action for redoing a command
      */
-    public final Action m_redoAction = new RedoAction("Redo", loadIcon("redoIcon.gif"));
+    public final Action m_redoAction = 
+        new MenuAction("Redo", loadIcon("redoIcon.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {   
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    panel.redoCommand();
+                    updateUndoActions();
+                    panel.repaint();
+                }
+            }
+        };
 
     /**
      * Action for cutting selected states and transitions.
      */
-    public final Action m_cutAction = new CutSelectedAction("Cut", loadIcon("cut.gif"));
+    public final Action m_cutAction = 
+        new MenuAction("Cut", loadIcon("cut.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {   
+                m_copyAction.actionPerformed(e); 
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    panel.doCommand(new CutCommand(panel, 
+                                (HashSet<? extends State>)panel.getSelectedStates().clone(),
+                                (HashSet<? extends Transition>)panel.getSelectedTransitions().clone()));
+                    updateUndoActions();
+                }
+            }
+        };
 
     /**
      * Action for copying selected states and transitions.
      */
-    public final Action m_copyAction = new CopySelectedAction("Copy", loadIcon("copy.gif"));
+    public final Action m_copyAction = 
+        new MenuAction("Copy", loadIcon("copy.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {   
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    m_copiedData = panel.copySelectedToByteArray();
+                }
+            }
+        };
 
     /**
      * Action for pasting selected states and transitions.
      */
-    public final Action m_pasteAction = new PasteAction("Paste", loadIcon("paste.gif"));
+    public final Action m_pasteAction = 
+        new MenuAction("Paste", loadIcon("paste.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {   
+                try
+                {
+                    MachineInternalFrame iFrame = (MachineInternalFrame)m_desktopPane.getSelectedFrame();
+                    if (m_copiedData == null || iFrame == null)
+                    {
+                        // Abort
+                        return;
+                    }
+
+                    // Translate our byte[] back into real data
+                    ObjectInputStream restore = new ObjectInputStream(new ByteArrayInputStream(m_copiedData));
+                    HashSet<State> selectedStates = (HashSet<State>)restore.readObject();
+                    HashSet<Transition> selectedTransitions = (HashSet<Transition>)restore.readObject();
+
+                    // Figure out roughly the centre-of-mass of the copied data
+                    Point2D centroid = computeCentroid(selectedStates);
+
+                    // Find the centre of the frame
+                    Point2D centreOfWindow = iFrame.getCenterOfViewPort();
+                    translateCentroidToMiddleOfWindow(selectedStates, selectedTransitions,
+                            centreOfWindow, iFrame.getGfxPanel().getLastPastedLocation(),
+                            iFrame.getGfxPanel().getNumPastesToSameLocation(), iFrame.getGfxPanel());
+
+                    MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                    if (panel != null)
+                    {
+                        Machine machine = panel.getSimulator().getMachine();
+                        switch (machine.getNamingScheme())
+                        {
+                            case GENERAL:
+                                panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
+                                break;
+
+                            case NORMALIZED:
+                                panel.doJoinCommand(
+                                        new PasteCommand(panel, selectedStates, selectedTransitions),
+                                        new SchemeRelabelCommand(panel, NamingScheme.NORMALIZED));
+                                break;
+                        }
+                        updateUndoActions();
+                    }
+                }
+                catch (Exception e2) { }
+            }
+        };
 
     /**
      * Action for deleting selected states and transitions.
      */
-    public final Action m_deleteAction = new DeleteSelectedAction("Delete Selected Items", loadIcon("delete.gif"));
+    public final Action m_deleteAction = 
+        new MenuAction("Delete Selected Items", loadIcon("delete.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
+        {
+            public void actionPerformed(ActionEvent e)
+            {   
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    panel.deleteAllSelected();
+                }
+            }
+        };
 
     /**
      * Action associated with ADDNODES.
      */
-    public final GUI_ModeSelectionAction m_addNodesAction = new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
+    public final GUI_ModeSelectionAction m_addNodesAction = 
+        new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
             loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
 
     /**
      * Action associated with ADDTRANSITIONS.
      */
-    public final GUI_ModeSelectionAction m_addTransitionsAction = new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
+    public final GUI_ModeSelectionAction m_addTransitionsAction = 
+        new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
             loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 
     /**
      * Action associated with SELECTION.
      */
-    public final GUI_ModeSelectionAction m_selectionAction = new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
+    public final GUI_ModeSelectionAction m_selectionAction = 
+        new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
             loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
 
     /**
      * Action associated with ERASER.
      */
-    public final GUI_ModeSelectionAction m_eraserAction = new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
+    public final GUI_ModeSelectionAction m_eraserAction = 
+        new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
             loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
 
     /**
      * Action associated with CHOOSESTART.
      */
-    public final GUI_ModeSelectionAction m_chooseStartAction = new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
+    public final GUI_ModeSelectionAction m_chooseStartAction = 
+        new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
             loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
      * Action associated with CHOOSEACCEPTING.
      */
-    public final GUI_ModeSelectionAction m_chooseAcceptingAction = new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
+    public final GUI_ModeSelectionAction m_chooseAcceptingAction = 
+        new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
             loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**
@@ -2990,27 +2304,117 @@ public class MainWindow extends JFrame
      */
     public final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
         new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
-                loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
+            loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
 
     /**
      * Action for stepping through execution.
      */
-    public final Action m_stepAction = new StepAction("Step", this, loadIcon("step.gif"));
+    public final Action m_stepAction = 
+        new MenuAction("Step", loadIcon("step.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+                if (gfxPanel == null)
+                {
+                    return;
+                }
+
+                try
+                {
+                    Simulator sim = gfxPanel.getSimulator();
+                    sim.step();
+                    m_tapeDisp.repaint();
+                    if (sim.isHalted())
+                    {
+                        m_console.logPartial(gfxPanel, sim.getConfiguration());
+                    }
+                    else
+                    {
+                        m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
+                    }
+                }
+                catch (ComputationCompletedException|ComputationFailedException e2)
+                {
+                    String msg = gfxPanel.getErrorMessage(e2);
+                    m_console.log(msg);
+                    JOptionPane.showMessageDialog(MainWindow.getInstance(), msg, 
+                            MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                    gfxPanel.getSimulator().resetMachine();
+                }
+                catch (Exception e2)
+                {
+                    String msg = gfxPanel.getErrorMessage(e2);
+                    m_console.log(msg);
+                    JOptionPane.showMessageDialog(MainWindow.getInstance(), msg,
+                            MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                }
+                repaint();
+            }
+        };
 
     /**
      * Action for starting simulation of the machine.
      */
-    public final Action m_fastExecuteAction = new FastExecuteAction("Execute", loadIcon("fastExecute.gif"));
+    public final Action m_fastExecuteAction = 
+        new MenuAction("Execute", loadIcon("fastExecute.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            { 
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    if (m_timerTask != null)
+                    {
+                        m_timerTask.cancel();
+                    }
+                    setEditingEnabled(false);
+                    m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp);
+                    m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
+                }
+            }
+        };
 
     /**
      * Action for pausing simulation of the machine.
      */
-    public final Action m_pauseExecutionAction = new PauseExecutionAction("Pause Execution", loadIcon("pause.gif"));
+    public final Action m_pauseExecutionAction = 
+        new MenuAction("Pause Execution", loadIcon("pause.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                stopExecution();
+                updateUndoActions();
+            }
+        };
 
     /**
      * Action for stopping a simulation.
      */
-    public final Action m_stopMachineAction = new StopMachineAction("Stop Execution", loadIcon("stop.gif"));
+    public final Action m_stopMachineAction = 
+        new MenuAction("Stop Execution", loadIcon("stop.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+                boolean wasRunning = stopExecution();
+                if (gfxPanel != null)
+                {
+                    // TODO: reset it even if not running
+                    if (m_timerTask == null || !wasRunning || gfxPanel == m_timerTask.getPanel())
+                    {
+                        gfxPanel.getSimulator().resetMachine();
+                        gfxPanel.repaint();
+                        m_console.log("Stopped machine");
+                    }
+                }
+                updateUndoActions();
+            }
+        };
 
     /**
      * Action to set execution speed to slow.
@@ -3050,40 +2454,178 @@ public class MainWindow extends JFrame
     /**
      * Action for moving the read/write head to the start of the tape.
      */
-    public final HeadToStartAction m_headToStartAction = new HeadToStartAction("Move Read/Write Head to Start of Tape", loadIcon("tapeStart.gif"));
+    public final Action m_headToStartAction = 
+        new MenuAction("Reset Read/Write Head", loadIcon("tapeStart.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e) 
+            {
+                // Move r/w head to the left end of the tape
+                m_tapeDisp.getTape().resetRWHead();
+                m_tapeDispController.repaint();
+            }
+        };
 
     /**
      * Action for reloading the tape.
      */
-    public final ReloadTapeAction m_reloadTapeAction = new ReloadTapeAction("Reload Tape", loadIcon("tapeReload.gif"));
+    public final Action m_reloadTapeAction = 
+        new MenuAction("Reload Tape", loadIcon("tapeReload.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e) 
+            {
+                // Wipe the tape.
+                Object[] options = {"Ok", "Cancel"};
+                // TODO: should disable keyboard here
+                int result = 0;
+                if (m_tapeDisp.getFile() == null)
+                {
+                    result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                }
+                else
+                {
+                    result = JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                }
+
+                if (result == JOptionPane.YES_OPTION)
+                {
+                    m_tapeDisp.reloadTape();
+                    m_tapeDispController.repaint();
+
+                    File file = m_tapeDisp.getFile();
+                    if (file == null)
+                    {
+                        m_console.log("Deleted tape contents");
+                    }
+                    else
+                    {
+                        m_console.log(String.format("Reloaded tape from file %s", 
+                                    file.toString()));
+                    }
+                }
+            }
+        };
 
     /**
      * Action for erasing the tape.
      */
-    public final EraseTapeAction m_eraseTapeAction = new EraseTapeAction("Erase Tape", loadIcon("tapeClear.gif"));
+    public final Action m_eraseTapeAction = 
+        new MenuAction("Erase Tape", loadIcon("tapeClear.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e) 
+            {
+                // Wipe the tape.
+                Object[] options = {"Ok", "Cancel"};
+                // TODO: should disable keyboard here
+                int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                if (result == JOptionPane.YES_OPTION)
+                {
+                    m_tapeDisp.getTape().clearTape();
+                    m_tapeDispController.repaint();
+                }
+            }
+        };
 
     /**
      * Action for configuring the alphabet.
      */
-    public final Action m_configureAlphabetAction = new ConfigureAlphabetAction("Configure Alphabet", loadIcon("configureAlphabet.gif")); 
+    public final Action m_configureAlphabetAction = 
+        new MenuAction("Configure Alphabet", loadIcon("configureAlphabet.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    m_asif.setPanel(panel);
+                    m_asif.show();
+                    getGlassPane().setVisible(true);
+                }
+            }
+        };
 
     /**
      * Action for configuring the naming scheme.
      */
-    public final Action m_configureSchemeAction = new ConfigureSchemeAction("Configure Naming Scheme", loadIcon("scheme.gif"));
+    public final Action m_configureSchemeAction = 
+        new MenuAction("Configure Naming Scheme", loadIcon("scheme.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
+                if (panel != null)
+                {
+                    m_ssif.setPanel(panel);
+                    m_ssif.show();
+                    getGlassPane().setVisible(true);
+                }
+            }
+        };
 
     /**
      * Action for displaying the shared console.
      */
-    public final Action m_showConsoleAction = new ShowConsoleAction("Show Console", loadIcon("console.gif"));
+    public final Action m_showConsoleAction = 
+        new MenuAction("Show Console", loadIcon("console.gif"), null, null)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                if (!m_console.isVisible())
+                {
+                    addFrame(m_console);
+                }
+                else
+                {
+                    m_console.moveToFront();
+                    try { m_console.setSelected(true); }
+                    catch (PropertyVetoException e2) { }
+                }
+            }
+        };
 
     /**
      * Action for displaying help documentation.
      */
-    public final Action m_helpAction = new HelpAction("Help", loadIcon("tuatara.gif"));
+    public final Action m_helpAction = 
+        new MenuAction("Help", loadIcon("tuatara.gif"), null, 
+                       KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                if (m_helpDisp == null)
+                {
+                    m_helpDisp = new HelpDisplayer();
+                    m_helpDisp.setLayer(60);
+                }
+                if (!m_helpDisp.isVisible())
+                {
+                    addFrame(m_helpDisp);
+                }
+                else
+                {
+                    m_helpDisp.moveToFront();
+                    try { m_helpDisp.setSelected(true); }
+                    catch (PropertyVetoException e2) { }
+                }
+            }
+        };
 
     /**
      * Action for displaying meta information about the program.
      */
-    public final Action m_aboutAction = new AboutAction("About", loadIcon("emptyIcon.gif"));
+    public final Action m_aboutAction = 
+        new MenuAction("About", loadIcon("emptyIcon.gif"), null, null)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
+                        "and extended by Mitchell Grout in 2017-2018, with funding from the \n" +
+                        "Department of Mathematics at the University of Waikato, New Zealand.");
+            }
+        };
 }

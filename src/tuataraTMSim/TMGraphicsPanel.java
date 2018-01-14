@@ -73,7 +73,7 @@ public class TMGraphicsPanel
 
         // Add TM-specific context menu actions
         m_contextMenu.addSeparator();
-        m_contextMenu.add(new SubmachineAction("Make Submachine"));
+        m_contextMenu.add(m_submachineAction);
 
         initialization();
     }
@@ -430,105 +430,6 @@ public class TMGraphicsPanel
     }
 
     /**
-     * Action to open a frame to edit a submachine.
-     */
-    protected class SubmachineAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of SubmachineAction.
-         * @param text Description of the action.
-         */ 
-        public SubmachineAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-
-            // TODO: Create a JFrame to allow blitting across an existing machine
-        }
-
-        /**
-         * If no existing submachine, prompt the user to copy across an existing machine, or start
-         * blank. Otherwise, load the machine into a new frame with no backing file.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            // For safety reasons, we can only ever have one instance of a frame for a submachine
-            // due to machines being shared by reference. Before spawning a frame, check if one
-            // exists.
-            MainWindow inst = MainWindow.getInstance();
-
-            // Create a new machine if necessary
-            if (m_contextState.getSubmachine() == null)
-            switch (JOptionPane.showConfirmDialog(MainWindow.getInstance(), 
-                        "Would you like to clone an existing machine?", "Make Submachine",
-                        JOptionPane.YES_NO_CANCEL_OPTION))
-            {
-                case JOptionPane.YES_OPTION: 
-                    // Show a file dialog and clone the given machine
-                    JFileChooser fc = new JFileChooser();
-                    fc.setDialogTitle("Clone Submachine");
-                    fc.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
-                    {
-                        public boolean accept(File f)
-                        {
-                            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
-                        }
-
-                        public String getDescription()
-                        {
-                            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
-                        }
-                    });
-                    if (fc.showOpenDialog(MainWindow.getInstance()) != JFileChooser.APPROVE_OPTION)
-                    {
-                        // Cancel
-                        return;
-                    }
-                    m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile()));
-                    break;
-
-                case JOptionPane.NO_OPTION:
-                    // Add a blank machine
-                    m_contextState.setSubmachine(new TM_Machine( 
-                                new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
-                                getAlphabet())); 
-                    break;
-
-                default: 
-                    // Cancel creating a submachine
-                    return;
-            }
-
-            // Determine if a MachineInternalFrame already exists
-            MachineInternalFrame frame = null;
-            for (TMGraphicsPanel child : m_children)
-            {
-                if (child.getSimulator().getMachine() == m_contextState.getSubmachine())
-                {
-                    frame = child.getFrame();
-                    break;
-                }
-            }
-
-            // No frame present
-            if (frame == null)
-            {
-                TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null);
-                addChild(gfx);
-                frame = inst.newMachineWindow(gfx);
-                gfx.setFrame(frame);
-                inst.addFrame(frame);
-            }
-
-            if (!frame.isVisible())
-            {
-                inst.addFrame(frame);
-            }
-        }
-    }
-
-    /**
      * The parent of this panel.
      */
     protected TMGraphicsPanel m_parent;
@@ -537,4 +438,87 @@ public class TMGraphicsPanel
      * The children of this panel.
      */
     protected ArrayList<TMGraphicsPanel> m_children = new ArrayList<TMGraphicsPanel>();
+
+    /**
+     * Action to create a panel used to edit submachines.
+     */
+    protected Action m_submachineAction = 
+        new AbstractAction("Make Submachine")
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // For safety reasons, we can only ever have one instance of a frame for a submachine
+                // due to machines being shared by reference. Before spawning a frame, check if one
+                // exists.
+                MainWindow inst = MainWindow.getInstance();
+
+                // Create a new machine if necessary
+                if (m_contextState.getSubmachine() == null)
+                    switch (JOptionPane.showConfirmDialog(MainWindow.getInstance(), 
+                                "Would you like to clone an existing machine?", "Make Submachine",
+                                JOptionPane.YES_NO_CANCEL_OPTION))
+                    {
+                        case JOptionPane.YES_OPTION: 
+                            // Show a file dialog and clone the given machine
+                            JFileChooser fc = new JFileChooser();
+                            fc.setDialogTitle("Clone Submachine");
+                            fc.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+                                    {
+                                        public boolean accept(File f)
+                                        {
+                                            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
+                                        }
+
+                                        public String getDescription()
+                                        {
+                                            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
+                                        }
+                                    });
+                            if (fc.showOpenDialog(MainWindow.getInstance()) != JFileChooser.APPROVE_OPTION)
+                            {
+                                // Cancel
+                                return;
+                            }
+                            m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile()));
+                            break;
+
+                        case JOptionPane.NO_OPTION:
+                            // Add a blank machine
+                            m_contextState.setSubmachine(new TM_Machine( 
+                                        new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
+                                        getAlphabet())); 
+                            break;
+
+                        default: 
+                            // Cancel creating a submachine
+                            return;
+                    }
+
+                // Determine if a MachineInternalFrame already exists
+                MachineInternalFrame frame = null;
+                for (TMGraphicsPanel child : m_children)
+                {
+                    if (child.getSimulator().getMachine() == m_contextState.getSubmachine())
+                    {
+                        frame = child.getFrame();
+                        break;
+                    }
+                }
+
+                // No frame present
+                if (frame == null)
+                {
+                    TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null);
+                    addChild(gfx);
+                    frame = inst.newMachineWindow(gfx);
+                    gfx.setFrame(frame);
+                    inst.addFrame(frame);
+                }
+
+                if (!frame.isVisible())
+                {
+                    inst.addFrame(frame);
+                }
+            }
+        };
 }

@@ -67,9 +67,9 @@ public abstract class MachineGraphicsPanel<
 
         // Create our context menu
         m_contextMenu = new JPopupMenu();
-        m_contextMenu.add(new RenameStateAction("Rename State"));
-        m_contextMenu.add(new ToggleStartAction("Toggle Start"));
-        m_contextMenu.add(new ToggleAcceptingAction("Toggle Accepting"));
+        m_contextMenu.add(m_renameStateAction);
+        m_contextMenu.add(m_toggleStartAction);
+        m_contextMenu.add(m_toggleAcceptingAction);
     }
 
     /**
@@ -1465,142 +1465,6 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Action to rename a state selected by the context menu.
-     */
-    protected class RenameStateAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of RenameStateAction.
-         * @param text Description of the action.
-         */
-        public RenameStateAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Display a dialog to change the state label. If the user accepts the new name, and it
-         * passes relevant checks, fire the command to change the label.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            // Should be fired by m_contextMenu, which in turn is only open if we have right clicked
-            // on a state. Hence we have a non-null state to work with.
-            
-            // Disable the keyboard while we prompt for user input
-            m_keyboardEnabled = false;
-            String result = (String) JOptionPane.showInputDialog(null, "Please enter the new state label",
-                                                                 "Rename State", JOptionPane.QUESTION_MESSAGE,
-                                                                 null, null, m_contextState.getLabel());
-            m_keyboardEnabled = true;
-        
-            // User cancelled, or no change
-            if (result == null || result.equals(m_contextState.getLabel()))
-            {
-                // Do nothing
-            }
-            // Blank label not allowed
-            else if (result.equals(""))
-            {
-                JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
-            }
-            // Label already in use
-            else if (m_labelsUsed.contains(result))
-            {
-                JOptionPane.showMessageDialog(null, "Label is already used by another state!");
-            }
-            // Otherwise rename
-            else
-            {
-                doCommand(new RenameStateCommand(MachineGraphicsPanel.this, m_contextState, result));
-            }
-        }
-    }
-
-    /**
-     * Action to toggle whether or not a state is the start state.
-     */
-    protected class ToggleStartAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ToggleStartAction.
-         * @param text Description of the action.
-         */
-        public ToggleStartAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Toggle whether or not this state is the start state. Unsets the current start state.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            MACHINE mac = m_sim.getMachine();
-            switch (mac.getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState),
-                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
-                    break;
-            }
-        }
-    } 
-
-    /**
-     * Action to toggle whether or not a state is the accepting state.
-     */
-    protected class ToggleAcceptingAction extends AbstractAction
-    {
-        /**
-         * Creates a new instance of ToggleAcceptingAction.
-         * @param text Description of the action.
-         */
-        public ToggleAcceptingAction(String text)
-        {
-            super(text);
-            putValue(Action.SHORT_DESCRIPTION, text);
-        }
-
-        /**
-         * Toggle whether or not this state is an accepting state. If the underlying machine
-         * indicates it should have a unique halt state, unsets the existing accepting state.
-         * @param e The generating event.
-         */
-        public void actionPerformed(ActionEvent e)
-        {
-            // Get all relevant objects
-            MACHINE mac      = m_sim.getMachine();
-            STATE finalState = mac.getFinalStates().isEmpty()?
-                               null : mac.getFinalStates().iterator().next();
-
-            // Generalized for all machines; if the machine should have a unique halt state, then
-            // ensure only 1 is ever selected at a time, otherwise toggle.
-            switch (mac.getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
-                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
-                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
-                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
-            }
-        }
-    }
-
-    /**
      * Get the file extension associated with this type of machine. Should return a value from a
      * symbol named MACHINE_EXT.
      * @return The file extension associated with this type of machine.
@@ -1817,4 +1681,100 @@ public abstract class MachineGraphicsPanel<
      * How many times an object was pasted to the last pasted location.
      */
     protected int m_numPastesToSameLocation = 0;
+
+    /**
+     * Action which prompts the user to rename the selected state.
+     */
+    protected Action m_renameStateAction = 
+        new AbstractAction("Rename State")
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Should be fired by m_contextMenu, which in turn is only open if we have right clicked
+                // on a state. Hence we have a non-null state to work with.
+
+                // Disable the keyboard while we prompt for user input
+                m_keyboardEnabled = false;
+                String result = (String) JOptionPane.showInputDialog(null, "Please enter the new state label",
+                        "Rename State", JOptionPane.QUESTION_MESSAGE,
+                        null, null, m_contextState.getLabel());
+                m_keyboardEnabled = true;
+
+                // User cancelled, or no change
+                if (result == null || result.equals(m_contextState.getLabel()))
+                {
+                    // Do nothing
+                }
+                // Blank label not allowed
+                else if (result.equals(""))
+                {
+                    JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
+                }
+                // Label already in use
+                else if (m_labelsUsed.contains(result))
+                {
+                    JOptionPane.showMessageDialog(null, "Label is already used by another state!");
+                }
+                // Otherwise rename
+                else
+                {
+                    doCommand(new RenameStateCommand(MachineGraphicsPanel.this, m_contextState, result));
+                }
+            }
+        };
+
+    /**
+     * Action which toggles whether or not the selected state is the start state.
+     */
+    protected Action m_toggleStartAction = 
+        new AbstractAction("Toggle Start")
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MACHINE mac = m_sim.getMachine();
+                switch (mac.getNamingScheme())
+                {
+                    case GENERAL:
+                        doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
+                        break;
+
+                    case NORMALIZED:
+                        doJoinCommand(
+                                new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState),
+                                new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
+                        break;
+                }
+            }
+        };
+
+    /**
+     * Action which toggles whether or not the selected state is accepting.
+     */
+    protected Action m_toggleAcceptingAction = 
+        new AbstractAction("Toggle Accepting")
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Get all relevant objects
+                MACHINE mac      = m_sim.getMachine();
+                STATE finalState = mac.getFinalStates().isEmpty()?
+                    null : mac.getFinalStates().iterator().next();
+
+                // Generalized for all machines; if the machine should have a unique halt state, then
+                // ensure only 1 is ever selected at a time, otherwise toggle.
+                switch (mac.getNamingScheme())
+                {
+                    case GENERAL:
+                        doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                    mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
+                        break;
+
+                    case NORMALIZED:
+                        doJoinCommand(
+                                new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                    mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
+                                new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
+                }
+            }
+        };
 }
