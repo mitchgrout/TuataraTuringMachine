@@ -62,7 +62,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         // Menu bar
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(new JButton(new ClearAction("Clear")));
+        menuBar.add(new JButton(m_clearAction));
         setJMenuBar(menuBar);
 
         // Text area
