@@ -43,12 +43,14 @@ public class MachineInternalFrame extends JInternalFrame
     /** 
      * Creates a new instance of MachineInternalFrame.
      * @param gfxPanel The current graphics panel.
+     * @param windowIdx The index of this window, i.e. how many windows have been created before it.
      */
-    public MachineInternalFrame(MachineGraphicsPanel gfxPanel)
+    public MachineInternalFrame(MachineGraphicsPanel gfxPanel, int windowIdx)
     {
         // Create a window which can be resized, minimized, maximized, and moved.
         super("untitled", true, true, true, true);
         m_gfxPanel = gfxPanel;
+        m_idx = windowIdx;
         
         this.addInternalFrameListener(new InternalFrameAdapter()
         {
@@ -97,16 +99,26 @@ public class MachineInternalFrame extends JInternalFrame
     {
         return m_gfxPanel;
     }
+
+    /**
+     * Get the frame index.
+     * @return The frame index.
+     */
+    public int getIndex()
+    {
+        return m_idx;
+    }
    
     /**
      * Update the title of the frame to reflect the filename of the underlying machine.
      */
     public void updateTitle()
     {
+        // TODO: Maybe move some of this to MachineGraphicsPanel
         File file = m_gfxPanel.getFile();
-        setTitle(String.format("%s%s [%s]", 
+        setTitle(String.format("%s%s [%s]",
                     m_gfxPanel.isModifiedSinceSave()? "* " : "",
-                    file == null? "untitled" : file.getName(),
+                    m_gfxPanel.getFilename(),
                     m_gfxPanel.getMachineType()));
     }
     
@@ -139,6 +151,11 @@ public class MachineInternalFrame extends JInternalFrame
      * The current graphics panel.
      */
     private MachineGraphicsPanel m_gfxPanel;
+
+    /**
+     * The window index.
+     */
+    private int m_idx;
 
     /**
      * The scroll panel to track.

@@ -147,6 +147,17 @@ public abstract class State<
     }
 
     /**
+     * Get the color to paint this object.
+     * @return The color to paint this object.
+     */
+    protected Paint getPaint()
+    {
+        return new GradientPaint(m_windowX, m_windowY, Color.RED, 
+                m_windowX + STATE_RENDERING_WIDTH, m_windowY + STATE_RENDERING_WIDTH, Color.WHITE);
+    }
+
+
+    /**
      * Render the state to a graphics object.
      * @param g The graphics object to render onto.
      * @param selectedStates The set of states selected by the user.
@@ -155,26 +166,23 @@ public abstract class State<
     {
         Graphics2D g2d = (Graphics2D)g;
 
-        GradientPaint redtowhite = new GradientPaint(m_windowX,m_windowY,Color.RED,m_windowX + STATE_RENDERING_WIDTH, m_windowY + STATE_RENDERING_WIDTH,Color.WHITE);
-        g2d.setPaint(redtowhite);
+        // Paint the state
         Ellipse2D.Float stateCircle = new Ellipse2D.Float(m_windowX, m_windowY, STATE_RENDERING_WIDTH, STATE_RENDERING_WIDTH);
+        g2d.setPaint(getPaint());
         g2d.fill(stateCircle);
 
-        if (selectedStates.contains(this))
-        {
-            g2d.setColor(Color.RED);
-        }
-        else
-        {
-            g2d.setColor(Color.BLACK);
-        }
+        // Determine the color we should paint the edge
+        g2d.setColor(selectedStates.contains(this)? Color.RED : Color.BLACK);
         g2d.draw(stateCircle);
 
+        // If final, draw a small rim on the interior
         if (isFinalState())
         {
             g2d.draw(new Ellipse2D.Float(m_windowX + 5, m_windowY + 5, STATE_RENDERING_WIDTH - 10, STATE_RENDERING_WIDTH - 10));
         }
 
+        // If start, draw a curved arrow into the state
+        // TODO: Do we really need the curvature, or is this excessive
         if (isStartState())
         {
             g2d.draw(new Line2D.Float(m_windowX - STATE_RENDERING_WIDTH/2, m_windowY + STATE_RENDERING_WIDTH/2, m_windowX, m_windowY + STATE_RENDERING_WIDTH/2));
@@ -185,9 +193,10 @@ public abstract class State<
                         STATE_RENDERING_WIDTH/2, m_windowX - STATE_RENDERING_WIDTH*3/4, m_windowY + STATE_RENDERING_WIDTH/2,
                         m_windowX - STATE_RENDERING_WIDTH*2/3, m_windowY + STATE_RENDERING_WIDTH/3));
         }
+
+        // Draw in the state name below
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int textTranslationX = -metrics.stringWidth(m_label) / 2;
-
         g2d.drawString(m_label, m_windowX + STATE_RENDERING_WIDTH/2 + textTranslationX, m_windowY + STATE_RENDERING_WIDTH + TEXT_DISTANCE);
     }
 

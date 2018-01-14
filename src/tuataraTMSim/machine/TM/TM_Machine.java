@@ -56,7 +56,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
@@ -118,7 +118,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     {
         // If we have already validated the machine, and we havent mutated our machine, then we do
         // not need to perform this computation again.
-        if(m_validated)
+        if (m_validated)
         {
             return;
         }
@@ -129,15 +129,21 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         boolean visitedStart = false,
                 visitedFinal = false;
 
-        for(TM_State st : m_states)
+        for (TM_State st : m_states)
         {
             // List of transitions for this state
             ArrayList<TM_Transition> transitions = st.getTransitions();
 
-            // Ensure a unique start state
-            if(st.isStartState())
+            // Ensure submachines are valid
+            if (st.getSubmachine() != null)
             {
-                if(!visitedStart)
+                st.getSubmachine().validate();
+            }
+            
+            // Ensure a unique start state
+            if (st.isStartState())
+            {
+                if (!visitedStart)
                 {
                     visitedStart = true;
                 }
@@ -149,12 +155,12 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
             }
 
             // Ensure a unique final state
-            if(st.isFinalState())
+            if (st.isFinalState())
             {
-                if(!visitedFinal)
+                if (!visitedFinal)
                 {
                     visitedFinal = true;
-                    if(transitions.size() != 0)
+                    if (transitions.size() != 0)
                     {
                         throw new NondeterministicException(String.format(
                                     "Machine has a transition leaving the final state leaving %s.",
@@ -171,38 +177,38 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
             // Ensure no transitions are undefined (TM_Machine.UNDEFINED_SYMBOL), no duplicate transitions,
             // no transitions outside of our alphabet.
             ArrayList<Character> usedSymbols = new ArrayList<Character>();
-            for(TM_Transition tr : transitions)
+            for (TM_Transition tr : transitions)
             {
                 // Get input/output for this transition
                 char inp = tr.getAction().getInputChar();
                 char out = tr.getAction().getOutputChar();
 
                 // Undefined input
-                if(inp == UNDEFINED_SYMBOL)
+                if (inp == UNDEFINED_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an undefined input.", tr.toString()));
                 }
                 // Undefined output
-                if(out == UNDEFINED_SYMBOL)
+                if (out == UNDEFINED_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an undefined action.", tr.toString()));
                 }
                 // Duplicate input
-                if(usedSymbols.contains(inp))
+                if (usedSymbols.contains(inp))
                 {
                     throw new NondeterministicException(String.format(
                                 "State %s has more than one transition with input %c.", st.getLabel(), inp));
                 }
                 // Input not in the alphabet
-                if(!m_alphabet.containsSymbol(inp) && inp != OTHERWISE_SYMBOL)
+                if (!m_alphabet.containsSymbol(inp) && inp != OTHERWISE_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an input which is not in the alphabet.", tr.toString()));
                 }
                 // Output not in the alphabet
-                if(!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out) && out != EMPTY_ACTION_SYMBOL)
+                if (!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out) && out != EMPTY_ACTION_SYMBOL)
                 {
                     throw new NondeterministicException(String.format(
                                 "Transition %s has an action which is not in the alphabet.", tr.toString()));
@@ -212,12 +218,12 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
             }
         }
 
-        if(!visitedStart)
+        if (!visitedStart)
         {
             throw new NondeterministicException("Machine has no start state.");
         }
 
-        if(!visitedFinal)
+        if (!visitedFinal)
         {
             throw new NondeterministicException("Machine has no final state.");
         }
@@ -318,7 +324,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     {
         for (TM_State st : m_states) 
         {
-            if(st.isStartState())
+            if (st.isStartState())
             {
                 return st;
             }
@@ -335,14 +341,24 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         HashSet<TM_State> result = new HashSet<TM_State>();
         for (TM_State s : m_states)
         {
-            if(s.isFinalState())
+            if (s.isFinalState())
             {
                 result.add(s);
             }
         }
         return result;
     }
-    
+
+    /**
+     * Determine whether or not this type of machine should have a unique halt state. If true, then
+     * getFinalStates() should never return more than one element.
+     * @return true if this machine should have a unique halt state, false otherwise.
+     */
+    public boolean hasUniqueFinalState()
+    {
+        return true;
+    }
+
     /**
      * Add a state to the machine.
      * @param state The state to add.

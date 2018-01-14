@@ -42,7 +42,7 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Width of the graphical representation of the state, in pixels.
@@ -78,7 +78,37 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
     {
         this(label, startState, finalState, 0, 0);
     }
-    
+
+    /**
+     * Get the color to paint this object.
+     * @return The color to paint this object.
+     */
+    protected Paint getPaint()
+    {
+        Color c = m_subMachine != null? Color.BLUE : Color.RED;
+        return new GradientPaint(m_windowX, m_windowY, c,
+                m_windowX + STATE_RENDERING_WIDTH, m_windowY + STATE_RENDERING_WIDTH, Color.WHITE);
+    }
+
+
+    /**
+     * Get the submachine associated with this state.
+     * @return The submachine associated with this state.
+     */
+    public TM_Machine getSubmachine()
+    {
+        return m_subMachine;
+    }
+
+    /**
+     * Set the submachine associated with this state.
+     * @param mac The new submachine associated with this state.
+     */
+    public void setSubmachine(TM_Machine mac)
+    {
+        m_subMachine = mac;
+    }
+
     /**
      * Get the outgoing transitions of this state.
      * @return An array list of all transitions which leave this state.

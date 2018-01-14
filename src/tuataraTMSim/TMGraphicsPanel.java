@@ -28,12 +28,14 @@ package tuataraTMSim;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.*;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
@@ -64,21 +66,182 @@ public class TMGraphicsPanel
      */
     public TMGraphicsPanel(TM_Machine machine, Tape tape, File file)
     {
-        // TODO: Move to MachineGraphicsPanel
-        m_sim = new TM_Simulator(machine, tape);
-        m_file = file;
-        m_labelsUsed = m_sim.getMachine().getLabelHashset();
+        super(new TM_Simulator(machine, tape), file);
+
+        // Turing machines need to know about their owning panels
+        m_sim.setPanel(this);
+
+        // Add TM-specific context menu actions
+        m_contextMenu.addSeparator();
+        m_contextMenu.add(new SubmachineAction("Make Submachine"));
+
         initialization();
     }
 
     /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
+     * Determine if the machine has been modified since its last save.
+     * @return true if it has been modified since its last save, false otherwise.
      */
-    public TM_Simulator getSimulator()
+    public boolean isModifiedSinceSave()
     {
-        return m_sim;
+        // Submachines should not indicate that they are modified; this should instead be pushed to
+        // the topmost machine
+        return m_parent != null? false : super.isModifiedSinceSave(); 
     }
+
+    /**
+     * Set whether the machine has been modified since its last save.
+     * @param isModified true if it has been modified since its last save, false otherwise.
+     */
+    public void setModifiedSinceSave(boolean isModified)
+    {
+        if (m_parent == null)
+        {
+            super.setModifiedSinceSave(isModified);
+        }
+        else
+        {
+            // Push notification upwards
+            TMGraphicsPanel owner = m_parent;
+            while (owner.m_parent != null)
+            {
+                owner = owner.m_parent;
+            }
+            owner.setModifiedSinceSave(isModified);
+            if (owner.m_iFrame != null)
+            {
+                owner.m_iFrame.updateTitle();
+            }
+        }
+    }
+
+    /**
+     * Get the owning graphics panel.
+     * @return The owning graphics panel.
+     */
+    public TMGraphicsPanel getParentPanel()
+    {
+        return m_parent;
+    }
+
+    /**
+     * Set the parent of this panel.
+     * @param parent The new parent
+     */ 
+    public void setParentPanel(TMGraphicsPanel parent)
+    {
+        m_parent = parent;
+    }
+
+    /**
+     * Get the state that owns this panel, and by extension the underlying simulator and machine.
+     * @return The owning state.
+     */
+    public TM_State getParentState()
+    {
+        // No parent means no parent state
+        if (m_parent == null)
+        {
+            return null;
+        }
+
+        // Iterate through all states searching for our machine
+        for (TM_State state : m_parent.getSimulator().getMachine().getStates())
+        {
+            if (state.getSubmachine() == m_sim.getMachine())
+            {
+                return state;
+            }
+        }
+        // Not reachable
+        return null;
+    }
+
+    /**
+     * Get the children of this panel.
+     * @return The children of this panel.
+     */
+    public ArrayList<TMGraphicsPanel> getChildren()
+    {
+        return m_children;
+    }
+
+    /**
+     * Add a child to this panel. Additionally calls child.setParentPanel(this).
+     * @param child The child to add.
+     */
+    public void addChild(TMGraphicsPanel child)
+    {
+        m_children.add(child);
+        child.setParentPanel(this);
+    }
+
+    /**
+     * Remove a child from this panel. Additionally calls child.setParentPanel(null).
+     * @param child The child to remove.
+     * @return true if the child is removed, false otherwise.
+     */
+    public boolean removeChild(TMGraphicsPanel child)
+    {
+        if (m_children.remove(child))
+        {
+            child.setParentPanel(null);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    /**
+     * Get the filename associated with the machine. If getFile() is null, then this value is a
+     * temporary name for the machine.
+     * @return The filename associated with the machine.
+     */
+    public String getFilename()
+    {
+        // Submachines should just reflect their parents names, plus the state they belong to
+        if (m_parent != null)
+        {
+            TM_State owner = getParentState();
+            return String.format("%s - %s submachine", m_parent.getFilename(), owner.getLabel());
+        }
+        else
+        {
+            return super.getFilename();
+        }
+    }
+
+    /**
+     * Set the internal frame for this panel.
+     * @param iFrame The new internal frame.
+     */
+    public void setFrame(MachineInternalFrame iFrame)
+    {
+        super.setFrame(iFrame);
+        iFrame.addInternalFrameListener(new InternalFrameAdapter()
+        {
+            public void internalFrameClosed(InternalFrameEvent e)
+            {
+                // If we have an empty machine, destroy this frame
+                if (m_parent != null && m_sim.getMachine().getStates().size() == 0)
+                {
+                    // m_parent != null => getParentState() != null
+                    TM_State owner = getParentState();
+                    owner.setSubmachine(null);
+                    m_parent.removeChild(TMGraphicsPanel.this);
+                }
+                // Otherwise, close all children, but do not delete their references
+                else for (TMGraphicsPanel child : m_children)
+                {
+                    MainWindow.getInstance().removeFrame(child.m_iFrame);
+                }
+            }
+        });
+    }
+
 
     public void onActivation()
     {
@@ -93,13 +256,13 @@ public class TMGraphicsPanel
      */
     public boolean handleKeyEvent(KeyEvent e)
     {
-        if (selectedSymbolBoundingBox != null && getSelectedTransition() != null)
+        if (m_selectedSymbolBoundingBox != null && getSelectedTransition() != null)
         {
             // There is a transition action currently selected by the user.
             char c = e.getKeyChar();
             c = Character.toUpperCase(c);
 
-            if (inputSymbolSelected)
+            if (m_inputSymbolSelected)
             {
                 if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_LEFT)
                 {
@@ -200,227 +363,26 @@ public class TMGraphicsPanel
     }
 
     /**
-     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
-     * state, or creating a new state.
-     * @param e The generating event.
+     * Create a TM_State object with the given label at the specified location.
+     * @param label The state label.
+     * @param x The x-ordinate of the state.
+     * @param y The y-ordinate of the state.
+     * @return A new TM_State object.
      */
-    protected void handleAddNodesClick(MouseEvent e)
+    protected TM_State makeState(String label, int x, int y)
     {
-        if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY()) != null)
-        {
-            // Adding states on top of states is not allowed
-            handleSelectionClick(e);
-            return;
-        }
-
-        int x = e.getX() - TM_State.STATE_RENDERING_WIDTH / 2;
-        int y = e.getY() - TM_State.STATE_RENDERING_WIDTH / 2;
-        switch (m_sim.getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                String label = getFirstFreeName();
-                doCommand(new AddStateCommand(this, new TM_State(label, false, false, x, y)));
-                break;
-
-            case NORMALIZED:
-                doJoinCommand(
-                        new AddStateCommand(this, new TM_State("", false, false, x, y)),
-                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                break;
-        }
+        return new TM_State(label, false, false, x, y);
     }
 
     /**
-     * Handle when a mouse button is released. Creates any new transitions if a transition creating
-     * drag has occured.
-     * @param e The generating event.
+     * Create a TM_Transition object with a default action, attached to the two specified states.
+     * @param start The state the transition leaves.
+     * @param end The state the transition arrives at.
+     * @return A new TM_Transition object.
      */
-    protected void handleMouseReleased(MouseEvent e)
+    protected TM_Transition makeTransition(TM_State from, TM_State to)
     {
-        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
-        {
-            TM_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
-            if (mouseReleasedState != null)
-            {
-                TM_Transition newTrans = new TM_Transition((TM_State)mousePressedState, mouseReleasedState,
-                        new TM_Action(0, Machine.UNDEFINED_SYMBOL, Machine.UNDEFINED_SYMBOL));
-                doCommand(new AddTransitionCommand(this, newTrans));
-                repaint();
-            }
-        }
-        else if (m_currentMode == GUI_Mode.SELECTION)
-        {
-            if (selectionInProgress)
-            {
-                madeSelection = (selectionBoxStartX != selectionBoxEndX ||
-                        selectionBoxStartY != selectionBoxEndY); //true IFF selection not empty
-
-                if (madeSelection)
-                {
-                    updateSelectedStatesAndTransitions();
-                }
-                repaint();
-            }
-        }
-        if (mousePressedState != null && movedState)
-        {
-            // Create an undo/redo command object for the move of a state/set of states/transitions.
-            int translateX = mousePressedState.getX() - moveStateStartLocationX;
-            int translateY = mousePressedState.getY() - moveStateStartLocationY;
-
-            if (translateX != 0 || translateY != 0)
-            {
-                if (selectedStates.contains(mousePressedState))
-                {
-                    // Moved a set of states
-                    Collection<State> statesCopy = (HashSet<State>)selectedStates.clone();
-                    Collection<Transition> transitionsCopy = (HashSet<Transition>)selectedTransitions.clone();
-                    addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy,
-                                translateX,  translateY));
-                }
-                else
-                {
-                    // Moved one state
-                    Collection<Transition> transitions = new ArrayList<Transition>();
-                    transitions.addAll(m_transitionsToMoveState);
-                    addCommand(new MoveStateCommand(this, mousePressedState, translateX, 
-                                translateY, transitions));
-                }
-            }
-        }
-
-        if (mousePressedTransition != null && movedTransition)
-        {
-            // Create an undo/redo command object for the move of a transition
-
-            int translateX = (int)(mousePressedTransition.getMidpoint().getX() - transitionMidPointBeforeMove.getX());
-            int translateY = (int)(mousePressedTransition.getMidpoint().getY() - transitionMidPointBeforeMove.getY());
-            addCommand(new MoveTransitionCommand(this, mousePressedTransition, translateX, translateY));
-        }
-        selectionInProgress = false;
-
-        mousePressedState = null;
-        mousePressedTransition = null;
-        transitionMidPointBeforeMove = null;
-        movedTransition = false;
-        movedState = false;
-        drawPosX = Integer.MIN_VALUE; // Reset these values so that the line is not drawn.
-        drawPosY = Integer.MIN_VALUE;
-    }
-
-
-    /** 
-     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
-     * state, it is deleted, and if it is over a transition, that is deleted.
-     * @param e The generating event.
-     */
-    public void handleEraserClick(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        if (stateClickedOn != null)
-        {
-            deleteState(stateClickedOn);
-        }
-        else
-        {
-            TM_Transition transitionClickedOn = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-            if (transitionClickedOn != null)
-            {
-                deleteTransition(transitionClickedOn);
-            }
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
-     * over a state, the start state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseStartClick(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (stateClickedOn != null)
-        {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseAcceptingClick(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        TM_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
-                              null : m_sim.getMachine().getFinalStates().iterator().next();
-        if (stateClickedOn != null)
-        {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(this, finalState, stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleAcceptingStateCommand(this, finalState, stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-            }
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
-     * state, the state is either added or removed from the selected state set, depending on context.
-     * @param e The generating event.
-     */
-    protected void handleSelectionClick(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (!(e.isControlDown() || e.isShiftDown()))
-        {
-            selectedStates.clear();
-            selectedTransitions.clear();
-        }
-        if (stateClickedOn != null)
-        {
-            if (!selectedStates.remove(stateClickedOn))
-            {
-                selectedStates.add(stateClickedOn);
-            }
-        }
-        selectedTransitions = m_sim.getMachine().getSelectedTransitions(selectedStates);
-    }
-
-    /**
-     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
-     * occurs over a state, the state is made to be the current state.
-     * @param e The generating event.
-     */
-    protected void handleChooseCurrentState(MouseEvent e)
-    {
-        TM_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (stateClickedOn != null)
-        {
-            m_sim.setCurrentState(stateClickedOn);
-        }
-
+        return new TM_Transition(from, to, new TM_Action(0, Machine.UNDEFINED_SYMBOL, Machine.UNDEFINED_SYMBOL));
     }
 
     public String getErrorMessage(ComputationCompletedException e)
@@ -468,7 +430,111 @@ public class TMGraphicsPanel
     }
 
     /**
-     * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
+     * Action to open a frame to edit a submachine.
      */
-    protected TM_Simulator m_sim;
+    protected class SubmachineAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of SubmachineAction.
+         * @param text Description of the action.
+         */ 
+        public SubmachineAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+
+            // TODO: Create a JFrame to allow blitting across an existing machine
+        }
+
+        /**
+         * If no existing submachine, prompt the user to copy across an existing machine, or start
+         * blank. Otherwise, load the machine into a new frame with no backing file.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // For safety reasons, we can only ever have one instance of a frame for a submachine
+            // due to machines being shared by reference. Before spawning a frame, check if one
+            // exists.
+            MainWindow inst = MainWindow.getInstance();
+
+            // Create a new machine if necessary
+            if (m_contextState.getSubmachine() == null)
+            switch (JOptionPane.showConfirmDialog(MainWindow.getInstance(), 
+                        "Would you like to clone an existing machine?", "Make Submachine",
+                        JOptionPane.YES_NO_CANCEL_OPTION))
+            {
+                case JOptionPane.YES_OPTION: 
+                    // Show a file dialog and clone the given machine
+                    JFileChooser fc = new JFileChooser();
+                    fc.setDialogTitle("Clone Submachine");
+                    fc.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
+                    {
+                        public boolean accept(File f)
+                        {
+                            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
+                        }
+
+                        public String getDescription()
+                        {
+                            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
+                        }
+                    });
+                    if (fc.showOpenDialog(MainWindow.getInstance()) != JFileChooser.APPROVE_OPTION)
+                    {
+                        // Cancel
+                        return;
+                    }
+                    m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile()));
+                    break;
+
+                case JOptionPane.NO_OPTION:
+                    // Add a blank machine
+                    m_contextState.setSubmachine(new TM_Machine( 
+                                new ArrayList<TM_State>(), new ArrayList<TM_Transition>(),
+                                getAlphabet())); 
+                    break;
+
+                default: 
+                    // Cancel creating a submachine
+                    return;
+            }
+
+            // Determine if a MachineInternalFrame already exists
+            MachineInternalFrame frame = null;
+            for (TMGraphicsPanel child : m_children)
+            {
+                if (child.getSimulator().getMachine() == m_contextState.getSubmachine())
+                {
+                    frame = child.getFrame();
+                    break;
+                }
+            }
+
+            // No frame present
+            if (frame == null)
+            {
+                TMGraphicsPanel gfx = new TMGraphicsPanel(m_contextState.getSubmachine(), inst.getTape(), null);
+                addChild(gfx);
+                frame = inst.newMachineWindow(gfx);
+                gfx.setFrame(frame);
+                inst.addFrame(frame);
+            }
+
+            if (!frame.isVisible())
+            {
+                inst.addFrame(frame);
+            }
+        }
+    }
+
+    /**
+     * The parent of this panel.
+     */
+    protected TMGraphicsPanel m_parent;
+
+    /**
+     * The children of this panel.
+     */
+    protected ArrayList<TMGraphicsPanel> m_children = new ArrayList<TMGraphicsPanel>();
 }

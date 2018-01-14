@@ -161,7 +161,7 @@ public class MainWindow extends JFrame
             public void mousePressed(MouseEvent e)
             {
                 MachineGraphicsPanel gfx = getSelectedGraphicsPanel();
-                if (gfx != null);
+                if (gfx != null)
                 {
                     gfx.deselectSymbol();
                 }
@@ -247,6 +247,60 @@ public class MainWindow extends JFrame
                 (new MainWindow()).setVisible(true);
             }
         });
+    }
+
+    /**
+     * Get the desktop pane in use by the window.
+     * @return The desktop pane in use.
+     */
+    public JDesktopPane getDesktopPane()
+    {
+        return m_desktopPane;
+    }
+
+    /**
+     * Get the current console.
+     * @return The current console.
+     */
+    public ConsoleInternalFrame getConsole()
+    {
+        return m_console;
+    }
+
+    /** 
+     * Gets the graphics panel for the currently selected machine diagram window.
+     * @return A reference to the currently selected graphics panel, or null if there is no such panel.
+     */
+    public MachineGraphicsPanel getSelectedGraphicsPanel()
+    {
+        if (m_desktopPane == null)
+        {
+            return null;
+        }
+        JInternalFrame selected = m_desktopPane.getSelectedFrame();
+        if (selected == null)
+        {
+            return null;
+        }
+        try
+        {
+            MachineInternalFrame tmif = (MachineInternalFrame)selected;
+            return tmif.getGfxPanel();
+        }
+        catch (ClassCastException e)
+        {
+            // Wrong window type
+            return null;
+        }
+    }
+
+    /**
+     * Get the tape currently in use.
+     * @return The tape.
+     */
+    public Tape getTape()
+    {
+        return m_tape;
     }
 
     /**
@@ -404,14 +458,7 @@ public class MainWindow extends JFrame
 
         // Maximize on startup
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
-        
-        // Make a state diagram window as the default for the desktop pane
-        JInternalFrame iFrame = 
-            newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
-        m_desktopPane.add(iFrame);      
-        m_desktopPane.setSelectedFrame(iFrame);
-        m_desktopPane.getDesktopManager().activateFrame(iFrame);
-        
+
         // Create the alphabet configuration internal frame
         m_asif = new AlphabetSelectorInternalFrame();
         m_asif.pack();
@@ -436,17 +483,10 @@ public class MainWindow extends JFrame
         m_console = new ConsoleInternalFrame();
         m_console.setLayer(50);
 
-        setVisible(true);
-
-        try
-        {
-            // setSelected only works when the component is already displayed, so this must be done
-            // after the this.setVisible call.
-            iFrame.moveToFront();
-            iFrame.setSelected(true);
-        }
-        catch (PropertyVetoException e2) { }
+        // Disable all toolbars (no default machine)
+        setEnabledActionsThatRequireAMachine(false); 
         
+        setVisible(true);
         updateUndoActions();
     }
     
@@ -619,6 +659,39 @@ public class MainWindow extends JFrame
 
         // Entire toolstrip will be composed of three toolbars
         JToolBar[] returner = new JToolBar[3];
+        
+        // Machine
+        // SPECIAL: newMachine causes a JPopupMenu to show, which contains all new***MachineAction's
+        JButton newMachineToolBarButton = new JButton(loadIcon("newMachine.gif"));
+        JPopupMenu machineMenu = new JPopupMenu();
+        machineMenu.add(m_newTuringMachineAction);
+        machineMenu.add(m_newDFSAAction);
+        newMachineToolBarButton.addMouseListener(new MouseAdapter()
+        {
+            // Show the popup menu when clicked
+            public void mouseClicked(MouseEvent e)
+            {
+                if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    machineMenu.show(e.getComponent(), 
+                            newMachineToolBarButton.getX() - newMachineToolBarButton.getWidth() / 2, 
+                            newMachineToolBarButton.getY() + newMachineToolBarButton.getHeight());
+                }
+            }
+        });
+        newMachineToolBarButton.setFocusable(false);
+        newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        newMachineToolBarButton.setText("");
+        
+        JButton openMachineToolBarButton = new JButton(m_openMachineAction);
+        openMachineToolBarButton.setFocusable(false);
+        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        openMachineToolBarButton.setText("");
+        
+        JButton saveMachineToolBarButton = new JButton(m_saveMachineAction);
+        saveMachineToolBarButton.setFocusable(false);
+        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        saveMachineToolBarButton.setText("");
 
         // Tape
         JButton newTapeToolBarButton = new JButton(m_newTapeAction);
@@ -635,22 +708,6 @@ public class MainWindow extends JFrame
         saveTapeToolBarButton.setFocusable(false);
         saveTapeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         saveTapeToolBarButton.setText("");
-
-        // Machine
-        //JButton newMachineToolBarButton = new JButton(m_newTuringMachineAction);
-        //newMachineToolBarButton.setFocusable(false);
-        //newMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        //newMachineToolBarButton.setText("");
-        
-        JButton openMachineToolBarButton = new JButton(m_openMachineAction);
-        openMachineToolBarButton.setFocusable(false);
-        openMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        openMachineToolBarButton.setText("");
-        
-        JButton saveMachineToolBarButton = new JButton(m_saveMachineAction);
-        saveMachineToolBarButton.setFocusable(false);
-        saveMachineToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        saveMachineToolBarButton.setText("");
 
         // Edit       
         JButton cutToolBarButton = new JButton(m_cutAction);
@@ -740,12 +797,12 @@ public class MainWindow extends JFrame
         // Attach everything to the correct toolbars
         returner[0] = new JToolBar("File/Edit/Configure");
         returner[0].setRollover(true);
+        returner[0].add(newMachineToolBarButton);
+        returner[0].add(openMachineToolBarButton);
+        returner[0].add(saveMachineToolBarButton);
         returner[0].add(newTapeToolBarButton);
         returner[0].add(openTapeToolBarButton);
         returner[0].add(saveTapeToolBarButton);
-        //returner[0].add(newMachineToolBarButton);
-        returner[0].add(openMachineToolBarButton);
-        returner[0].add(saveMachineToolBarButton);
         returner[0].add(cutToolBarButton);
         returner[0].add(copyToolBarButton);
         returner[0].add(pasteToolBarButton);
@@ -777,17 +834,17 @@ public class MainWindow extends JFrame
         
         return returner;
     }
-    
+   
     /**
      * Creates a new window displaying a machine.
      * @param gfxPanel The underlying graphics panel.
      * @return A frame containing the graphics panel.
      */
-    private MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
+    public MachineInternalFrame newMachineWindow(MachineGraphicsPanel gfxPanel)
     {
-        gfxPanel.setUIMode(m_currentMode); 
-        final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel);
-        gfxPanel.setWindow(returner);
+        gfxPanel.setUIMode(m_currentMode);
+        final MachineInternalFrame returner = new MachineInternalFrame(gfxPanel, ++m_windowCount);
+        gfxPanel.setFrame(returner);
         gfxPanel.setPreferredSize(new Dimension(MACHINE_CANVAS_SIZE_X, MACHINE_CANVAS_SIZE_Y));
         returner.setSize(new Dimension(640, 480));
         Point2D loc = nextWindowLocation();
@@ -823,12 +880,47 @@ public class MainWindow extends JFrame
         
         return returner;
     }
+
+    /**
+     * Add an internal frame to the window. 
+     * @param frame The frame to add.
+     */
+    public void addFrame(JInternalFrame frame)
+    {
+        // Unselect any existing frame
+        JInternalFrame currentFrame = m_desktopPane.getSelectedFrame();
+        if (currentFrame != null)
+        {
+            try { currentFrame.setSelected(false); }
+            catch (PropertyVetoException e) { }
+        }
+
+        // Add and select
+        m_desktopPane.add(frame);
+        m_desktopPane.setSelectedFrame(frame);
+        m_desktopPane.getDesktopManager().activateFrame(frame);
+        frame.setVisible(true);
+        try { frame.setSelected(true); }
+        catch (PropertyVetoException e) { }
+
+    }
+    
+    /**
+     * Remove an internal frame from the window.
+     * @param frame The frame to remove.
+     */
+    public void removeFrame(MachineInternalFrame frame)
+    {
+        frame.dispose();
+        // Is this necessary?
+        m_desktopPane.remove(frame);
+    }
    
     /**
      * Compute the next location to place a new window.
      * @return The next location to place a new window.
      */
-    Point2D.Float nextWindowLocation()
+    private Point2D.Float nextWindowLocation()
     {
         int x = m_lastNewWindowLocX + m_windowLocStepSize;
         int y = m_lastNewWindowLocY + m_windowLocStepSize;
@@ -1432,42 +1524,6 @@ public class MainWindow extends JFrame
     }
    
     /**
-     * Get the current console.
-     * @return The current console.
-     */
-    public ConsoleInternalFrame getConsole()
-    {
-        return m_console;
-    }
-
-    /** 
-     * Gets the graphics panel for the currently selected machine diagram window.
-     * @return A reference to the currently selected graphics panel, or null if there is no such panel.
-     */
-    public MachineGraphicsPanel getSelectedGraphicsPanel()
-    {
-        if (m_desktopPane == null)
-        {
-            return null;
-        }
-        JInternalFrame selected = m_desktopPane.getSelectedFrame();
-        if (selected == null)
-        {
-            return null;
-        }
-        try
-        {
-            MachineInternalFrame tmif = (MachineInternalFrame)selected;
-            return tmif.getGfxPanel();
-        }
-        catch (ClassCastException e)
-        {
-            // Wrong window type
-            return null;
-        }
-    }
- 
-    /**
      * Action for creating a new Turing Machine in a new window.
      */
     class NewTuringMachineAction extends AbstractAction
@@ -1492,11 +1548,10 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = 
-                    newMachineWindow(new TMGraphicsPanel(new TM_Machine(), m_tape, null));
-                m_desktopPane.add(iFrame);
-                try { iFrame.setSelected(true); }
-                catch (PropertyVetoException e2) { }
+                TMGraphicsPanel panel = new TMGraphicsPanel(new TM_Machine(), m_tape, null);
+                MachineInternalFrame frame = newMachineWindow(panel);
+                panel.setFrame(frame);
+                addFrame(frame);
             }
         }
     }
@@ -1526,11 +1581,7 @@ public class MainWindow extends JFrame
         {
             if (m_desktopPane != null)
             {
-                JInternalFrame iFrame = 
-                    newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null));
-                m_desktopPane.add(iFrame);
-                try { iFrame.setSelected(true); }
-                catch (PropertyVetoException e2) { }
+                addFrame(newMachineWindow(new DFSAGraphicsPanel(new DFSA_Machine(), m_tape, null)));
             }
         }
     }
@@ -1579,19 +1630,16 @@ public class MainWindow extends JFrame
                 JInternalFrame iFrame = null;
                 if (machine instanceof TM_Machine)
                 {
-                    iFrame = newMachineWindow(new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile));
+                    TMGraphicsPanel panel = new TMGraphicsPanel((TM_Machine)machine, m_tape, inFile);
+                    MachineInternalFrame frame = newMachineWindow(panel);
+                    panel.setFrame(frame);
+                    addFrame(frame);
                 }
                 else if (machine instanceof DFSA_Machine)
                 {
-                    iFrame = newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile));
+                    addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
                 }
-                m_desktopPane.add(iFrame);
                 m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
-                try
-                {
-                    iFrame.setSelected(true);
-                }
-                catch (PropertyVetoException e2) { }
             }
             catch (Exception e2)
             {
@@ -2211,51 +2259,20 @@ public class MainWindow extends JFrame
                     m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
                 }
             }
-            catch (ComputationCompletedException e2)
+            catch (ComputationCompletedException|ComputationFailedException e2)
             {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
-                
+                String msg = gfxPanel.getErrorMessage(e2);
+                m_console.log(msg);
+                JOptionPane.showMessageDialog(m_parentComponent, msg, 
+                        MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
                 gfxPanel.getSimulator().resetMachine();
-            }
-            catch (ComputationFailedException e2)
-            {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
-                
-                gfxPanel.getSimulator().resetMachine();
-            }
-            catch (NondeterministicException e2)
-            {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
-            }
-            catch (TapeBoundsException e2)
-            {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
-            }
-            catch (UndefinedTransitionException e2)
-            {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
             }
             catch (Exception e2)
             {
-                m_console.log(gfxPanel.getErrorMessage(e2));
-                JOptionPane.showMessageDialog(m_parentComponent,
-                        gfxPanel.getErrorMessage(e2), MainWindow.HALTED_MESSAGE_TITLE_STR,
-                        JOptionPane.WARNING_MESSAGE);
+                String msg = gfxPanel.getErrorMessage(e2);
+                m_console.log(msg);
+                JOptionPane.showMessageDialog(m_parentComponent, msg,
+                        MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             }
             repaint();
         }
@@ -2611,12 +2628,14 @@ public class MainWindow extends JFrame
         {
             if (!m_console.isVisible())
             {
-                m_desktopPane.add(m_console);
-                m_console.setVisible(true);
+                addFrame(m_console);
             }
-            m_console.moveToFront();
-            try { m_console.setSelected(true); }
-            catch (PropertyVetoException e2) { }
+            else
+            {
+                m_console.moveToFront();
+                try { m_console.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
         }
     }
 
@@ -2651,12 +2670,14 @@ public class MainWindow extends JFrame
             }
             if (!m_helpDisp.isVisible())
             {
-                m_desktopPane.add(m_helpDisp);
-                m_helpDisp.setVisible(true);
+                addFrame(m_helpDisp);
             }
-            m_helpDisp.moveToFront();
-            try { m_helpDisp.setSelected(true); }
-            catch (PropertyVetoException e2) { }
+            else
+            {
+                m_helpDisp.moveToFront();
+                try { m_helpDisp.setSelected(true); }
+                catch (PropertyVetoException e2) { }
+            }
         }
     }
 
@@ -2767,6 +2788,11 @@ public class MainWindow extends JFrame
      * Simulation delay associated with the machine, used by m_timerTask.
      */
     private int m_executionDelayTime;
+
+    /**
+     * How many machine internal frames have been created since the program started.
+     */
+    private int m_windowCount = 0;
 
     /**
      * Data which has been copied, used for pasting.

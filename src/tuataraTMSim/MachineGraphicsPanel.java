@@ -54,12 +54,117 @@ public abstract class MachineGraphicsPanel<
     private final Font PANEL_FONT = new Font("Monospaced", Font.PLAIN, 14);
 
     /**
+     * Creates a new instance of MachineGraphicsPanel.
+     * @param sim The simulator, containing the machine to render, and tape.
+     * @param file The file the machine is associated with.
+     */
+    public MachineGraphicsPanel(SIMULATOR sim, File file)
+    {
+        // Setup
+        m_sim  = sim;
+        m_file = file;
+        m_labelsUsed = m_sim.getMachine().getLabelHashset();
+
+        // Create our context menu
+        m_contextMenu = new JPopupMenu();
+        m_contextMenu.add(new RenameStateAction("Rename State"));
+        m_contextMenu.add(new ToggleStartAction("Toggle Start"));
+        m_contextMenu.add(new ToggleAcceptingAction("Toggle Accepting"));
+    }
+
+    /**
      * Determine if this panel is opaque; allows for optomization by Swing.
      * @return true in all cases.
      */
     public final boolean isOpaque()
     {
         return true;
+    }
+
+    /**
+     * Get the internal frame for this panel.
+     * @return The internal frame for this panel.
+     */
+    public MachineInternalFrame getFrame()
+    {
+        return m_iFrame;
+    }
+
+    /**
+     * Set the internal frame for this panel.
+     * @param iFrame The new internal frame.
+     */
+    public void setFrame(MachineInternalFrame iFrame)
+    {
+        m_iFrame = iFrame;
+        updateTitle();
+    }
+
+    /**
+     * Get the simulator associated with this panel.
+     * @return The simulator for this panel.
+     */
+    public SIMULATOR getSimulator()
+    {
+        return m_sim;
+    }
+
+    /**
+     * Get the file associated with the machine.
+     * @return The file associated with the machine.
+     */
+    public File getFile()
+    {
+        return m_file;
+    }
+
+    /**
+     * Set the file associated with the machine.
+     * @param f The new file associated with the machine.
+     */
+    public void setFile(File f)
+    {
+        m_file = f;
+        updateTitle();
+    }
+
+    /**
+     * Get the filename associated with the machine. If getFile() is null, then this value is a
+     * temporary name for the machine.
+     * @return The filename associated with the machine.
+     */
+    public String getFilename()
+    {
+        if (m_file == null)
+        {
+            return String.format("untitled-%d", m_iFrame.getIndex()); 
+        }
+        else
+        {
+            return m_file.getName();
+        }
+    }       
+
+    /**
+     * Determine if the machine has been modified since its last save.
+     * @return true if it has been modified since its last save, false otherwise.
+     */
+    public boolean isModifiedSinceSave()
+    {
+        return m_modifiedSinceSave;
+    }
+
+    /**
+     * Set whether the machine has been modified since its last save.
+     * @param isModified true if it has been modified since its last save, false otherwise.
+     */
+    public void setModifiedSinceSave(boolean isModified)
+    {
+        m_modifiedSinceSave = isModified;
+        if (m_iFrame != null)
+        {
+            m_iFrame.updateTitle();
+        }
     }
 
     /**
@@ -73,12 +178,150 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
+     * Get the set of states selected by the user.
+     * @return The set of states selected by the user.
+     */
+    public HashSet<STATE> getSelectedStates()
+    {
+        return m_selectedStates;
+    }
+
+    /**
+     * Set which states are selected by the user.
+     * @param states The states selected by the user.
+     */
+    public void setSelectedStates(HashSet<STATE> states)
+    {
+        m_selectedStates = states;
+    }
+
+    /**
+     * Get the set of transitions selected by the user.
+     * @return The set of transitions selected by the user.
+     */
+    public HashSet<TRANSITION> getSelectedTransitions()
+    {
+        return m_selectedTransitions;
+    }
+
+    /**
+     * Set which transtions are selected by the user.
+     * @param transitions The transitions selected by the user.
+     */
+    public void setSelectedTransitions(HashSet<TRANSITION> transitions)
+    {
+        m_selectedTransitions = transitions;
+    }
+
+    /**
+     * Get the current transition selected by the user for modification of its input/output symbols,
+     * or null if there is no selected transition one.
+     * @return The current transition selected by the user for modification.
+     */
+    public TRANSITION getSelectedTransition()
+    {
+        return m_selectedTransition;
+    }
+
+    /** 
+     * Find the first unused standard state label in the machine. Standard labels are 'q' followed
+     * by a non-negative integer.
+     * NOTE: Potentially should be abstract.
+     * @return The first unused standard state label.
+     */
+    public String getFirstFreeName()
+    {
+        switch (getSimulator().getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                int current = 0;
+                while (m_labelsUsed.contains("q" + current))
+                {
+                    current++;
+                }
+                return "q" + current;
+
+            case NORMALIZED:
+                // Assume every state name is normalized, hence no naming conflicts
+                return "" + getSimulator().getMachine().getStates().size();
+
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Get the alphabet for the machine associated with this panel.
      * @return The alphabet for the machine.
      */
     public Alphabet getAlphabet()
     {
         return getSimulator().getMachine().getAlphabet();
+    }
+
+    /**
+     * Determine if the keyboard is enabled.
+     * @return true if the keyboard is enabled, false otherwise.
+     */
+    public boolean getKeyboardEnabled()
+    {
+        return m_keyboardEnabled;
+    }
+
+    /**
+     * Determine if editing of the machine is enabled.
+     * @return true if editing is enabled, false otherwise.
+     */
+    public boolean isEditingEnabled()
+    {
+        return m_editingEnabled;
+    }
+
+    /** 
+     * Set if editing of the machine is enabled.
+     * @param enabled true if editing is enabled, false otherwise.
+     */
+    public void setEditingEnabled(boolean enabled)
+    {
+        m_editingEnabled = enabled;
+        m_keyboardEnabled = enabled;
+    }
+
+    /**
+     * Get the location of the last place we pasted to.
+     * @return The location where the last pasted item was placed.
+     */
+    public Point2D getLastPastedLocation()
+    {
+        return m_lastPastedLocation;
+    }
+
+    /** 
+     * Set the location where the last pasted item was placed. This is to prevent pasting multiple
+     * items in the same place.
+     * @param location The location where the last pasted item was placed.
+     */
+    public void setLastPastedLocation(Point2D location)
+    {
+        m_lastPastedLocation = location;
+        m_numPastesToSameLocation = 1;
+    }
+
+    /**
+     * Get the count of the number of times we've pasted to the same location on the canvas.
+     * @return The number of times an item has been pasted to the same location on the canvas.
+     */
+    public int getNumPastesToSameLocation()
+    {
+        return m_numPastesToSameLocation;
+    }
+
+    /**
+     * Increase the count of the number of times we've pasted to the same location on the canvas.
+     */
+    public void incrementNumPastesToSameLocation()
+    {
+        m_numPastesToSameLocation++;
     }
 
     /**
@@ -105,34 +348,35 @@ public abstract class MachineGraphicsPanel<
             g2d.draw(new Ellipse2D.Float(currentState.getX() - 5, currentState.getY() - 5, STATE.STATE_RENDERING_WIDTH + 10, STATE.STATE_RENDERING_WIDTH + 10));
         }
 
-        getSimulator().getMachine().paint(g, selectedStates, selectedTransitions, getSimulator());
-        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
+        getSimulator().getMachine().paint(g, m_selectedStates, m_selectedTransitions, getSimulator());
+        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
         {
-            if (!(drawPosX == Integer.MIN_VALUE) || !(drawPosY == Integer.MIN_VALUE))
+            if (!(m_drawPosX == Integer.MIN_VALUE) || !(m_drawPosY == Integer.MIN_VALUE))
             {
                 g2d.setColor(Color.BLACK);
-                g2d.draw(new Line2D.Float(mousePressedState.getX() + STATE.STATE_RENDERING_WIDTH/2,mousePressedState.getY()+ STATE.STATE_RENDERING_WIDTH/2, drawPosX, drawPosY));
+                g2d.draw(new Line2D.Float(m_mousePressedState.getX() + STATE.STATE_RENDERING_WIDTH/2,m_mousePressedState.getY()+ STATE.STATE_RENDERING_WIDTH/2, m_drawPosX, m_drawPosY));
             }
         }
 
-        if (selectedSymbolBoundingBox != null)
+        if (m_selectedSymbolBoundingBox != null)
         {
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
             g2d.setColor(Color.BLACK);
-            g2d.draw(selectedSymbolBoundingBox);
+            g2d.draw(m_selectedSymbolBoundingBox);
             g2d.setStroke(current);
         }
-        if (selectionInProgress)
+
+        // A marquee selection is taking place
+        if (m_selectionBox != null)
         {
             g2d.setColor(Color.BLACK);
-            int topLeftX = Math.min(selectionBoxStartX, selectionBoxEndX);
-            int topLeftY = Math.min(selectionBoxStartY, selectionBoxEndY);
-            int width = Math.abs(selectionBoxStartX - selectionBoxEndX);
-            int height = Math.abs(selectionBoxStartY - selectionBoxEndY);
+            int topLeftX = Math.min(m_selectionBox.x, m_selectionBox.x + m_selectionBox.width),
+                topLeftY = Math.min(m_selectionBox.y, m_selectionBox.y + m_selectionBox.height),
+                width    = Math.abs(m_selectionBox.width),
+                height   = Math.abs(m_selectionBox.height);
             Stroke current = g2d.getStroke();
             g2d.setStroke(dashed);
-
             g2d.draw(new Rectangle2D.Float(topLeftX, topLeftY,
                         width, height));
             g2d.setStroke(current);
@@ -145,186 +389,167 @@ public abstract class MachineGraphicsPanel<
      */
     protected void initialization()
     {
-        // TODO: If only called by the constructor, of which there is only one, this should be moved
-        //       entirely to the constructor.
         setFocusable(false);
 
-        final Component thisPtr = this;
         // Set up event listeners and their corresponding actions.
         addMouseListener(new MouseAdapter()
+        {
+            public void mouseClicked(MouseEvent e)
+            {   
+                // Do nothing if editing is disabled, or this is not a left-click
+                if (!m_editingEnabled ||
+                    e.getButton() != MouseEvent.BUTTON1)
                 {
-                    public void mouseClicked(MouseEvent e)
-                    {   
-                        if (!m_editingEnabled)
+                    return;
+                }
+
+                // Deselect any selected action symbol
+                m_selectedSymbolBoundingBox = null;
+                m_selectedTransition = null;
+
+                // Selecting a transition action
+                if (m_currentMode != GUI_Mode.ERASER && selectCharacterByClicking(e))
+                {
+                    repaint();
+                    return;
+                }
+
+                // Handle GUI mode events
+                switch (m_currentMode)
+                {
+                    case ADDNODES:
+                        handleAddNodesClick(e);
+                        break;
+
+                    case ADDTRANSITIONS:
+                        if ((e.isControlDown() || e.isShiftDown()))
                         {
-                            return;
+                            handleSelectionClick(e);
                         }
+                        break;
 
-                        // Deselect any selected action symbol
-                        selectedSymbolBoundingBox = null;
-                        selectedTransition = null;
+                    case ERASER:
+                        handleEraserClick(e);
+                        break;
 
-                        if (m_currentMode != GUI_Mode.ERASER)
-                        {
-                            // Select characters on transitions by left clicking
-                            // or rename states
-                            if (clickStateName(e) || selectCharacterByClicking(e))
-                            {
-                                repaint();
-                                return;
-                            }
-                        }
+                    case CHOOSESTART:
+                        handleChooseStartClick(e);
+                        break;
 
-                        switch (m_currentMode)
-                        {
-                            case ADDNODES:
-                                handleAddNodesClick(e);
-                                break;
-                            case ADDTRANSITIONS:
-                                if ((e.isControlDown() || e.isShiftDown()))
-                                {
-                                    handleSelectionClick(e);
-                                }
-                                break;
-                            case ERASER:
-                                {
-                                    handleEraserClick(e);
-                                    break;
-                                }
-                            case CHOOSESTART:
-                                {
-                                    handleChooseStartClick(e);
-                                    break;
-                                }
-                            case CHOOSEACCEPTING:
-                                {
-                                    handleChooseAcceptingClick(e);
-                                    break;
-                                }
-                            case SELECTION:
-                                {
-                                    handleSelectionClick(e);
-                                    break;
-                                }
-                            case CHOOSECURRENTSTATE:
-                                {
-                                    handleChooseCurrentState(e);
-                                    break;
-                                }
-                        }
-                        if (getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY())!= null ||
-                                getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
-                        {
-                            setModifiedSinceSave(true);
-                        }
-                        repaint();
+                    case CHOOSEACCEPTING:
+                        handleChooseAcceptingClick(e);
+                        break;
 
-                    }
+                    case SELECTION:
+                        handleSelectionClick(e);
+                        break;
 
-                    public void mousePressed(MouseEvent e)
+                    case CHOOSECURRENTSTATE:
+                        handleChooseCurrentState(e);
+                        break;
+                }
+
+                // Update modified if anything is clicked on
+                MACHINE mac = getSimulator().getMachine();
+                if (mac.getStateClickedOn(e.getX(), e.getY())!= null ||
+                    mac.getTransitionClickedOn(e.getX(), e.getY(), getGraphics()) != null)
+                {
+                    setModifiedSinceSave(true);
+                }
+                repaint();
+
+            }
+
+            public void mousePressed(MouseEvent e)
+            {
+                if (!m_editingEnabled)
+                {
+                    return;
+                }
+                else if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    handleMousePressed(e);
+                }
+                else if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    tryShowPopup(e);
+                }
+                repaint();
+            }
+
+            public void mouseReleased(MouseEvent e)
+            {
+                if (!m_editingEnabled)
+                {
+                    return;
+                }
+                else if (e.getButton() == MouseEvent.BUTTON1)
+                {
+                    handleMouseReleased(e);
+                }
+                else if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    tryShowPopup(e);
+                }
+                repaint();
+            }
+
+            private void tryShowPopup(MouseEvent e)
+            {
+                if (e.isPopupTrigger())
+                {
+                    m_contextState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
+                    if (m_contextState != null)
                     {
-                        if (!m_editingEnabled)
-                        {
-                            return;
-                        }
-                        handleMousePressed(e);
+                        m_contextMenu.show(e.getComponent(), e.getX(), e.getY());
                     }
-
-                    public void mouseReleased(MouseEvent e)
-                    {
-                        if (!m_editingEnabled)
-                        {
-                            return;
-                        }
-                        handleMouseReleased(e);
-                        repaint();
-                    }
-                });
+                }
+            }
+        });
 
         addMouseMotionListener(new MouseMotionAdapter()
+        {
+            public void mouseDragged(MouseEvent e)
+            {
+                // Deselect any selected action symbol
+                m_selectedSymbolBoundingBox = null;
+                m_selectedTransition = null;
+
+                boolean repaintNeeded = false;
+                if (m_currentMode != GUI_Mode.ADDTRANSITIONS)
                 {
-                    public void mouseDragged(MouseEvent e)
+                    if (m_mousePressedState != null)
                     {
-                        // Deselect any selected action symbol
-                        selectedSymbolBoundingBox = null;
-                        selectedTransition = null;
-
-                        boolean repaintNeeded = false;
-                        if (m_currentMode != GUI_Mode.ADDTRANSITIONS)
-                        {
-                            if (mousePressedState != null)
-                            {
-                                handleStateDrag(e);
-                                repaintNeeded = true;
-                            }
-                            else if (m_currentMode == GUI_Mode.SELECTION && selectionInProgress)
-                            {
-                                selectionBoxEndX = e.getX();
-                                selectionBoxEndY = e.getY();
-                                repaintNeeded = true;
-                            }
-                        }
-                        // Add transitions mode
-                        else
-                        {
-                            drawPosX = e.getX();
-                            drawPosY = e.getY();
-                            repaintNeeded = true;
-                        }
-
-                        if (mousePressedTransition != null)
-                        {
-                            handleTransitionDrag(e);
-                            repaintNeeded = true;
-                        }
-
-                        if (repaintNeeded)
-                        {
-                            repaint();
-                        }
+                        handleStateDrag(e);
+                        repaintNeeded = true;
                     }
-                });
-    }
+                    else if (m_currentMode == GUI_Mode.SELECTION && m_selectionBox != null)
+                    {
+                        m_selectionBox.width  = e.getX() - m_selectionBox.x;
+                        m_selectionBox.height = e.getY() - m_selectionBox.y;
+                        repaintNeeded = true;
+                    }
+                }
+                // Add transitions mode
+                else
+                {
+                    m_drawPosX = e.getX();
+                    m_drawPosY = e.getY();
+                    repaintNeeded = true;
+                }
 
-    /**
-     * Handle when a mouse click occurs over the label of a state, by bringing up a dialog box
-     * requesting the new value for the label.
-     * @param e The generating event.
-     * @return true if the mouse click created a dialog box, false otherwise.
-     */
-    protected boolean clickStateName(MouseEvent e)
-    {
-        STATE nameClicked = getSimulator().getMachine().getStateLabelClickedOn(getGraphics(),e.getX(), e.getY());
-        if (nameClicked == null)
-        {
-            return false;
-        }
-        m_keyboardEnabled = false; // Disable keyboard while dialog box shows
-        String result = (String)JOptionPane.showInputDialog(null, "What would you like to label the state as?", "", JOptionPane.QUESTION_MESSAGE, null, null, nameClicked.getLabel());
-        m_keyboardEnabled = true;
+                if (m_mousePressedTransition != null)
+                {
+                    handleTransitionDrag(e);
+                    repaintNeeded = true;
+                }
 
-        if (result == null)
-        {
-            return true;
-        }
-        if (result.equals(""))
-        {
-            JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
-            return true;
-        }
-        if (result.equals(nameClicked.getLabel()))
-        {
-            return true; // Change to the same thing
-        }
-        if (m_labelsUsed.contains(result))
-        {
-            JOptionPane.showMessageDialog(null, "You cannot assign a label that is already being used by another state!");
-            return true;
-        }
-
-        doCommand(new RenameStateCommand(this, nameClicked, result));
-
-        return true;
+                if (repaintNeeded)
+                {
+                    repaint();
+                }
+            }
+        });
     }
 
     /**
@@ -342,21 +567,21 @@ public abstract class MachineGraphicsPanel<
             Rectangle2D s2 = transitionClicked.getOutputSymbolBoundingBox(getGraphics());
             if (s1.contains(e.getX(), e.getY()))
             {
-                selectedSymbolBoundingBox = s1;
-                inputSymbolSelected = true;
+                m_selectedSymbolBoundingBox = s1;
+                m_inputSymbolSelected = true;
             }
             else if (s2.contains(e.getX(), e.getY()))
             {
-                selectedSymbolBoundingBox = s2;
-                inputSymbolSelected = false;
+                m_selectedSymbolBoundingBox = s2;
+                m_inputSymbolSelected = false;
             }
-            selectedTransition = transitionClicked;
+            m_selectedTransition = transitionClicked;
             return true;
         }
         else
         {
-            selectedSymbolBoundingBox = null;
-            selectedTransition = null;
+            m_selectedSymbolBoundingBox = null;
+            m_selectedTransition = null;
             return false;
         }
     }
@@ -399,34 +624,34 @@ public abstract class MachineGraphicsPanel<
         if ((e.isControlDown() || e.isShiftDown()))
         {
             // We don't want to start creating a new transition in this case
-            mousePressedState = null;
+            m_mousePressedState = null;
         }
         else
         {
-            mousePressedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
+            m_mousePressedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
         }
-        if (mousePressedState != null) // Mouse press on a state
+        if (m_mousePressedState != null) // Mouse press on a state
         {
             setModifiedSinceSave(true);
-            moveStateClickOffsetX = mousePressedState.getX() - e.getX();
-            moveStateClickOffsetY = mousePressedState.getY() - e.getY();
-            moveStateLastLocationX = mousePressedState.getX();
-            moveStateLastLocationY = mousePressedState.getY();
-            moveStateStartLocationX = mousePressedState.getX();
-            moveStateStartLocationY = mousePressedState.getY();
-            m_transitionsToMoveState = getSimulator().getMachine().getTransitionsTo(mousePressedState);
+            m_moveStateClickOffsetX = m_mousePressedState.getX() - e.getX();
+            m_moveStateClickOffsetY = m_mousePressedState.getY() - e.getY();
+            m_moveStateLastLocationX = m_mousePressedState.getX();
+            m_moveStateLastLocationY = m_mousePressedState.getY();
+            m_moveStateStartLocationX = m_mousePressedState.getX();
+            m_moveStateStartLocationY = m_mousePressedState.getY();
+            m_transitionsToMoveState = getSimulator().getMachine().getTransitionsTo(m_mousePressedState);
             precomputeSelectedTransitionsToDrag();
             return;
         }
         else
         {
-            mousePressedTransition = getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-            if (mousePressedTransition != null) // Mouse press on a transition
+            m_mousePressedTransition = getSimulator().getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            if (m_mousePressedTransition != null) // Mouse press on a transition
             {
                 setModifiedSinceSave(true);
-                transitionMidPointBeforeMove = mousePressedTransition.getMidpoint();
-                moveTransitionClickOffsetX = (int)transitionMidPointBeforeMove.getX() - e.getX();
-                moveTransitionClickOffsetY = (int)transitionMidPointBeforeMove.getY() - e.getY();
+                m_transitionMidPointBeforeMove = m_mousePressedTransition.getMidpoint();
+                m_moveTransitionClickOffsetX = (int)m_transitionMidPointBeforeMove.getX() - e.getX();
+                m_moveTransitionClickOffsetY = (int)m_transitionMidPointBeforeMove.getY() - e.getY();
 
                 return;
             }
@@ -435,22 +660,11 @@ public abstract class MachineGraphicsPanel<
         if (m_currentMode == GUI_Mode.SELECTION)
         {
             // Start building a selection bounding box
-            madeSelection = false;
-            selectionInProgress = true;
-            selectionBoxStartX = selectionBoxEndX = e.getX();
-            selectionBoxStartY = selectionBoxEndY = e.getY();
-            selectionConcatenateMode = (e.isControlDown() || e.isShiftDown());
+            m_selectionBox = new Rectangle(e.getX(), e.getY(), 0, 0);
+            m_selectionConcatenateMode = (e.isControlDown() || e.isShiftDown());
 
         }
     }
-
-    /**
-     * Handle when a mouse button is released. Creates any new transitions if a transition creating
-     * drag has occured.
-     * @param e The generating event.
-     */
-    protected abstract void handleMouseReleased(MouseEvent e); // !!!
-
 
     /**
      * Handle when a mouse drag occurs while in selection mode. Moves a transition relative to mouse
@@ -461,20 +675,20 @@ public abstract class MachineGraphicsPanel<
     {
         // Update control point location
         // TODO: enforce area bounds?
-        movedTransition = true;
+        m_movedTransition = true;
 
         // Find the midpoint by correcting for the offset of where the user clicked
-        double correctedMidpointX = e.getX() + moveTransitionClickOffsetX; 
-        double correctedMidpointY = e.getY() + moveTransitionClickOffsetY;
+        double correctedMidpointX = e.getX() + m_moveTransitionClickOffsetX; 
+        double correctedMidpointY = e.getY() + m_moveTransitionClickOffsetY;
 
         Point2D newCP = Spline.getControlPointFromMidPoint(
                 new Point2D.Double(correctedMidpointX, correctedMidpointY),
-                mousePressedTransition.getFromState(), mousePressedTransition.getToState());
+                m_mousePressedTransition.getFromState(), m_mousePressedTransition.getToState());
 
-        mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
+        m_mousePressedTransition.setControlPoint((int)newCP.getX(), (int)newCP.getY());
 
         // Move the bounding box for the selected symbol if it is on this transition action
-        if (mousePressedTransition == selectedTransition)
+        if (m_mousePressedTransition == m_selectedTransition)
         {
             updateSelectedSymbolBoundingBox();
         }
@@ -487,8 +701,8 @@ public abstract class MachineGraphicsPanel<
      */
     protected void handleStateDrag(MouseEvent e)
     {
-        int newX = e.getX() + moveStateClickOffsetX;
-        int newY = e.getY() + moveStateClickOffsetY;
+        int newX = e.getX() + m_moveStateClickOffsetX;
+        int newY = e.getY() + m_moveStateClickOffsetY;
 
         // Check that this is within panel bounds.
         // This is complicated in the case where multiple items are selected
@@ -498,13 +712,13 @@ public abstract class MachineGraphicsPanel<
         int maxX = (int)boundaries.getWidth() - STATE.STATE_RENDERING_WIDTH;
         int maxY = (int)boundaries.getHeight() - STATE.STATE_RENDERING_WIDTH;
 
-        if (selectedStates.contains(mousePressedState)) // Clicked on a selected state
+        if (m_selectedStates.contains(m_mousePressedState)) // Clicked on a selected state
         {
-            int rightMostX = mousePressedState.getX();
-            int leftMostX = mousePressedState.getX();
-            int bottomMostY = mousePressedState.getY();
-            int topMostY = mousePressedState.getY();
-            for (STATE s : selectedStates)
+            int rightMostX = m_mousePressedState.getX();
+            int leftMostX = m_mousePressedState.getX();
+            int bottomMostY = m_mousePressedState.getY();
+            int topMostY = m_mousePressedState.getY();
+            for (STATE s : m_selectedStates)
             {
                 if (s.getX() > rightMostX)
                 {
@@ -523,44 +737,44 @@ public abstract class MachineGraphicsPanel<
                     topMostY = s.getY();
                 }
             }
-            maxX -= rightMostX - mousePressedState.getX();
-            maxY -= bottomMostY - mousePressedState.getY();
-            minX += mousePressedState.getX() - leftMostX;
-            minY += mousePressedState.getY() - topMostY;
+            maxX -= rightMostX - m_mousePressedState.getX();
+            maxY -= bottomMostY - m_mousePressedState.getY();
+            minX += m_mousePressedState.getX() - leftMostX;
+            minY += m_mousePressedState.getY() - topMostY;
         }
         newX = Math.min(newX, maxX);
         newY = Math.min(newY, maxY);
         newX = Math.max(minX, newX); // Constrain to accessable bounds of view plane
         newY = Math.max(minY, newY);
 
-        int translateX = newX - moveStateLastLocationX;
-        int translateY = newY - moveStateLastLocationY;
+        int translateX = newX - m_moveStateLastLocationX;
+        int translateY = newY - m_moveStateLastLocationY;
 
         if (translateX == 0 && translateY == 0)
         {
             return;
         }
-        movedState = true;
-        if (!selectedStates.contains(mousePressedState))
+        m_movedState = true;
+        if (!m_selectedStates.contains(m_mousePressedState))
         {
             // Just move the one state
-            updateTransitionLocations(mousePressedState,translateX, translateY,
-                    m_transitionsToMoveState, mousePressedState.getTransitions());
-            mousePressedState.setPosition(mousePressedState.getX() + translateX,
-                    mousePressedState.getY() + translateY);
+            updateTransitionLocations(m_mousePressedState,translateX, translateY,
+                    m_transitionsToMoveState, m_mousePressedState.getTransitions());
+            m_mousePressedState.setPosition(m_mousePressedState.getX() + translateX,
+                    m_mousePressedState.getY() + translateY);
         }
         else
         {
             // Move all selected states
             pullSelectedTransitionsWithState(translateX, translateY);            
-            for (STATE s : selectedStates)
+            for (STATE s : m_selectedStates)
             {
                 s.setPosition(s.getX() + translateX,
                         s.getY() + translateY);
             }
         }
-        moveStateLastLocationX = mousePressedState.getX();
-        moveStateLastLocationY = mousePressedState.getY();
+        m_moveStateLastLocationX = m_mousePressedState.getX();
+        m_moveStateLastLocationY = m_mousePressedState.getY();
         updateSelectedSymbolBoundingBox();
     }
 
@@ -570,17 +784,17 @@ public abstract class MachineGraphicsPanel<
      */
     protected void updateSelectedSymbolBoundingBox()
     {
-        if (selectedSymbolBoundingBox == null || selectedTransition == null)
+        if (m_selectedSymbolBoundingBox == null || m_selectedTransition == null)
         {
             return;
         }
-        if (inputSymbolSelected)
+        if (m_inputSymbolSelected)
         {
-            selectedSymbolBoundingBox = selectedTransition.getInputSymbolBoundingBox(getGraphics());
+            m_selectedSymbolBoundingBox = m_selectedTransition.getInputSymbolBoundingBox(getGraphics());
         }
         else
         {
-            selectedSymbolBoundingBox = selectedTransition.getOutputSymbolBoundingBox(getGraphics());
+            m_selectedSymbolBoundingBox = m_selectedTransition.getOutputSymbolBoundingBox(getGraphics());
         }
     }
 
@@ -590,22 +804,22 @@ public abstract class MachineGraphicsPanel<
      */
     protected void updateSelectedStatesAndTransitions()
     {
-        int topLeftX = Math.min(selectionBoxStartX, selectionBoxEndX);
-        int topLeftY = Math.min(selectionBoxStartY, selectionBoxEndY);
-        int width = Math.abs(selectionBoxStartX - selectionBoxEndX);
-        int height = Math.abs(selectionBoxStartY - selectionBoxEndY);
-
+        int topLeftX = Math.min(m_selectionBox.x, m_selectionBox.x + m_selectionBox.width),
+            topLeftY = Math.min(m_selectionBox.y, m_selectionBox.y + m_selectionBox.height),
+            width    = Math.abs(m_selectionBox.width),
+            height   = Math.abs(m_selectionBox.height);
+ 
         HashSet<STATE> states = getSimulator().getMachine().getSelectedStates(topLeftX, topLeftY, width, height);
 
-        if (selectionConcatenateMode)
+        if (m_selectionConcatenateMode)
         {
-            selectedStates.addAll(states);
+            m_selectedStates.addAll(states);
         }
         else
         {
-            selectedStates = states;
+            m_selectedStates = states;
         }
-        selectedTransitions = getSimulator().getMachine().getSelectedTransitions(selectedStates);
+        m_selectedTransitions = getSimulator().getMachine().getSelectedTransitions(m_selectedStates);
     }
 
     /**
@@ -617,11 +831,11 @@ public abstract class MachineGraphicsPanel<
         m_outTransitionsToMove = new HashSet<TRANSITION>();
         calcMovedTransitionSets(m_inTransitionsToMove, m_outTransitionsToMove);
 
-        m_TransitionsToMoveintersection = new HashSet<TRANSITION>();
-        m_TransitionsToMoveintersection.addAll(m_inTransitionsToMove);
-        m_TransitionsToMoveintersection.retainAll(m_outTransitionsToMove);
-        m_inTransitionsToMove.removeAll(m_TransitionsToMoveintersection);
-        m_outTransitionsToMove.removeAll(m_TransitionsToMoveintersection);
+        m_transitionsToMoveintersection = new HashSet<TRANSITION>();
+        m_transitionsToMoveintersection.addAll(m_inTransitionsToMove);
+        m_transitionsToMoveintersection.retainAll(m_outTransitionsToMove);
+        m_inTransitionsToMove.removeAll(m_transitionsToMoveintersection);
+        m_outTransitionsToMove.removeAll(m_transitionsToMoveintersection);
     }
 
     /**
@@ -634,7 +848,7 @@ public abstract class MachineGraphicsPanel<
         double halfOfTranslatedX = translateX / 2.0;
         double halfOfTranslatedY = translateY / 2.0;
 
-        for (TRANSITION t : m_TransitionsToMoveintersection)
+        for (TRANSITION t : m_transitionsToMoveintersection)
         {
             if (t.getFromState() == t.getToState())
             {
@@ -727,32 +941,13 @@ public abstract class MachineGraphicsPanel<
     protected void calcMovedTransitionSets(HashSet<TRANSITION> inTransitions,
             HashSet<TRANSITION> outTransitions)
     {
-        for (STATE s : selectedStates)
+        for (STATE s : m_selectedStates)
         {
             Collection<TRANSITION> out = s.getTransitions();
             outTransitions.addAll(out);
             Collection<TRANSITION> in = getSimulator().getMachine().getTransitionsTo(s);
             inTransitions.addAll(in);
         }
-    }
-
-    /**
-     * Get the file associated with the machine.
-     * @return The file associated with the machine.
-     */
-    public File getFile()
-    {
-        return m_file;
-    }
-
-    /**
-     * Set the file associated with the machine.
-     * @param f The new file associated with the machine.
-     */
-    public void setFile(File f)
-    {
-        m_file = f;
-        updateTitle();
     }
 
     /**
@@ -763,33 +958,6 @@ public abstract class MachineGraphicsPanel<
         if (m_iFrame != null)
         {
             m_iFrame.updateTitle();
-        }
-    }
-
-    /** 
-     * Find the first unused standard state label in the machine. Standard labels are 'q' followed
-     * by a non-negative integer.
-     * NOTE: Potentially should be abstract.
-     * @return The first unused standard state label.
-     */
-    public String getFirstFreeName()
-    {
-        switch (getSimulator().getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                int current = 0;
-                while (m_labelsUsed.contains("q" + current))
-                {
-                    current++;
-                }
-                return "q" + current;
-
-            case NORMALIZED:
-                // Assume every state name is normalized, hence no naming conflicts
-                return "" + getSimulator().getMachine().getStates().size();
-
-            default:
-                return null;
         }
     }
 
@@ -824,78 +992,22 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Set the internal frame for this panel.
-     * @param iFrame The new internal frame.
-     */
-    public void setWindow(MachineInternalFrame iFrame)
-    {
-        m_iFrame = iFrame;
-        updateTitle();
-    }
-
-    /**
-     * Get the internal frame for this panel.
-     * @return The internal frame for this panel.
-     */
-    public MachineInternalFrame getWindow()
-    {
-        return m_iFrame;
-    }
-
-    /**
-     * Determine if the keyboard is enabled.
-     * @return true if the keyboard is enabled, false otherwise.
-     */
-    public boolean getKeyboardEnabled()
-    {
-        return m_keyboardEnabled;
-    }
-
-    /**
      * Deselect any transition action character currently selected by the user. Causes a repaint.
      */
     public void deselectSymbol()
     {
-        selectedSymbolBoundingBox = null;
-        selectedTransition = null;
+        m_selectedSymbolBoundingBox = null;
+        m_selectedTransition = null;
         repaint();
     }
 
-    /**
-     * Get the current transition selected by the user for modification of its input/output symbols,
-     * or null if there is no selected transition one.
-     * @return The current transition selected by the user for modification.
-     */
-    public TRANSITION getSelectedTransition()
-    {
-        return selectedTransition;
-    }
-
-    /**
-     * Get the set of transitions selected by the user.
-     * @return The set of transitions selected by the user.
-     */
-    public HashSet<TRANSITION> getSelectedTransitions()
-    {
-        return selectedTransitions;
-    }
-
-    /**
-     * Get the set of states selected by the user.
-     * @return The set of states selected by the user.
-     */
-    public HashSet<STATE> getSelectedStates()
-    {
-        return selectedStates;
-    }
-
-    /**
+   /**
      * Delete all states and transitions that the user has currently selected.
      */
     public void deleteAllSelected()
     {
-        HashSet<STATE> selectedStatesCopy = (HashSet<STATE>)selectedStates.clone();
-        HashSet<TRANSITION> selectedTransitionsCopy = (HashSet<TRANSITION>)selectedTransitions.clone();
+        HashSet<STATE> selectedStatesCopy = (HashSet<STATE>)m_selectedStates.clone();
+        HashSet<TRANSITION> selectedTransitionsCopy = (HashSet<TRANSITION>)m_selectedTransitions.clone();
         switch (getSimulator().getMachine().getNamingScheme())
         {
             case GENERAL:
@@ -918,14 +1030,14 @@ public abstract class MachineGraphicsPanel<
      * machine are maintained. Returns null if the process fails, which should not occur.
      * @return A byte array representation of the states and transitions.
      */
-    byte[] copySelectedToByteArray() 
+    protected byte[] copySelectedToByteArray() 
     {
         try
         {
             ByteArrayOutputStream returner = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(returner);
-            oos.writeObject(selectedStates);
-            oos.writeObject(selectedTransitions);
+            oos.writeObject(m_selectedStates);
+            oos.writeObject(m_selectedTransitions);
             oos.flush();
 
             return returner.toByteArray();
@@ -936,102 +1048,6 @@ public abstract class MachineGraphicsPanel<
         }
     }
 
-    /**
-     * Set which states are selected by the user.
-     * @param states The states selected by the user.
-     */
-    public void setSelectedStates(HashSet<STATE> states)
-    {
-        selectedStates = states;
-    }
-
-    /**
-     * Set which transtions are selected by the user.
-     * @param transitions The transitions selected by the user.
-     */
-    public void setSelectedTransitions(HashSet<TRANSITION> transitions)
-    {
-        selectedTransitions = transitions;
-    }
-
-    /**
-     * Determine if the machine has been modified since its last save.
-     * @return true if it has been modified since its last save, false otherwise.
-     */
-    public boolean isModifiedSinceSave()
-    {
-        return m_modifiedSinceSave;
-    }
-
-    /**
-     * Set whether the machine has been modified since its last save.
-     * @param isModified true if it has been modified since its last save, false otherwise.
-     */
-    public void setModifiedSinceSave(boolean isModified)
-    {
-        m_modifiedSinceSave = isModified;
-        if (m_iFrame != null)
-        {
-            m_iFrame.updateTitle();
-        }
-    }
-
-    /**
-     * Determine if editing of the machine is enabled.
-     * @return true if editing is enabled, false otherwise.
-     */
-    public boolean isEditingEnabled()
-    {
-        return m_editingEnabled;
-    }
-
-    /** 
-     * Set if editing of the machine is enabled.
-     * @param enabled true if editing is enabled, false otherwise.
-     */
-    public void setEditingEnabled(boolean enabled)
-    {
-        m_editingEnabled = enabled;
-        m_keyboardEnabled = enabled;
-    }
-
-    /** 
-     * Set the location where the last pasted item was placed. This is to prevent pasting multiple
-     * items in the same place.
-     * @param location The location where the last pasted item was placed.
-     */
-    public void setLastPastedLocation(Point2D location)
-    {
-        m_lastPastedLocation = location;
-        m_numPastesToSameLocation = 1;
-    }
-
-    /**
-     * Get the location of the last place we pasted to.
-     * @return The location where the last pasted item was placed.
-     */
-    public Point2D getLastPastedLocation()
-    {
-        return m_lastPastedLocation;
-    }
-
-    /**
-     * Increase the count of the number of times we've pasted to the same location on the canvas.
-     */
-    public void incrementNumPastesToSameLocation()
-    {
-        m_numPastesToSameLocation++;
-    }
-
-    /**
-     * Get the count of the number of times we've pasted to the same location on the canvas.
-     * @return The number of times an item has been pasted to the same location on the canvas.
-     */
-    public int getNumPastesToSameLocation()
-    {
-        return m_numPastesToSameLocation;
-    }
-
     // Command handing:
     /**
      * Executes a command and adds it to the undo stack. Clears the redo stack also.
@@ -1040,8 +1056,8 @@ public abstract class MachineGraphicsPanel<
     public void doCommand(TMCommand command)
     {
         command.doCommand();
-        undoStack.add(command);
-        redoStack.clear();
+        m_undoStack.add(command);
+        m_redoStack.clear();
         setModifiedSinceSave(true);
         MainWindow.getInstance().updateUndoActions();
         repaint();
@@ -1064,8 +1080,8 @@ public abstract class MachineGraphicsPanel<
      */
     public void addCommand(TMCommand command)
     {
-        undoStack.add(command);
-        redoStack.clear();
+        m_undoStack.add(command);
+        m_redoStack.clear();
         MainWindow.getInstance().updateUndoActions();
         repaint();
     }
@@ -1077,9 +1093,9 @@ public abstract class MachineGraphicsPanel<
     {
         try
         {
-            TMCommand c = undoStack.removeLast();
+            TMCommand c = m_undoStack.removeLast();
             c.undoCommand();
-            redoStack.add(c);
+            m_redoStack.add(c);
             setModifiedSinceSave(true);
             MainWindow.getInstance().updateUndoActions();
             repaint();
@@ -1094,9 +1110,9 @@ public abstract class MachineGraphicsPanel<
     {
         try
         {
-            TMCommand c = redoStack.removeLast();
+            TMCommand c = m_redoStack.removeLast();
             c.doCommand();
-            undoStack.add(c);
+            m_undoStack.add(c);
             setModifiedSinceSave(true);
             MainWindow.getInstance().updateUndoActions();
             repaint();
@@ -1110,9 +1126,9 @@ public abstract class MachineGraphicsPanel<
      */
     public String undoCommandName()
     {
-        if (!undoStack.isEmpty())
+        if (!m_undoStack.isEmpty())
         {
-            return undoStack.getLast().getName();
+            return m_undoStack.getLast().getName();
         }
         return null;
     }
@@ -1123,18 +1139,227 @@ public abstract class MachineGraphicsPanel<
      */
     public String redoCommandName()
     {
-        if (!redoStack.isEmpty())
+        if (!m_redoStack.isEmpty())
         {
-            return redoStack.getLast().getName();
+            return m_redoStack.getLast().getName();
         }
         return null;
     }
 
     /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
+     * Handle when a mouse button is released. Creates any new transitions if a transition creating
+     * drag has occured.
+     * @param e The generating event.
      */
-    public abstract SIMULATOR getSimulator();
+    protected void handleMouseReleased(MouseEvent e)
+    {
+        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && m_mousePressedState != null)
+        {
+            STATE mouseReleasedState = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+            if (mouseReleasedState != null)
+            {
+                TRANSITION newTrans = makeTransition(m_mousePressedState, mouseReleasedState);
+                doCommand(new AddTransitionCommand(this, newTrans));
+                repaint();
+            }
+        }
+        else if (m_currentMode == GUI_Mode.SELECTION && m_selectionBox != null)
+        {
+            if (m_selectionBox.width != 0 && m_selectionBox.height != 0)
+            {
+                updateSelectedStatesAndTransitions();
+            }
+            repaint();
+        }
+
+        if (m_mousePressedState != null && m_movedState)
+        {
+            // Create an undo/redo command object for the move of a state/set of states/transitions.
+            int translateX = m_mousePressedState.getX() - m_moveStateStartLocationX,
+                translateY = m_mousePressedState.getY() - m_moveStateStartLocationY;
+
+            if (translateX != 0 || translateY != 0)
+            {
+                if (m_selectedStates.contains(m_mousePressedState))
+                {
+                    // Moved a set of states
+                    Collection<State> statesCopy = (Collection<State>)m_selectedStates.clone();
+                    Collection<Transition> transitionsCopy = (Collection<Transition>)m_selectedTransitions.clone();
+                    addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy, translateX, translateY));
+                }
+                else
+                {
+                    // Moved one state
+                    Collection<Transition> transitions = new ArrayList<Transition>();
+                    transitions.addAll(m_transitionsToMoveState);
+                    addCommand(new MoveStateCommand(this, m_mousePressedState, translateX, translateY, transitions));
+                }
+            }
+        }
+
+        if (m_mousePressedTransition != null && m_movedTransition)
+        {
+            // Create an undo/redo command object for the move of a transition
+            int translateX = (int)(m_mousePressedTransition.getMidpoint().getX() - m_transitionMidPointBeforeMove.getX()),
+                translateY = (int)(m_mousePressedTransition.getMidpoint().getY() - m_transitionMidPointBeforeMove.getY());
+            addCommand(new MoveTransitionCommand(this, m_mousePressedTransition, translateX, translateY));
+        }
+
+        m_selectionBox = null;
+        m_mousePressedState = null;
+        m_mousePressedTransition = null;
+        m_transitionMidPointBeforeMove = null;
+        m_movedTransition = false;
+        m_movedState = false;
+        m_drawPosX = Integer.MIN_VALUE;
+        m_drawPosY = Integer.MIN_VALUE;
+    }
+
+    /**
+     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
+     * state, or creating a new state.
+     * @param e The generating event.
+     */
+    protected void handleAddNodesClick(MouseEvent e)
+    {
+        // Clicking on another state should just select the existing state
+        if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY()) != null)
+        {
+            // Adding states on top of states is not allowed
+            handleSelectionClick(e);
+            return;
+        }
+
+        int x = e.getX() - STATE.STATE_RENDERING_WIDTH / 2,
+            y = e.getY() - STATE.STATE_RENDERING_WIDTH / 2;
+        switch (m_sim.getMachine().getNamingScheme())
+        {
+            case GENERAL:
+                String label = getFirstFreeName();
+                doCommand(new AddStateCommand(this, makeState(label, x, y)));
+                break;
+            
+            case NORMALIZED:
+                doJoinCommand(
+                        new AddStateCommand(this, makeState("", x, y)),
+                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+                break;
+        }
+    }
+
+    /** 
+     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
+     * state, it is deleted, and if it is over a transition, that is deleted.
+     * @param e The generating event.
+     */
+    protected void handleEraserClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            deleteState(stateClickedOn);
+        }
+        else
+        {
+            TRANSITION transitionClickedOn = m_sim.getMachine()
+                .getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
+            if (transitionClickedOn != null)
+            {
+                deleteTransition(transitionClickedOn);
+            }
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
+     * over a state, the start state of the machine is changed.
+     * @param e The generating event.
+     */
+    protected void handleChooseStartClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            switch (m_sim.getMachine().getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
+                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+            }
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
+     * occurs over a state, the accepting state of the machine is changed.
+     * @param e The generating event.
+     */
+    protected void handleChooseAcceptingClick(MouseEvent e)
+    {
+        // Get all relevant objects
+        MACHINE mac          = m_sim.getMachine();
+        STATE stateClickedOn = mac.getStateClickedOn(e.getX(), e.getY()),
+              finalState     = mac.getFinalStates().isEmpty()?
+                               null : mac.getFinalStates().iterator().next();
+
+        if (stateClickedOn != null)
+        {
+            // Generalized for all machines; if the machine should have a unique halt state, then
+            // ensure only 1 is ever selected at a time, otherwise toggle.
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleAcceptingStateCommand(this, 
+                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleAcceptingStateCommand(this, 
+                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn),
+                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
+            }
+        }
+    }
+
+    /**
+     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
+     * state, the state is either added or removed from the selected state set, depending on context.
+     * @param e The generating event.
+     */
+    protected void handleSelectionClick(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (!(e.isControlDown() || e.isShiftDown()))
+        {
+            m_selectedStates.clear();
+            m_selectedTransitions.clear();
+        }
+        if (stateClickedOn != null && !m_selectedStates.remove(stateClickedOn))
+        {
+            m_selectedStates.add(stateClickedOn);
+        }
+        m_selectedTransitions = m_sim.getMachine().getSelectedTransitions(m_selectedStates);
+    }
+
+    /**
+     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
+     * occurs over a state, the state is made to be the current state.
+     * @param e The generating event.
+     */
+    protected void handleChooseCurrentState(MouseEvent e)
+    {
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
+        if (stateClickedOn != null)
+        {
+            m_sim.setCurrentState(stateClickedOn);
+        }
+    }
 
     /**
      * Called when the owning frame is activated. Should deactivate any and all events which are not
@@ -1151,62 +1376,229 @@ public abstract class MachineGraphicsPanel<
     public abstract boolean handleKeyEvent(KeyEvent e);
 
     /**
-     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
-     * state, or creating a new state.
-     * @param e The generating event.
+     * Create a STATE object with the given label at the specified location.
+     * @param label The state label.
+     * @param x The x-ordinate of the state.
+     * @param y The y-ordinate of the state.
+     * @return A new STATE object.
      */
-    protected abstract void handleAddNodesClick(MouseEvent e);
-
-    /** 
-     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
-     * state, it is deleted, and if it is over a transition, that is deleted.
-     * @param e The generating event.
-     */
-    public abstract void handleEraserClick(MouseEvent e);
+    protected abstract STATE makeState(String label, int x, int y);
 
     /**
-     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
-     * over a state, the start state of the machine is changed.
-     * @param e The generating event.
+     * Create a TRANSITION object with a default action, attached to the two specified states.
+     * @param start The state the transition leaves.
+     * @param end The state the transition arrives at.
+     * @return A new TRANSITION object.
      */
-    protected abstract void handleChooseStartClick(MouseEvent e);
+    protected abstract TRANSITION makeTransition(STATE start, STATE end);
 
     /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
+     * Build an error message for the given ComputationCompletedException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
      */
-    protected abstract void handleChooseAcceptingClick(MouseEvent e);
-
-    /**
-     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
-     * state, the state is either added or removed from the selected state set, depending on context.
-     * @param e The generating event.
-     */
-    protected abstract void handleSelectionClick(MouseEvent e);
-
-    /**
-     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
-     * occurs over a state, the state is made to be the current state.
-     * @param e The generating event.
-     */
-    protected abstract void handleChooseCurrentState(MouseEvent e);
-
     public abstract String getErrorMessage(ComputationCompletedException e);
+
+    /**
+     * Build an error message for the given ComputationFailedException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public abstract String getErrorMessage(ComputationFailedException e);
+
+    /**
+     * Build an error message for the given NondeterministicException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public abstract String getErrorMessage(NondeterministicException e);
+
+    /**
+     * Build an error message for the given TapeBoundsException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public abstract String getErrorMessage(TapeBoundsException e);
+
+    /**
+     * Build an error message for the given UndefinedTransitionException.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public abstract String getErrorMessage(UndefinedTransitionException e);
+
+    /**
+     * Build an error message for the given Exception. Automatically checks the type of the
+     * exception to see if it matches any existing definitions of getErrorMessage and dispatches
+     * accordingly.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
     public String getErrorMessage(Exception e)
     {
-        return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+        // Pretend we have dynamic dispatch
+        if (e instanceof ComputationCompletedException)
+        {
+            return getErrorMessage((ComputationCompletedException) e);
+        }
+        else if (e instanceof ComputationFailedException)
+        {
+            return getErrorMessage((ComputationFailedException) e);
+        }
+        else if (e instanceof NondeterministicException)
+        {
+            return getErrorMessage((NondeterministicException) e);
+        }
+        else if (e instanceof TapeBoundsException)
+        {
+            return getErrorMessage((TapeBoundsException) e);
+        }
+        else if (e instanceof UndefinedTransitionException)
+        {
+            return getErrorMessage((UndefinedTransitionException) e);
+        }
+        else 
+        { 
+            e.printStackTrace();
+            return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+        }
     }
 
     /**
-     * Build an error message using the given exception specifically for the type of machine being
-     * simulated.
-     * @return An error message specific for the type of machine being simulated.
+     * Action to rename a state selected by the context menu.
      */
+    protected class RenameStateAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of RenameStateAction.
+         * @param text Description of the action.
+         */
+        public RenameStateAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Display a dialog to change the state label. If the user accepts the new name, and it
+         * passes relevant checks, fire the command to change the label.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // Should be fired by m_contextMenu, which in turn is only open if we have right clicked
+            // on a state. Hence we have a non-null state to work with.
+            
+            // Disable the keyboard while we prompt for user input
+            m_keyboardEnabled = false;
+            String result = (String) JOptionPane.showInputDialog(null, "Please enter the new state label",
+                                                                 "Rename State", JOptionPane.QUESTION_MESSAGE,
+                                                                 null, null, m_contextState.getLabel());
+            m_keyboardEnabled = true;
+        
+            // User cancelled, or no change
+            if (result == null || result.equals(m_contextState.getLabel()))
+            {
+                // Do nothing
+            }
+            // Blank label not allowed
+            else if (result.equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
+            }
+            // Label already in use
+            else if (m_labelsUsed.contains(result))
+            {
+                JOptionPane.showMessageDialog(null, "Label is already used by another state!");
+            }
+            // Otherwise rename
+            else
+            {
+                doCommand(new RenameStateCommand(MachineGraphicsPanel.this, m_contextState, result));
+            }
+        }
+    }
+
+    /**
+     * Action to toggle whether or not a state is the start state.
+     */
+    protected class ToggleStartAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ToggleStartAction.
+         * @param text Description of the action.
+         */
+        public ToggleStartAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Toggle whether or not this state is the start state. Unsets the current start state.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            MACHINE mac = m_sim.getMachine();
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState),
+                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
+                    break;
+            }
+        }
+    } 
+
+    /**
+     * Action to toggle whether or not a state is the accepting state.
+     */
+    protected class ToggleAcceptingAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of ToggleAcceptingAction.
+         * @param text Description of the action.
+         */
+        public ToggleAcceptingAction(String text)
+        {
+            super(text);
+            putValue(Action.SHORT_DESCRIPTION, text);
+        }
+
+        /**
+         * Toggle whether or not this state is an accepting state. If the underlying machine
+         * indicates it should have a unique halt state, unsets the existing accepting state.
+         * @param e The generating event.
+         */
+        public void actionPerformed(ActionEvent e)
+        {
+            // Get all relevant objects
+            MACHINE mac      = m_sim.getMachine();
+            STATE finalState = mac.getFinalStates().isEmpty()?
+                               null : mac.getFinalStates().iterator().next();
+
+            // Generalized for all machines; if the machine should have a unique halt state, then
+            // ensure only 1 is ever selected at a time, otherwise toggle.
+            switch (mac.getNamingScheme())
+            {
+                case GENERAL:
+                    doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
+                    break;
+
+                case NORMALIZED:
+                    doJoinCommand(
+                            new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                                mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
+                            new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
+            }
+        }
+    }
 
     /**
      * Get the file extension associated with this type of machine. Should return a value from a
@@ -1223,61 +1615,14 @@ public abstract class MachineGraphicsPanel<
     public abstract String getMachineType();
 
     /**
-     * The current GUI mode.
+     * The owning frame.
      */
-    protected GUI_Mode m_currentMode;
+    protected MachineInternalFrame m_iFrame;
 
     /**
-     * The set of selected states.
+     * The associated simulator
      */
-    protected HashSet<STATE> selectedStates = new HashSet<STATE>();
-
-    /**
-     * The set of selected transitions.
-     */
-    protected HashSet<TRANSITION> selectedTransitions = new HashSet<TRANSITION>();
-
-    /**
-     * The start X ordinate of the selection marquee.
-     */
-    protected int selectionBoxStartX = Integer.MIN_VALUE;
-
-    /** 
-     * The start Y ordinate of the selection marquee.
-     */
-    protected int selectionBoxStartY = Integer.MIN_VALUE;
-
-    /**
-     * The end X ordinate of the selection marquee.
-     */
-    protected int selectionBoxEndX = Integer.MIN_VALUE;
-
-    /**
-     * The end Y ordinate of the selection marquee.
-     */
-    protected int selectionBoxEndY = Integer.MIN_VALUE;
-
-    /**
-     * Whether or not the user has made a marquee selection; determines if the values for
-     * selectionBoxStartX, selectionBoxStartY, selectionBoxEndX, and selectionBoxEndY are valid.
-     */
-    protected boolean madeSelection = false;
-
-    /**
-     * Whether or not a marquee selection is in progress.
-     */
-    protected boolean selectionInProgress = false;
-
-    /**
-     * Whether or not selected items will be concatenated to the list of selected items, or the
-     * previous selected items overwritten.
-     */
-    protected boolean selectionConcatenateMode = false;
-
-    /**
-     * Whether or not the machine has been modified since the last save.
-     */
-    protected boolean m_modifiedSinceSave = false;
+    protected SIMULATOR m_sim;
 
     /**
      * The underlying file.
@@ -1285,74 +1630,123 @@ public abstract class MachineGraphicsPanel<
     protected File m_file;
 
     /**
-     * The owning frame.
+     * Whether or not the machine has been modified since the last save.
      */
-    protected MachineInternalFrame m_iFrame;
+    protected boolean m_modifiedSinceSave = false;
+
+    /**
+     * The current GUI mode.
+     */
+    protected GUI_Mode m_currentMode;
+
+    /**
+     * The right-click context menu associated with this panel.
+     * Specialized panels should take this menu and add new actions after a separator.
+     */
+    protected JPopupMenu m_contextMenu;
+
+    /**
+     * The state currently selected by the right-click context menu.
+     * If m_contextMenu is displayed, then m_contextState is non-null.
+     */
+    protected STATE m_contextState;
+
+    /**
+     * Stack containing commands which can be undone.
+     */
+    protected LinkedList<TMCommand> m_undoStack = new LinkedList<TMCommand>();
+
+    /**
+     * Stack containing commands which can be redone.
+     */
+    protected LinkedList<TMCommand> m_redoStack = new LinkedList<TMCommand>();
+
+    /**
+     * The set of selected states.
+     */
+    protected HashSet<STATE> m_selectedStates = new HashSet<STATE>();
+
+    /**
+     * The set of selected transitions.
+     */
+    protected HashSet<TRANSITION> m_selectedTransitions = new HashSet<TRANSITION>();
+
+    /**
+     * The bounds of the selection marquee. If null, then no selection is in progress.
+     * If width and height are nonzero, then a selection has been made.
+     */
+    protected Rectangle m_selectionBox;
+
+    /**
+     * Whether or not selected items will be concatenated to the list of selected items, or the
+     * previous selected items overwritten.
+     */
+    protected boolean m_selectionConcatenateMode = false;
 
     /**
      *  The state we last pressed a mouse button on.
      */
-    protected STATE mousePressedState = null;
+    protected STATE m_mousePressedState = null;
 
     /**
      * The transition we last pressed a mouse button on
      */
-    protected TRANSITION mousePressedTransition = null;
+    protected TRANSITION m_mousePressedTransition = null;
 
     /**
      * The X ordinate of the temporary transition to be drawn when the mouse is dragged.
      */
-    protected int drawPosX = Integer.MIN_VALUE;
+    protected int m_drawPosX = Integer.MIN_VALUE;
 
     /**
      * The Y ordinate of the temporary transition to be drawn when the mouse is dragged.
      */
-    protected int drawPosY = Integer.MIN_VALUE;
+    protected int m_drawPosY = Integer.MIN_VALUE;
 
     /**
      * X ordinate from the mouse click to the control point.
      */
-    protected int moveTransitionClickOffsetX = Integer.MIN_VALUE;
+    protected int m_moveTransitionClickOffsetX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate from the mouse click to the control point.
      */
-    protected int moveTransitionClickOffsetY = Integer.MIN_VALUE;
+    protected int m_moveTransitionClickOffsetY = Integer.MIN_VALUE;
 
     /**
      * X ordinate from the mouse click to state location.
      */
-    protected int moveStateClickOffsetX = Integer.MIN_VALUE;
+    protected int m_moveStateClickOffsetX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate from the mouse click to state location.
      */
-    protected int moveStateClickOffsetY = Integer.MIN_VALUE;
+    protected int m_moveStateClickOffsetY = Integer.MIN_VALUE;
 
     /**
      * X ordinate of the last location of the moved state.
      */
-    protected int moveStateLastLocationX = Integer.MIN_VALUE;
+    protected int m_moveStateLastLocationX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate of the last location of the moved state.
      */
-    protected int moveStateLastLocationY = Integer.MIN_VALUE;
+    protected int m_moveStateLastLocationY = Integer.MIN_VALUE;
 
     /**
      * X ordinate of the original position of the state, before movement.
      */
-    protected int moveStateStartLocationX = Integer.MIN_VALUE;
+    protected int m_moveStateStartLocationX = Integer.MIN_VALUE;
 
     /**
      * Y ordinate of the original position of the state, before movement.
      */
-    protected int moveStateStartLocationY = Integer.MIN_VALUE;
+    protected int m_moveStateStartLocationY = Integer.MIN_VALUE;
 
     /**
      * Whether a state has been moved.
      */
-    protected boolean movedState = false;
+    protected boolean m_movedState = false;
 
     /**
      * Cached list of transitions that finish at the state we are dragging.
@@ -1372,17 +1766,17 @@ public abstract class MachineGraphicsPanel<
     /**
      * Intersection of m_inTransitionsToMove and m_outTransitionsToMove.
      */
-    protected HashSet<TRANSITION> m_TransitionsToMoveintersection = new HashSet<TRANSITION>();
+    protected HashSet<TRANSITION> m_transitionsToMoveintersection = new HashSet<TRANSITION>();
 
     /**
      * Midpoint of the currently selected transition, before movement.
      */
-    protected Point2D transitionMidPointBeforeMove = null;
+    protected Point2D m_transitionMidPointBeforeMove = null;
 
     /**
      * Whether a transition has been moved.
      */
-    protected boolean movedTransition = false;
+    protected boolean m_movedTransition = false;
 
     /**
      * Whether the keyboard is enabled.
@@ -1400,29 +1794,19 @@ public abstract class MachineGraphicsPanel<
     protected HashSet<String> m_labelsUsed = new HashSet<String>();
 
     /**
-     * Stack containing commands which can be undone.
-     */
-    protected LinkedList<TMCommand> undoStack = new LinkedList<TMCommand>();
-
-    /**
-     * Stack containing commands which can be redone.
-     */
-    protected LinkedList<TMCommand> redoStack = new LinkedList<TMCommand>();
-
-    /**
      * Bounding box of the currently selected transition action.
      */
-    protected Rectangle2D selectedSymbolBoundingBox = null;
+    protected Rectangle2D m_selectedSymbolBoundingBox = null;
 
     /**
      * The selected transition.
      */
-    protected TRANSITION selectedTransition = null;
+    protected TRANSITION m_selectedTransition = null;
 
     /**
      * Whether a transition action has been selected.
      */
-    protected boolean inputSymbolSelected = false;
+    protected boolean m_inputSymbolSelected = false;
 
     /**
      * Last location a value was pasted.

@@ -421,6 +421,13 @@ public abstract class Machine<
     public abstract Collection<STATE> getFinalStates();
 
     /**
+     * Determine whether or not this type of machine should have a unique halt state. If true, then
+     * getFinalStates() should never return more than one element.
+     * @return true if this machine should have a unique halt state, false otherwise.
+     */
+    public abstract boolean hasUniqueFinalState();
+
+    /**
      * Add a state to the machine.
      * @param state The state to add.
      */

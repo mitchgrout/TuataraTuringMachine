@@ -63,20 +63,8 @@ public class DFSAGraphicsPanel
      */
     public DFSAGraphicsPanel(DFSA_Machine machine, Tape tape, File file)
     {
-        // TODO: Move to MachineGraphicsPanel
-        m_sim = new DFSA_Simulator(machine, tape);
-        m_file = file;
-        m_labelsUsed = m_sim.getMachine().getLabelHashset();
+        super(new DFSA_Simulator(machine, tape), file);
         initialization();
-    }
-
-    /**
-     * Get the simulator object for the machine associated with this panel.
-     * @return The simulator object for the machine.
-     */
-    public DFSA_Simulator getSimulator()
-    {
-        return m_sim;
     }
 
     /**
@@ -96,7 +84,7 @@ public class DFSAGraphicsPanel
      */
     public boolean handleKeyEvent(KeyEvent e)
     {
-        if (selectedSymbolBoundingBox == null || getSelectedTransition() == null)
+        if (m_selectedSymbolBoundingBox == null || getSelectedTransition() == null)
         {
             return false;
         }
@@ -104,7 +92,7 @@ public class DFSAGraphicsPanel
         // There is a transition action currently selected by the user.
         char c = Character.toUpperCase(e.getKeyChar());
 
-        if (!inputSymbolSelected)
+        if (!m_inputSymbolSelected)
         {
             return false;
         }
@@ -132,196 +120,26 @@ public class DFSAGraphicsPanel
     }
 
     /**
-     * Handle when a mouse click occurs over a state, by either selecting the existing underlying
-     * state, or creating a new state.
-     * @param e The generating event.
+     * Create a DFSA_State object with the given label at the specified location.
+     * @param label The state label.
+     * @param x The x-ordinate of the state.
+     * @param y The y-ordinate of the state.
+     * @return A new DFSA_State object.
      */
-    protected void handleAddNodesClick(MouseEvent e)
+    protected DFSA_State makeState(String label, int x, int y)
     {
-        if (m_sim.getMachine().getStateClickedOn(e.getX(), e.getY()) != null)
-        {
-            // Adding states on top of states is not allowed
-            handleSelectionClick(e);
-            return;
-        }
-
-        int x = e.getX() - DFSA_State.STATE_RENDERING_WIDTH / 2;
-        int y = e.getY() - DFSA_State.STATE_RENDERING_WIDTH / 2;
-        String label = getFirstFreeName();
-        doCommand(new AddStateCommand(this, new DFSA_State(label, false, false, x, y)));
+        return new DFSA_State(label, false, false, x, y);
     }
 
     /**
-     * Handle when a mouse button is released. Creates any new transitions if a transition creating
-     * drag has occured.
-     * @param e The generating event.
+     * Create a DFSA_Transition object with a default action, attached to the two specified states.
+     * @param start The state the transition leaves.
+     * @param end The state the transition arrives at.
+     * @return A new DFSA_Transition object.
      */
-    protected void handleMouseReleased(MouseEvent e)
+    protected DFSA_Transition makeTransition(DFSA_State start, DFSA_State end)
     {
-        if (m_currentMode == GUI_Mode.ADDTRANSITIONS && mousePressedState != null)
-        {
-            DFSA_State mouseReleasedState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
-            if (mouseReleasedState != null)
-            {
-                DFSA_Transition newTrans = new DFSA_Transition((DFSA_State)mousePressedState, mouseReleasedState,
-                        new DFSA_Action(Machine.UNDEFINED_SYMBOL));
-                doCommand(new AddTransitionCommand(this, newTrans));
-                repaint();
-            }
-        }
-        else if (m_currentMode == GUI_Mode.SELECTION)
-        {
-            if (selectionInProgress)
-            {
-                madeSelection = (selectionBoxStartX != selectionBoxEndX ||
-                        selectionBoxStartY != selectionBoxEndY); //true IFF selection not empty
-
-                if (madeSelection)
-                {
-                    updateSelectedStatesAndTransitions();
-                }
-                repaint();
-            }
-        }
-        if (mousePressedState != null && movedState)
-        {
-            // Create an undo/redo command object for the move of a state/set of states/transitions.
-            int translateX = mousePressedState.getX() - moveStateStartLocationX;
-            int translateY = mousePressedState.getY() - moveStateStartLocationY;
-
-            if (translateX != 0 || translateY != 0)
-            {
-                if (selectedStates.contains(mousePressedState))
-                {
-                    // Moved a set of states
-                    Collection<State> statesCopy = (HashSet<State>)selectedStates.clone();
-                    Collection<Transition> transitionsCopy = (HashSet<Transition>)selectedTransitions.clone();
-                    addCommand(new MoveSelectedCommand(this, statesCopy, transitionsCopy,
-                                translateX,  translateY));
-                }
-                else
-                {
-                    // Moved one state
-                    Collection<Transition> transitions = new ArrayList<Transition>();
-                    transitions.addAll(m_transitionsToMoveState);
-                    addCommand(new MoveStateCommand(this, mousePressedState, translateX, 
-                                translateY, transitions));
-                }
-            }
-        }
-
-        if (mousePressedTransition != null && movedTransition)
-        {
-            // Create an undo/redo command object for the move of a transition
-
-            int translateX = (int)(mousePressedTransition.getMidpoint().getX() - transitionMidPointBeforeMove.getX());
-            int translateY = (int)(mousePressedTransition.getMidpoint().getY() - transitionMidPointBeforeMove.getY());
-            addCommand(new MoveTransitionCommand(this, mousePressedTransition, translateX, translateY));
-        }
-        selectionInProgress = false;
-
-        mousePressedState = null;
-        mousePressedTransition = null;
-        transitionMidPointBeforeMove = null;
-        movedTransition = false;
-        movedState = false;
-        drawPosX = Integer.MIN_VALUE; // Reset these values so that the line is not drawn.
-        drawPosY = Integer.MIN_VALUE;
-    }
-
-
-    /** 
-     * Handle when a mouse click occurs while in eraser mode. If the mouse click occurs over a
-     * state, it is deleted, and if it is over a transition, that is deleted.
-     * @param e The generating event.
-     */
-    public void handleEraserClick(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        if (stateClickedOn != null)
-        {
-            deleteState(stateClickedOn);
-        }
-        else
-        {
-            DFSA_Transition transitionClickedOn = m_sim.getMachine().getTransitionClickedOn(e.getX(), e.getY(), getGraphics());
-            if (transitionClickedOn != null)
-            {
-                deleteTransition(transitionClickedOn);
-            }
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in select start state mode. If the mouse click occurs
-     * over a state, the start state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseStartClick(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (stateClickedOn != null)
-        {
-            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
-     * @param e The generating event.
-     */
-    protected void handleChooseAcceptingClick(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-        DFSA_State finalState = m_sim.getMachine().getFinalStates().isEmpty()?
-                              null : m_sim.getMachine().getFinalStates().iterator().next();
-        if (stateClickedOn != null)
-        {
-            // NOTE: Passing stateClickedOn twice prevents the old final states from being unset
-            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn, stateClickedOn));
-        }
-    }
-
-    /**
-     * Handle when a mouse click occurs while in selection mode. If the mouse click occurs over a
-     * state, the state is either added or removed from the selected state set, depending on context.
-     * @param e The generating event.
-     */
-    protected void handleSelectionClick(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (!(e.isControlDown() || e.isShiftDown()))
-        {
-            selectedStates.clear();
-            selectedTransitions.clear();
-        }
-        if (stateClickedOn != null)
-        {
-            if (!selectedStates.remove(stateClickedOn))
-            {
-                selectedStates.add(stateClickedOn);
-            }
-        }
-        selectedTransitions = m_sim.getMachine().getSelectedTransitions(selectedStates);
-    }
-
-    /**
-     * Handle when a mouse click occurs while in current state selection mode. If the mouse click
-     * occurs over a state, the state is made to be the current state.
-     * @param e The generating event.
-     */
-    protected void handleChooseCurrentState(MouseEvent e)
-    {
-        DFSA_State stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
-
-        if (stateClickedOn != null)
-        {
-            m_sim.setCurrentState(stateClickedOn);
-        }
-
+        return new DFSA_Transition(start, end, new DFSA_Action(Machine.UNDEFINED_SYMBOL));
     }
 
     public String getErrorMessage(ComputationCompletedException e)
@@ -368,9 +186,4 @@ public class DFSAGraphicsPanel
     {
         return MACHINE_TYPE;
     }
-
-    /**
-     * The machine simulator. Exposes the machine and tape via .getMachine() and .getTape() respectively.
-     */
-    protected DFSA_Simulator m_sim;
 }

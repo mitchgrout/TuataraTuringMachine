@@ -42,7 +42,7 @@ public class TM_Transition extends Transition<TM_Action, TM_State, TM_Machine, T
     /**
      * Serialization version.
      */
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
 
     /**
      * Creates a new instance of TM_Transition.
