@@ -1903,14 +1903,22 @@ public abstract class MachineGraphicsPanel<
         };
 
     /**
-     * Action which deletes the selected state.
+     * Action which deletes the selected state or transition.
      */
     protected Action m_deleteStateAction =
-        new TriggerAction("Delete State", TRIGGER_STATE)
+        new TriggerAction("Delete", TRIGGER_STATE | TRIGGER_TRANSITION)
         {
             public void actionPerformed(ActionEvent e)
             {
-                deleteState(m_contextState);
+                // Since we fire on state|transition, we have a guarantee that exactly one is non-null
+                if (m_contextState != null)
+                {
+                    deleteState(m_contextState);
+                }
+                else
+                {
+                    deleteTransition(m_contextTransition);
+                }
             }
         };
 }
