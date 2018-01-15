@@ -73,6 +73,7 @@ public class TMGraphicsPanel
 
         // Add TM-specific context menu actions
         m_contextMenu.addSeparator();
+        m_contextMenu.add(m_normalizeAction);
         m_contextMenu.add(m_submachineAction);
 
         initialization();
@@ -240,12 +241,6 @@ public class TMGraphicsPanel
                 }
             }
         });
-    }
-
-
-    public void onActivation()
-    {
-        // Do nothing
     }
 
     /** 
@@ -438,6 +433,65 @@ public class TMGraphicsPanel
      * The children of this panel.
      */
     protected ArrayList<TMGraphicsPanel> m_children = new ArrayList<TMGraphicsPanel>();
+
+    /**
+     * Action to normalize the states in the machine.
+     */
+    protected Action m_normalizeAction = 
+        new TriggerAction("Normalize", TRIGGER_ALL)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // TODO: Currently this is allocated as a closure; should we instead move it to a
+                //       proper class?
+                Collection<TM_State> states = m_sim.getMachine().getStates();
+                HashMap<TM_State, String> oldLabels = new HashMap<TM_State, String>();
+                for (TM_State s : states)
+                {
+                    oldLabels.put(s, s.getLabel());   
+                }
+                
+                doCommand(new TMCommand()
+                {
+                    public void doCommand()
+                    {
+                        int counter = 1;
+                        int size = states.size();
+                        for (TM_State s : states)
+                        {
+                            // Start states are labelled 0
+                            if (s.isStartState())
+                            {
+                                s.setLabel("0");
+                            }
+                            // Halt states are labelled (n-1), with n states
+                            else if (s.isFinalState())
+                            {
+                                s.setLabel("" + (size - 1));
+                            }
+                            else
+                            {
+                                s.setLabel("" + counter++);
+                            }
+                        }
+                    }
+
+                    public void undoCommand()
+                    {
+                        for (State s : states)
+                        {
+                            s.setLabel(oldLabels.get(s));
+                        }
+                    }
+
+                    public String getName()
+                    {
+                        return "Normalize machine";
+                    }
+                });
+                // repaint();
+            }
+        };
 
     /**
      * Action to create a panel used to edit submachines.

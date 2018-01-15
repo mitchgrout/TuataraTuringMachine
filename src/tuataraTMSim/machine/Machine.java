@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import tuataraTMSim.exceptions.*;
-import tuataraTMSim.NamingScheme;
 
 /**
  * An abstraction of an object which represents the structure of some finite state machine. This
@@ -81,26 +80,6 @@ public abstract class Machine<
     public void setAlphabet(Alphabet alphabet)
     {
         m_alphabet = alphabet;
-    }
-
-    /**
-     * Get the naming scheme for this machine. By default, this always returns GENERAL. Machines
-     * which use different naming schemes should @Override this.
-     * @return The naming scheme for this machine.
-     */
-    public NamingScheme getNamingScheme()
-    {
-        return NamingScheme.GENERAL;
-    }
-
-    /**
-     * Set the naming scheme for this machine. By default, this does nothing. Machines which use
-     * different naming schemes should @Override this.
-     * @param scheme The new naming scheme.
-     */
-    public void setNamingScheme(NamingScheme scheme)
-    {
-        // Do nothing
     }
 
     /**

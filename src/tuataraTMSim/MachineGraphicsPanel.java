@@ -259,23 +259,12 @@ public abstract class MachineGraphicsPanel<
      */
     public String getFirstFreeName()
     {
-        switch (getSimulator().getMachine().getNamingScheme())
+        int current = 0;
+        while (m_labelsUsed.contains("q" + current))
         {
-            case GENERAL:
-                int current = 0;
-                while (m_labelsUsed.contains("q" + current))
-                {
-                    current++;
-                }
-                return "q" + current;
-
-            case NORMALIZED:
-                // Assume every state name is normalized, hence no naming conflicts
-                return "" + getSimulator().getMachine().getStates().size();
-
-            default:
-                return null;
+            current++;
         }
+        return "q" + current;
     }
 
     /**
@@ -655,18 +644,7 @@ public abstract class MachineGraphicsPanel<
      */
     public void deleteState(STATE s)
     {
-        switch (getSimulator().getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                doCommand(new DeleteStateCommand(this, s));
-                break;
-
-            case NORMALIZED:
-                doJoinCommand(
-                        new DeleteStateCommand(this, s),
-                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                break;
-        }
+        doCommand(new DeleteStateCommand(this, s));
     }
 
     /**
@@ -1071,18 +1049,8 @@ public abstract class MachineGraphicsPanel<
     {
         HashSet<STATE> selectedStatesCopy = (HashSet<STATE>)m_selectedStates.clone();
         HashSet<TRANSITION> selectedTransitionsCopy = (HashSet<TRANSITION>)m_selectedTransitions.clone();
-        switch (getSimulator().getMachine().getNamingScheme())
-        {
-            case GENERAL:
-                doCommand(new DeleteAllSelectedCommand(this, selectedStatesCopy,
-                            selectedTransitionsCopy));
-                break;
-
-            case NORMALIZED:
-                doJoinCommand(
-                        new DeleteAllSelectedCommand(this, selectedStatesCopy, selectedTransitionsCopy),
-                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-        }
+        doCommand(new DeleteAllSelectedCommand(this, selectedStatesCopy,
+                    selectedTransitionsCopy));
         repaint();
     }
 
@@ -1124,16 +1092,6 @@ public abstract class MachineGraphicsPanel<
         setModifiedSinceSave(true);
         MainWindow.getInstance().updateUndoActions();
         repaint();
-    }
-
-    /**
-     * Convenience wrapper to doCommand(new JoinCommand(first, second)).
-     * @param first The first command to run.
-     * @param second The second command to run.
-     */
-    public void doJoinCommand(TMCommand first, TMCommand second)
-    {
-        doCommand(new JoinCommand(first, second));
     }
 
     /** 
@@ -1295,19 +1253,8 @@ public abstract class MachineGraphicsPanel<
 
         int x = e.getX() - STATE.STATE_RENDERING_WIDTH / 2,
             y = e.getY() - STATE.STATE_RENDERING_WIDTH / 2;
-        switch (m_sim.getMachine().getNamingScheme())
-        {
-            case GENERAL:
                 String label = getFirstFreeName();
                 doCommand(new AddStateCommand(this, makeState(label, x, y)));
-                break;
-            
-            case NORMALIZED:
-                doJoinCommand(
-                        new AddStateCommand(this, makeState("", x, y)),
-                        new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-                break;
-        }
     }
 
     /** 
@@ -1343,17 +1290,7 @@ public abstract class MachineGraphicsPanel<
         STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            switch (m_sim.getMachine().getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-            }
+            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
         }
     }
 
@@ -1374,19 +1311,8 @@ public abstract class MachineGraphicsPanel<
         {
             // Generalized for all machines; if the machine should have a unique halt state, then
             // ensure only 1 is ever selected at a time, otherwise toggle.
-            switch (mac.getNamingScheme())
-            {
-                case GENERAL:
-                    doCommand(new ToggleAcceptingStateCommand(this, 
-                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn));
-                    break;
-
-                case NORMALIZED:
-                    doJoinCommand(
-                            new ToggleAcceptingStateCommand(this, 
-                                mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn),
-                            new SchemeRelabelCommand(this, NamingScheme.NORMALIZED));
-            }
+            doCommand(new ToggleAcceptingStateCommand(this, 
+                        mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn));
         }
     }
 
@@ -1423,12 +1349,6 @@ public abstract class MachineGraphicsPanel<
             m_sim.setCurrentState(stateClickedOn);
         }
     }
-
-    /**
-     * Called when the owning frame is activated. Should deactivate any and all events which are not
-     * used by the simulated machine.
-     */
-    public abstract void onActivation();
 
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
@@ -1856,18 +1776,7 @@ public abstract class MachineGraphicsPanel<
             public void actionPerformed(ActionEvent e)
             {
                 MACHINE mac = m_sim.getMachine();
-                switch (mac.getNamingScheme())
-                {
-                    case GENERAL:
-                        doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
-                        break;
-
-                    case NORMALIZED:
-                        doJoinCommand(
-                                new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState),
-                                new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
-                        break;
-                }
+                doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
             }
         };
 
@@ -1886,19 +1795,8 @@ public abstract class MachineGraphicsPanel<
 
                 // Generalized for all machines; if the machine should have a unique halt state, then
                 // ensure only 1 is ever selected at a time, otherwise toggle.
-                switch (mac.getNamingScheme())
-                {
-                    case GENERAL:
-                        doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
-                                    mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
-                        break;
-
-                    case NORMALIZED:
-                        doJoinCommand(
-                                new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
-                                    mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
-                                new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
-                }
+                doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
+                            mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
             }
         };
 

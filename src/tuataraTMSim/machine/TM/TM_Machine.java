@@ -32,7 +32,6 @@ import java.util.*;
 import tuataraTMSim.commands.RemoveInconsistentTransitionsCommand;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
-import tuataraTMSim.NamingScheme;
 import tuataraTMSim.TMGraphicsPanel;
 
 /**
@@ -79,7 +78,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         super(alphabet);
         m_states = states;
         m_transitions = transitions;
-        m_scheme = NamingScheme.GENERAL;
         m_validated = false;
     }
     
@@ -89,16 +87,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     public TM_Machine()
     {
         this(new ArrayList<TM_State>(), new ArrayList<TM_Transition>(), new Alphabet());
-    }
-
-    public NamingScheme getNamingScheme()
-    {
-        return m_scheme;
-    }
-
-    public void setNamingScheme(NamingScheme scheme)
-    {
-        m_scheme = scheme;
     }
 
     /**
@@ -488,11 +476,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      * The set of transitions in the machine.
      */
     protected ArrayList<TM_Transition> m_transitions;
-
-    /**
-     * The naming scheme to use.
-     */
-    protected NamingScheme m_scheme;
 
     /**
      * Determine if this machine has been deemed valid or not.  Will be set to true after successful
