@@ -443,7 +443,7 @@ public class TMGraphicsPanel
      * Action to create a panel used to edit submachines.
      */
     protected Action m_submachineAction = 
-        new TriggerAction("Make Submachine", TRIGGER_STATE)
+        new TriggerAction("Edit Submachine", TRIGGER_STATE)
         {
             public void actionPerformed(ActionEvent e)
             {
