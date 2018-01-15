@@ -54,6 +54,31 @@ public abstract class MachineGraphicsPanel<
     private final Font PANEL_FONT = new Font("Monospaced", Font.PLAIN, 14);
 
     /**
+     * Trigger indicating an event should never be enabled.
+     */
+    protected static final int TRIGGER_NONE = 0;
+
+    /**
+     * Trigger indicating an event should be enabled when the context menu is on the panel.
+     */
+    protected static final int TRIGGER_PANEL = 1 << 0;
+
+    /**
+     * Trigger indicating an event should be enabled when the context menu is on a state.
+     */
+    protected static final int TRIGGER_STATE = 1 << 1;
+
+    /**
+     * Trigger indicating an event should be enabled when the context menu is on a transition.
+     */
+    protected static final int TRIGGER_TRANSITION = 1 << 2;
+
+    /**
+     * Trigger indicating an event should always be enabled.
+     */
+    protected static final int TRIGGER_ALL = TRIGGER_PANEL | TRIGGER_STATE | TRIGGER_TRANSITION;
+
+    /**
      * Creates a new instance of MachineGraphicsPanel.
      * @param sim The simulator, containing the machine to render, and tape.
      * @param file The file the machine is associated with.
@@ -67,10 +92,13 @@ public abstract class MachineGraphicsPanel<
 
         // Create our context menu
         m_contextMenu = new JPopupMenu();
+        m_contextMenu.add(m_addStateAction);
+        m_contextMenu.addSeparator();
         m_contextMenu.add(m_renameStateAction);
         m_contextMenu.add(m_toggleStartAction);
         m_contextMenu.add(m_toggleAcceptingAction);
-    }
+        m_contextMenu.add(m_deleteStateAction);
+   }
 
     /**
      * Determine if this panel is opaque; allows for optomization by Swing.
@@ -496,13 +524,48 @@ public abstract class MachineGraphicsPanel<
 
             private void tryShowPopup(MouseEvent e)
             {
+                int event = TRIGGER_NONE;
                 if (e.isPopupTrigger())
                 {
-                    m_contextState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY());
-                    if (m_contextState != null)
+                    m_contextLocX = e.getX();
+                    m_contextLocY = e.getY();
+
+                    // Try to grab a state first
+                    if ((m_contextState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY())) != null)
                     {
-                        m_contextMenu.show(e.getComponent(), e.getX(), e.getY());
+                        event = TRIGGER_STATE;
                     }
+                    // Otherwise try to grab a transition
+                    else if ((m_contextTransition = getSimulator().getMachine().getTransitionClickedOn(
+                                    e.getX(), e.getY(), getGraphics())) != null)
+                    {
+                        event = TRIGGER_TRANSITION;
+                    }
+                    // Otherwise it's a panel click
+                    else 
+                    {
+                        event = TRIGGER_PANEL;
+                    }
+
+                    // Enable events based off of their triggers
+                    for (Component c : m_contextMenu.getComponents())
+                    {
+                        if (!(c instanceof JMenuItem))
+                        {
+                            // Not what we're looking for
+                            continue;
+                        }
+                        JMenuItem item = (JMenuItem) c;
+                        if (!(item.getAction() instanceof TriggerAction))
+                        {
+                            // Ditto
+                            continue;
+                        }
+                        // Enable/disable the action based off of the event
+                        ((TriggerAction) item.getAction()).triggerEvent(event);
+                    }
+
+                    m_contextMenu.show(e.getComponent(), m_contextLocX, m_contextLocY);
                 }
             }
         });
@@ -1511,9 +1574,23 @@ public abstract class MachineGraphicsPanel<
 
     /**
      * The state currently selected by the right-click context menu.
-     * If m_contextMenu is displayed, then m_contextState is non-null.
      */
     protected STATE m_contextState;
+
+    /**
+     * The transition currently selected by the right-click context menu.
+     */
+    protected TRANSITION m_contextTransition;
+
+    /**
+     * The x-ordinate where the context menu was shown.
+     */
+    protected int m_contextLocX;
+
+    /**
+     * The y-ordinate where the context menu was shown.
+     */
+    protected int m_contextLocY;
 
     /**
      * Stack containing commands which can be undone.
@@ -1683,10 +1760,57 @@ public abstract class MachineGraphicsPanel<
     protected int m_numPastesToSameLocation = 0;
 
     /**
+     * A wrapper around AbstractAction which allows actions to be 'tagged' with a mask, which
+     * determines if they should be active or not when an event is triggered.
+     */
+    protected static abstract class TriggerAction extends AbstractAction
+    {
+        /**
+         * Creates a new instance of TriggerAction.
+         * @param text Description of the action.
+         * @param trigger The events for which this action should be enabled.
+         */
+        public TriggerAction(String text, int trigger)
+        {
+            super(text);
+            m_trigger = trigger;
+        }
+
+        /**
+         * Enable or disable this action based off of the type of event that has occured.
+         * @param event The type of event that has occured. Should be one of the constant TRIGGER
+         *              values, but not TRIGGER_NONE or TRIGGER_ALL, i.e. exactly one flag set.
+         */
+        public void triggerEvent(int event)
+        {
+            setEnabled((m_trigger & event) != TRIGGER_NONE);
+        }
+
+        /**
+         * The trigger for this action.
+         */
+        protected int m_trigger;
+    }
+
+    /**
+     * Action which creates a new state at the specified location.
+     */
+    protected Action m_addStateAction = 
+        new TriggerAction("Add State", TRIGGER_PANEL)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // Give a phony MouseEvent object to the addnodes handler
+                handleAddNodesClick(new MouseEvent(MachineGraphicsPanel.this, 0, 0, 0, 
+                                                   m_contextLocX, m_contextLocY, 0, false));
+            }
+        };
+
+    /**
      * Action which prompts the user to rename the selected state.
      */
     protected Action m_renameStateAction = 
-        new AbstractAction("Rename State")
+        new TriggerAction("Rename State", TRIGGER_STATE)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1727,7 +1851,7 @@ public abstract class MachineGraphicsPanel<
      * Action which toggles whether or not the selected state is the start state.
      */
     protected Action m_toggleStartAction = 
-        new AbstractAction("Toggle Start")
+        new TriggerAction("Toggle Start", TRIGGER_STATE)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1751,7 +1875,7 @@ public abstract class MachineGraphicsPanel<
      * Action which toggles whether or not the selected state is accepting.
      */
     protected Action m_toggleAcceptingAction = 
-        new AbstractAction("Toggle Accepting")
+        new TriggerAction("Toggle Accepting", TRIGGER_STATE)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1775,6 +1899,18 @@ public abstract class MachineGraphicsPanel<
                                     mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState),
                                 new SchemeRelabelCommand(MachineGraphicsPanel.this, NamingScheme.NORMALIZED));
                 }
+            }
+        };
+
+    /**
+     * Action which deletes the selected state.
+     */
+    protected Action m_deleteStateAction =
+        new TriggerAction("Delete State", TRIGGER_STATE)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                deleteState(m_contextState);
             }
         };
 }
