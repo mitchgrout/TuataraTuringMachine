@@ -31,7 +31,6 @@ import java.io.*;
 import java.util.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
-import tuataraTMSim.NamingScheme;
 
 /**
  * An implementation of a DFSA. This class stores the specification of the machine, in particular

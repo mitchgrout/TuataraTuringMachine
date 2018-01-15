@@ -58,7 +58,6 @@ public class MachineInternalFrame extends JInternalFrame
             {
                 MainWindow.getInstance().updateUndoActions();
                 MainWindow.getInstance().setEditingActionsEnabledState(true);
-                m_gfxPanel.onActivation();
             }
             
             public void internalFrameClosed(InternalFrameEvent e)
@@ -86,7 +85,6 @@ public class MachineInternalFrame extends JInternalFrame
             {
                 MainWindow.getInstance().updateUndoActions();
                 MainWindow.getInstance().setEditingActionsEnabledState(true);
-                m_gfxPanel.onActivation();
             }
         });   
     }

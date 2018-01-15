@@ -317,9 +317,9 @@ public class AlphabetSelectorInternalFrame extends JInternalFrame
                                 m_panel.getSimulator().getMachine().getInconsistentTransitions(newAlph);
 
                             // Change the alphabet, and remove inconsistent transitions
-                            m_panel.doJoinCommand(
+                            m_panel.doCommand(new JoinCommand(
                                     new RemoveInconsistentTransitionsCommand(m_panel, purge),
-                                    new ConfigureAlphabetCommand(m_panel, oldAlphabet, newAlph));
+                                    new ConfigureAlphabetCommand(m_panel, oldAlphabet, newAlph)));
 
                             // Hide the frame
                             setVisible(false);

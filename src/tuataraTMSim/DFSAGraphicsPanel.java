@@ -67,15 +67,6 @@ public class DFSAGraphicsPanel
         initialization();
     }
 
-    /**
-     *
-     */
-    public void onActivation()
-    {
-        // Naming schemes are not applicable for DFSAs.
-        MainWindow.getInstance().m_configureSchemeAction.setEnabled(false);
-    }
-
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.

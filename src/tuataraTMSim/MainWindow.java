@@ -463,21 +463,15 @@ public class MainWindow extends JFrame
         m_asif = new AlphabetSelectorInternalFrame();
         m_asif.pack();
 
-        // Create the scheme selector internal frame
-        m_ssif = new SchemeSelectorInternalFrame();
-        m_ssif.pack();
-        
         // Make the internal frames quasi-modal.
         JPanel glass = new JPanel();
         glass.setOpaque(false);
         glass.add(m_asif);
-        glass.add(m_ssif);
         setGlassPane(glass);
         
         // The ModalAdapter intercepts all mouse events when the glass pane is visible.
         ModalAdapter adapter = new ModalAdapter(glass);
         m_asif.addInternalFrameListener(adapter);
-        m_ssif.addInternalFrameListener(adapter);
 
         // Set up the global console
         m_console = new ConsoleInternalFrame();
@@ -633,7 +627,6 @@ public class MainWindow extends JFrame
         menuBar.add(configMenu);
 
         configMenu.add(new JMenuItem(m_configureAlphabetAction));
-        configMenu.add(new JMenuItem(m_configureSchemeAction));
         
         
         // Help menu
@@ -746,11 +739,6 @@ public class MainWindow extends JFrame
         configureAlphabetToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         configureAlphabetToolBarButton.setText("");
        
-        JButton configureSchemeToolBarButton = new JButton(m_configureSchemeAction);
-        configureSchemeToolBarButton.setFocusable(false);
-        configureSchemeToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        configureSchemeToolBarButton.setText("");
-
         // GUI mode
         GUIModeButton addNodesToolBarButton = new GUIModeButton(m_addNodesAction, GUI_Mode.ADDNODES);
         m_toolbarButtons.add(addNodesToolBarButton);
@@ -810,7 +798,6 @@ public class MainWindow extends JFrame
         returner[0].add(m_undoToolBarButton);
         returner[0].add(m_redoToolBarButton);
         returner[0].add(configureAlphabetToolBarButton);
-        returner[0].add(configureSchemeToolBarButton); 
 
         returner[1] = new JToolBar("Mode");
         returner[1].setRollover(true);
@@ -1074,8 +1061,6 @@ public class MainWindow extends JFrame
         {
             m_stepAction.setEnabled(isEnabled);
             m_configureAlphabetAction.setEnabled(isEnabled);
-            m_configureSchemeAction.setEnabled(isEnabled);
-            m_saveMachineAsAction.setEnabled(isEnabled);
             m_saveMachineAction.setEnabled(isEnabled);
             m_cutAction.setEnabled(isEnabled);
             m_copyAction.setEnabled(isEnabled);
@@ -1107,7 +1092,6 @@ public class MainWindow extends JFrame
     {
         m_stepAction.setEnabled(isEnabled);
         m_configureAlphabetAction.setEnabled(isEnabled);
-        m_configureSchemeAction.setEnabled(isEnabled);
         m_cutAction.setEnabled(isEnabled);
         m_copyAction.setEnabled(isEnabled);
         m_pasteAction.setEnabled(isEnabled);
@@ -1912,11 +1896,6 @@ public class MainWindow extends JFrame
     private AlphabetSelectorInternalFrame m_asif;
 
     /**
-     * Frame for selecting the current naming scheme.
-     */
-    private SchemeSelectorInternalFrame m_ssif;
-
-    /**
      * Frame for displaying help information as HTML.
      */
     private HelpDisplayer m_helpDisp;
@@ -2221,18 +2200,7 @@ public class MainWindow extends JFrame
                     if (panel != null)
                     {
                         Machine machine = panel.getSimulator().getMachine();
-                        switch (machine.getNamingScheme())
-                        {
-                            case GENERAL:
-                                panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
-                                break;
-
-                            case NORMALIZED:
-                                panel.doJoinCommand(
-                                        new PasteCommand(panel, selectedStates, selectedTransitions),
-                                        new SchemeRelabelCommand(panel, NamingScheme.NORMALIZED));
-                                break;
-                        }
+                        panel.doCommand(new PasteCommand(panel, selectedStates, selectedTransitions)); 
                         updateUndoActions();
                     }
                 }
@@ -2542,25 +2510,6 @@ public class MainWindow extends JFrame
                 {
                     m_asif.setPanel(panel);
                     m_asif.show();
-                    getGlassPane().setVisible(true);
-                }
-            }
-        };
-
-    /**
-     * Action for configuring the naming scheme.
-     */
-    public final Action m_configureSchemeAction = 
-        new MenuAction("Configure Naming Scheme", loadIcon("scheme.gif"), null, 
-                       KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK))
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                MachineGraphicsPanel panel = getSelectedGraphicsPanel();
-                if (panel != null)
-                {
-                    m_ssif.setPanel(panel);
-                    m_ssif.show();
                     getGlassPane().setVisible(true);
                 }
             }
