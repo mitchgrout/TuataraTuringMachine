@@ -59,7 +59,7 @@ public class DFSAGraphicsPanel
     /**
      * DFSA file chooser. Note that this is not exposed in MachineGraphicsPanel as the object only
      * needs to be created once, and placing it in the generic subclass would not permit this.
-     **/
+     */
     public static final FileFilter FILE_FILTER = new FileFilter()
     {
         public boolean accept(File f)
@@ -72,7 +72,6 @@ public class DFSAGraphicsPanel
             return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
         }
     };
-
 
     /**
      * Creates a new instance of DFSAGraphicsPanel. 
