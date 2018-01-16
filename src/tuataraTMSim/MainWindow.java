@@ -973,12 +973,13 @@ public class MainWindow extends JFrame
                     }
                 }
 
-                if (Machine.saveMachine(machine, outFile))
+                try
                 {
+                    Machine.saveMachine(machine, outFile);
                     iFrame.dispose();
                     return true;
                 }
-                else
+                catch (Exception e)
                 {
                     return false;
                 }
@@ -1579,15 +1580,9 @@ public class MainWindow extends JFrame
                     }
                 }
                 
-                if (!Machine.saveMachine(machine, outFile))
-                {
-                    throw new IOException(outFile.toString());
-                }
-                else
-                {
-                    panel.setModifiedSinceSave(false);
-                    panel.setFile(outFile);
-                }
+                Machine.saveMachine(machine, outFile);
+                panel.setModifiedSinceSave(false);
+                panel.setFile(outFile);
                 m_console.log(String.format("Successfully saved machine %s", outFile.toString()));
             }
             catch (Exception e2)

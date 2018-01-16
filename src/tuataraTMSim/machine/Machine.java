@@ -307,40 +307,28 @@ public abstract class Machine<
      * @param machine The machine to serialize.
      * @param file The file to write to.
      * @return true if the machine is saved successfully, false otherwise.
+     * @throws IOException If an underlying stream exception occurs.
      */
-    public static final boolean saveMachine(Machine machine, File file)
+    public static final void saveMachine(Machine machine, File file) throws IOException
     {
-        try
-        {
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-            out.writeObject(machine);
-            out.close();
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+        out.writeObject(machine);
+        out.close();
     }
 
     /**
      * Load and deserialize a machine from persistent storage.
      * @param file The file where the machine was serialized and written to.
      * @return The deserialized machine.
+     * @throws IOException If an underlying stream exception occurs.
+     * @throws ClassNotFoundException If the serialized object is not recognized.
      */
-    public static final Machine loadMachine(File file)
+    public static final Machine loadMachine(File file) throws IOException, ClassNotFoundException
     {
-        try
-        {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-            Machine result = (Machine)in.readObject();
-            in.close();
-            return result;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+        Machine result = (Machine)in.readObject();
+        in.close();
+        return result;
     }
 
     /**
