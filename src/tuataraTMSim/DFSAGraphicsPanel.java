@@ -57,7 +57,7 @@ public class DFSAGraphicsPanel
     public static final String MACHINE_TYPE = "DFSA";
 
     /**
-     * TM file chooser. Note that this is not exposed in MachineGraphicsPanel as the object only
+     * DFSA file chooser. Note that this is not exposed in MachineGraphicsPanel as the object only
      * needs to be created once, and placing it in the generic subclass would not permit this.
      **/
     public static final FileFilter FILE_FILTER = new FileFilter()
