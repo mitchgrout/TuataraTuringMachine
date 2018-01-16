@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
@@ -54,6 +55,23 @@ public class DFSAGraphicsPanel
      * Friendly description.
      */
     public static final String MACHINE_TYPE = "DFSA";
+
+    /**
+     * DFSA file chooser. Note that this is not exposed in MachineGraphicsPanel as the object only
+     * needs to be created once, and placing it in the generic subclass would not permit this.
+     */
+    public static final FileFilter FILE_FILTER = new FileFilter()
+    {
+        public boolean accept(File f)
+        {
+            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
+        }
+
+        public String getDescription()
+        {
+            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
+        }
+    };
 
     /**
      * Creates a new instance of DFSAGraphicsPanel. 

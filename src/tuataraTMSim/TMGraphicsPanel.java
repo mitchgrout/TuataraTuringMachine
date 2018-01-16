@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
 import tuataraTMSim.commands.*;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.*;
@@ -57,6 +58,23 @@ public class TMGraphicsPanel
      * Friendly description.
      */
     public static final String MACHINE_TYPE = "Turing Machine";
+
+    /**
+     * TM file chooser. Note that this is not exposed in MachineGraphicsPanel as the object only
+     * needs to be created once, and placing it in the generic subclass would not permit this.
+     */
+    public static final FileFilter FILE_FILTER = new FileFilter()
+    {
+        public boolean accept(File f)
+        {
+            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
+        }
+
+        public String getDescription()
+        {
+            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
+        }
+    };
 
     /**
      * Creates a new instance of TMGraphicsPanel. 
@@ -516,18 +534,7 @@ public class TMGraphicsPanel
                             // Show a file dialog and clone the given machine
                             JFileChooser fc = new JFileChooser();
                             fc.setDialogTitle("Clone Submachine");
-                            fc.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
-                                    {
-                                        public boolean accept(File f)
-                                        {
-                                            return f.isDirectory() || f.getName().endsWith(MACHINE_EXT);
-                                        }
-
-                                        public String getDescription()
-                                        {
-                                            return String.format("%s files (*%s)", MACHINE_TYPE, MACHINE_EXT);
-                                        }
-                                    });
+                            fc.addChoosableFileFilter(FILE_FILTER);
                             if (fc.showOpenDialog(MainWindow.getInstance()) != JFileChooser.APPROVE_OPTION)
                             {
                                 // Cancel
