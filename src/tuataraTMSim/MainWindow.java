@@ -390,36 +390,10 @@ public class MainWindow extends JFrame
         m_tapeDispController.setBounds(0, getHeight() - m_tapeDispController.getHeight(), getWidth(),100); 
         m_tapeDispController.setVisible(true);
         
-        // Set up the file choosers; FQN is required as the compiler sees `FileFilter` as ambiguous
+        // Set up the file choosers
         m_fcMachine.setDialogTitle("Save machine");
-        // TM
-        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
-        {
-            public boolean accept(File f)
-            {
-                return f.isDirectory() || f.getName().endsWith(TMGraphicsPanel.MACHINE_EXT);
-            }
-            
-            public String getDescription()
-            {
-                return String.format("%s files (*%s)", 
-                        TMGraphicsPanel.MACHINE_TYPE, TMGraphicsPanel.MACHINE_EXT);
-            }
-        });
-        // DFSA
-        m_fcMachine.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
-        {
-            public boolean accept(File f)
-            {
-                return f.isDirectory() || f.getName().endsWith(DFSAGraphicsPanel.MACHINE_EXT);
-            }
-
-            public String getDescription()
-            {
-                return String.format("%s files (*%s)", 
-                        DFSAGraphicsPanel.MACHINE_TYPE, DFSAGraphicsPanel.MACHINE_EXT);
-            }
-        });
+        m_fcMachine.addChoosableFileFilter(TMGraphicsPanel.FILE_FILTER);
+        m_fcMachine.addChoosableFileFilter(DFSAGraphicsPanel.FILE_FILTER);
        
         m_fcTape.setDialogTitle("Save tape");
         m_fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
