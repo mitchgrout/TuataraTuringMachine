@@ -533,7 +533,15 @@ public class TMGraphicsPanel
                                 // Cancel
                                 return;
                             }
-                            m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile()));
+                            try { m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile())); }
+                            catch (Exception ex)
+                            {
+                                JOptionPane.showMessageDialog(MainWindow.getInstance(),
+                                        String.format("Error opening machine file %s", fc.getSelectedFile().toString()));
+                                MainWindow.getInstance().getConsole().log(String.format(
+                                        "Encountered an error when loading the machine %s: %s",
+                                        fc.getSelectedFile().toString(), ex.getMessage()));
+                            }
                             break;
 
                         case JOptionPane.NO_OPTION:
