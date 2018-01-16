@@ -26,6 +26,7 @@
 package tuataraTMSim.machine;
 
 import java.io.*;
+import javax.swing.filechooser.FileFilter;
 import tuataraTMSim.exceptions.TapeBoundsException;
 
 /** 
@@ -42,6 +43,27 @@ public abstract class Tape implements Serializable
      * The character used to represent a blank symbol, which fill the tape.
      */
     public static final char BLANK_SYMBOL = '_';
+
+    /**
+     * File extension for tapes.
+     */
+    public static final String TAPE_EXTENSION = ".tap";
+
+    /**
+     * Tape file chooser.
+     */
+    public static final FileFilter FILE_FILTER = new FileFilter()
+    {
+        public boolean accept(File f)
+        {
+            return f.isDirectory() || f.getName().endsWith(TAPE_EXTENSION);
+        }
+
+        public String getDescription()
+        {
+            return String.format("Tape files (*%s)", TAPE_EXTENSION);
+        }
+    };
 
     /** 
      * Read the current character from the tape, at the position of the read/write head.

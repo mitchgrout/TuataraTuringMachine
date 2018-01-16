@@ -60,11 +60,6 @@ public class MainWindow extends JFrame
     public static final int MACHINE_WINDOW_LAYER = 50;
    
     /**
-     * File extension for tapes.
-     */
-    public static final String TAPE_EXTENSION = ".tap";
-
-    /**
      * Internal timer.
      */
     private final java.util.Timer m_timer = new java.util.Timer(true);
@@ -396,18 +391,7 @@ public class MainWindow extends JFrame
         m_fcMachine.addChoosableFileFilter(DFSAGraphicsPanel.FILE_FILTER);
        
         m_fcTape.setDialogTitle("Save tape");
-        m_fcTape.addChoosableFileFilter(new javax.swing.filechooser.FileFilter()
-        {
-            public boolean accept(File f)
-            {
-                return f.isDirectory() || f.getName().endsWith(TAPE_EXTENSION);
-            }
-            
-            public String getDescription()
-            {
-                return String.format("Tape files (*%s)", TAPE_EXTENSION);
-            }
-        });
+        m_fcTape.addChoosableFileFilter(Tape.FILE_FILTER);
         
         // Set up menus
         setJMenuBar(createMenus());
@@ -1607,7 +1591,7 @@ public class MainWindow extends JFrame
             {
                 if (m_force || outFile == null)
                 {
-                    outFile = chooseSaveFile(m_fcTape, "Save Tape", TAPE_EXTENSION);
+                    outFile = chooseSaveFile(m_fcTape, "Save Tape", Tape.TAPE_EXTENSION);
                     if (outFile == null)
                     {
                         // Cancelled by user 
@@ -2004,7 +1988,7 @@ public class MainWindow extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
-                File inFile = chooseLoadFile(m_fcTape, "Load Tape", TAPE_EXTENSION);
+                File inFile = chooseLoadFile(m_fcTape, "Load Tape", Tape.TAPE_EXTENSION);
                 if (inFile == null)
                 {
                     // Cancelled by user
