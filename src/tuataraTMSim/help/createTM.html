@@ -19,21 +19,6 @@ for the symbols that you wish to include in your alphabet, and press <i>Ok</i>.
 </p>
 
 <p>
-<h3> Choosing a Naming Scheme </h3> 
-When adding new states, a new label will be selected from a set of potential labels. This pool may
-be configured by choosing a different naming scheme.
-</p>
-<p>
-In the <i>Configuration</i> menu, click on <img src="../images/scheme.gif"> <i>Configure Scheme</i>.  This
-will bring up the naming scheme dialog.  Choose the naming scheme that you would like to use for the
-current machine.  Currently, you may use a general naming scheme which assigns names sequentially,
-or a normalized naming scheme, in which the start state is "0", the halt state is "n-1", and all
-other states are inbetween, given <i>n</i> many states. To rename all of your states to fit the new
-scheme, click <i>OK & Rename</i>, or click <i>OK</i> to change the scheme without renaming existing
-states.  Normalization will require a rename of all existing states.
-</p>
-
-<p>
 <h3> Adding States </h3>
 To add a state, choose the <img src="../images/state.gif"> <i>Add States</i> mode from the Mode menu
 or from the toolbar.  Now, clicking on an empty space in a machine window will create a state at
@@ -133,6 +118,14 @@ To give a state a custom name, right click on the state.  This brings up the app
 menu from which the state may be renamed.  States must be uniquely named within a machine -
 duplicate names are not allowed.
 </p>
+
+<p>
+<h3> Normalization </h3>
+A Turing machine is said to be normalized if, given <i>n</i> states, the start state is named
+<i>0</i>, the halt state is named <i>n-1</i>, and all other states are named using unique numbers
+inbetween.  To automatically normalize an existing Turing machine, right-click anywhere on the
+machine window to bring up the appropriate context menu.  From here, click <i>Normalize</i> to
+automatically rename every existing state to conform to the specification for a normalized machine.
 
 <p>
 <h3> Submachines </h3>
