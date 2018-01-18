@@ -48,10 +48,11 @@ public abstract class MachineGraphicsPanel<
     MACHINE extends Machine<PREACTION, TRANSITION, STATE, SIMULATOR>,
     SIMULATOR extends Simulator<PREACTION, TRANSITION, STATE, MACHINE>> extends JPanel
 {
-    private final BasicStroke dashed = new BasicStroke(
-            1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 3.0f }, 0.0f);
-
-    private final Font PANEL_FONT = new Font("Monospaced", Font.PLAIN, 14);
+    /**
+     * Dashed stroke used for displaying the marquee selection.
+     */
+    protected final BasicStroke DASHED_STROKE = 
+        new BasicStroke( 1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 3.0f }, 0.0f);
 
     /**
      * Trigger indicating an event should never be enabled.
@@ -354,7 +355,7 @@ public abstract class MachineGraphicsPanel<
         // Fill background
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, w, h);
-        g2d.setFont(PANEL_FONT);
+        g2d.setFont(Global.FONT_MONOSPACE);
 
         STATE currentState = getSimulator().getCurrentState();
         if (currentState != null)
@@ -378,7 +379,7 @@ public abstract class MachineGraphicsPanel<
         if (m_selectedSymbolBoundingBox != null)
         {
             Stroke current = g2d.getStroke();
-            g2d.setStroke(dashed);
+            g2d.setStroke(DASHED_STROKE);
             g2d.setColor(Color.BLACK);
             g2d.draw(m_selectedSymbolBoundingBox);
             g2d.setStroke(current);
@@ -393,7 +394,7 @@ public abstract class MachineGraphicsPanel<
                 width    = Math.abs(m_selectionBox.width),
                 height   = Math.abs(m_selectionBox.height);
             Stroke current = g2d.getStroke();
-            g2d.setStroke(dashed);
+            g2d.setStroke(DASHED_STROKE);
             g2d.draw(new Rectangle2D.Float(topLeftX, topLeftY,
                         width, height));
             g2d.setStroke(current);

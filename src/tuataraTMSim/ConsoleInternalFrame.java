@@ -27,7 +27,6 @@ package tuataraTMSim;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.Font;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import javax.swing.*;
@@ -38,9 +37,10 @@ import javax.swing.*;
  */
 public class ConsoleInternalFrame extends JInternalFrame
 {
-    public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 16);
-
-    public static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator 1.0 <<<";
+    /**
+     * Text displayed when the console is opened, or cleared.
+     */
+    protected static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator 1.0 <<<";
 
     public ConsoleInternalFrame()
     {
@@ -67,7 +67,7 @@ public class ConsoleInternalFrame extends JInternalFrame
 
         // Text area
         m_text = new JTextArea();
-        m_text.setFont(FONT_USED);
+        m_text.setFont(Global.FONT_DIALOG);
         m_text.setLineWrap(true);
         m_text.setEditable(false);
         JScrollPane scroll = new JScrollPane(m_text);
