@@ -302,17 +302,6 @@ public class MainWindow extends JFrame
         return m_instance;
     }
 
-    /**
-     * Create an ImageIcon based off of the given filename. The images/ directory is prepended to
-     * the given filename.
-     * @param fname The filename of the image, found in the images/ directory.
-     * @return An ImageIcon representing the loaded image.
-     */
-    private static ImageIcon loadIcon(String fname)
-    {
-        return new ImageIcon(MainWindow.class.getResource("images/" + fname));
-    }
-
     /** 
      * Selects the user interface interaction mode and notifies all internal windows accordingly.
      * This determines the results of user interactions such as clicking on the state diagrams.
@@ -362,7 +351,7 @@ public class MainWindow extends JFrame
         // Set up the main window
         setSize(new Dimension(640, 480));
         setTitle("Tuatara Turing Machine Simulator");
-        setIconImage(loadIcon("tuatara.gif").getImage());
+        setIconImage(Global.loadIcon("tuatara.gif").getImage());
 
         // Omnibus will be the panel which contains everything barring the toolbar
         JPanel omnibus = new JPanel();
@@ -451,7 +440,7 @@ public class MainWindow extends JFrame
         menuBar.add(fileMenu);
       
         JMenu newSubmenu = new JMenu("New Machine");
-        newSubmenu.setIcon(loadIcon("newMachine.gif"));
+        newSubmenu.setIcon(Global.loadIcon("newMachine.gif"));
         newSubmenu.setMnemonic(KeyEvent.VK_N);
         newSubmenu.add(new JMenuItem(m_newTuringMachineAction));
         newSubmenu.add(new JMenuItem(m_newDFSAAction));
@@ -608,7 +597,7 @@ public class MainWindow extends JFrame
         
         // Machine
         // SPECIAL: newMachine causes a JPopupMenu to show, which contains all new***MachineAction's
-        JButton newMachineToolBarButton = new JButton(loadIcon("newMachine.gif"));
+        JButton newMachineToolBarButton = new JButton(Global.loadIcon("newMachine.gif"));
         JPopupMenu machineMenu = new JPopupMenu();
         machineMenu.add(m_newTuringMachineAction);
         machineMenu.add(m_newDFSAAction);
@@ -1857,7 +1846,7 @@ public class MainWindow extends JFrame
      * Action for creating a new Turing Machine.
      */
     public final Action m_newTuringMachineAction = 
-        new MenuAction("New Turing Machine", loadIcon("newMachine.gif"), null, null)
+        new MenuAction("New Turing Machine", Global.loadIcon("newMachine.gif"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1875,7 +1864,7 @@ public class MainWindow extends JFrame
      * Action for creating a new DFSA.
      */
     public final Action m_newDFSAAction = 
-        new MenuAction("New DFSA", loadIcon("newMachine.gif"), null, null)
+        new MenuAction("New DFSA", Global.loadIcon("newMachine.gif"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1890,7 +1879,7 @@ public class MainWindow extends JFrame
      * Action for opening a machine.
      */
     public final Action m_openMachineAction = 
-        new MenuAction("Open Machine", loadIcon("openMachine.gif"), null, 
+        new MenuAction("Open Machine", Global.loadIcon("openMachine.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -1940,19 +1929,19 @@ public class MainWindow extends JFrame
      * Action for saving a machine to an associated file.
      */
     public final Action m_saveMachineAction = 
-        new SaveMachineAction("Save Machine", loadIcon("saveMachine.gif"), false);
+        new SaveMachineAction("Save Machine", Global.loadIcon("saveMachine.gif"), false);
 
     /**
      * Action for saving a machine to a selected file.
      */
     public final Action m_saveMachineAsAction = 
-        new SaveMachineAction("Save Machine As", loadIcon("emptyIcon.gif"), true);
+        new SaveMachineAction("Save Machine As", Global.loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for creating a new tape.
      */
     public final Action m_newTapeAction = 
-        new MenuAction("New Tape", loadIcon("newTape.gif"), null, 
+        new MenuAction("New Tape", Global.loadIcon("newTape.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -1978,7 +1967,7 @@ public class MainWindow extends JFrame
      * Action for opening a tape.
      */
     public final Action m_openTapeAction = 
-        new MenuAction("Open Tape", loadIcon("openTape.gif"), null, 
+        new MenuAction("Open Tape", Global.loadIcon("openTape.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2016,19 +2005,19 @@ public class MainWindow extends JFrame
      * Action for saving a tape to an associated file.
      */
     public final Action m_saveTapeAction = 
-        new SaveTapeAction("Save Tape", loadIcon("saveTape.gif"), false);
+        new SaveTapeAction("Save Tape", Global.loadIcon("saveTape.gif"), false);
     
     /**
      * Action for saving a tape to a selected file.
      */
     public final Action m_saveTapeAsAction = 
-        new SaveTapeAction("Save Tape As", loadIcon("emptyIcon.gif"), true);
+        new SaveTapeAction("Save Tape As", Global.loadIcon("emptyIcon.gif"), true);
 
     /**
      * Action for exiting the program.
      */
     public final Action m_exitAction = 
-        new MenuAction("Exit", loadIcon("emptyIcon.gif"), null, null)
+        new MenuAction("Exit", Global.loadIcon("emptyIcon.gif"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -2040,7 +2029,7 @@ public class MainWindow extends JFrame
      * Action for undoing a command.
      */
     public final Action m_undoAction = 
-        new MenuAction("Undo", loadIcon("undoIcon.gif"), null, 
+        new MenuAction("Undo", Global.loadIcon("undoIcon.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2059,7 +2048,7 @@ public class MainWindow extends JFrame
      * Action for redoing a command
      */
     public final Action m_redoAction = 
-        new MenuAction("Redo", loadIcon("redoIcon.gif"), null, 
+        new MenuAction("Redo", Global.loadIcon("redoIcon.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2078,7 +2067,7 @@ public class MainWindow extends JFrame
      * Action for cutting selected states and transitions.
      */
     public final Action m_cutAction = 
-        new MenuAction("Cut", loadIcon("cut.gif"), null, 
+        new MenuAction("Cut", Global.loadIcon("cut.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2099,7 +2088,7 @@ public class MainWindow extends JFrame
      * Action for copying selected states and transitions.
      */
     public final Action m_copyAction = 
-        new MenuAction("Copy", loadIcon("copy.gif"), null, 
+        new MenuAction("Copy", Global.loadIcon("copy.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2116,7 +2105,7 @@ public class MainWindow extends JFrame
      * Action for pasting selected states and transitions.
      */
     public final Action m_pasteAction = 
-        new MenuAction("Paste", loadIcon("paste.gif"), null, 
+        new MenuAction("Paste", Global.loadIcon("paste.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2160,7 +2149,7 @@ public class MainWindow extends JFrame
      * Action for deleting selected states and transitions.
      */
     public final Action m_deleteAction = 
-        new MenuAction("Delete Selected Items", loadIcon("delete.gif"), null, 
+        new MenuAction("Delete Selected Items", Global.loadIcon("delete.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
         {
             public void actionPerformed(ActionEvent e)
@@ -2178,55 +2167,55 @@ public class MainWindow extends JFrame
      */
     public final GUI_ModeSelectionAction m_addNodesAction = 
         new GUI_ModeSelectionAction("Add States", GUI_Mode.ADDNODES,
-            loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
+            Global.loadIcon("state.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F2,0));
 
     /**
      * Action associated with ADDTRANSITIONS.
      */
     public final GUI_ModeSelectionAction m_addTransitionsAction = 
         new GUI_ModeSelectionAction("Add Transitions", GUI_Mode.ADDTRANSITIONS,
-            loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
+            Global.loadIcon("transition.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 
     /**
      * Action associated with SELECTION.
      */
     public final GUI_ModeSelectionAction m_selectionAction = 
         new GUI_ModeSelectionAction("Make Selection", GUI_Mode.SELECTION,
-            loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
+            Global.loadIcon("selection.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F4,0));
 
     /**
      * Action associated with ERASER.
      */
     public final GUI_ModeSelectionAction m_eraserAction = 
         new GUI_ModeSelectionAction("Eraser", GUI_Mode.ERASER, 
-            loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
+            Global.loadIcon("eraser.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
 
     /**
      * Action associated with CHOOSESTART.
      */
     public final GUI_ModeSelectionAction m_chooseStartAction = 
         new GUI_ModeSelectionAction("Choose Start State", GUI_Mode.CHOOSESTART, 
-            loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
+            Global.loadIcon("startState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
      * Action associated with CHOOSEACCEPTING.
      */
     public final GUI_ModeSelectionAction m_chooseAcceptingAction = 
         new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
-            loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
+            Global.loadIcon("finalState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**
      * Action associated with CHOOSECURRENTSTATE.
      */
     public final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
         new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
-            loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
+            Global.loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
 
     /**
      * Action for stepping through execution.
      */
     public final Action m_stepAction = 
-        new MenuAction("Step", loadIcon("step.gif"), null, 
+        new MenuAction("Step", Global.loadIcon("step.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2274,7 +2263,7 @@ public class MainWindow extends JFrame
      * Action for starting simulation of the machine.
      */
     public final Action m_fastExecuteAction = 
-        new MenuAction("Execute", loadIcon("fastExecute.gif"), null, 
+        new MenuAction("Execute", Global.loadIcon("fastExecute.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2297,7 +2286,7 @@ public class MainWindow extends JFrame
      * Action for pausing simulation of the machine.
      */
     public final Action m_pauseExecutionAction = 
-        new MenuAction("Pause Execution", loadIcon("pause.gif"), null, 
+        new MenuAction("Pause Execution", Global.loadIcon("pause.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2311,7 +2300,7 @@ public class MainWindow extends JFrame
      * Action for stopping a simulation.
      */
     public final Action m_stopMachineAction = 
-        new MenuAction("Stop Execution", loadIcon("stop.gif"), null, 
+        new MenuAction("Stop Execution", Global.loadIcon("stop.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2371,7 +2360,7 @@ public class MainWindow extends JFrame
      * Action for moving the read/write head to the start of the tape.
      */
     public final Action m_headToStartAction = 
-        new MenuAction("Reset Read/Write Head", loadIcon("tapeStart.gif"), null, 
+        new MenuAction("Reset Read/Write Head", Global.loadIcon("tapeStart.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e) 
@@ -2386,7 +2375,7 @@ public class MainWindow extends JFrame
      * Action for reloading the tape.
      */
     public final Action m_reloadTapeAction = 
-        new MenuAction("Reload Tape", loadIcon("tapeReload.gif"), null, 
+        new MenuAction("Reload Tape", Global.loadIcon("tapeReload.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e) 
@@ -2427,7 +2416,7 @@ public class MainWindow extends JFrame
      * Action for erasing the tape.
      */
     public final Action m_eraseTapeAction = 
-        new MenuAction("Erase Tape", loadIcon("tapeClear.gif"), null, 
+        new MenuAction("Erase Tape", Global.loadIcon("tapeClear.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e) 
@@ -2448,7 +2437,7 @@ public class MainWindow extends JFrame
      * Action for configuring the alphabet.
      */
     public final Action m_configureAlphabetAction = 
-        new MenuAction("Configure Alphabet", loadIcon("configureAlphabet.gif"), null, 
+        new MenuAction("Configure Alphabet", Global.loadIcon("configureAlphabet.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e)
@@ -2467,7 +2456,7 @@ public class MainWindow extends JFrame
      * Action for displaying the shared console.
      */
     public final Action m_showConsoleAction = 
-        new MenuAction("Show Console", loadIcon("console.gif"), null, null)
+        new MenuAction("Show Console", Global.loadIcon("console.gif"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -2488,7 +2477,7 @@ public class MainWindow extends JFrame
      * Action for displaying help documentation.
      */
     public final Action m_helpAction = 
-        new MenuAction("Help", loadIcon("tuatara.gif"), null, 
+        new MenuAction("Help", Global.loadIcon("tuatara.gif"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0))
         {
             public void actionPerformed(ActionEvent e)
@@ -2515,7 +2504,7 @@ public class MainWindow extends JFrame
      * Action for displaying meta information about the program.
      */
     public final Action m_aboutAction = 
-        new MenuAction("About", loadIcon("emptyIcon.gif"), null, null)
+        new MenuAction("About", Global.loadIcon("emptyIcon.gif"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
