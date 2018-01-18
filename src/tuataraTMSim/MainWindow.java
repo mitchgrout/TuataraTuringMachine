@@ -48,98 +48,93 @@ import tuataraTMSim.machine.DFSA.*;
  * @author Jimmy
  */
 public class MainWindow extends JFrame
-{
-    /**
-     * Font used for rendering text.
-     */
-    public static final Font FONT_USED = new Font("Dialog", Font.PLAIN, 12);
-    
+{ 
     /**
      * The layer used for internal frames containing machines.
      */
-    public static final int MACHINE_WINDOW_LAYER = 50;
+    protected static final int MACHINE_WINDOW_LAYER = 50;
    
     /**
      * Internal timer.
      */
-    private final java.util.Timer m_timer = new java.util.Timer(true);
+    protected final java.util.Timer m_timer = new java.util.Timer(true);
     
     /**
      * String for execution halting.
      */
-    public static final String HALTED_MESSAGE_TITLE_STR  = "Machine halted!";
+    protected static final String HALTED_MESSAGE_TITLE_STR  = "Machine halted!";
 
     /**
      * Delay between steps for slow execution speed.
      */
-    public static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
+    protected static final int SLOW_EXECUTE_SPEED_DELAY = 1200;
 
     /**
      * Delay between steps for medium execution speed.
      */
-    public static final int MEDIUM_EXECUTE_SPEED_DELAY = 800;
+    protected static final int MEDIUM_EXECUTE_SPEED_DELAY = 800;
 
     /**
      * Delay between steps for fast execution speed.
      */
-    public static final int FAST_EXECUTE_SPEED_DELAY = 400;
+    protected static final int FAST_EXECUTE_SPEED_DELAY = 400;
 
     /**
      * Delay between steps for superfast execution speed.
      */
-    public static final int SUPERFAST_EXECUTE_SPEED_DELAY = 200;
+    protected static final int SUPERFAST_EXECUTE_SPEED_DELAY = 200;
 
     /**
      * Delay between steps for ultrafast execution speed.
      */
-    public static final int ULTRAFAST_EXECUTE_SPEED_DELAY = 10;
+    protected static final int ULTRAFAST_EXECUTE_SPEED_DELAY = 10;
     
     /**
      * Width of the machine canvas.
      */
-    public static final int MACHINE_CANVAS_SIZE_X = 2000;
+    protected static final int MACHINE_CANVAS_SIZE_X = 2000;
 
     /**
      * Height of the machine canvas.
      */
-    public static final int MACHINE_CANVAS_SIZE_Y = 2000;
+    protected static final int MACHINE_CANVAS_SIZE_Y = 2000;
    
     /**
      * Horizontal translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_X = State.STATE_RENDERING_WIDTH * 2;
+    protected static final int TRANSLATE_TO_AVOID_STACKING_X = State.STATE_RENDERING_WIDTH * 2;
 
     /**
      * Vertical translation of states to avoid stacking.
      */
-    public static final int TRANSLATE_TO_AVOID_STACKING_Y = State.STATE_RENDERING_WIDTH * 2;
+    protected static final int TRANSLATE_TO_AVOID_STACKING_Y = State.STATE_RENDERING_WIDTH * 2;
     
     /**
      * Maximum horizontal ratio for new window location.
      */
-    public static final double maxHorizontalRatioForNewWindowLoc = 0.3;
+    protected static final double maxHorizontalRatioForNewWindowLoc = 0.3;
 
     /**
      * Maximum vertical ratio for new window location.
      */
-    public static final double maxVerticalRatioForNewWindowLoc = 0.3;
+    protected static final double maxVerticalRatioForNewWindowLoc = 0.3;
 
     /**
      * Minimum distance between two new windows.
      */
-    public static int minDistanceForNewWindowLoc = 50;
+    protected static int minDistanceForNewWindowLoc = 50;
 
     /**
      * Random step between distances between new windows.
      * Considered for removal.
      */
-    public static int windowLocRandomStepSize = 10;
+    protected static int windowLocRandomStepSize = 10;
     
     /**
      * Random number generator used for state and transition placement.
      * Considered for removal.
      */
-    private Random myRandom = new Random();
+    protected Random myRandom = new Random();
     
     /**
      * Creates a new instance of MainWindow.

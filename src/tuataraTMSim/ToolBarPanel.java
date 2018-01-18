@@ -49,12 +49,12 @@ class ToolBarPanel extends JPanel
     /**
      * Horizontal padding between toolbar components.
      */
-    public static final int TOOLBAR_HGAP = 5;
+    protected static final int TOOLBAR_HGAP = 5;
 
     /**
      * Vertical padding between toolbar components.
      */
-    public static final int TOOLBAR_VGAP = 5;
+    protected static final int TOOLBAR_VGAP = 5;
 
     /**
      * Creates a new instance of ToolBarPanel.

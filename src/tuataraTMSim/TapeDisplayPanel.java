@@ -40,34 +40,29 @@ import tuataraTMSim.machine.Tape;
 public class TapeDisplayPanel extends JPanel
 { 
     /**
-     * Monospaced font used by the panel.
-     */
-    protected static final Font MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
-
-    /**
      * Width of a monospaced character, excluding padding. 
      */
-    protected static final int CHAR_WIDTH = new Canvas().getFontMetrics(MONOSPACE).charWidth('_'); 
+    protected static final int CHAR_WIDTH = new Canvas().getFontMetrics(Global.FONT_MONOSPACE).charWidth('_'); 
 
     /**
      * Horizontal padding around a tape cell.
      */
-    public static final int CELLPADDING_X  = 4;
+    protected static final int CELLPADDING_X  = 4;
 
     /**
      * Vertical padding around a tape cell.
      */
-    public static final int CELLPADDING_Y  = 2;
+    protected static final int CELLPADDING_Y  = 2;
 
     /**
      * Horizontal padding around the entire tape.
      */
-    public static final int TAPEPADDING_X = 5;
+    protected static final int TAPEPADDING_X = 5;
 
     /**
      * Vertical padding around the entire tape.
      */
-    public static final int TAPEPADDING_Y = 2;
+    protected static final int TAPEPADDING_Y = 2;
     
     /**
      * Creates a new instance of TapeDisplayPanel.
@@ -183,7 +178,7 @@ public class TapeDisplayPanel extends JPanel
         // cannot be set in the constructor as the graphics object has not been created until the
         // component is packed.
         Graphics2D g2d = (Graphics2D)g;
-        g2d.setFont(MONOSPACE);
+        g2d.setFont(Global.FONT_MONOSPACE);
         FontMetrics metrics = g2d.getFontMetrics();
         
         int height = metrics.getHeight();

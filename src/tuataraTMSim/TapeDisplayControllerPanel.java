@@ -40,7 +40,7 @@ public class TapeDisplayControllerPanel extends JPanel
     /**
      * Number of pixels used for padding between subcomponents.
      */
-    public static final int PADDING = 0;
+    protected static final int PADDING = 0;
     
     /**
      * Creates a new instance of TapeDisplayControllerPanel.
