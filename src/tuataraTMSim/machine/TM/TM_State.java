@@ -85,11 +85,8 @@ public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Sim
      */
     protected Paint getPaint()
     {
-        Color c = m_subMachine != null? Color.BLUE : Color.RED;
-        return new GradientPaint(m_windowX, m_windowY, c,
-                m_windowX + STATE_RENDERING_WIDTH, m_windowY + STATE_RENDERING_WIDTH, Color.WHITE);
+        return m_subMachine != null? new Color(100, 100, 255) : super.getPaint();
     }
-
 
     /**
      * Get the submachine associated with this state.
