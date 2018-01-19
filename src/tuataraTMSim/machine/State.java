@@ -152,10 +152,8 @@ public abstract class State<
      */
     protected Paint getPaint()
     {
-        return new GradientPaint(m_windowX, m_windowY, Color.RED, 
-                m_windowX + STATE_RENDERING_WIDTH, m_windowY + STATE_RENDERING_WIDTH, Color.WHITE);
+        return new Color(255, 100, 100);
     }
-
 
     /**
      * Render the state to a graphics object.
