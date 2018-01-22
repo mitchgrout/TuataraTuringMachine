@@ -67,7 +67,7 @@ public class ExecutionTimerTask extends TimerTask
             }
             else
             {
-                m_mainWindow.getConsole().logPartial(m_panel, String.format("%s %c ", sim.getConfiguration(), Global.CONFIG_TEE)); 
+                m_mainWindow.getConsole().logPartial(m_panel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
             }
         }
         catch (ComputationCompletedException|ComputationFailedException e)
