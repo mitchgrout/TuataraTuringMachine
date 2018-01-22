@@ -910,7 +910,7 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user
-                        m_console.log("Cancelled saving machine");
+                        m_console.log("Cancelled saving machine.");
                         return false;
                     }
                 }
@@ -1502,7 +1502,7 @@ public class MainWindow extends JFrame
             if (panel == null)
             {
                 // Whatever we are looking at isn't a graphics panel
-                m_console.log("Current window is not a graphics panel; cannot save");
+                m_console.log("Current window is not a graphics panel; cannot save.");
                 return;
             }
 
@@ -1517,7 +1517,7 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user 
-                        m_console.log("Cancelled saving machine");
+                        m_console.log("Cancelled saving machine.");
                         return;
                     }
                 }
@@ -1525,14 +1525,14 @@ public class MainWindow extends JFrame
                 Machine.saveMachine(machine, outFile);
                 panel.setModifiedSinceSave(false);
                 panel.setFile(outFile);
-                m_console.log(String.format("Successfully saved machine %s", outFile.toString()));
+                m_console.log("Successfully saved machine %s.", outFile.toString());
             }
-            catch (Exception e2)
+            catch (IOException ex)
             {
                 JOptionPane.showMessageDialog(MainWindow.this,
                         String.format("Error saving machine to %s", outFile.toString()));
-                m_console.log(String.format("Encountered an error when saving the machine to %s: %s",
-                            outFile.toString(), e2.getMessage())); 
+                m_console.log("Encountered an error when saving the machine to %s.\nMessage: %s.",
+                              outFile.toString(), ex.getMessage());
             }
         }
 
@@ -1579,24 +1579,21 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user 
-                        m_console.log("Cancelled saving tape");
+                        m_console.log("Cancelled saving tape.");
                         return;
                     }
                 }
                 
-                if (!Tape.saveTape(m_tapeDisp.getTape(), outFile))
-                {
-                    throw new IOException(outFile.toString());
-                }
+                Tape.saveTape(m_tapeDisp.getTape(), outFile);
                 m_tapeDisp.setFile(outFile);
-                m_console.log(String.format("Successfully saved tape to %s", outFile.toString()));
+                m_console.log("Successfully saved tape to %s.", outFile.toString());
             }
-            catch (Exception e2)
+            catch (IOException ex)
             {
                 JOptionPane.showMessageDialog(MainWindow.this,
                         String.format("Error saving tape to %s", outFile.toString()));
-                m_console.log(String.format("Encountered an error when saving the tape to %s: %s",
-                            outFile.toString(), e2.getMessage()));
+                m_console.log("Encountered an error when saving the tape to %s.\nMessage: %s",
+                              outFile.toString(), ex.getMessage());
             }
         }
 
@@ -1889,16 +1886,12 @@ public class MainWindow extends JFrame
                 if (inFile == null)
                 {
                     // Cancelled by user
-                    m_console.log("Cancelled loading machine");
+                    m_console.log("Cancelled loading machine.");
                     return;
                 }
                 try
                 {
                     Machine machine = Machine.loadMachine(inFile);
-                    if (machine == null)
-                    {
-                        throw new IOException("Failed to load " + inFile.toString());
-                    }
 
                     // TODO: Can we make this nicer?
                     JInternalFrame iFrame = null;
@@ -1913,14 +1906,14 @@ public class MainWindow extends JFrame
                     {
                         addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
                     }
-                    m_console.log(String.format("Successfully loaded machine %s", inFile.toString()));
+                    m_console.log("Successfully loaded machine %s.", inFile.toString());
                 }
-                catch (Exception e2)
+                catch (Exception ex)
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, 
                             String.format("Error opening machine file %s", inFile.toString()));
-                    m_console.log(String.format("Encountered an error when loading the machine %s: %s", 
-                                inFile.toString(), e2.getMessage()));
+                    m_console.log("Encountered an error when loading the machine %s.\nMessage: %s.", 
+                                  inFile.toString(), ex.getMessage());
                 }
             }
         };
@@ -1976,27 +1969,23 @@ public class MainWindow extends JFrame
                 if (inFile == null)
                 {
                     // Cancelled by user
-                    m_console.log("Cancelled loading tape");
+                    m_console.log("Cancelled loading tape.");
                     return;
                 }
 
                 try
                 {
                     Tape tape = Tape.loadTape(inFile);
-                    if (tape == null)
-                    {
-                        throw new IOException(inFile.toString());
-                    }
                     m_tapeDisp.getTape().copyOther(tape);
                     m_tapeDisp.setFile(inFile);
                     m_tapeDisp.repaint();
                 }
-                catch (Exception e2)
+                catch (Exception ex)
                 {
                     JOptionPane.showMessageDialog(MainWindow.this, 
                             String.format("Error opening tape file %s", inFile.toString()));
-                    m_console.log(String.format("Encountered an error when load the tape %s: %s",
-                                inFile.toString(), e2.getMessage()));
+                    m_console.log("Encountered an error when load the tape %s.\nMessage: %s.",
+                                  inFile.toString(), ex.getMessage());
                 }
             }
         };
@@ -2237,7 +2226,7 @@ public class MainWindow extends JFrame
                     }
                     else
                     {
-                        m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
+                        m_console.logPartial(gfxPanel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
                     }
                 }
                 catch (ComputationCompletedException|ComputationFailedException e2)
@@ -2314,7 +2303,7 @@ public class MainWindow extends JFrame
                     {
                         gfxPanel.getSimulator().resetMachine();
                         gfxPanel.repaint();
-                        m_console.log("Stopped machine");
+                        m_console.log("Stopped machine.");
                     }
                 }
                 updateUndoActions();
@@ -2380,33 +2369,42 @@ public class MainWindow extends JFrame
         {
             public void actionPerformed(ActionEvent e) 
             {
-                // Wipe the tape.
                 Object[] options = {"Ok", "Cancel"};
+                File tfile = m_tapeDisp.getFile();
+
                 // TODO: should disable keyboard here
-                int result = 0;
-                if (m_tapeDisp.getFile() == null)
+                if (tfile == null)
                 {
-                    result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                    int result = JOptionPane.showOptionDialog(null,
+                            "This will erase the tape. Do you want to continue?", "Reload tape",
+                            JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                            options, options[1]);
+                    if (result == JOptionPane.YES_OPTION)
+                    {
+                        m_tape.clearTape();
+                        m_console.log("Erased tape.");
+                    }
                 }
                 else
                 {
-                    result = JOptionPane.showOptionDialog(null, "This will reload the tape, discarding any changes.  Do you want to continue?", "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-                }
-
-                if (result == JOptionPane.YES_OPTION)
-                {
-                    m_tapeDisp.reloadTape();
-                    m_tapeDispController.repaint();
-
-                    File file = m_tapeDisp.getFile();
-                    if (file == null)
+                    int result = JOptionPane.showOptionDialog(null, 
+                            "This will reload the tape, discarding any changes. Do you want to continue?", 
+                            "Reload tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+                            null, options, options[1]);
+                    if (result == JOptionPane.YES_OPTION) try
                     {
-                        m_console.log("Deleted tape contents");
+                        m_tape = Tape.loadTape(tfile);
+                        m_tapeDisp.getTape().copyOther(m_tape);
+                        m_tapeDisp.setFile(tfile);
+                        m_tapeDisp.repaint();
+                        m_console.log("Reloaded tape from file %s.", tfile.toString());
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        m_console.log(String.format("Reloaded tape from file %s", 
-                                    file.toString()));
+                        JOptionPane.showMessageDialog(MainWindow.this,
+                                String.format("Error opening tape file %s", tfile.toString()));
+                        m_console.log("Encountered an error when loading the tape %s.\nMessage: %s", 
+                                      tfile.toString(), ex.getMessage());
                     }
                 }
             }
@@ -2424,11 +2422,16 @@ public class MainWindow extends JFrame
                 // Wipe the tape.
                 Object[] options = {"Ok", "Cancel"};
                 // TODO: should disable keyboard here
-                int result = JOptionPane.showOptionDialog(null, "This will erase the tape.  Do you want to continue?", "Clear tape", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                int result = JOptionPane.showOptionDialog(null, 
+                        "This will erase the tape. Do you want to continue?", "Clear tape", 
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
+                        options, options[1]);
                 if (result == JOptionPane.YES_OPTION)
                 {
                     m_tapeDisp.getTape().clearTape();
+                    m_tapeDisp.setFile(null);
                     m_tapeDispController.repaint();
+                    m_console.log("Erased tape.");
                 }
             }
         };

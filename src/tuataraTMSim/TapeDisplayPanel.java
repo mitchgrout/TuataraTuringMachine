@@ -305,50 +305,6 @@ public class TapeDisplayPanel extends JPanel
        return false;
     }
     
-    /** 
-     * Serialize and save the tape to persistent storage.
-     * @param file The file to save to.
-     * @return true if the tape was saved successfully, false otherwise.
-     */
-    public boolean saveTapeAs(File file)
-    {
-        m_file = file;
-        return Tape.saveTape(m_tape, file);
-    }
-    
-    /**
-     * Serialize and save the tape to persistent storage, using the associated file.
-     * @return true if the tape was saved successfully, false otherwise.
-     */
-    public boolean saveTape()
-    {
-        if (m_file == null)
-        {
-            return false;
-        }
-        if (m_tape == null) // Shouldnt happen
-        {
-            return false;
-        }
-        return Tape.saveTape(m_tape, m_file);
-    }
-
-    /**
-     * Load and deserialize a tape from persistent storage.
-     * @param file The file of the saved tape.
-     * @return true if the tape was loaded successfully, false otherwise.
-     */
-    public boolean loadTape(File file)
-    {
-        Tape t = Tape.loadTape(file);
-        if (t == null)
-        {
-            return false;
-        }
-        m_tape.copyOther(t);
-        return true;
-    }
-    
     /**
      * Get the file associated with this tape.
      * @return The file associated with this tape.
@@ -365,23 +321,6 @@ public class TapeDisplayPanel extends JPanel
     public void setFile(File file)
     {
         m_file = file;
-    }
-    
-    /** 
-     * Reload the tape from the file it was loaded from or last saved as, or clear the tape if it
-     * was never loaded or saved at all.
-     */
-    public void reloadTape()
-    {
-        if (m_file == null)
-        {
-            m_tape.clearTape();
-            return;
-        }
-        if (!loadTape(m_file))
-        {
-            JOptionPane.showMessageDialog(null, "Error reloading " + m_file.toString(), "Loading tape", JOptionPane.ERROR_MESSAGE);
-        }
     }
     
     /**

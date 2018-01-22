@@ -545,9 +545,9 @@ public class TMGraphicsPanel
                             {
                                 JOptionPane.showMessageDialog(MainWindow.getInstance(),
                                         String.format("Error opening machine file %s", fc.getSelectedFile().toString()));
-                                MainWindow.getInstance().getConsole().log(String.format(
+                                MainWindow.getInstance().getConsole().log(
                                         "Encountered an error when loading the machine %s: %s",
-                                        fc.getSelectedFile().toString(), ex.getMessage()));
+                                        fc.getSelectedFile().toString(), ex.getMessage());
                             }
                             break;
 

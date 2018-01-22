@@ -146,39 +146,27 @@ public abstract class Tape implements Serializable
      * @param t The tape to serialize.
      * @param file The file to write to.
      * @return true if the tape is saved successfully, false otherwise.
+     * @throws IOException If an underlying stream exception occurs.
      */
-    public static boolean saveTape(Tape t, File file)
+    public static void saveTape(Tape t, File file) throws IOException
     {
-        try
-        {
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-            out.writeObject(t);
-            out.close();
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+        out.writeObject(t);
+        out.close();
     }
 
     /**
      * Load and deserialize a tape from persistent storage.
      * @param file The file where the tape was serialized and written to.
      * @return The deserialized tape, or null if the tape was not successfully loaded.
+     * @throws IOException If an underlying stream exception occurs.
+     * @throws ClassNotFoundException If the serialized object is not recognized.
      */
-    public static Tape loadTape(File file)
+    public static Tape loadTape(File file) throws IOException, ClassNotFoundException
     {
-        try
-        {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-            Tape result = (Tape)in.readObject();
-            in.close();
-            return result;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+        Tape result = (Tape)in.readObject();
+        in.close();
+        return result;
     }   
 }
