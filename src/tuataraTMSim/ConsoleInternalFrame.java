@@ -90,18 +90,30 @@ public class ConsoleInternalFrame extends JInternalFrame
     }
 
     /**
+     * Append text to the console.
+     * @param fmt The format string to be appended.
+     * @param args Arguments for the format string.
+     */
+    private void append(String fmt, Object... args)
+    {
+        m_text.append(String.format(fmt, args));
+    }
+
+    /**
      * Log a partial message to the console. Subsequent calls to logPartial will continue on the
      * same line, without adding a new timestamp.
      * @param panel The panel logging the text.
-     * @param s The string to be logged.
+     * @param fmt The format string to be logged.
+     * @param args Arguments for the format string.
      */
-    public void logPartial(MachineGraphicsPanel panel, String s)
+    public void logPartial(MachineGraphicsPanel panel, String fmt, Object... args)
     {
         // Last message was not partial; timestamp and log
         if (!m_partial)
         {
             // Do not add a newline, so we can continue logging after this message.
-            m_text.append(String.format("[%s] %s", timestamp(), s));
+            append("[%s] ", timestamp());
+            append(fmt, args);
             m_partial = true;
             m_panel = panel;
         }
@@ -109,15 +121,16 @@ public class ConsoleInternalFrame extends JInternalFrame
         else if (m_panel == panel)
         {
             // Continue logging on the same line
-            m_text.append(s);
+            append(fmt, args);
         }
         // Last message was partial, and the panel did not send it.
         else
         {
             // TODO: Decide if this is necessary for the user to see
-            m_text.append(" -- Interrupted\n");
+            append(" -- Interrupted\n");
             // Begin logging on a new line
-            m_text.append(String.format("[%s] %s", timestamp(), s));
+            append("[%s] ", timestamp());
+            append(fmt, args);
             m_partial = true;
             m_panel = panel;
         }
@@ -130,7 +143,7 @@ public class ConsoleInternalFrame extends JInternalFrame
     {
         if (m_partial)
         {
-            m_text.append("\n");
+            append("\n");
             m_panel = null;
             m_partial = false;
         }
@@ -138,13 +151,16 @@ public class ConsoleInternalFrame extends JInternalFrame
 
     /**
      * Log text to the console. Forces text to appear on a new line.
-     * @param s The string to be logged.
+     * @param fmt The format string to be logged.
+     * @param args Arguments for the format string.
      */
-    public void log(String s)
+    public void log(String fmt, Object... args)
     {
         // Finish any partial messages, then log
         endPartial();
-        m_text.append(String.format("[%s] %s\n", timestamp(), s));
+        append("[%s] ", timestamp());
+        append(fmt, args);
+        append("\n");
     }
 
     /**
