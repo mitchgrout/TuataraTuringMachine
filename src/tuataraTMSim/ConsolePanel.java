@@ -25,6 +25,7 @@
 
 package tuataraTMSim;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.time.format.DateTimeFormatter;
@@ -35,19 +36,16 @@ import javax.swing.*;
  * A frame for machines to log information to. This panel may be written to by every machine
  * currently loaded due to the fact that the accesses are mutually exclusive.
  */
-public class ConsoleInternalFrame extends JInternalFrame
+public class ConsolePanel extends JPanel
 {
     /**
      * Text displayed when the console is opened, or cleared.
      */
     protected static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator 1.0 <<<";
 
-    public ConsoleInternalFrame()
+    public ConsolePanel()
     {
-        // Create a frame with the title "Console", which can be resized, closed, maximized, but
-        // cannot be minimized.
-        super("Console", true, true, true, false);
-
+        super();
         initComponents();
     }
 
@@ -56,14 +54,11 @@ public class ConsoleInternalFrame extends JInternalFrame
      */
     private void initComponents()
     {
-        this.setSize(new Dimension(600, 400));
-
-        // Only two components in this frame; a menu bar and text area
-
         // Menu bar
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.add(new JButton(m_clearAction));
-        setJMenuBar(menuBar);
+        // JMenuBar menuBar = new JMenuBar();
+        // menuBar.add(new JButton(m_clearAction));
+        // setJMenuBar(menuBar);
+        setLayout(new BorderLayout());
 
         // Text area
         m_text = new JTextArea();
@@ -73,8 +68,7 @@ public class ConsoleInternalFrame extends JInternalFrame
         JScrollPane scroll = new JScrollPane(m_text);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        getContentPane().add(scroll);
+        add(scroll, BorderLayout.CENTER);
 
         // Clear and setup any text on m_text
         clear();

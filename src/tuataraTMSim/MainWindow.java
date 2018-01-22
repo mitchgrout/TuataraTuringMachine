@@ -252,7 +252,7 @@ public class MainWindow extends JFrame
      * Get the current console.
      * @return The current console.
      */
-    public ConsoleInternalFrame getConsole()
+    public ConsolePanel getConsole()
     {
         return m_console;
     }
@@ -358,8 +358,24 @@ public class MainWindow extends JFrame
  
         // Desktop pane holds all internal frames
         m_desktopPane = new JDesktopPane();
+        m_desktopPane.setMinimumSize(new Dimension(200, 400));
+        m_desktopPane.setPreferredSize(new Dimension(1600, 1200));
         m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        // Console is the global point for logging
+        m_console = new ConsolePanel();
+        m_console.setMinimumSize(new Dimension(200, 100));
+        m_console.setPreferredSize(new Dimension(200, 100));
+        
+        // The desktop pane and console go together in a horizontal-split pane so the console may be
+        // resized veritcally only. Additionally requires that components be continuously redrawn
+        // when resized. setMinimumSize(0,0) ensures that the tape display is always shown.
+        JSplitPane mainPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, m_desktopPane, m_console);
+        mainPane.setMinimumSize(new Dimension(0,0));
+        mainPane.setOneTouchExpandable(true);
+        mainPane.setResizeWeight(0.9D);
         
         // Set up the tape and associated controllers
         m_tape = new CA_Tape();
@@ -393,10 +409,9 @@ public class MainWindow extends JFrame
 
         // Add the desktop pane and tape controller to the omnibus; add that to the bottom of the window
         omnibus.setLayout(new BorderLayout());
-        omnibus.add(m_desktopPane, BorderLayout.CENTER);
+        omnibus.add(mainPane, BorderLayout.CENTER);
         omnibus.add(m_tapeDispController, java.awt.BorderLayout.SOUTH);
         getContentPane().add(omnibus);
-       
 
         // Maximize on startup
         this.setExtendedState(Frame.MAXIMIZED_BOTH);
@@ -414,10 +429,6 @@ public class MainWindow extends JFrame
         // The ModalAdapter intercepts all mouse events when the glass pane is visible.
         ModalAdapter adapter = new ModalAdapter(glass);
         m_asif.addInternalFrameListener(adapter);
-
-        // Set up the global console
-        m_console = new ConsoleInternalFrame();
-        m_console.setLayer(50);
 
         // Disable all toolbars (no default machine)
         setEnabledActionsThatRequireAMachine(false); 
@@ -576,7 +587,6 @@ public class MainWindow extends JFrame
         helpMenu.setMnemonic(KeyEvent.VK_H);
         menuBar.add(helpMenu);
 
-        helpMenu.add(new JMenuItem(m_showConsoleAction));
         helpMenu.add(new JMenuItem(m_helpAction));
         helpMenu.add(new JMenuItem(m_aboutAction));
 
@@ -1837,7 +1847,7 @@ public class MainWindow extends JFrame
     /**
      * Frame for displaying a console window for logging information.
      */
-    private ConsoleInternalFrame m_console;
+    private ConsolePanel m_console;
 
     /**
      * Action for creating a new Turing Machine.
@@ -2451,27 +2461,6 @@ public class MainWindow extends JFrame
                     m_asif.setPanel(panel);
                     m_asif.show();
                     getGlassPane().setVisible(true);
-                }
-            }
-        };
-
-    /**
-     * Action for displaying the shared console.
-     */
-    public final Action m_showConsoleAction = 
-        new MenuAction("Show Console", Global.loadIcon("console.gif"), null, null)
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                if (!m_console.isVisible())
-                {
-                    addFrame(m_console);
-                }
-                else
-                {
-                    m_console.moveToFront();
-                    try { m_console.setSelected(true); }
-                    catch (PropertyVetoException e2) { }
                 }
             }
         };
