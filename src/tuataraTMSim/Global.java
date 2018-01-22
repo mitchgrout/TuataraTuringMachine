@@ -41,12 +41,17 @@ public final class Global
     /**
      * Font used for rendering text.
      */
-     public static final Font FONT_DIALOG = new Font(Font.DIALOG, Font.PLAIN, 12);
+    public static final Font FONT_DIALOG = new Font(Font.DIALOG, Font.PLAIN, 12);
 
     /**
      * Font used for rendering machine-related text.
      */
-     public static final Font FONT_MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+    public static final Font FONT_MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+
+    /**
+     * Character used to separate machine configuration steps.
+     */
+    public static final char CONFIG_TEE = '\u02Eb';
 
     /**
      * Create an ImageIcon based off of the given filename. The images/ directory is prepended to

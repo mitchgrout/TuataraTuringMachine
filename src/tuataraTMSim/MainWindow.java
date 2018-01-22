@@ -2237,7 +2237,7 @@ public class MainWindow extends JFrame
                     }
                     else
                     {
-                        m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), '\u02Eb'));    
+                        m_console.logPartial(gfxPanel, String.format("%s %c ", sim.getConfiguration(), Global.CONFIG_TEE));    
                     }
                 }
                 catch (ComputationCompletedException|ComputationFailedException e2)
