@@ -230,6 +230,19 @@ public class MainWindow extends JFrame
      */
     public static void main(String[] args)
     {
+        // Determine what UIs are available
+        // for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+        // {
+        //     System.out.println(info.getClassName());
+        // }
+        
+        // Use the Nimbus look-and-feel
+        try 
+        {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
+        catch (Exception e) { }
+
         java.awt.EventQueue.invokeLater(new Runnable()
         {
             public void run()
@@ -349,7 +362,7 @@ public class MainWindow extends JFrame
     private void initComponents()
     {
         // Set up the main window
-        setSize(new Dimension(640, 480));
+        setMinimumSize(new Dimension(640, 480));
         setTitle("Tuatara Turing Machine Simulator");
         setIconImage(Global.loadIcon("tuatara.png").getImage());
 
@@ -2520,7 +2533,7 @@ public class MainWindow extends JFrame
      * Action for displaying help documentation.
      */
     public final Action m_helpAction = 
-        new MenuAction("Help", Global.loadIcon("tuatara.png"), null, 
+        new MenuAction("Help", Global.loadIcon("help.png"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0))
         {
             public void actionPerformed(ActionEvent e)
@@ -2547,7 +2560,7 @@ public class MainWindow extends JFrame
      * Action for displaying meta information about the program.
      */
     public final Action m_aboutAction = 
-        new MenuAction("About", Global.loadIcon("emptyIcon.png"), null, null)
+        new MenuAction("About", Global.loadIcon("tuatara.png"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
