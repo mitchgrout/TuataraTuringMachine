@@ -1539,10 +1539,10 @@ public class MainWindow extends JFrame
             }
             catch (IOException ex)
             {
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Error saving machine to %s", outFile.toString()));
                 m_console.log("Encountered an error when saving the machine to %s.\nMessage: %s.",
                               outFile.toString(), ex.getMessage());
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        String.format("Error saving machine to %s", outFile.toString()));
             }
         }
 
@@ -1600,10 +1600,10 @@ public class MainWindow extends JFrame
             }
             catch (IOException ex)
             {
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Error saving tape to %s", outFile.toString()));
                 m_console.log("Encountered an error when saving the tape to %s.\nMessage: %s",
                               outFile.toString(), ex.getMessage());
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        String.format("Error saving tape to %s", outFile.toString()));
             }
         }
 
@@ -1920,10 +1920,10 @@ public class MainWindow extends JFrame
                 }
                 catch (Exception ex)
                 {
-                    JOptionPane.showMessageDialog(MainWindow.this, 
-                            String.format("Error opening machine file %s", inFile.toString()));
                     m_console.log("Encountered an error when loading the machine %s.\nMessage: %s.", 
                                   inFile.toString(), ex.getMessage());
+                    JOptionPane.showMessageDialog(MainWindow.this, 
+                            String.format("Error opening machine file %s", inFile.toString()));
                 }
             }
         };
@@ -1992,10 +1992,10 @@ public class MainWindow extends JFrame
                 }
                 catch (Exception ex)
                 {
-                    JOptionPane.showMessageDialog(MainWindow.this, 
-                            String.format("Error opening tape file %s", inFile.toString()));
                     m_console.log("Encountered an error when load the tape %s.\nMessage: %s.",
                                   inFile.toString(), ex.getMessage());
+                    JOptionPane.showMessageDialog(MainWindow.this, 
+                            String.format("Error opening tape file %s", inFile.toString()));
                 }
             }
         };
@@ -2411,10 +2411,10 @@ public class MainWindow extends JFrame
                     }
                     catch (Exception ex)
                     {
-                        JOptionPane.showMessageDialog(MainWindow.this,
-                                String.format("Error opening tape file %s", tfile.toString()));
                         m_console.log("Encountered an error when loading the tape %s.\nMessage: %s", 
                                       tfile.toString(), ex.getMessage());
+                        JOptionPane.showMessageDialog(MainWindow.this,
+                                String.format("Error opening tape file %s", tfile.toString()));
                     }
                 }
             }
