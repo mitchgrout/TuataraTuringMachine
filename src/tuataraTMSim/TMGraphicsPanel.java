@@ -543,11 +543,11 @@ public class TMGraphicsPanel
                             try { m_contextState.setSubmachine((TM_Machine) Machine.loadMachine(fc.getSelectedFile())); }
                             catch (Exception ex)
                             {
-                                JOptionPane.showMessageDialog(MainWindow.getInstance(),
-                                        String.format("Error opening machine file %s", fc.getSelectedFile().toString()));
                                 MainWindow.getInstance().getConsole().log(
                                         "Encountered an error when loading the machine %s: %s",
                                         fc.getSelectedFile().toString(), ex.getMessage());
+                                JOptionPane.showMessageDialog(MainWindow.getInstance(),
+                                        String.format("Error opening machine file %s", fc.getSelectedFile().toString()));
                             }
                             break;
 
