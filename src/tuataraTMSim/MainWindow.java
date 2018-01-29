@@ -2437,7 +2437,7 @@ public class MainWindow extends JFrame
      * Action for erasing the tape.
      */
     public final Action m_eraseTapeAction = 
-        new MenuAction("Erase Tape", Global.loadIcon("delete.png"), null, 
+        new MenuAction("Erase Tape", Global.loadIcon("tapeClear.png"), null, 
                        KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK))
         {
             public void actionPerformed(ActionEvent e) 
