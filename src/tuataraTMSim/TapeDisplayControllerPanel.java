@@ -29,7 +29,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import tuataraTMSim.exceptions.TapeBoundsException;
+import tuataraTMSim.exceptions.ComputationFailedException;
 
 /** 
  * A panel containing a tape display panel and some buttons to move the read/write head.
@@ -114,7 +114,7 @@ public class TapeDisplayControllerPanel extends JPanel
                     m_tapeDP.getTape().headLeft();
                     repaint();
                  }
-                 catch (TapeBoundsException e1) { }
+                 catch (ComputationFailedException e1) { }
              }
         });
         m_BLeft.addMouseListener(onClick);

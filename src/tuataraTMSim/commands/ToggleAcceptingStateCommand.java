@@ -37,59 +37,28 @@ public class ToggleAcceptingStateCommand implements TMCommand
     /**
      * Creates a new instance of ToggleAcceptingCommand.
      * @param panel The current graphics panel.
-     * @param oldState The previous accepting state.
-     * @param newState The new accepting state. If newState and oldState are the same state, then we
-     *                 toggle the value for the state.
+     * @param state The state to toggle.
      */
-    public ToggleAcceptingStateCommand(MachineGraphicsPanel panel, State oldState, State newState)
+    public ToggleAcceptingStateCommand(MachineGraphicsPanel panel, State state)
     {
         m_panel = panel;
-        m_oldState = oldState;
-        m_newState = newState;
+        m_state = state;
     }
     
     /**
-     * If oldState and newState are different, then newState is made to be the accepting state.
-     * If they are the same, then the value is toggled.
+     * Toggle whether or not the supplied state is accepting.
      */
     public void doCommand()
     {
-        // Changing the accepting state of a machine invalidates it.
-        m_panel.getSimulator().getMachine().invalidate();
-
-        // If the old start is the new start, or there was no old start, we're simply toggling
-        if(m_oldState == null || m_oldState.equals(m_newState))
-        {
-            m_newState.setFinalState(!m_newState.isFinalState());
-        }
-        // Otherwise, we're unsetting one, and setting the other
-        else
-        {
-            m_oldState.setFinalState(false);
-            m_newState.setFinalState(true);
-        }
+        m_state.setFinalState(!m_state.isFinalState());
     }
     
     /**
-     * If oldState and newState are different, then oldState is made to be the accepting state.
-     * If they are the same, then the value is toggled.
+     * Toggle whether or not the supplied state is accepting.
      */
     public void undoCommand()
     {
-        // Changing the accepting state of a machine invalidates it.
-        m_panel.getSimulator().getMachine().invalidate();
-
-        // If the old start is the new start, or there was no old start, we're simply toggling
-        if(m_oldState == null || m_oldState.equals(m_newState))
-        {
-            m_newState.setFinalState(!m_newState.isFinalState());
-        }
-        // Otherwise, we're unsetting one, and setting the other
-        else
-        {
-            m_oldState.setFinalState(true);
-            m_newState.setFinalState(false);
-        }
+        m_state.setFinalState(!m_state.isFinalState());
     }
     
     /**
@@ -107,12 +76,7 @@ public class ToggleAcceptingStateCommand implements TMCommand
     private MachineGraphicsPanel m_panel;
 
     /**
-     * The old accepting state.
+     * The state to toggle.
      */
-    private State m_oldState;
-    
-    /**
-     * The new accepting state.
-     */
-    private State m_newState;
+    private State m_state;
 }

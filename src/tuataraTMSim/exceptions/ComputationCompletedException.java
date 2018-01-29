@@ -27,17 +27,16 @@ package tuataraTMSim.exceptions;
 
 /**
  * An Exception thrown when a machine finishes a computation.
- * @author Jimmy
  */
 public class ComputationCompletedException extends Exception
 {
     /**
-     * Creates a new instance of <code>ComputationCompletedException</code> without detail message.
+     * Creates a new instance of ComputationCompletedException without a detail message.
      */
     public ComputationCompletedException() { }
     
     /**
-     * Constructs an instance of <code>ComputationCompletedException</code> with the specified detail message.
+     * Constructs an instance of ComputationCompletedException with the specified detail message.
      * @param msg The detailed error message.
      */
     public ComputationCompletedException(String msg) { super(msg); }    

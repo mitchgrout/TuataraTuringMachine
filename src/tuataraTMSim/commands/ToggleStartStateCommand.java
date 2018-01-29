@@ -35,61 +35,30 @@ import tuataraTMSim.machine.State;
 public class ToggleStartStateCommand implements TMCommand
 {
     /**
-     * Creates a new instance of ToggleStartStateCommand.
+     * Creates a new instance of ToggleStartCommand.
      * @param panel The current graphics panel.
-     * @param oldState The previous start state.
-     * @param newState The new accepting state. If newState and oldState are the same state, then we
-     *                 toggle the value for the state.
+     * @param state The state to toggle.
      */
-    public ToggleStartStateCommand(MachineGraphicsPanel panel, State oldState, State newState)
+    public ToggleStartStateCommand(MachineGraphicsPanel panel, State state)
     {
         m_panel = panel;
-        m_oldState = oldState;
-        m_newState = newState;
-    }
-   
-    /**
-     * If oldState and newState are different, then newState is made to be the start state.
-     * If they are the same, then the value is toggled.
-     */
-    public void doCommand()
-    {
-        // Changing the start state of a machine invalidates it.
-        m_panel.getSimulator().getMachine().invalidate();
-
-        // If the old start is the new start, or there was no old start, we're simply toggling
-        if(m_oldState == null || m_oldState.equals(m_newState))
-        {
-            m_newState.setStartState(!m_newState.isStartState());
-        }
-        // Otherwise, we're unsetting one, and setting the other
-        else
-        {
-            m_oldState.setStartState(false);
-            m_newState.setStartState(true);
-        }
+        m_state = state;
     }
     
     /**
-     * If oldState and newState are different, thenoldState is made to be the start state.
-     * If they are the same, then the value is toggled.
+     * Toggle whether or not the supplied state is accepting.
+     */
+    public void doCommand()
+    {
+        m_state.setStartState(!m_state.isStartState());
+    }
+    
+    /**
+     * Toggle whether or not the supplied state is accepting.
      */
     public void undoCommand()
     {
-        // Changing the start state of a machine invalidates it.
-        m_panel.getSimulator().getMachine().invalidate();
-
-        // If the old start is the new start, or there was no old start, we're simply toggling
-        if(m_oldState == null || m_oldState.equals(m_newState))
-        {
-            m_newState.setStartState(!m_newState.isStartState());
-        }
-        // Otherwise, we're unsetting one, and setting the other
-        else
-        {
-            m_oldState.setStartState(true);
-            m_newState.setStartState(false);
-        }
+        m_state.setStartState(!m_state.isStartState());
     }
     
     /**
@@ -100,19 +69,14 @@ public class ToggleStartStateCommand implements TMCommand
     {
         return "Toggle Start State";
     }
-   
+    
     /**
      * The current graphics panel.
      */
     private MachineGraphicsPanel m_panel;
 
     /**
-     * The old start state.
+     * The state to toggle.
      */
-    private State m_oldState;
-    
-    /**
-     * The new start state.
-     */
-    private State m_newState;
+    private State m_state;
 }

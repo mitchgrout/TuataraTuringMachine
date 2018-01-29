@@ -27,7 +27,7 @@ package tuataraTMSim.machine;
 
 import java.io.IOException;
 import java.io.Serializable;
-import tuataraTMSim.exceptions.TapeBoundsException;
+import tuataraTMSim.exceptions.ComputationFailedException;
 import tuataraTMSim.MainWindow;
 
 /**
@@ -70,15 +70,15 @@ public class CA_Tape extends Tape implements Serializable
     
     /**
      * Shift the read/write head one cell to the left.
-     * @throws TapeBoundsException If the read/write head is at the leftmost position of the tape.
+     * @throws ComputationFailedException If the read/write head falls off the head of the tape.
      */
-    public void headLeft() throws TapeBoundsException
+    public void headLeft() throws ComputationFailedException
     {
         m_headLoc--;
         if (m_headLoc < 0)
         {
             resetRWHead();
-            throw new TapeBoundsException();
+            throw new ComputationFailedException("Read/write head fell off the tape");
         }
         MainWindow.getInstance().updateAllSimulators();
     }

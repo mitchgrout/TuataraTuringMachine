@@ -28,7 +28,7 @@ package tuataraTMSim.machine;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.*;
-import tuataraTMSim.exceptions.TapeBoundsException;
+import tuataraTMSim.exceptions.ComputationFailedException;
 
 /**
  * An abstraction of an action with a precondition for a state transition of a machine.
@@ -143,9 +143,9 @@ public abstract class PreAction implements Serializable
     /** 
      * Perform the action specified by this object on the given tape.
      * @param t The tape to be modified.
-     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws ComputationFailedException If the read/write head falls off the tape.
      */
-    public abstract void performAction(Tape t) throws TapeBoundsException;
+    public abstract void performAction(Tape t) throws ComputationFailedException;
 
     /**
      * Get a String representation of this action.

@@ -26,17 +26,18 @@
 package tuataraTMSim.exceptions;
 
 /**
- * An Exception thrown when a machine fails.
+ * An Exception thrown when a machine fails. This can be due to a variety of reasons such as an
+ * illegal operation, nondeterminism, not halting in a final state, etc.
  */
 public class ComputationFailedException extends Exception
 {
     /**
-     * Creates a new instance of <code>ComputationFailedException</code> without detail message.
+     * Creates a new instance of ComputationFailedException without a detail message.
      */
     public ComputationFailedException() { }
     
     /**
-     * Constructs an instance of <code>ComputationFailedException</code> with the specified detail message.
+     * Constructs an instance of ComputationFailedException with the specified detail message.
      * @param msg The detailed error message.
      */
     public ComputationFailedException(String msg) { super(msg); }    

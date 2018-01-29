@@ -27,7 +27,7 @@ package tuataraTMSim.machine;
 
 import java.io.*;
 import javax.swing.filechooser.FileFilter;
-import tuataraTMSim.exceptions.TapeBoundsException;
+import tuataraTMSim.exceptions.ComputationFailedException;
 
 /** 
  * A tape for a machine.
@@ -74,10 +74,10 @@ public abstract class Tape implements Serializable
 
     /**
      * Shift the read/write head one cell to the left.
-     * @throws TapeBoundsException If the read/write head is at the leftmost
-     position of the tape.
+     * @throws ComputationFailedException If the read/write head is at the leftmost
+     *                                    position of the tape.
      */
-    public abstract void headLeft() throws TapeBoundsException;
+    public abstract void headLeft() throws ComputationFailedException;
 
     /**
      * Shift the read/write head one cell to the right.

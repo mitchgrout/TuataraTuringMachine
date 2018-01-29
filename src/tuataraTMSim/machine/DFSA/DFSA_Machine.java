@@ -37,7 +37,7 @@ import tuataraTMSim.machine.*;
  * the set of states and transitions, but does not contain any configuration information. All
  * simulation interaction should be done vial DFSA_Simulator. The machine is not guaranteed to be
  * deterministic at all times, but can be assured to be deterministic by calling
- * DFSA_Machine.validate().
+ * DFSA_Machine.isDeterministic().
  * We will use the following definition for a DFSA:
  * M = (Q, d, q0, F, X), where
  * - Q is a finite set of states
@@ -64,7 +64,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         super(alphabet);
         m_states = states;
         m_transitions = transitions;
-        m_validated = false;
     }
 
     /**
@@ -77,35 +76,22 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
 
     /**
      * Determine whether this machine is valid, in terms of its formal definition.
-     * @throws NondeterministicException If the machine is considered nondeterministic.
+     * @return null if there are no nondeterministic features in the machine, otherwise a
+     *         description of the object which is undefined in the machine.
      */
-    public void validate() throws NondeterministicException
+    public String isDeterministic()
     {
-        // Already validated
-        if (m_validated)
-        {
-            return;
-        }
-
-        boolean hasStart = false;
+        int startCount = 0;
         for (DFSA_State state : m_states)
         {
-            // Ensure a unique start state
-            if (state.isStartState())
+            // Ensure a unique start state; note we use int to reduce LOC
+            if (state.isStartState() && startCount++ > 0)
             {
-                if (hasStart)
-                {
-                    throw new NondeterministicException("Machine has more than one start state.");
-                }
-                else
-                {
-                    hasStart = true;
-                }
+                return "Machine has more than one start state.";
             }
 
-            // Set of matched characters
+            // Check to see if there are any transitions with the same input
             HashSet<Character> matched = new HashSet<Character>();
-
             for (DFSA_Transition trans : state.getTransitions())
             {
                 // Get the input char to match
@@ -114,20 +100,19 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
                 // Undefined input
                 if (inp == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has undefined input.", trans.toString()));
+                    return String.format("Transition %s has undefined input.", trans.toString());
                 }
                 // Duplicate
                 if (matched.contains(inp))
                 {
-                    throw new NondeterministicException(String.format(
-                                "State %s has more than one transition with input %c.", state.getLabel(), inp));
+                    return String.format("State %s has more than one transition with input %c.", 
+                                         state.getLabel(), inp);
                 }
                 // Input not in alphabet
                 if (!m_alphabet.containsSymbol(inp))
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has an input which is not in the alphabet.", trans.toString()));
+                    return String.format("Transition %s has an input which is not in the alphabet.",
+                                         trans.toString());
                 }
                 // Keep track of this symbol
                 matched.add(inp);
@@ -138,28 +123,18 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
             {
                 if (!matched.contains(c))
                 {
-                    throw new NondeterministicException(String.format(
-                                "State %s does not have a transition for input %c.", 
-                                state.getLabel(), c));
+                    return String.format("State %s does not have a transition for input %c.", 
+                                         state.getLabel(), c);
                 }
             }
         }
-        if (!hasStart)
+        // Did we find a single start state
+        if (startCount == 0)
         {
-            throw new NondeterministicException("Machine has no start state.");
+            return "Machine has no start state.";
         }
 
-        // Our machine is valid
-        m_validated = true;
-    }
-
-    /**
-     * Mark this machine as invalid. The effect of this should be that the next call to validate()
-     * should force all relevant checks to occur.
-     */
-    public void invalidate()
-    {
-        m_validated = false;
+        return null;
     }
 
     /** 
@@ -198,20 +173,13 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         
         if (currentNextTransition == null)
         {
-            // Not possible
-            return null;
+            throw new ComputationFailedException("Undefined transition");
         }
 
-        // Sanity check
-        if (currentTransitions.contains(currentNextTransition))
-        {
-            try { currentNextTransition.getAction().performAction(tape); }
-            catch (TapeBoundsException e2) { }
-            return currentNextTransition.getToState();
-        }
-        
-       // Assuming this machine has been invalidated, it is not possible to reach this.
-        return null;
+        // Move the head; moving may throw so we catch and immediately discard exception
+        try { currentNextTransition.getAction().performAction(tape); }
+        catch (ComputationFailedException e2) { }
+        return currentNextTransition.getToState();
     }
 
     /**
@@ -232,40 +200,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         return m_transitions;
     }
 
-
-    /** 
-     * Get the unique start state. May assume the machine is valid.
-     * @return The unique start state of the machine.
-     */
-    public DFSA_State getStartState()
-    {
-        for (DFSA_State state : m_states)
-        {
-            if (state.isStartState())
-            {
-                return state;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get a set containing all final states.
-     * @return A non-null collection of all final states in this machine.
-     */
-    public Collection<DFSA_State> getFinalStates()
-    {
-        HashSet<DFSA_State> result = new HashSet<DFSA_State>();
-        for (DFSA_State state : m_states)
-        {
-            if (state.isFinalState())
-            {
-                result.add(state);
-            }
-        }
-        return result;
-    }
-
     /**
      * Determine whether or not this type of machine should have a unique halt state. If true, then
      * getFinalStates() should never return more than one element.
@@ -282,7 +216,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      */
     public void addState(DFSA_State state)
     {
-        invalidate();
         m_states.add(state);
     }
 
@@ -293,7 +226,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      */
     public boolean deleteState(DFSA_State state)
     {
-        invalidate();
         if (m_states.remove(state))
         {
             removeTransitionsConnectedTo(state);
@@ -308,7 +240,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      */
     public void addTransition(DFSA_Transition transition)
     {
-        invalidate();
         m_transitions.add(transition);
         transition.getFromState().addTransition(transition);
     }
@@ -320,7 +251,6 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      */
     public boolean deleteTransition(DFSA_Transition transition)
     {
-        invalidate();
         if (m_transitions.remove(transition))
         {
             transition.getFromState().removeTransition(transition);
@@ -367,10 +297,4 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
      * The set of transitions in the machine.
      */
     protected ArrayList<DFSA_Transition> m_transitions;
-
-    /**
-     * Determine if this machine has been deemed valid or not. Will be set to true after successful
-     * calls to validate(), and set to false after mutations have occured to the machine.
-     */
-    protected transient boolean m_validated = false;
 }

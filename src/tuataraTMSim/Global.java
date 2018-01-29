@@ -26,7 +26,11 @@
 package tuataraTMSim;
 
 import java.awt.Font;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.function.Function;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  * A global utility class containing values and functions which are used by several distinct types,
@@ -62,5 +66,43 @@ public final class Global
     public static ImageIcon loadIcon(String fname)
     {
         return new ImageIcon(Global.class.getResource("images/" + fname));
+    }
+
+    /**
+     * Prompt the user to select an item from the given collection.
+     * @param coll The non-null collection the user should select an item from.
+     * @param promptString The string supplied to the user explaining what they are selecting.
+     * @param toString A function mapping T to String, normally T::toString.
+     * @return The item the user selected from the collection, null if the user cancelled.
+     */
+    public static <T> T promptSelection(Collection<T> coll, String promptString, Function<T, String> toString)
+    {
+        // Stringify the collection (effectively coll.map(toString).toarray())
+        String[] items = new String[coll.size()];
+        Iterator<T> iter = coll.iterator();
+        for (int i = 0; i < items.length; i++)
+        {
+            items[i] = toString.apply(iter.next());
+        }
+
+        // Prompt the user to select one of these strings
+        String result = (String) JOptionPane.showInputDialog(null, promptString, 
+                "Make a selection", JOptionPane.QUESTION_MESSAGE, null, items, items[0]);
+
+        // User cancelled
+        if (result == null)
+        {
+            return null;
+        }
+
+        for (T item : coll)
+        {
+            if (toString.apply(item).equals(result))
+            {
+                return item;
+            }
+        }
+        // Non-reachable
+        return null;
     }
 }

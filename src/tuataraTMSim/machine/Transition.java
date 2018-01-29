@@ -190,7 +190,8 @@ public abstract class Transition<
         Graphics2D g2d = (Graphics2D)g;
 
         // Choose color based off of this transitions state
-        g2d.setPaint(getPaint(selectedTransitions.contains(this), simulator.getNextTransition() == this));
+        g2d.setPaint(getPaint(selectedTransitions.contains(this),
+                              simulator.getNextTransitions().contains(this)));
        
         // An arc
         if (m_fromState != m_toState)
