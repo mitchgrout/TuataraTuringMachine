@@ -531,7 +531,8 @@ public class MainWindow extends JFrame
         JMenu machineMenu = new JMenu("Machine");
         machineMenu.setMnemonic(KeyEvent.VK_M);
         menuBar.add(machineMenu);
-        
+       
+        machineMenu.add(new JMenuItem(m_validateAction));
         machineMenu.add(new JMenuItem(m_stepAction));
         machineMenu.add(new JMenuItem(m_fastExecuteAction));
         machineMenu.add(new JMenuItem(m_pauseExecutionAction));
@@ -714,6 +715,11 @@ public class MainWindow extends JFrame
         m_toolbarButtons.add(chooseCurrentStateToolBarButton);
  
         // Machine
+        JButton validateToolBarButton = new JButton(m_validateAction);
+        validateToolBarButton.setFocusable(false);
+        validateToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        validateToolBarButton.setText("");
+
         JButton stepToolBarButton = new JButton(m_stepAction);
         stepToolBarButton.setFocusable(false);
         stepToolBarButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
@@ -763,6 +769,7 @@ public class MainWindow extends JFrame
         
         returner[2] = new JToolBar("Machine");
         returner[2].setRollover(true);
+        returner[2].add(validateToolBarButton);
         returner[2].add(stepToolBarButton);
         returner[2].add(fastExecute);
         returner[2].add(stopExecutionToolBarButton);
@@ -1012,6 +1019,7 @@ public class MainWindow extends JFrame
         
         if (isEditingEnabled() || isEnabled == false)
         {
+            m_validateAction.setEnabled(isEnabled);
             m_stepAction.setEnabled(isEnabled);
             m_configureAlphabetAction.setEnabled(isEnabled);
             m_saveMachineAction.setEnabled(isEnabled);
@@ -1043,6 +1051,7 @@ public class MainWindow extends JFrame
      */
     public void setEditingActionsEnabledState(boolean isEnabled)
     {
+        m_validateAction.setEnabled(isEnabled);
         m_stepAction.setEnabled(isEnabled);
         m_configureAlphabetAction.setEnabled(isEnabled);
         m_cutAction.setEnabled(isEnabled);
@@ -2209,6 +2218,37 @@ public class MainWindow extends JFrame
     public final GUI_ModeSelectionAction m_chooseCurrentStateAction = 
         new GUI_ModeSelectionAction("Choose Current State", GUI_Mode.CHOOSECURRENTSTATE,
             Global.loadIcon("currentState.gif"), KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
+
+    /**
+     * Action for validating the machine.
+     */
+    public final Action m_validateAction =
+        new MenuAction("Validate", Global.loadIcon("validate.png"), null,
+                       KeyStroke.getKeyStroke(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK))
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                MachineGraphicsPanel gfxPanel = getSelectedGraphicsPanel();
+                if (gfxPanel == null)
+                {
+                    return;
+                }
+
+                String result = gfxPanel.getSimulator().getMachine().isDeterministic();
+                if (result == null)
+                {
+                    m_console.log("Machine %s is deterministic", gfxPanel.getFrame().getTitle());
+                    JOptionPane.showMessageDialog(null, "Machine is deterministic", 
+                                                  "Validation", JOptionPane.INFORMATION_MESSAGE);
+                }
+                else
+                {
+                    m_console.log("Machine %s is nondeterministic: %s", gfxPanel.getFrame().getTitle(), result);
+                    JOptionPane.showMessageDialog(null, "Machine is nondeterministic: " + result,
+                                                  "Validation", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        };
 
     /**
      * Action for stepping through execution.

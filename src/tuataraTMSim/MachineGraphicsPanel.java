@@ -99,6 +99,8 @@ public abstract class MachineGraphicsPanel<
         m_contextMenu.add(m_toggleStartAction);
         m_contextMenu.add(m_toggleAcceptingAction);
         m_contextMenu.add(m_deleteStateAction);
+        m_contextMenu.addSeparator();
+        m_contextMenu.add(m_validateAction);
    }
 
     /**
@@ -1755,4 +1757,32 @@ public abstract class MachineGraphicsPanel<
                 }
             }
         };
+
+    /**
+     * Action which validates the current machine.
+     */
+    protected Action m_validateAction =
+        new TriggerAction("Validate", TRIGGER_ALL)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                String result = m_sim.getMachine().isDeterministic();
+                if (result == null)
+                {
+                    MainWindow.getInstance().getConsole().log("Machine %s is deterministic", 
+                                                              m_iFrame.getTitle());
+                    JOptionPane.showMessageDialog(null, "Machine is deterministic", 
+                                                  "Validation", JOptionPane.INFORMATION_MESSAGE);
+                }
+                else
+                {
+                    MainWindow.getInstance().getConsole().log("Machine %s is nondeterministic: %s", 
+                                                              m_iFrame.getTitle(), result);
+                    JOptionPane.showMessageDialog(null, "Machine is nondeterministic: " + result,
+                                                  "Validation", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        };
+
+
 }
