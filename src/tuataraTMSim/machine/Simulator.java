@@ -27,7 +27,7 @@ package tuataraTMSim.machine;
 
 import java.util.ArrayList;
 import tuataraTMSim.exceptions.*;
-import tuataraTMSim.machine.TM.TM_Machine; // !!!
+import tuataraTMSim.machine.Machine;
 
 /**
  * An abstraction of an object which simulates the execution of a given machine.
@@ -95,7 +95,7 @@ public abstract class Simulator<
                 matched.add(t);
             }
             // Non-exact match
-            else if (transSym == TM_Machine.OTHERWISE_SYMBOL)
+            else if (transSym == Machine.OTHERWISE_SYMBOL)
             {
                 otherwise.add(t);
             }

@@ -56,6 +56,20 @@ public abstract class Machine<
     public static final char UNDEFINED_SYMBOL = '!';
 
     /**
+     * Matches symbols which do not have a transition.
+     */
+    public static final char OTHERWISE_SYMBOL = '?';
+
+    /**
+     * Lambda; Represents a non-consuming input.
+     */
+
+   /**
+     * Epsilon; Represents a do-nothing action.
+     **/
+    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
+ 
+    /**
      * Creates an instance of Machine.
      * @param alphabet The tape alphabet.
      */

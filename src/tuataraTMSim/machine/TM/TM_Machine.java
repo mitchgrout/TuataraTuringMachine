@@ -56,17 +56,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      * Serialization version.
      */
     public static final long serialVersionUID = 2L;
-
-    /**
-     * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
-     */
-    public static final char OTHERWISE_SYMBOL = '?';
-
-    /**
-     * Epsilon; Represents a do-nothing action
-     **/
-    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
-    
+   
     /**
      * Creates a new instance of TM_Machine.
      * @param states The set of states.
