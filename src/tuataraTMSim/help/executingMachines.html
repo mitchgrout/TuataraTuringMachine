@@ -16,6 +16,13 @@ the core functionality of this program.
 This guide explains in detail how to control the simulation of your shiny new machines. 
 </p>
 
+<p> 
+<h3> Validating a machine </h3>
+To ensure that the current machine is deemed deterministic, select 
+<img src="../images/validate.png"> <i>Validate</i> from the <i>Machine</i> menu or toolbar.  This
+will ensure that there is no nondeterministic behaviour in the machine such as duplicate edges,
+multiple start states, or missing edges. 
+
 <p>
 <h3> Stepping a machine </h3>
 To make the current machine step through one single operation, choose the <img src="../images/step.gif"> 
@@ -62,12 +69,5 @@ then <i>c</i> is omitted.
 <p>
 Tuatara Turing Machine Simulator will log the configuration sequence of a machine as it executes. 
 The sequence is logged to the console, which is displayed at the bottom of the screen.
-</p>
-
-<p>
-<h3> Non-deterministic Machines </h3> 
-This program has no support for non-deterministic machines.  Prior to simulating the machine,
-the machine will be first validated for non-determinism and other inconsistencies, and if none are
-found, will proceed with the simulation.
 </p>
 </html>
