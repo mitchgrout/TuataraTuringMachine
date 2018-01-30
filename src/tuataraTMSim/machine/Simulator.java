@@ -95,7 +95,7 @@ public abstract class Simulator<
                 matched.add(t);
             }
             // Non-exact match
-            else if (inputSym == TM_Machine.OTHERWISE_SYMBOL)
+            else if (transSym == TM_Machine.OTHERWISE_SYMBOL)
             {
                 otherwise.add(t);
             }
