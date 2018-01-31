@@ -298,7 +298,9 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
     protected boolean isConsistentWithAlphabet(DFSA_Action act, Alphabet alph)
     {
         char inp = act.getInputChar();
-        return alph.containsSymbol(inp) || inp == Machine.UNDEFINED_SYMBOL;
+        return alph.containsSymbol(inp)           || 
+               inp == Machine.UNDEFINED_SYMBOL    || 
+               inp == Machine.EMPTY_INPUT_SYMBOL;
     }
 
     /**
