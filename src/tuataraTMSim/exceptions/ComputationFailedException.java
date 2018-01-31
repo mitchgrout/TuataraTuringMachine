@@ -26,17 +26,18 @@
 package tuataraTMSim.exceptions;
 
 /**
- * An Exception thrown when a machine fails.
+ * An Exception thrown when a machine fails to finish execution. This implies that execution was
+ * interrupted due to an error in the machine, such as an undefined transition.
  */
 public class ComputationFailedException extends Exception
 {
     /**
-     * Creates a new instance of <code>ComputationFailedException</code> without detail message.
+     * Creates a new instance of ComputationFailedException without a detail message.
      */
     public ComputationFailedException() { }
     
     /**
-     * Constructs an instance of <code>ComputationFailedException</code> with the specified detail message.
+     * Constructs an instance of ComputationFailedException with the specified detail message.
      * @param msg The detailed error message.
      */
     public ComputationFailedException(String msg) { super(msg); }    

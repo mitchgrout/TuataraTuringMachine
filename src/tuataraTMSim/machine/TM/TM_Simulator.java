@@ -28,6 +28,7 @@ package tuataraTMSim.machine.TM;
 import java.beans.PropertyVetoException;
 import java.util.*;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.Global;
 import tuataraTMSim.machine.*;
 import tuataraTMSim.MachineInternalFrame;
 import tuataraTMSim.MainWindow;
@@ -91,12 +92,9 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     /** 
      * Determine if the machine is in an accepting state.
      * @return true if the machine is in an accepting state, false otherwise.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean isHalted() throws NondeterministicException
+    public boolean isHalted()
     {
-        // Guarantee that there is a unique halting state, hence guarantee the result makes sense.
-        m_machine.validate();
         return m_state != null && m_state.isFinalState();
     }
 
@@ -105,54 +103,10 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
      * the first cell of the tape.
      * @return true if the machine is in an accepting state, with the read/write head parked, false
      *         otherwise.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean isAccepted() throws NondeterministicException
+    public boolean isAccepted()
     {
-        // Guarantee that there is a unique halting state, hence guarantee the result makes sense.
-        m_machine.validate();
-        return (isHalted() && m_tape.isParked());
-    }
-
-    /**
-     * Get the next possible transition that the machine can take in the next execution step.
-     * This will either be a valid transition, or null.
-     */
-    public TM_Transition getNextTransition()
-    {
-        // Since the machine is assumed valid, there are three possibilities:
-        // - No transition
-        // - An exact match
-        // - A default route via OTHERWISE_SYMBOL
-
-        if (getCurrentState() == null)
-        {
-            return null;
-        }
-
-        TM_Transition otherwise = null;
-        ArrayList<TM_Transition> out = getCurrentState().getTransitions();
-        char currentInputSymbol = m_tape.read();
-
-        for (TM_Transition t : m_state.getTransitions())
-        {
-            char inp = t.getAction().getInputChar();
-
-            // An exact, guaranteed unique match
-            if (inp == currentInputSymbol)
-            {
-                return t;
-            }
-            // A non-exact match; we will keep track of this
-            else if (inp == TM_Machine.OTHERWISE_SYMBOL)
-            {
-                otherwise = t;
-            }
-        }
-        // If we are here, there is no exact match, either a default route, or no transition.
-        // These are both represented by the current value of otherwise
-        // null -- no transition, non-null -- default route
-        return otherwise;
+        return isHalted() && m_tape.isParked();
     }
 
     /**
@@ -172,32 +126,59 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
 
     /**
      * Perform an iteration of the machine.
-     * @throws TapeBoundsException If the read/write head falls off the tape.
-     * @throws UndefinedTransitionException If there is no transition for the machine to take.
      * @throws ComputationCompletedException If execution halts successfully.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
+     * @throws ComputationFailedException If execution halts unexpectedly.
      */
     public void step()
-        throws TapeBoundsException, UndefinedTransitionException, 
-               ComputationCompletedException, NondeterministicException
+        throws ComputationCompletedException, ComputationFailedException
     {
-        // Validation is cached, so long as no invalidating mutations are made, so this is not an
-        // expensive call in general.
-        m_machine.validate();
-
         // Machine has just started
         if (m_state == null)
         {
-            // Guaranteed to exist by m_machine.validate()
-            m_state = m_machine.getStartState();
+            ArrayList<TM_State> startStates = m_machine.getStartStates();
+            if (startStates.size() == 0)
+            {
+                throw new ComputationFailedException("No start state");
+            }
+            else if (startStates.size() == 1)
+            {
+                m_state = startStates.get(0);
+            }
+            else
+            {
+                m_state = Global.promptSelection(startStates, "Please choose which start state to use", TM_State::getLabel);
+                // User cancelled
+                if (m_state == null)
+                {
+                    throw new ComputationFailedException("No start state chosen");
+                }
+            }
         }
         // Already running
         else try
         {
+            ArrayList<TM_Transition> next = getNextTransitions();
+
             // No problems with regular states
             if (m_state.getSubmachine() == null)
             {
-                m_state = m_machine.step(m_tape, m_state, getNextTransition());
+                if (next.size() == 0)
+                {
+                    m_state = m_machine.step(m_tape, m_state, null);
+                }
+                else if (next.size() == 1)
+                {
+                    m_state = m_machine.step(m_tape, m_state, next.get(0));
+                }
+                else
+                {
+                    TM_Transition t = Global.promptSelection(next, "Please select which transition to use", TM_Transition::toString);
+                    if (t == null)
+                    {
+                        throw new ComputationFailedException("No transition chosen");
+                    }
+                    m_state = m_machine.step(m_tape, m_state, t);
+                }
             }
             // Search for the frame for this submachine; if nonexistent, create one
             else
@@ -226,7 +207,23 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
                 // submachine. Otherwise continue submachine execution.
                 if (gfx.getSimulator().isHalted())
                 {
-                    m_state = m_machine.step(m_tape, m_state, getNextTransition());   
+                    if (next == null)
+                    {
+                        m_state = m_machine.step(m_tape, m_state, null);
+                    }
+                    else if (next.size() == 1)
+                    {
+                        m_state = m_machine.step(m_tape, m_state, next.get(0));
+                    }
+                    else
+                    {
+                        TM_Transition t = Global.promptSelection(next, "Please select which transition to use", TM_Transition::toString);
+                        if (t == null)
+                        {
+                            throw new ComputationFailedException("No transition chosen");
+                        }
+                        m_state = m_machine.step(m_tape, m_state, t);
+                    }
                     gfx.getSimulator().resetMachine();
                 }
                 else
@@ -252,14 +249,11 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
      * @param maxSteps The maximum number of iterations allowed for the computation. A value of zero
      *                 represents no limit. If this number is reached, simulation is aborted.
      * @return true if the machine halts in a finite amount of steps up until maxSteps, false otherwise.
-     * @throws TapeBoundsException If the read/write head falls off the tape.
-     * @throws UndefinedTransitionException If there is no transition for the machine to take.
      * @throws ComputationCompletedException If execution halts successfully.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
+     * @throws ComputationFailedException If execution halts, but the input is not accepted.
      */
     public boolean runUntilHalt(int maxSteps)
-        throws TapeBoundsException, UndefinedTransitionException, 
-               ComputationCompletedException, NondeterministicException 
+        throws ComputationCompletedException, ComputationFailedException 
     {
         // TODO: Not required by anything at this stage, however could be useful for almost-instant
         //       execution of machines. Considered for removal.

@@ -56,6 +56,21 @@ public abstract class Machine<
     public static final char UNDEFINED_SYMBOL = '!';
 
     /**
+     * Matches symbols which do not have a transition.
+     */
+    public static final char OTHERWISE_SYMBOL = '?';
+
+    /**
+     * Lambda; Represents a non-consuming input.
+     */
+    public static final char EMPTY_INPUT_SYMBOL = (char)0x03BB;
+    
+    /**
+     * Epsilon; Represents a do-nothing action.
+     **/
+    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
+ 
+    /**
      * Creates an instance of Machine.
      * @param alphabet The tape alphabet.
      */
@@ -95,6 +110,34 @@ public abstract class Machine<
         }
         return result;
     } 
+
+    /** 
+     * Get the collection of start states.
+     * @return A non-null collection of all start states in this machine.
+     */
+    public ArrayList<STATE> getStartStates()
+    {
+        ArrayList<STATE> result = new ArrayList<STATE>();
+        for (STATE s : getStates()) if (s.isStartState())
+        {
+            result.add(s);
+        }
+        return result;
+    }
+
+    /**
+     * Get a set containing all final states.
+     * @return A non-null collection of all final states in this machine.
+     */
+    public ArrayList<STATE> getFinalStates()
+    {
+        ArrayList<STATE> result = new ArrayList<STATE>();
+        for (STATE s : getStates()) if (s.isFinalState())
+        {
+            result.add(s);
+        }
+        return result;
+    }
 
     /**
      * Determine if this machine is consistent with the alphabet, i.e. does not have any actions not
@@ -332,16 +375,35 @@ public abstract class Machine<
     }
 
     /**
-     * Determine whether this machine is valid, in terms of its formal definition.
-     * @throws NondeterministicException If the machine is considered nondeterministic.
+     * Determine if this machine contains any undefined symbols. Used as a precursor to
+     * isDeterministic().
+     * @return null if there are no undefined symbols, otherwise a description of the object which
+     *         is undefined in the machine.
      */
-    public abstract void validate() throws NondeterministicException;
+    public String hasUndefinedSymbols()
+    {
+        for (TRANSITION t : getTransitions())
+        {
+            if (t.getAction().getInputChar() == UNDEFINED_SYMBOL)
+            {
+                return String.format("Transition from %s to %s has undefined input",
+                        t.getFromState().getLabel(), t.getToState().getLabel());
+            }
+            if (t.getAction().getOutputChar() == UNDEFINED_SYMBOL)
+            {
+                return String.format("Transition from %s to %s has undefined output",
+                        t.getFromState().getLabel(), t.getToState().getLabel());
+            }
+        }
+        return null;
+    }
 
     /**
-     * Mark this machine as invalid. The effect of this should be that the next call to validate()
-     * should force all relevant checks to occur.
+     * Determine whether this machine is valid, in terms of its formal definition.
+     * @return null if there are no nondeterministic features in the machine, otherwise a
+     *         description of the object which is undefined in the machine.
      */
-    public abstract void invalidate();
+    public abstract String isDeterministic();
 
     /** 
      * Given a current state and tape, determine the next state the machine should move to, and
@@ -349,18 +411,14 @@ public abstract class Machine<
      * @param tape The current tape.
      * @param currentState The state that this machine is currently in.
      * @param currentNextTransition The next transition to be taken, determined by the value at the
-     *                              tape, and the current state.
+     *                              tape, and the current state. This is null if the transition is
+     *                              not defined.
      * @return The new state that the machine is in after this step.
-     * @throws TapeBoundsException If the action causes the read/write head to fall off the tape.
-     * @throws UndefinedTransitionException If there is no transition to take.
-     * @throws ComputationCompletedException If after this step, we have finished execution, and the
-     *                                       machine accepts the input.
-     * @throws ComputationFailedException If after this step, we have finished execution, but the
-     *                                    machine fails to accept the input
+     * @throws ComputationCompletedException If, after this step, the machine halts.
+     * @throws ComputationFailedException If the machine halts unexpectedly.
      */
     public abstract STATE step(Tape tape, STATE currentState, TRANSITION currentNextTransition)
-        throws TapeBoundsException, UndefinedTransitionException,
-               ComputationCompletedException, ComputationFailedException;
+        throws ComputationCompletedException, ComputationFailedException;
 
     /**
      * Get a collection containing all states in this machine.
@@ -373,26 +431,6 @@ public abstract class Machine<
      * @return A collection of all transitions in this machine.
      */
     public abstract Collection<TRANSITION> getTransitions();
-
-
-    /** 
-     * Get the unique start state. May assume the machine is valid.
-     * @return The unique start state of the machine.
-     */
-    public abstract STATE getStartState();
-
-    /**
-     * Get a set containing all final states.
-     * @return A non-null collection of all final states in this machine.
-     */
-    public abstract Collection<STATE> getFinalStates();
-
-    /**
-     * Determine whether or not this type of machine should have a unique halt state. If true, then
-     * getFinalStates() should never return more than one element.
-     * @return true if this machine should have a unique halt state, false otherwise.
-     */
-    public abstract boolean hasUniqueFinalState();
 
     /**
      * Add a state to the machine.

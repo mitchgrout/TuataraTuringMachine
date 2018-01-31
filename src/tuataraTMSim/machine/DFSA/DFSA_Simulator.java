@@ -25,7 +25,9 @@
 
 package tuataraTMSim.machine.DFSA;
 
+import java.util.ArrayList;
 import tuataraTMSim.exceptions.*;
+import tuataraTMSim.Global;
 import tuataraTMSim.machine.*;
 
 /**
@@ -74,49 +76,23 @@ public class DFSA_Simulator extends Simulator<DFSA_Action, DFSA_Transition, DFSA
     /** 
      * Determine if the machine has finished executing.
      * @return true if the machine is has finished executing, false otherwise.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
      */
-    public boolean isHalted() throws NondeterministicException
+    public boolean isHalted()
     {
         // Halt condition for a DFSA is no more input
-        return m_tape.read() == Tape.BLANK_SYMBOL;
+        return (m_tape.read() == Tape.BLANK_SYMBOL);
     } 
     
     /**
      * Determine if the machine is in an accepting state.
      * @return true if the machine is in an accepting state, false otherwise.
      */
-    public boolean isAccepted() throws NondeterministicException
+    public boolean isAccepted()
     {
         // Accepted input means no more input, and last state is accepting
-        return isHalted() && m_state.isFinalState();
+        return isHalted() && m_state != null && m_state.isFinalState();
     }
  
-    /**
-     * Get the next possible transition that the machine can take in the next execution step. This
-     * will either be a valid transition, or null if there is no next transition to take.
-     * @return The next possible transition that the machine can take.
-     */
-    public DFSA_Transition getNextTransition()
-    {
-        // Since the machine is assumed valid, there is always a transition, unless we are not running
-        if (m_state == null)
-        {
-            return null;
-        }
-
-        for (DFSA_Transition trans : m_state.getTransitions())
-        {
-            if (trans.getAction().getInputChar() == m_tape.read())
-            {
-                return trans;
-            }
-        }
-
-        // Unreachable
-        return null;
-    }
-
     /**
      * Gets a string representation of the current configuration of the machine.
      * @return A string representation of the current configuration.
@@ -128,23 +104,72 @@ public class DFSA_Simulator extends Simulator<DFSA_Action, DFSA_Transition, DFSA
  
     /**
      * Perform an iteration of the machine. If the machine is stopped, loads the unique start state.
-     * @throws TapeBoundsException If the read/write head falls off the tape.
-     * @throws UndefinedTransitionException If there is no transition for the machine to take.
      * @throws ComputationCompletedException If execution halts successfully.
-     * @throws NondeterministicException If the machine is deemed nondeterministic.
+     * @throws ComputationFailedException If execution halts unexpectedly.
      */
     public void step() 
-        throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException,
-               ComputationFailedException, NondeterministicException
+        throws ComputationCompletedException, ComputationFailedException
     {
-        m_machine.validate();
+        // Machine has just started
         if (m_state == null)
         {
-            m_state = m_machine.getStartState();       
+            ArrayList<DFSA_State> startStates = m_machine.getStartStates();
+            if (startStates.size() == 0)
+            {
+                throw new ComputationFailedException("No start state");
+            }
+            else if (startStates.size() == 1)
+            {
+                m_state = startStates.get(0);
+            }
+            else
+            {
+                m_state = Global.promptSelection(startStates, "Please choose which start state to use", DFSA_State::getLabel);
+                // User cancelled
+                if (m_state == null)
+                {
+                    throw new ComputationFailedException("No start state chosen");
+                }
+            }
         }
+        // Already running
         else
         {
-            m_state = m_machine.step(m_tape, m_state, getNextTransition());
+            // Since our DFSA could contain a lambda edge, we need to do a linear pass to check if
+            // any lambda edges are in next. If so, user *must* be prompted to select which edge.
+            ArrayList<DFSA_Transition> next = getNextTransitions();
+            boolean hasLambda = false;
+            for (DFSA_Transition t : next)
+            {
+                if (t.getAction().getInputChar() == Machine.EMPTY_INPUT_SYMBOL)
+                {
+                    hasLambda = true;
+                    break;
+                }
+            }
+            if (hasLambda)
+            {
+                // t could be null if the user cancels, if so this simply halts execution
+                DFSA_Transition t = Global.promptSelection(next, "Please select which transition to use, if any", DFSA_Transition::toString);
+                m_state = m_machine.step(m_tape, m_state, t);
+            }
+            else if (next.size() == 0)
+            {
+                m_state = m_machine.step(m_tape, m_state, null);
+            }
+            else if (next.size() == 1)
+            {
+                m_state = m_machine.step(m_tape, m_state, next.get(0));
+            }
+            else
+            {
+                DFSA_Transition t = Global.promptSelection(next, "Please select which transition to use", DFSA_Transition::toString);
+                if (t == null)
+                {
+                    throw new ComputationFailedException("No transition chosen");
+                }
+                m_state = m_machine.step(m_tape, m_state, t);
+            }
         }
     }
  
@@ -154,8 +179,7 @@ public class DFSA_Simulator extends Simulator<DFSA_Action, DFSA_Transition, DFSA
      *                 represents no limit. If this number is reached, simulation is aborted.
      */
     public boolean runUntilHalt(int maxSteps) 
-        throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException,
-               ComputationFailedException, NondeterministicException
+        throws ComputationCompletedException, ComputationFailedException 
     {
         int currentStep = 0;
         while (!isHalted())

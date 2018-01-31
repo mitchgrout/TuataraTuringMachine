@@ -32,7 +32,7 @@ import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import tuataraTMSim.exceptions.TapeBoundsException;
+import tuataraTMSim.exceptions.ComputationFailedException;
 import tuataraTMSim.machine.*;
 
 /**
@@ -99,9 +99,9 @@ public class TM_Action extends PreAction
      * Perform the action specified by this object on the given tape, updating both the physical
      * tape, and the location of the read/write head.
      * @param t The tape to be modified.
-     * @throws TapeBoundsException If the read/write head falls off the tape.
+     * @throws ComputationFailedException If the read/write head falls off the tape.
      */
-    public void performAction(Tape t) throws TapeBoundsException
+    public void performAction(Tape t) throws ComputationFailedException
     {
         if (m_direction == -1)
         {

@@ -398,32 +398,6 @@ public class TMGraphicsPanel
         return new TM_Transition(from, to, new TM_Action(0, Machine.UNDEFINED_SYMBOL, Machine.UNDEFINED_SYMBOL));
     }
 
-    public String getErrorMessage(ComputationCompletedException e)
-    {
-        return "The machine halted correctly with the r/w head parked.";
-    }
-
-    public String getErrorMessage(ComputationFailedException e)
-    {
-        // Unused
-        return null;
-    }
-
-    public String getErrorMessage(NondeterministicException e)
-    {
-        return String.format("The machine could not be validated. %s", e.getMessage()); 
-    }
-
-    public String getErrorMessage(TapeBoundsException e)
-    {
-        return "The machine r/w head went past the start of the tape.";
-    }
-
-    public String getErrorMessage(UndefinedTransitionException e)
-    {
-        return String.format("The machine did not complete a computation. %s", e.getMessage());
-    }
-
     /**
      * Get the file extension associated with Turing machines.
      * @return The file extension associated with Turing machines.

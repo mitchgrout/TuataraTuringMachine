@@ -46,9 +46,16 @@ in &Sigma;.
 
 <p>
 <h3> Choosing Transition Symbols </h3>
-Click on the input or output symbol of a transition, and on your keyboard type the character that
+Click on the input symbol of a transition, and on your keyboard type the character that
 you want to change the symbol to be.  You may only change the symbol to characters that belong to
 the alphabet of the machine.
+</p>
+
+<p>
+Nondeterministic machines may contain <i>lambda edges</i>, which can be added by selecting a
+transition symbol and pressing '<i>Shift + L</i>'.  A lambda edge can be used regardless of what the
+input is.  If a lambda edge is encountered while executing the machine, the user will be required to
+choose if it should be used or not.
 </p>
 
 <p>
@@ -103,5 +110,17 @@ duplicate names are not allowed.
 Machines can be saved to a hard disk or other storage medium by selecting <img src="../images/saveMachine.gif"> 
 <i> Save Machine </i> from the <i>File</i> menu.  Choose <img src="../images/openMachine.gif">
 <i>Open Machine </i> from the <i>File</i> menu to retrieve a machine later.
+</p>
+
+<p>
+<h3> Nondeterminism </h3>
+A machine which is nondeterministic may still be simulated.  However, to eliminate any ambiguity,
+whenever nondeterminism is encountered in the simulation, the user is prompted to make the decision,
+rather than using randomness.
+</p>
+
+<p>
+Machines may be validated with <img src="../images/validate.png"> to ensure that they are
+deterministic.
 </p>
 </html>

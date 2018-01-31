@@ -106,15 +106,11 @@ public class DFSAGraphicsPanel
             return false;
         }
 
-        // TODO: Determine if DFSAs should support wildcards
-        /*
-        if (c == DFSA_Machine.OTHERWISE_SYMBOL)
+        if (c == 'L' && e.isShiftDown())
         {
-            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), 
-                        DFSA_Machine.OTHERWISE_SYMBOL));
+            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), Machine.EMPTY_INPUT_SYMBOL));
         }
-        */
-        if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
+        else if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
         {
             doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), c));
         }
@@ -149,33 +145,6 @@ public class DFSAGraphicsPanel
     protected DFSA_Transition makeTransition(DFSA_State start, DFSA_State end)
     {
         return new DFSA_Transition(start, end, new DFSA_Action(Machine.UNDEFINED_SYMBOL));
-    }
-
-    public String getErrorMessage(ComputationCompletedException e)
-    {
-        return "The input string was accepted.";
-    }
-
-    public String getErrorMessage(ComputationFailedException e)
-    {
-        return "The input string was not accepted.";
-    }
-
-    public String getErrorMessage(NondeterministicException e)
-    {
-        return String.format("The machine could not be validated. %s", e.getMessage());
-    }
-
-    public String getErrorMessage(TapeBoundsException e)
-    {
-        // Unused
-        return null;
-    }
-
-    public String getErrorMessage(UndefinedTransitionException e)
-    {
-        // Unused
-        return null;
     }
 
     /**

@@ -39,7 +39,7 @@ import tuataraTMSim.TMGraphicsPanel;
  * particular the set of states and transitions, but does not contain any configuration (execution
  * state) information. All simulation interaction should be done via TM_Simulator.  The machine is
  * not guaranteed to be deterministic at all times, but can be assured to be deterministic by
- * calling TM_Machine.validate().
+ * calling TM_Machine.isDeterministic().
  * We will use the following definition for a Turing machine:
  * M = (Q, d, q0, qf, X), where
  * - Q is a finite set of states
@@ -56,17 +56,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      * Serialization version.
      */
     public static final long serialVersionUID = 2L;
-
-    /**
-     * Matches symbols which do not have a transition. Multiple OTHERWISE transitions are not permitted.
-     */
-    public static final char OTHERWISE_SYMBOL = '?';
-
-    /**
-     * Epsilon; Represents a do-nothing action
-     **/
-    public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;
-    
+   
     /**
      * Creates a new instance of TM_Machine.
      * @param states The set of states.
@@ -78,7 +68,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         super(alphabet);
         m_states = states;
         m_transitions = transitions;
-        m_validated = false;
     }
     
     /**
@@ -90,32 +79,14 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
     }
 
     /**
-     * Ensures this TM_Machine is valid. This must include the following checks:
-     * - There is a unique start state.
-     * - There is a unique halt state.
-     * - No transitions leave the halt state.
-     * - No state has more than one transition for every symbol in the alphabet, including ?.
-     * - No state has a transition with input !.
-     * - No state has a transition with action !.
-     * - No state has a transition with input outside the alphabet.
-     * - No state has a transition with action outside the alphabet.
-     * @throws NondeterministicException If the machine is considered nondeterministic, i.e. any of
-     *                                   the prior conditions are violated.
+     * Determine whether this machine is valid, in terms of its formal definition.
+     * @return null if there are no nondeterministic features in the machine, otherwise a
+     *         description of the object which is undefined in the machine.
      */
-    public void validate() throws NondeterministicException
+    public String isDeterministic()
     {
-        // If we have already validated the machine, and we havent mutated our machine, then we do
-        // not need to perform this computation again.
-        if (m_validated)
-        {
-            return;
-        }
-
-        // Otherwise, pre-emptively assume it is no longer valid.
-        m_validated = false;
-
-        boolean visitedStart = false,
-                visitedFinal = false;
+        int startCount = 0,
+            finalCount = 0;
 
         for (TM_State st : m_states)
         {
@@ -125,40 +96,32 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
             // Ensure submachines are valid
             if (st.getSubmachine() != null)
             {
-                st.getSubmachine().validate();
+                String result = st.getSubmachine().isDeterministic();
+                if (result != null)
+                {
+                    return result;
+                }
             }
             
-            // Ensure a unique start state
-            if (st.isStartState())
+            // Duplicate start state
+            if (st.isStartState() && startCount++ > 0)
             {
-                if (!visitedStart)
-                {
-                    visitedStart = true;
-                }
-                // Duplicate start state
-                else
-                {
-                    throw new NondeterministicException("Machine has more than one start state.");
-                }
+                return "Machine has more than one start state";
             }
 
             // Ensure a unique final state
             if (st.isFinalState())
             {
-                if (!visitedFinal)
-                {
-                    visitedFinal = true;
-                    if (transitions.size() != 0)
-                    {
-                        throw new NondeterministicException(String.format(
-                                    "Machine has a transition leaving the final state leaving %s.",
-                                    st.getLabel())); 
-                    }
-                }
                 // Duplicate final state
-                else
+                if (finalCount++ > 0)
                 {
-                    throw new NondeterministicException("Machine has more than one final state.");
+                    return "Machine has more than one final state";
+                }
+                // Final states cannot have edges leaving them
+                if (transitions.size() != 0)
+                {
+                    return String.format("Machine has a transition leaving the final state leaving %s",
+                                         st.getLabel()); 
                 }
             }
 
@@ -174,116 +137,94 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
                 // Undefined input
                 if (inp == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has an undefined input.", tr.toString()));
+                    return String.format("Transition %s has an undefined input", tr.toString());
                 }
                 // Undefined output
                 if (out == UNDEFINED_SYMBOL)
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has an undefined action.", tr.toString()));
+                    return String.format("Transition %s has an undefined action", tr.toString());
                 }
                 // Duplicate input
                 if (usedSymbols.contains(inp))
                 {
-                    throw new NondeterministicException(String.format(
-                                "State %s has more than one transition with input %c.", st.getLabel(), inp));
+                    return String.format("State %s has more than one transition with input %c", st.getLabel(), inp);
                 }
                 // Input not in the alphabet
                 if (!m_alphabet.containsSymbol(inp) && inp != OTHERWISE_SYMBOL)
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has an input which is not in the alphabet.", tr.toString()));
+                    return String.format("Transition %s has an input which is not in the alphabet", tr.toString());
                 }
                 // Output not in the alphabet
                 if (!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out) && out != EMPTY_ACTION_SYMBOL)
                 {
-                    throw new NondeterministicException(String.format(
-                                "Transition %s has an action which is not in the alphabet.", tr.toString()));
+                    return String.format("Transition %s has an action which is not in the alphabet", tr.toString());
                 }
                 // Keep track of this symbol, to check for duplicate inputs.
                 usedSymbols.add(inp);
             }
         }
 
-        if (!visitedStart)
+        // No start
+        if (startCount == 0)
         {
-            throw new NondeterministicException("Machine has no start state.");
+            return "Machine has no start state";
+        }
+        // No halt
+        if (finalCount == 0)
+        {
+            return "Machine has no final state";
         }
 
-        if (!visitedFinal)
-        {
-            throw new NondeterministicException("Machine has no final state.");
-        }
-
-        // Our machine is valid
-        m_validated = true;
+        // Valid
+        return null;
     }
-
+    
     /**
-     * Change the state of this TM_Machine to invalid. This means that the next call to validate()
-     * will force the entire check to be performed, instead of being predicated on m_validated.
-     * This should be called outside this class when one of the underlying states is toggled to be a
-     * start state or accepting state.
-     */
-    public void invalidate()
-    {
-        m_validated = false;
-    }
-
-    /** 
-     * Given the current execution state and tape, perform the current action, and update the state.
-     * @param tape The current tape.
-     * @param currentState The state that this machine is currently in.
-     * @param currentNextTransition The next transition to be taken, determined by the value at the
-     *                              tape, and the current state.
-     * @return The new state that the machine is in after this step.
-     * @throws TapeBoundsException If the action causes the read/write head to fall off the tape.
-     * @throws UndefinedTransitionException If there is no transition to take.
-     * @throws ComputationCompletedException If after this step, we have reached a final state.
-     */
+      * Given a current state and tape, determine the next state the machine should move to, and
+      * perform any relevant actions.
+      * @param tape The current tape.
+      * @param currentState The state that this machine is currently in.  
+      * @param currentNextTransition The next transition to be taken, determined by the value at the
+      *                              tape, and the current state.  This is null if the transition is 
+      *                              not defined.  
+      * @return The new state that the machine is in after this step.
+      * @throws ComputationCompletedException If, after this step, the machine halts.  
+      * @throws ComputationFailedException If the machine halts unexpectedly.
+      */
     public TM_State step(Tape tape, TM_State currentState, TM_Transition currentNextTransition)
-        throws TapeBoundsException, UndefinedTransitionException, ComputationCompletedException
+        throws ComputationCompletedException, ComputationFailedException
     {
-        TM_State tmState = (TM_State)currentState;
-        TM_Transition tmTrans = (TM_Transition)currentNextTransition;
-
-        // TODO: Remove currentNextTransition, as we can figure it out deterministically.
-
-        // TODO: handle submachines
         char currentChar = tape.read();
-        ArrayList<TM_Transition> currentTransitions = tmState.getTransitions();
-
-        if (tmTrans != null)
+        // Not finished yet
+        if (currentNextTransition != null)
         {
-            // Sanity check
-            if (tmState.getTransitions().contains(tmTrans))
-            {
-                tmTrans.getAction().performAction(tape);
-                return tmTrans.getToState();
-            }
+            currentNextTransition.getAction().performAction(tape);
+            return currentNextTransition.getToState();
         }
-
+        // Halted successfully
+        else if (tape.isParked() && currentState.isFinalState())
+        {
+            throw new ComputationCompletedException("The machine halted with the r/w head parked");
+        }
         // Halted
-        if (tape.isParked() && tmState.isFinalState())
+        else if (!tape.isParked() && !currentState.isFinalState())
         {
-            throw new ComputationCompletedException();
+            throw new ComputationFailedException(
+                    "The machine halted, but the r/w head was not parked, " +
+                    "and the last state was not an accepting state");
         }
-
-        String message = "";
-        if (!tape.isParked() && !tmState.isFinalState())
-        {
-            message = "The r/w head was not parked, and the last state was not an accepting state.";
-        }
+        // Halted
         else if (!tape.isParked())
         {
-            message = "The r/w head was not parked.";
+            throw new ComputationFailedException(
+                    "The machine halted in an accepting state, but the r/w head was not parked");
         }
+        // Halted
         else
         {
-            message = "The last state was not an accepting state.";
+            throw new ComputationFailedException(
+                    "The machine halted with the r/w head parked, but was not in an accepting state");
         }      
-        throw new UndefinedTransitionException(message);
     }
 
     /**
@@ -304,39 +245,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         return m_transitions;
     }
 
-    /** 
-     * Get the unique start state. 
-     * @return The unique start state of the machine.
-     */
-    public TM_State getStartState()
-    {
-        for (TM_State st : m_states) 
-        {
-            if (st.isStartState())
-            {
-                return st;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Get a set containing all final states.
-     * @return A non-null collection of all final states in this machine.
-     */
-    public HashSet<TM_State> getFinalStates()
-    {
-        HashSet<TM_State> result = new HashSet<TM_State>();
-        for (TM_State s : m_states)
-        {
-            if (s.isFinalState())
-            {
-                result.add(s);
-            }
-        }
-        return result;
-    }
-
     /**
      * Determine whether or not this type of machine should have a unique halt state. If true, then
      * getFinalStates() should never return more than one element.
@@ -353,9 +261,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      */
     public void addState(TM_State state)
     {
-        // Adding a new state potentially makes our machine invalid.
-        invalidate();
-         
         m_states.add(state);
     }
     
@@ -366,9 +271,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      */
     public boolean deleteState(TM_State state)
     {
-        // Removing an existing state potentially makes our machine invalid.
-        invalidate();
-        
         if (m_states.remove(state))
         {
             removeTransitionsConnectedTo(state);
@@ -384,9 +286,6 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      */
     public void addTransition(TM_Transition transition)
     {
-        // Adding transitions potentially makes our machine invalid.
-        invalidate();
-
         m_transitions.add(transition);
         transition.getFromState().addTransition(transition);
     }
@@ -476,10 +375,4 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
      * The set of transitions in the machine.
      */
     protected ArrayList<TM_Transition> m_transitions;
-
-    /**
-     * Determine if this machine has been deemed valid or not.  Will be set to true after successful
-     * calls to validate(), and set to false after mutations have occured to the machine.
-     */
-    protected transient boolean m_validated = false;
 }

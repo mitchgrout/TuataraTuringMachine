@@ -99,6 +99,8 @@ public abstract class MachineGraphicsPanel<
         m_contextMenu.add(m_toggleStartAction);
         m_contextMenu.add(m_toggleAcceptingAction);
         m_contextMenu.add(m_deleteStateAction);
+        m_contextMenu.addSeparator();
+        m_contextMenu.add(m_validateAction);
    }
 
     /**
@@ -1291,7 +1293,7 @@ public abstract class MachineGraphicsPanel<
         STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleStartStateCommand(this, m_sim.getMachine().getStartState(), stateClickedOn));
+            doCommand(new ToggleStartStateCommand(this, stateClickedOn));
         }
     }
 
@@ -1302,18 +1304,10 @@ public abstract class MachineGraphicsPanel<
      */
     protected void handleChooseAcceptingClick(MouseEvent e)
     {
-        // Get all relevant objects
-        MACHINE mac          = m_sim.getMachine();
-        STATE stateClickedOn = mac.getStateClickedOn(e.getX(), e.getY()),
-              finalState     = mac.getFinalStates().isEmpty()?
-                               null : mac.getFinalStates().iterator().next();
-
+        STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            // Generalized for all machines; if the machine should have a unique halt state, then
-            // ensure only 1 is ever selected at a time, otherwise toggle.
-            doCommand(new ToggleAcceptingStateCommand(this, 
-                        mac.hasUniqueFinalState()? finalState : stateClickedOn, stateClickedOn));
+            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn));
         }
     }
 
@@ -1351,6 +1345,29 @@ public abstract class MachineGraphicsPanel<
         }
     }
 
+    /**
+     * Build an error message for the given Exception. Automatically checks the type of the
+     * exception to see if it matches any existing definitions of getErrorMessage and dispatches
+     * accordingly.
+     * @param e The exception to build a message for.
+     * @return An error message for the given exception.
+     */
+    public String getErrorMessage(Exception e)
+    {
+        if (e instanceof ComputationCompletedException)
+        {
+            return String.format("Execution completed: %s.", e.getMessage());
+        }
+        else if (e instanceof ComputationFailedException)
+        {
+            return String.format("Execution failed: %s.", e.getMessage());
+        }
+        else 
+        { 
+            return String.format("Unknown error [%s]: %s", e.getClass().getSimpleName(), e.getMessage());
+        }
+    }
+
     /** 
      * Accept a KeyEvent detected in the main window, and use it to update any transition action
      * selected by the user.
@@ -1375,78 +1392,6 @@ public abstract class MachineGraphicsPanel<
      * @return A new TRANSITION object.
      */
     protected abstract TRANSITION makeTransition(STATE start, STATE end);
-
-    /**
-     * Build an error message for the given ComputationCompletedException.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public abstract String getErrorMessage(ComputationCompletedException e);
-
-    /**
-     * Build an error message for the given ComputationFailedException.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public abstract String getErrorMessage(ComputationFailedException e);
-
-    /**
-     * Build an error message for the given NondeterministicException.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public abstract String getErrorMessage(NondeterministicException e);
-
-    /**
-     * Build an error message for the given TapeBoundsException.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public abstract String getErrorMessage(TapeBoundsException e);
-
-    /**
-     * Build an error message for the given UndefinedTransitionException.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public abstract String getErrorMessage(UndefinedTransitionException e);
-
-    /**
-     * Build an error message for the given Exception. Automatically checks the type of the
-     * exception to see if it matches any existing definitions of getErrorMessage and dispatches
-     * accordingly.
-     * @param e The exception to build a message for.
-     * @return An error message for the given exception.
-     */
-    public String getErrorMessage(Exception e)
-    {
-        // Pretend we have dynamic dispatch
-        if (e instanceof ComputationCompletedException)
-        {
-            return getErrorMessage((ComputationCompletedException) e);
-        }
-        else if (e instanceof ComputationFailedException)
-        {
-            return getErrorMessage((ComputationFailedException) e);
-        }
-        else if (e instanceof NondeterministicException)
-        {
-            return getErrorMessage((NondeterministicException) e);
-        }
-        else if (e instanceof TapeBoundsException)
-        {
-            return getErrorMessage((TapeBoundsException) e);
-        }
-        else if (e instanceof UndefinedTransitionException)
-        {
-            return getErrorMessage((UndefinedTransitionException) e);
-        }
-        else 
-        { 
-            e.printStackTrace();
-            return String.format("Unknown error [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
-        }
-    }
 
     /**
      * Get the file extension associated with this type of machine. Should return a value from a
@@ -1777,7 +1722,7 @@ public abstract class MachineGraphicsPanel<
             public void actionPerformed(ActionEvent e)
             {
                 MACHINE mac = m_sim.getMachine();
-                doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, mac.getStartState(), m_contextState));
+                doCommand(new ToggleStartStateCommand(MachineGraphicsPanel.this, m_contextState));
             }
         };
 
@@ -1789,15 +1734,7 @@ public abstract class MachineGraphicsPanel<
         {
             public void actionPerformed(ActionEvent e)
             {
-                // Get all relevant objects
-                MACHINE mac      = m_sim.getMachine();
-                STATE finalState = mac.getFinalStates().isEmpty()?
-                    null : mac.getFinalStates().iterator().next();
-
-                // Generalized for all machines; if the machine should have a unique halt state, then
-                // ensure only 1 is ever selected at a time, otherwise toggle.
-                doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, 
-                            mac.hasUniqueFinalState()? finalState : m_contextState, m_contextState));
+                doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, m_contextState));
             }
         };
 
@@ -1820,4 +1757,32 @@ public abstract class MachineGraphicsPanel<
                 }
             }
         };
+
+    /**
+     * Action which validates the current machine.
+     */
+    protected Action m_validateAction =
+        new TriggerAction("Validate", TRIGGER_ALL)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                String result = m_sim.getMachine().isDeterministic();
+                if (result == null)
+                {
+                    MainWindow.getInstance().getConsole().log("Machine %s is deterministic", 
+                                                              m_iFrame.getTitle());
+                    JOptionPane.showMessageDialog(null, "Machine is deterministic", 
+                                                  "Validation", JOptionPane.INFORMATION_MESSAGE);
+                }
+                else
+                {
+                    MainWindow.getInstance().getConsole().log("Machine %s is nondeterministic: %s", 
+                                                              m_iFrame.getTitle(), result);
+                    JOptionPane.showMessageDialog(null, "Machine is nondeterministic: " + result,
+                                                  "Validation", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        };
+
+
 }
