@@ -57,8 +57,15 @@ public class DFSA_Action extends PreAction
      */
     public void performAction(Tape t) throws ComputationFailedException
     {
-        // We have matched our input character, hence we simply move rightward.
-        t.headRight();
+        if (m_inputChar == Machine.EMPTY_INPUT_SYMBOL)
+        {
+            // A match, with the empty string; no action
+        }
+        else
+        {
+            // We have matched our input character, hence we simply move rightward.
+            t.headRight();
+        }
     }
 
     /**

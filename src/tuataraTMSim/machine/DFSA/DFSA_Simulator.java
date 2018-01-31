@@ -135,8 +135,25 @@ public class DFSA_Simulator extends Simulator<DFSA_Action, DFSA_Transition, DFSA
         // Already running
         else
         {
+            // Since our DFSA could contain a lambda edge, we need to do a linear pass to check if
+            // any lambda edges are in next. If so, user *must* be prompted to select which edge.
             ArrayList<DFSA_Transition> next = getNextTransitions();
-            if (next.size() == 0)
+            boolean hasLambda = false;
+            for (DFSA_Transition t : next)
+            {
+                if (t.getAction().getInputChar() == Machine.EMPTY_INPUT_SYMBOL)
+                {
+                    hasLambda = true;
+                    break;
+                }
+            }
+            if (hasLambda)
+            {
+                // t could be null if the user cancels, if so this simply halts execution
+                DFSA_Transition t = Global.promptSelection(next, "Please select which transition to use, if any", DFSA_Transition::toString);
+                m_state = m_machine.step(m_tape, m_state, t);
+            }
+            else if (next.size() == 0)
             {
                 m_state = m_machine.step(m_tape, m_state, null);
             }

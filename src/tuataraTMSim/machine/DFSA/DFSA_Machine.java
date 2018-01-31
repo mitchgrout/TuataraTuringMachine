@@ -102,6 +102,11 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
                 {
                     return String.format("Transition %s has undefined input.", trans.toString());
                 }
+                // Lambda edge
+                if (inp == EMPTY_INPUT_SYMBOL)
+                {
+                    return String.format("Transition %s uses a lambda edge.", trans.toString());
+                }
                 // Duplicate
                 if (matched.contains(inp))
                 {
@@ -155,9 +160,19 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
     {
         char currentChar = tape.read();
         ArrayList<DFSA_Transition> currentTransitions = currentState.getTransitions();
-       
+      
+        // Lambda edges can be run even if nothing on the tape
+        if (currentNextTransition != null &&
+            currentNextTransition.getAction().getInputChar() == EMPTY_INPUT_SYMBOL)
+        {
+            // NOTE: performAction will not move the r/w head; this is included so it matches up
+            //       with other code.
+            try { currentNextTransition.getAction().performAction(tape); }
+            catch (ComputationFailedException e2) { }
+            return currentNextTransition.getToState();
+        }
         // Halted and accepted
-        if (currentChar == Tape.BLANK_SYMBOL && currentState.isFinalState())
+        else if (currentChar == Tape.BLANK_SYMBOL && currentState.isFinalState())
         {
             // For convenience, reset after finishing
             tape.resetRWHead();
@@ -170,16 +185,19 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
             tape.resetRWHead();
             throw new ComputationFailedException("Input string was not accepted");
         }
-        
-        if (currentNextTransition == null)
+        // No transition
+        else  if (currentNextTransition == null)
         {
             throw new ComputationFailedException("Undefined transition");
         }
-
-        // Move the head; moving may throw so we catch and immediately discard exception
-        try { currentNextTransition.getAction().performAction(tape); }
-        catch (ComputationFailedException e2) { }
-        return currentNextTransition.getToState();
+        // A regular transition
+        else
+        {
+            // Move the head; moving may throw so we catch and immediately discard exception
+            try { currentNextTransition.getAction().performAction(tape); }
+            catch (ComputationFailedException e2) { }
+            return currentNextTransition.getToState();
+        }
     }
 
     /**

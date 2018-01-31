@@ -63,8 +63,9 @@ public abstract class Machine<
     /**
      * Lambda; Represents a non-consuming input.
      */
-
-   /**
+    public static final char EMPTY_INPUT_SYMBOL = (char)0x03BB;
+    
+    /**
      * Epsilon; Represents a do-nothing action.
      **/
     public static final char EMPTY_ACTION_SYMBOL = (char)0x03B5;

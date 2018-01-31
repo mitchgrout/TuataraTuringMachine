@@ -53,31 +53,39 @@ public class ExecutionTimerTask extends TimerTask
      */
     public void run()
     {
-        MainWindow m_mainWindow = MainWindow.getInstance();
+        MainWindow inst = MainWindow.getInstance();
 
         try
         {
             Simulator sim = m_panel.getSimulator();
+            // Pre-validate the machine
+            String result = sim.getMachine().hasUndefinedSymbols();
+            if (result != null)
+            {
+                inst.getConsole().log(result);
+                JOptionPane.showMessageDialog(inst, result, "Undefined transition", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             sim.step();
             m_panel.repaint();
             m_tapeDisp.repaint();
             if (sim.isHalted())
             {
-                m_mainWindow.getConsole().logPartial(m_panel, sim.getConfiguration());
+                inst.getConsole().logPartial(m_panel, sim.getConfiguration());
             }
             else
             {
-                m_mainWindow.getConsole().logPartial(m_panel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
+                inst.getConsole().logPartial(m_panel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
             }
         }
         catch (ComputationCompletedException|ComputationFailedException e)
         {
             cancel();
-            m_mainWindow.stopExecution();
+            inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            m_mainWindow.getConsole().log(msg);
-            JOptionPane.showMessageDialog(m_mainWindow, msg,
+            inst.getConsole().log(msg);
+            JOptionPane.showMessageDialog(inst, msg,
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
@@ -85,14 +93,14 @@ public class ExecutionTimerTask extends TimerTask
         catch (Exception e)
         {
             cancel();
-            m_mainWindow.stopExecution();
+            inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            m_mainWindow.getConsole().log(msg);
-            JOptionPane.showMessageDialog(m_mainWindow, msg,
+            inst.getConsole().log(msg);
+            JOptionPane.showMessageDialog(inst, msg,
                     MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
         }
-        m_mainWindow.repaint();
+        inst.repaint();
     }
    
     /**

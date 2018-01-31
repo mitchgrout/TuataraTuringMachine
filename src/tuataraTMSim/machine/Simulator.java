@@ -99,6 +99,11 @@ public abstract class Simulator<
             {
                 otherwise.add(t);
             }
+            // Lambda edge
+            else if (transSym == Machine.EMPTY_INPUT_SYMBOL)
+            {
+                matched.add(t);
+            }
         }
 
         // Return the exact matches if any, otherwise the default matches, otherwise nothing.

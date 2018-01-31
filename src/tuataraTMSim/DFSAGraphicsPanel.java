@@ -106,15 +106,11 @@ public class DFSAGraphicsPanel
             return false;
         }
 
-        // TODO: Determine if DFSAs should support wildcards
-        /*
-        if (c == DFSA_Machine.OTHERWISE_SYMBOL)
+        if (c == 'L' && e.isShiftDown())
         {
-            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), 
-                        DFSA_Machine.OTHERWISE_SYMBOL));
+            doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), Machine.EMPTY_INPUT_SYMBOL));
         }
-        */
-        if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
+        else if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
         {
             doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), c));
         }

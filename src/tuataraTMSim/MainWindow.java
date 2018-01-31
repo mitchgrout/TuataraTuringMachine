@@ -2268,6 +2268,15 @@ public class MainWindow extends JFrame
                 try
                 {
                     Simulator sim = gfxPanel.getSimulator();
+                    // Pre-validate the machine
+                    String result = sim.getMachine().hasUndefinedSymbols();
+                    if (result != null)
+                    {
+                        m_console.log(result);
+                        JOptionPane.showMessageDialog(MainWindow.getInstance(), result, 
+                                "Undefined transition", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     sim.step();
                     m_tapeDisp.repaint();
                     if (sim.isHalted())
