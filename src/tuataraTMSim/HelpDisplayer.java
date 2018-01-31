@@ -126,7 +126,7 @@ class Hyperactive implements HyperlinkListener
             else
             {
                 try { pane.setPage(e.getURL()); }
-                catch (Throwable t) { t.printStackTrace(); }
+                catch (Throwable t) { }
             }
         }
     }

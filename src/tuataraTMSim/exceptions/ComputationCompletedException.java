@@ -26,7 +26,8 @@
 package tuataraTMSim.exceptions;
 
 /**
- * An Exception thrown when a machine finishes a computation.
+ * An Exception thrown when a machine finishes a computation. This does not imply that the
+ * computation itself was successful, only that the machine halted.
  */
 public class ComputationCompletedException extends Exception
 {

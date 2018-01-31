@@ -53,9 +53,8 @@ public class DFSA_Action extends PreAction
     /** 
      * Perform the action specified by this object on the given tape.
      * @param t The tape to be modified.
-     * @throws ComputationFailedException If the read/write head falls off the tape.
      */
-    public void performAction(Tape t) throws ComputationFailedException
+    public void performAction(Tape t)
     {
         if (m_inputChar == Machine.EMPTY_INPUT_SYMBOL)
         {

@@ -26,8 +26,8 @@
 package tuataraTMSim.exceptions;
 
 /**
- * An Exception thrown when a machine fails. This can be due to a variety of reasons such as an
- * illegal operation, nondeterminism, not halting in a final state, etc.
+ * An Exception thrown when a machine fails to finish execution. This implies that execution was
+ * interrupted due to an error in the machine, such as an undefined transition.
  */
 public class ComputationFailedException extends Exception
 {

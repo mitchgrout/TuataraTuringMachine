@@ -152,7 +152,7 @@ public abstract class Simulator<
     /**
      * Perform an iteration of the machine. If the machine is stopped, loads the unique start state.
      * @throws ComputationCompletedException If execution halts successfully.
-     * @throws ComputationFailedException If execution halts, but the input is not accepted.
+     * @throws ComputationFailedException If execution halts unexpectedly.
      */
     public abstract void step() 
         throws ComputationCompletedException, ComputationFailedException;

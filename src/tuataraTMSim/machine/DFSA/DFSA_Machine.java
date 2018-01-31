@@ -87,7 +87,7 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
             // Ensure a unique start state; note we use int to reduce LOC
             if (state.isStartState() && startCount++ > 0)
             {
-                return "Machine has more than one start state.";
+                return "Machine has more than one start state";
             }
 
             // Check to see if there are any transitions with the same input
@@ -100,23 +100,23 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
                 // Undefined input
                 if (inp == UNDEFINED_SYMBOL)
                 {
-                    return String.format("Transition %s has undefined input.", trans.toString());
+                    return String.format("Transition %s has undefined input", trans.toString());
                 }
                 // Lambda edge
                 if (inp == EMPTY_INPUT_SYMBOL)
                 {
-                    return String.format("Transition %s uses a lambda edge.", trans.toString());
+                    return String.format("Transition %s uses a lambda edge", trans.toString());
                 }
                 // Duplicate
                 if (matched.contains(inp))
                 {
-                    return String.format("State %s has more than one transition with input %c.", 
+                    return String.format("State %s has more than one transition with input %c", 
                                          state.getLabel(), inp);
                 }
                 // Input not in alphabet
                 if (!m_alphabet.containsSymbol(inp))
                 {
-                    return String.format("Transition %s has an input which is not in the alphabet.",
+                    return String.format("Transition %s has an input which is not in the alphabet",
                                          trans.toString());
                 }
                 // Keep track of this symbol
@@ -128,7 +128,7 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
             {
                 if (!matched.contains(c))
                 {
-                    return String.format("State %s does not have a transition for input %c.", 
+                    return String.format("State %s does not have a transition for input %c", 
                                          state.getLabel(), c);
                 }
             }
@@ -136,25 +136,24 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         // Did we find a single start state
         if (startCount == 0)
         {
-            return "Machine has no start state.";
+            return "Machine has no start state";
         }
 
         return null;
     }
 
-    /** 
-     * Given a current state and tape, determine the next state the machine should move to, and
-     * perform any relevant actions.
-     * @param tape The current tape.
-     * @param currentState The state that this machine is currently in.
-     * @param currentNextTransition The next transition to be taken, determined by the value at the
-     *                              tape, and the current state.
-     * @return The new state that the machine is in after this step.
-     * @throws ComputationCompletedException If after this step, we have finish execution, and
-     *                                       finish in an accepting state.
-     * @throws ComputationFailedException If after this step, we finish execution, but do not finish
-     *                                    in an accepting state.
-     */
+     /**
+      * Given a current state and tape, determine the next state the machine should move to, and
+      * perform any relevant actions.
+      * @param tape The current tape.
+      * @param currentState The state that this machine is currently in.  
+      * @param currentNextTransition The next transition to be taken, determined by the value at the
+      *                              tape, and the current state.  This is null if the transition is 
+      *                              not defined.  
+      * @return The new state that the machine is in after this step.
+      * @throws ComputationCompletedException If, after this step, the machine halts.  
+      * @throws ComputationFailedException If the machine halts unexpectedly.
+      */
     public DFSA_State step(Tape tape, DFSA_State currentState, DFSA_Transition currentNextTransition)
         throws ComputationCompletedException, ComputationFailedException
     {
@@ -165,10 +164,7 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         if (currentNextTransition != null &&
             currentNextTransition.getAction().getInputChar() == EMPTY_INPUT_SYMBOL)
         {
-            // NOTE: performAction will not move the r/w head; this is included so it matches up
-            //       with other code.
-            try { currentNextTransition.getAction().performAction(tape); }
-            catch (ComputationFailedException e2) { }
+            // No need to run performAction, as it will do nothing
             return currentNextTransition.getToState();
         }
         // Halted and accepted
@@ -176,14 +172,14 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         {
             // For convenience, reset after finishing
             tape.resetRWHead();
-            throw new ComputationCompletedException();
+            throw new ComputationCompletedException("The input string was accepted");
         }
         // Halted but not accepted
         else if (currentChar == Tape.BLANK_SYMBOL)
         {
             // For convenience, reset after finishing
             tape.resetRWHead();
-            throw new ComputationFailedException("Input string was not accepted");
+            throw new ComputationCompletedException("The input string was not accepted");
         }
         // No transition
         else  if (currentNextTransition == null)
@@ -193,9 +189,8 @@ public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_Sta
         // A regular transition
         else
         {
-            // Move the head; moving may throw so we catch and immediately discard exception
-            try { currentNextTransition.getAction().performAction(tape); }
-            catch (ComputationFailedException e2) { }
+            // Move the head rightwards
+            currentNextTransition.getAction().performAction(tape);
             return currentNextTransition.getToState();
         }
     }

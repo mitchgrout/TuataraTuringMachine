@@ -2288,7 +2288,8 @@ public class MainWindow extends JFrame
                         m_console.logPartial(gfxPanel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
                     }
                 }
-                catch (ComputationCompletedException|ComputationFailedException e2)
+                // Machine halted as expected
+                catch (ComputationCompletedException e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);
                     m_console.log(msg);
@@ -2296,6 +2297,7 @@ public class MainWindow extends JFrame
                             MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
                     gfxPanel.getSimulator().resetMachine();
                 }
+                // Machine halted unexpectedly
                 catch (Exception e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);

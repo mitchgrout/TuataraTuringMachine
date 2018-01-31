@@ -386,12 +386,12 @@ public abstract class Machine<
         {
             if (t.getAction().getInputChar() == UNDEFINED_SYMBOL)
             {
-                return String.format("Transition from %s to %s has undefined input.",
+                return String.format("Transition from %s to %s has undefined input",
                         t.getFromState().getLabel(), t.getToState().getLabel());
             }
             if (t.getAction().getOutputChar() == UNDEFINED_SYMBOL)
             {
-                return String.format("Transition from %s to %s has undefined output.",
+                return String.format("Transition from %s to %s has undefined output",
                         t.getFromState().getLabel(), t.getToState().getLabel());
             }
         }
@@ -411,12 +411,11 @@ public abstract class Machine<
      * @param tape The current tape.
      * @param currentState The state that this machine is currently in.
      * @param currentNextTransition The next transition to be taken, determined by the value at the
-     *                              tape, and the current state.
+     *                              tape, and the current state. This is null if the transition is
+     *                              not defined.
      * @return The new state that the machine is in after this step.
-     * @throws ComputationCompletedException If after this step, we have finished execution, and the
-     *                                       machine accepts the input.
-     * @throws ComputationFailedException If after this step, we have finished execution, but the
-     *                                    machine fails to accept the input
+     * @throws ComputationCompletedException If, after this step, the machine halts.
+     * @throws ComputationFailedException If the machine halts unexpectedly.
      */
     public abstract STATE step(Tape tape, STATE currentState, TRANSITION currentNextTransition)
         throws ComputationCompletedException, ComputationFailedException;

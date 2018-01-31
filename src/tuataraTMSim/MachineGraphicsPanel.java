@@ -1356,15 +1356,15 @@ public abstract class MachineGraphicsPanel<
     {
         if (e instanceof ComputationCompletedException)
         {
-            return String.format("The computation was successful: %s", e.getMessage());
+            return String.format("Execution completed: %s.", e.getMessage());
         }
         else if (e instanceof ComputationFailedException)
         {
-            return String.format("The computation was not successful: %s", e.getMessage());
+            return String.format("Execution failed: %s.", e.getMessage());
         }
         else 
         { 
-            return String.format("An unknown error occurred [%s]. %s", e.getClass().getSimpleName(), e.getMessage());
+            return String.format("Unknown error [%s]: %s", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 

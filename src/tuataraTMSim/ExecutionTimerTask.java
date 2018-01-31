@@ -78,7 +78,8 @@ public class ExecutionTimerTask extends TimerTask
                 inst.getConsole().logPartial(m_panel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
             }
         }
-        catch (ComputationCompletedException|ComputationFailedException e)
+        // Machine halted as expected
+        catch (ComputationCompletedException e)
         {
             cancel();
             inst.stopExecution();
@@ -90,6 +91,7 @@ public class ExecutionTimerTask extends TimerTask
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
         }
+        // Machine halted unexpectedly
         catch (Exception e)
         {
             cancel();

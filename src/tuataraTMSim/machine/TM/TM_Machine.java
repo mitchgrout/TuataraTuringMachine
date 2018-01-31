@@ -106,7 +106,7 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
             // Duplicate start state
             if (st.isStartState() && startCount++ > 0)
             {
-                return "Machine has more than one start state.";
+                return "Machine has more than one start state";
             }
 
             // Ensure a unique final state
@@ -115,12 +115,12 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
                 // Duplicate final state
                 if (finalCount++ > 0)
                 {
-                    return "Machine has more than one final state.";
+                    return "Machine has more than one final state";
                 }
                 // Final states cannot have edges leaving them
                 if (transitions.size() != 0)
                 {
-                    return String.format("Machine has a transition leaving the final state leaving %s.",
+                    return String.format("Machine has a transition leaving the final state leaving %s",
                                          st.getLabel()); 
                 }
             }
@@ -137,27 +137,27 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
                 // Undefined input
                 if (inp == UNDEFINED_SYMBOL)
                 {
-                    return String.format("Transition %s has an undefined input.", tr.toString());
+                    return String.format("Transition %s has an undefined input", tr.toString());
                 }
                 // Undefined output
                 if (out == UNDEFINED_SYMBOL)
                 {
-                    return String.format("Transition %s has an undefined action.", tr.toString());
+                    return String.format("Transition %s has an undefined action", tr.toString());
                 }
                 // Duplicate input
                 if (usedSymbols.contains(inp))
                 {
-                    return String.format("State %s has more than one transition with input %c.", st.getLabel(), inp);
+                    return String.format("State %s has more than one transition with input %c", st.getLabel(), inp);
                 }
                 // Input not in the alphabet
                 if (!m_alphabet.containsSymbol(inp) && inp != OTHERWISE_SYMBOL)
                 {
-                    return String.format("Transition %s has an input which is not in the alphabet.", tr.toString());
+                    return String.format("Transition %s has an input which is not in the alphabet", tr.toString());
                 }
                 // Output not in the alphabet
                 if (!tr.getAction().movesHead() && !m_alphabet.containsSymbol(out) && out != EMPTY_ACTION_SYMBOL)
                 {
-                    return String.format("Transition %s has an action which is not in the alphabet.", tr.toString());
+                    return String.format("Transition %s has an action which is not in the alphabet", tr.toString());
                 }
                 // Keep track of this symbol, to check for duplicate inputs.
                 usedSymbols.add(inp);
@@ -167,59 +167,64 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         // No start
         if (startCount == 0)
         {
-            return "Machine has no start state.";
+            return "Machine has no start state";
         }
         // No halt
         if (finalCount == 0)
         {
-            return "Machine has no final state.";
+            return "Machine has no final state";
         }
 
         // Valid
         return null;
     }
-
-    /** 
-     * Given the current execution state and tape, perform the current action, and update the state.
-     * @param tape The current tape.
-     * @param currentState The state that this machine is currently in.
-     * @param currentNextTransition The next transition to be taken, determined by the value at the
-     *                              tape, and the current state.
-     * @return The new state that the machine is in after this step.
-     * @throws UndefinedTransitionException If there is no transition to take.
-     * @throws ComputationCompletedException If after this step, we have reached a final state.
-     * @throws ComputationFailedException If execution halts unexpectedly.
-     */
+    
+    /**
+      * Given a current state and tape, determine the next state the machine should move to, and
+      * perform any relevant actions.
+      * @param tape The current tape.
+      * @param currentState The state that this machine is currently in.  
+      * @param currentNextTransition The next transition to be taken, determined by the value at the
+      *                              tape, and the current state.  This is null if the transition is 
+      *                              not defined.  
+      * @return The new state that the machine is in after this step.
+      * @throws ComputationCompletedException If, after this step, the machine halts.  
+      * @throws ComputationFailedException If the machine halts unexpectedly.
+      */
     public TM_State step(Tape tape, TM_State currentState, TM_Transition currentNextTransition)
         throws ComputationCompletedException, ComputationFailedException
     {
         char currentChar = tape.read();
+        // Not finished yet
         if (currentNextTransition != null)
         {
             currentNextTransition.getAction().performAction(tape);
             return currentNextTransition.getToState();
         }
-
+        // Halted successfully
+        else if (tape.isParked() && currentState.isFinalState())
+        {
+            throw new ComputationCompletedException("The machine halted with the r/w head parked");
+        }
         // Halted
-        if (tape.isParked() && currentState.isFinalState())
+        else if (!tape.isParked() && !currentState.isFinalState())
         {
-            throw new ComputationCompletedException();
+            throw new ComputationFailedException(
+                    "The machine halted, but the r/w head was not parked, " +
+                    "and the last state was not an accepting state");
         }
-
-        String message = "";
-        if (!tape.isParked() && !currentState.isFinalState())
-        {
-            message = "The r/w head was not parked, and the last state was not an accepting state.";
-        }
+        // Halted
         else if (!tape.isParked())
         {
-            message = "The r/w head was not parked.";
+            throw new ComputationFailedException(
+                    "The machine halted in an accepting state, but the r/w head was not parked");
         }
+        // Halted
         else
         {
-            message = "The last state was not an accepting state.";
+            throw new ComputationFailedException(
+                    "The machine halted with the r/w head parked, but was not in an accepting state");
         }      
-        throw new ComputationFailedException(message);
     }
 
     /**
