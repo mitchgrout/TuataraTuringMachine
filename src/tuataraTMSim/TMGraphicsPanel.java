@@ -430,12 +430,10 @@ public class TMGraphicsPanel
      * Action to normalize the states in the machine.
      */
     protected Action m_normalizeAction = 
-        new TriggerAction("Normalize", TRIGGER_ALL)
+        new TriggerAction("Normalize", TRIGGER_NONEMPTY)
         {
             public void actionPerformed(ActionEvent e)
             {
-                // TODO: Currently this is allocated as a closure; should we instead move it to a
-                //       proper class?
                 Collection<TM_State> states = m_sim.getMachine().getStates();
                 HashMap<TM_State, String> oldLabels = new HashMap<TM_State, String>();
                 for (TM_State s : states)
