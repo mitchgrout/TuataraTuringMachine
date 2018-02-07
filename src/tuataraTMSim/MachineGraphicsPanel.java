@@ -60,24 +60,42 @@ public abstract class MachineGraphicsPanel<
     protected static final int TRIGGER_NONE = 0;
 
     /**
-     * Trigger indicating an event should be enabled when the context menu is on the panel.
+     * Trigger indicating an event should be enabled when the context menu is on the panel, and the
+     * underlying machine is empty. This guarantees that m_contextState and m_contextTransition are
+     * both null.
      */
-    protected static final int TRIGGER_PANEL = 1 << 0;
+    protected static final int TRIGGER_EMPTY = 1 << 0;
 
     /**
-     * Trigger indicating an event should be enabled when the context menu is on a state.
+     * Trigger indicating an event should be enabled when the context menu is on the panel, and the
+     * underlying machine is nonempty. This does not give any guarantee about the values of
+     * m_contextState or m_contextTransition.
      */
-    protected static final int TRIGGER_STATE = 1 << 1;
+    protected static final int TRIGGER_NONEMPTY = 1 << 1;
+
+    /**
+     * Trigger indicating an event should be enabled when the context menu is on the panel. This
+     * does not give any guarantee about the values of m_contextState or m_contextTransition.
+     */
+    protected static final int TRIGGER_PANEL = TRIGGER_EMPTY | TRIGGER_NONEMPTY;
+
+    /**
+     * Trigger indicating an event should be enabled when the context menu is on a state. Guarantees
+     * that m_contextState is non-null.
+     */
+    protected static final int TRIGGER_STATE = 1 << 2;
 
     /**
      * Trigger indicating an event should be enabled when the context menu is on a transition.
+     * Guarantees that m_contextTransition is non-null.
      */
-    protected static final int TRIGGER_TRANSITION = 1 << 2;
+    protected static final int TRIGGER_TRANSITION = 1 << 3;
 
     /**
-     * Trigger indicating an event should always be enabled.
+     * Trigger indicating an event should always be enabled. This does not give any guarantee about
+     * the values of m_contextState or m_contextTransition.
      */
-    protected static final int TRIGGER_ALL = TRIGGER_PANEL | TRIGGER_STATE | TRIGGER_TRANSITION;
+    protected static final int TRIGGER_ALL = (1 << 4) - 1;
 
     /**
      * Creates a new instance of MachineGraphicsPanel.
@@ -522,21 +540,26 @@ public abstract class MachineGraphicsPanel<
                     m_contextLocX = e.getX();
                     m_contextLocY = e.getY();
 
+                    // Does the machine contain anything
+                    if (getSimulator().getMachine().getStates().size() == 0)
+                    {
+                        event |= TRIGGER_EMPTY;
+                    }
+                    else
+                    {
+                        event |= TRIGGER_NONEMPTY;
+                    }
+
                     // Try to grab a state first
                     if ((m_contextState = getSimulator().getMachine().getStateClickedOn(e.getX(), e.getY())) != null)
                     {
-                        event = TRIGGER_STATE;
+                        event |= TRIGGER_STATE;
                     }
                     // Otherwise try to grab a transition
                     else if ((m_contextTransition = getSimulator().getMachine().getTransitionClickedOn(
                                     e.getX(), e.getY(), getGraphics())) != null)
                     {
-                        event = TRIGGER_TRANSITION;
-                    }
-                    // Otherwise it's a panel click
-                    else 
-                    {
-                        event = TRIGGER_PANEL;
+                        event |= TRIGGER_TRANSITION;
                     }
 
                     // Enable events based off of their triggers
@@ -1762,7 +1785,7 @@ public abstract class MachineGraphicsPanel<
      * Action which validates the current machine.
      */
     protected Action m_validateAction =
-        new TriggerAction("Validate", TRIGGER_ALL)
+        new TriggerAction("Validate", TRIGGER_NONEMPTY)
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -1783,6 +1806,4 @@ public abstract class MachineGraphicsPanel<
                 }
             }
         };
-
-
 }
