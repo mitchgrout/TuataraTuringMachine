@@ -2560,7 +2560,7 @@ public class MainWindow extends JFrame
      * Action for displaying meta information about the program.
      */
     public final Action m_aboutAction = 
-        new MenuAction("About", Global.loadIcon("tuatara.png"), null, null)
+        new MenuAction("About", Global.loadIcon("tuataraSmall.png"), null, null)
         {
             public void actionPerformed(ActionEvent e)
             {
