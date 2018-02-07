@@ -139,6 +139,16 @@ class ToolBarPanel extends JPanel
     }
 
     /**
+     * Get the minimum size for this component.
+     * @return The minimum size for this component.
+     */
+    public Dimension getMinimumSize()
+    {
+        // NOTE: By returning preferred size, we can prevent the toolbar from being drawn over
+        return getPreferredSize();
+    }
+
+    /**
      * The owning component.
      */
     private Component m_parent;
