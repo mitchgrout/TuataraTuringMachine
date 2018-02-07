@@ -230,6 +230,16 @@ public class MainWindow extends JFrame
      */
     public static void main(String[] args)
     {
+        // Choose the look-and-feel for the program before running everything
+        try
+        {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
+        catch (Exception e)
+        {
+            // Unable to change look-and-feel; ignore
+        }
+
         java.awt.EventQueue.invokeLater(new Runnable()
         {
             public void run()
