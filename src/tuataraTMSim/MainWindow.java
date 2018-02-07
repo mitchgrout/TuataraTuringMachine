@@ -359,7 +359,7 @@ public class MainWindow extends JFrame
     private void initComponents()
     {
         // Set up the main window
-        setSize(new Dimension(640, 480));
+        setMinimumSize(new Dimension(640, 480));
         setTitle("Tuatara Turing Machine Simulator");
         setIconImage(Global.loadIcon("tuatara.gif").getImage());
 
