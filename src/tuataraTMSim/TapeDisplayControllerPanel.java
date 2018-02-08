@@ -89,9 +89,9 @@ public class TapeDisplayControllerPanel extends JPanel
         Border innerBorder = BorderFactory.createEmptyBorder(PADDING,PADDING,PADDING,PADDING);
         setBorder(BorderFactory.createCompoundBorder(currentBorder, innerBorder));
         
-        java.net.URL imageURL = MainWindow.class.getResource("images/tapeLeft.gif");
+        java.net.URL imageURL = MainWindow.class.getResource("images/tapeLeft.png");
         ImageIcon tapeLeftIcon = new ImageIcon(imageURL);
-        imageURL = MainWindow.class.getResource("images/tapeRight.gif");
+        imageURL = MainWindow.class.getResource("images/tapeRight.png");
         ImageIcon tapeRightIcon = new ImageIcon(imageURL);
         
         m_BStart = new JButton();
