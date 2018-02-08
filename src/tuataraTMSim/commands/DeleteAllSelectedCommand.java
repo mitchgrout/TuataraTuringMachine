@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with deleting all selected states, and related transitions, from a machine.
- * @author Jimmy
  */
 public class DeleteAllSelectedCommand implements TMCommand
 {

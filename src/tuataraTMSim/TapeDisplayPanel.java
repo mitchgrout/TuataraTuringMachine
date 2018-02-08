@@ -35,7 +35,6 @@ import tuataraTMSim.machine.Tape;
 /** 
  * A panel for displaying a Turing machine tape. Does not include any buttons, just the tape.
  * Assumes the use of a monospace font.
- * @author Jimmy
  */
 public class TapeDisplayPanel extends JPanel
 { 

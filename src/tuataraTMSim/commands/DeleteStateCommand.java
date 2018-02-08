@@ -33,7 +33,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with deleting a state from a machine.
- * @author Jimmy
  */
 public class DeleteStateCommand implements TMCommand
 {

@@ -50,7 +50,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * An frame used to select the current alphabet for a machine.
- * @author Jimmy
  */
 public class AlphabetSelectorInternalFrame extends JInternalFrame
 {    

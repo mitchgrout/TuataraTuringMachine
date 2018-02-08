@@ -30,7 +30,6 @@ import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the accepting state of a machine.
- * @author Jimmy
  */
 public class ToggleAcceptingStateCommand implements TMCommand
 {

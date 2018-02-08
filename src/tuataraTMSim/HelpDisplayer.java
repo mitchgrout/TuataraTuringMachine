@@ -42,7 +42,6 @@ import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 /**
  * An extension of a frame which displays help information, stored as HTML.
- * @author Jimmy
  */
 public class HelpDisplayer extends JInternalFrame
 {    

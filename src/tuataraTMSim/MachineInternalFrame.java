@@ -36,7 +36,6 @@ import javax.swing.JViewport;
 
 /** 
  * An internal frame containing a panel for displaying a machine.
- * @author Jimmy
  */
 public class MachineInternalFrame extends JInternalFrame
 { 

@@ -32,7 +32,6 @@ import javax.swing.JButton;
 
 /**
  * An extension of the JButton type, which has an associated action and GUI mode.
- * @author Jimmy
  */
 public class GUIModeButton extends JButton
 {

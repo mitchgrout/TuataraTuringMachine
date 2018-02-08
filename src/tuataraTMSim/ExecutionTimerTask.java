@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Simulator;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 
- * @author Jimmy
  */
 public class ExecutionTimerTask extends TimerTask
 {

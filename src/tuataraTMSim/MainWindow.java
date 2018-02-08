@@ -45,7 +45,6 @@ import tuataraTMSim.machine.DFSA.*;
 /**
  * The main window of the program. An MDI interface for building and running turing machines.
  * This class is the main entry point into the program.
- * @author Jimmy
  */
 public class MainWindow extends JFrame
 { 
@@ -1634,7 +1633,6 @@ public class MainWindow extends JFrame
 
     /**
      * An action for selecting user interface interaction modes.
-     * @author Jimmy
      */
     class GUI_ModeSelectionAction extends MenuAction
     {
@@ -1685,7 +1683,6 @@ public class MainWindow extends JFrame
    
     /**
      * An action for selecting speeds for automatic execution of machines.
-     * @author Jimmy
      */
     class ExecutionSpeedSelectionAction extends MenuAction
     {

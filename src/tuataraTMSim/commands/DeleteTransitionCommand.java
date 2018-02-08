@@ -30,7 +30,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with deleting a transition from a machine.
- * @author Jimmy
  */
 public class DeleteTransitionCommand implements TMCommand
 {    

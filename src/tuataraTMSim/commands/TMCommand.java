@@ -27,7 +27,6 @@ package tuataraTMSim.commands;
 
 /**
  * Represents an action which can be done and undone.
- * @author Jimmy
  */
 public interface TMCommand 
 {

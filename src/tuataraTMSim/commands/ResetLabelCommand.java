@@ -32,7 +32,6 @@ import tuataraTMSim.machine.State;
 
 /**
  * A command which resets the labels of all states in the machine.
- * @author Jimmy
  */
 public class ResetLabelCommand implements TMCommand
 {

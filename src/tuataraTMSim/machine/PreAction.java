@@ -32,7 +32,6 @@ import tuataraTMSim.exceptions.ComputationFailedException;
 
 /**
  * An abstraction of an action with a precondition for a state transition of a machine.
- * @author Jimmy
  */
 public abstract class PreAction implements Serializable
 {

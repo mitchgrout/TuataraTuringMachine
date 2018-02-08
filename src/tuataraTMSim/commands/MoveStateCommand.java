@@ -33,7 +33,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A comand which deals with moving a state.
- * @author Jimmy
  */
 public class MoveStateCommand implements TMCommand
 {

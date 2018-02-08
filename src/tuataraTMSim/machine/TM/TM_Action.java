@@ -38,7 +38,6 @@ import tuataraTMSim.machine.*;
 /**
  * An action for a state transition of a Turing machine, such as shifting the read/write head, or
  * writing to the tape.
- * @author Jimmy
  */
 public class TM_Action extends PreAction
 {

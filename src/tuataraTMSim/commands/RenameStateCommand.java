@@ -30,7 +30,6 @@ import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the label of a state.
- * @author Jimmy
  */
 public class RenameStateCommand implements TMCommand
 {

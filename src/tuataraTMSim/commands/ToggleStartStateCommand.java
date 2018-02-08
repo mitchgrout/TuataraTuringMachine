@@ -30,7 +30,6 @@ import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with changing the start state of a machine.
- * @author Jimmy
  */
 public class ToggleStartStateCommand implements TMCommand
 {

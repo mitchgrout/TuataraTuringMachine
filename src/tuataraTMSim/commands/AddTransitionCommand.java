@@ -34,7 +34,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with adding new transitions to a machine.
- * @author Jimmy
  */
 public class AddTransitionCommand implements TMCommand
 {

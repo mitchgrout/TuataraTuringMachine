@@ -33,7 +33,6 @@ import tuataraTMSim.exceptions.ComputationFailedException;
 
 /** 
  * A panel containing a tape display panel and some buttons to move the read/write head.
- * @author Jimmy
  */
 public class TapeDisplayControllerPanel extends JPanel
 {

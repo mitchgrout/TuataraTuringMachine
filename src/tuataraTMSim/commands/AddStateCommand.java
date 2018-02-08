@@ -30,7 +30,6 @@ import tuataraTMSim.machine.State;
 
 /**
  * A command which deals with adding new states to a machine.
- * @author Jimmy
  */
 public class AddStateCommand implements TMCommand
 {

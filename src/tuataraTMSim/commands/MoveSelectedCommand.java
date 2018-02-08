@@ -34,7 +34,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with moving a set of states and transitions.
- * @author Jimmy
  */
 public class MoveSelectedCommand implements TMCommand
 {

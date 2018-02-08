@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with cutting states and transitions from a machine.
- * @author Jimmy
  */
 public class CutCommand implements TMCommand
 {

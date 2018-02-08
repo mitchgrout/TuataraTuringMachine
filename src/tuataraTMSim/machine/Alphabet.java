@@ -30,7 +30,6 @@ import tuataraTMSim.machine.Machine;
 
 /**
  * Represents a collection of symbols which can appear on a Tape.
- * @author Jimmy
  */
 public class Alphabet implements Serializable, Cloneable
 {

@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with moving a transition
- * @author Jimmy
  */
 public class MoveTransitionCommand implements TMCommand
 {
