@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with pasting states and transitions into a machine.
- * @author Jimmy
  */
 public class PasteCommand implements TMCommand
 {

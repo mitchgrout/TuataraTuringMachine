@@ -48,7 +48,6 @@ import tuataraTMSim.TMGraphicsPanel;
  * - q0 is the unique start state
  * - qf is the unique halt state
  * - d(qf, x) is undefined for all x in X
- * @author Jimmy
  */
 public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_Simulator>
 {

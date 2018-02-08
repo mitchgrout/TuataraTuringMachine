@@ -31,7 +31,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with changing the action of a transition.
- * @author Jimmy
  */
 public class ModifyTransitionActionCommand implements TMCommand
 {

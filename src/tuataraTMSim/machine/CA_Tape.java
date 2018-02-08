@@ -32,7 +32,6 @@ import tuataraTMSim.MainWindow;
 
 /**
  * An implementation of Tape, using a char array.
- * @author Jimmy
  */
 public class CA_Tape extends Tape implements Serializable 
 {   

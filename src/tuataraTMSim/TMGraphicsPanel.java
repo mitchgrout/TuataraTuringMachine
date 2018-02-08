@@ -44,7 +44,6 @@ import tuataraTMSim.machine.TM.*;
 
 /**
  * The canvas for drawing a Turing machine state diagram.
- * @author Jimmy
  */
 public class TMGraphicsPanel 
     extends MachineGraphicsPanel<TM_Action, TM_Transition, TM_State, TM_Machine, TM_Simulator>

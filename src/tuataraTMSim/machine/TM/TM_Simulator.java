@@ -38,7 +38,6 @@ import tuataraTMSim.TMGraphicsPanel;
  * Encapsulates the whole system for a Turing machine, including the machine and its configuration.
  * In particular, this class handles the simulation of the machine, including validation of the
  * machine prior to execution.
- * @author Jimmy
  */
 public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, TM_Machine>
 {  

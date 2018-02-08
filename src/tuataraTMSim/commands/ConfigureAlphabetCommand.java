@@ -30,7 +30,6 @@ import tuataraTMSim.MachineGraphicsPanel;
 
 /**
  * A command which deals with manipulating the tape alphabet.
- * @author Jimmy
  */
 public class ConfigureAlphabetCommand implements TMCommand
 {

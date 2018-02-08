@@ -35,7 +35,6 @@ import tuataraTMSim.machine.*;
 
 /**
  * Represents a state in a Turing machine.
- * @author Jimmy
  */
 public class TM_State extends State<TM_Action, TM_Transition, TM_Machine, TM_Simulator>
 {

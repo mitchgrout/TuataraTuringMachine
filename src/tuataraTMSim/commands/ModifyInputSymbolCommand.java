@@ -30,7 +30,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with changing the input symbol of a transition.
- * @author Jimmy
  */
 public class ModifyInputSymbolCommand implements TMCommand
 {    

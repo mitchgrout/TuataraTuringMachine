@@ -32,7 +32,6 @@ import tuataraTMSim.machine.Transition;
 
 /**
  * A command which deals with a set of transitions which are deemed inconsistent with the alphabet.
- * @author Jimmy
  */
 public class RemoveInconsistentTransitionsCommand implements TMCommand
 {
