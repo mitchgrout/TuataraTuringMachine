@@ -112,12 +112,12 @@ public abstract class MachineGraphicsPanel<
         // Create our context menu
         m_contextMenu = new JPopupMenu();
         m_contextMenu.add(m_addStateAction);
-        m_contextMenu.addSeparator();
         m_contextMenu.add(m_renameStateAction);
         m_contextMenu.add(m_toggleStartAction);
         m_contextMenu.add(m_toggleAcceptingAction);
         m_contextMenu.add(m_deleteStateAction);
         m_contextMenu.addSeparator();
+        m_contextMenu.add(m_resetLabelsAction);
         m_contextMenu.add(m_validateAction);
    }
 
@@ -1778,6 +1778,18 @@ public abstract class MachineGraphicsPanel<
                 {
                     deleteTransition(m_contextTransition);
                 }
+            }
+        };
+
+    /**
+     * Action which resets the name of all the states in the machine.
+     */
+    protected Action m_resetLabelsAction =
+        new TriggerAction("Reset All Labels", TRIGGER_NONEMPTY)
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                doCommand(new ResetLabelCommand(MachineGraphicsPanel.this));
             }
         };
 
