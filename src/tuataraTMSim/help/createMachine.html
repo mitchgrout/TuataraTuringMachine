@@ -1,0 +1,133 @@
+<html>
+<h2> Creating and Editing a Finite-State Machine </h2>
+
+<p> In this section, we present a guide to creating and editing a general finite-state machine. </p>
+
+<p>
+<h3> Creating, Saving, and Loading Machines <img src="../images/newMachine.png"> 
+                                            <img src="../images/saveMachine.png">
+                                            <img src="../images/openMachine.png"> </h3>
+To begin, we must create a new machine window.  This can be done by clicking on 
+<i>File > New Machine</i>, and selecting the type of machine that you would like to create.
+Existing machines may be saved or loaded from disk by selecting <i>File > Save Machine</i> and
+<i>File > Open Machine</i> respectively.
+</p>
+
+<p>
+<h3> Choosing an Alphabet <img src="../images/configureAlphabet.png"> </h3> 
+The alphabet associated with the machine, &Sigma;, may be chosen after the machine has been created.  
+To do this, select <i>Configuration > Configure Alphabet</i>.  This will bring up the alphabet
+configuration dialog.  Check the boxes for the symbols that you wish to include in your alphabet,
+and press <i>Ok</i>.
+</p>
+
+<p>
+If your current machine contains transitions which do not belong to the new alphabet that you have
+chosen, you will be prompted to either automatically delete these transitions, or to undo the
+changes made to the alphabet.
+</p>
+
+<p>
+<h3> Adding States <img src="../images/state.png"> </h3>
+To add a state, select <i>Mode > Add States</i>, and click on an empty space in the machine window.
+This will create a new state under your cursor.  Alternatively, a new state can be placed under the
+cursor by right clicking and selecting <i>Add State</i> from the context menu.
+</p>
+
+<p>
+<h3> Adding Transitons <img src="../images/transition.png"> </h3>
+To add a transition, select <i>Mode > Add Transitions</i>.  To add a transition between two distinct
+states, click on the first state, drag the mouse to the second state, and release.  To create a
+loop, simply click and release the mouse on the same state.
+</p>
+
+<p>
+Every transition has an input and action associated with it.  This action is dependent on the type
+of machine being designed. <b>In a Turing machine</b>, the action determines whether or not the
+read/write head should move left or right, or whether it should write a value back to the tape.
+<b>In a DFSA</b>, there is no action, only an input.
+</p>
+
+<p>
+By default, the transition created will contain the <i>undefined</i> symbol, '<i>!</i>', which
+indicates that the transition has yet to be given a value.  If a machine contains a transition with
+the <i>undefined</i> symbol, it cannot be simulated.
+</p>
+
+<p>
+<h3> Choosing Transition Symbols </h3>
+To set the values of a transition, click on the value, and type the character that you would like to
+change the symbol to be.  You may only change the symbol to characters that belong to the alphabet
+of your machine, &Sigma;, or are machine-specific special characters.  These special characters are
+listed in the <b>Input Symbols</b> section <a href="keyShortcuts.html" target="mainwindow">here</a>.
+
+<p>
+<h3> Deleting States and Transitions <img src="../images/eraser.png"> </h3>
+To delete a state or transition, select <i>Mode > Eraser</i>, and click on a state or transition to
+erase it.  Alternatively, a state or transition may be deleted by right clicking the object and
+selecting <i>Delete</i> from the context menu.
+</p>
+
+<p>
+<h3> Moving States and Transitions </h3> 
+To move a state, click on the state and drag it to move it to another location.  Transitions can be
+moved similarly by clicking on their action text or the directional arrows and dragging.
+</p>
+
+<p>
+<h3> Choosing a Start State <img src="../images/startState.png"> </h3>
+To toggle whether or not a state is a start state, select <i>Mode > Choose Start State</i>, and click on a
+state to toggle whether it is a start state or not.  Alternatively, a state may be toggled by right
+clicking the state and selecting <i>Toggle Start</i> from the context menu.
+</p>
+
+<p>
+<h3> Choosing a Final State <img src="../images/finalState.png"> </h3>
+To toggle whether or not a state is a final state, select <i>Mode > Choose Final State</i>, and
+click on a state to toggle whether or not it is a final state or not.  Alternatively, a state may be
+toggled by right clicking the state and selecting <i>Toggle Final</i> from the context menu.
+</p>
+
+<p>
+<h3> Cutting, Copying, and Pasting <img src="../images/selection.png">
+                                   <img src="../images/cut.png">
+                                   <img src="../images/copy.png">
+                                   <img src="../images/paste.png">
+                                   <img src="../images/delete.png"> </h3> 
+A set of states can be selected by dragging a box around them using <i>Mode > Selection</i>.  To add
+or remove states from the current set of selected states, click on them while holding the shift key.
+All transitions that connect only to other states within the set of selected states are
+automatically selected.
+</p>
+
+<p>
+These selected states and transitions can now be cut, copied, pasted, or deleted using the
+appropriate items from the <i>Edit</i> menu.  Pasted states are renamed to the first free name that
+has not yet been used in this machine to prevent duplication of names.
+</p>
+
+<p>
+<h3> Renaming States </h3>
+To give a state a custom name, right click on the state.  This brings up the appropriate context
+menu from which the state may be renamed.  States must be uniquely named within a machine -
+duplicate names are not allowed.
+</p>
+
+<p>
+Alternatively, the names of all states may be reset by right clicking anywhere in the machine window
+and selecting <i>Reset All Labels</i>.  This will assign every state a unique name of the form
+'q[n]'.
+</p>
+
+<p>
+If the current machine is a Turing machine, the machine may instead be <i>normalized</i> by right
+clicking anywhere in the machine window and selecting <i>Normalize</i>.  This will automatically
+rename all states in the machine according to a specific set of rules:
+<ul>
+    <li> The unique start state is named '0'.
+    <li> The unique final state is named 'n-1'.
+    <li> Every other state is given a number from '1' to 'n-2' inclusive.
+</ul>
+where there are <i>n</i> states in the machine.
+</p>
+</html>
