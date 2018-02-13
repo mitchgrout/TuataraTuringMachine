@@ -56,9 +56,9 @@ public enum GUI_Mode
     CHOOSESTART,
 
     /**
-     * Choose the accepting state of the machine.
+     * Choose the final state of the machine.
      */
-    CHOOSEACCEPTING,
+    CHOOSEFINAL,
 
     /**
      * Choose the currently executing state of the machine.

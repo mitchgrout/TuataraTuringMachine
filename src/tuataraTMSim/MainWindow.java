@@ -523,10 +523,10 @@ public class MainWindow extends JFrame
         modeMenu.add(m_chooseStartMenuItem);
         modeMenuItems.add(m_chooseStartMenuItem);
         
-        JRadioButtonMenuItem m_chooseAcceptingMenuItem = new JRadioButtonMenuItem(m_chooseAcceptingAction);
-        m_chooseAcceptingAction.setMenuItem(m_chooseAcceptingMenuItem);
-        modeMenu.add(m_chooseAcceptingMenuItem);
-        modeMenuItems.add(m_chooseAcceptingMenuItem);
+        JRadioButtonMenuItem m_chooseFinalMenuItem = new JRadioButtonMenuItem(m_chooseFinalAction);
+        m_chooseFinalAction.setMenuItem(m_chooseFinalMenuItem);
+        modeMenu.add(m_chooseFinalMenuItem);
+        modeMenuItems.add(m_chooseFinalMenuItem);
         
         JRadioButtonMenuItem m_chooseCurrentStateMenuItem = new JRadioButtonMenuItem(m_chooseCurrentStateAction);
         m_chooseCurrentStateAction.setMenuItem(m_chooseCurrentStateMenuItem);
@@ -717,8 +717,8 @@ public class MainWindow extends JFrame
         GUIModeButton startStatesToolBarButton = new GUIModeButton(m_chooseStartAction, GUI_Mode.CHOOSESTART);
         m_toolbarButtons.add(startStatesToolBarButton);
         
-        GUIModeButton acceptingStatesToolBarButton = new GUIModeButton(m_chooseAcceptingAction, GUI_Mode.CHOOSEACCEPTING);
-        m_toolbarButtons.add(acceptingStatesToolBarButton);
+        GUIModeButton finalStatesToolBarButton = new GUIModeButton(m_chooseFinalAction, GUI_Mode.CHOOSEFINAL);
+        m_toolbarButtons.add(finalStatesToolBarButton);
         
         GUIModeButton chooseCurrentStateToolBarButton = new GUIModeButton(m_chooseCurrentStateAction, GUI_Mode.CHOOSECURRENTSTATE);
         m_toolbarButtons.add(chooseCurrentStateToolBarButton);
@@ -773,7 +773,7 @@ public class MainWindow extends JFrame
         returner[1].add(selectionToolBarButton);
         returner[1].add(eraserToolBarButton);
         returner[1].add(startStatesToolBarButton);
-        returner[1].add(acceptingStatesToolBarButton);
+        returner[1].add(finalStatesToolBarButton);
         returner[1].add(chooseCurrentStateToolBarButton);
         
         returner[2] = new JToolBar("Machine");
@@ -1043,7 +1043,7 @@ public class MainWindow extends JFrame
             m_eraserAction.setEnabled(isEnabled);
             m_selectionAction.setEnabled(isEnabled);
             m_chooseStartAction.setEnabled(isEnabled);
-            m_chooseAcceptingAction.setEnabled(isEnabled);
+            m_chooseFinalAction.setEnabled(isEnabled);
             m_chooseCurrentStateAction.setEnabled(isEnabled);
             
             m_slowExecuteSpeedAction.setEnabled(isEnabled);
@@ -1076,7 +1076,7 @@ public class MainWindow extends JFrame
         m_eraserAction.setEnabled(isEnabled);
         m_selectionAction.setEnabled(isEnabled);
         m_chooseStartAction.setEnabled(isEnabled);
-        m_chooseAcceptingAction.setEnabled(isEnabled);
+        m_chooseFinalAction.setEnabled(isEnabled);
         m_chooseCurrentStateAction.setEnabled(isEnabled);
         
         m_newTuringMachineAction.setEnabled(isEnabled);
@@ -2213,10 +2213,10 @@ public class MainWindow extends JFrame
             Global.loadIcon("startState.png"), KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
 
     /**
-     * Action associated with CHOOSEACCEPTING.
+     * Action associated with CHOOSEFINAL.
      */
-    public final GUI_ModeSelectionAction m_chooseAcceptingAction = 
-        new GUI_ModeSelectionAction("Choose Accepting State", GUI_Mode.CHOOSEACCEPTING,
+    public final GUI_ModeSelectionAction m_chooseFinalAction = 
+        new GUI_ModeSelectionAction("Choose Final State", GUI_Mode.CHOOSEFINAL,
             Global.loadIcon("finalState.png"), KeyStroke.getKeyStroke(KeyEvent.VK_F7,0));
 
     /**

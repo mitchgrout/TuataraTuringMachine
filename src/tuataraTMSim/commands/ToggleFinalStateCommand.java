@@ -29,23 +29,23 @@ import tuataraTMSim.MachineGraphicsPanel;
 import tuataraTMSim.machine.State;
 
 /**
- * A command which deals with changing the accepting state of a machine.
+ * A command which deals with changing the final state of a machine.
  */
-public class ToggleAcceptingStateCommand implements TMCommand
+public class ToggleFinalStateCommand implements TMCommand
 {
     /**
-     * Creates a new instance of ToggleAcceptingCommand.
+     * Creates a new instance of ToggleFinalCommand.
      * @param panel The current graphics panel.
      * @param state The state to toggle.
      */
-    public ToggleAcceptingStateCommand(MachineGraphicsPanel panel, State state)
+    public ToggleFinalStateCommand(MachineGraphicsPanel panel, State state)
     {
         m_panel = panel;
         m_state = state;
     }
     
     /**
-     * Toggle whether or not the supplied state is accepting.
+     * Toggle whether or not the supplied state is final.
      */
     public void doCommand()
     {
@@ -53,7 +53,7 @@ public class ToggleAcceptingStateCommand implements TMCommand
     }
     
     /**
-     * Toggle whether or not the supplied state is accepting.
+     * Toggle whether or not the supplied state is final.
      */
     public void undoCommand()
     {
@@ -66,7 +66,7 @@ public class ToggleAcceptingStateCommand implements TMCommand
      */
     public String getName()
     {
-        return "Toggle Accepting State";
+        return "Toggle Final State";
     }
     
     /**

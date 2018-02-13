@@ -84,12 +84,12 @@ public class DFSA_Simulator extends Simulator<DFSA_Action, DFSA_Transition, DFSA
     } 
     
     /**
-     * Determine if the machine is in an accepting state.
-     * @return true if the machine is in an accepting state, false otherwise.
+     * Determine if the machine is in a final state.
+     * @return true if the machine is in a final state, false otherwise.
      */
     public boolean isAccepted()
     {
-        // Accepted input means no more input, and last state is accepting
+        // Accepted input means no more input, and last state is final
         return isHalted() && m_state != null && m_state.isFinalState();
     }
  

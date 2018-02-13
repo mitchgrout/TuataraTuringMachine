@@ -89,8 +89,8 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     }
 
     /** 
-     * Determine if the machine is in an accepting state.
-     * @return true if the machine is in an accepting state, false otherwise.
+     * Determine if the machine is in a final state.
+     * @return true if the machine is in a final state, false otherwise.
      */
     public boolean isHalted()
     {
@@ -98,9 +98,9 @@ public class TM_Simulator extends Simulator<TM_Action, TM_Transition, TM_State, 
     }
 
     /**
-     * Determine if the machine is in an accepting state, and the read/write head of the tape is in
+     * Determine if the machine is in a final state, and the read/write head of the tape is in
      * the first cell of the tape.
-     * @return true if the machine is in an accepting state, with the read/write head parked, false
+     * @return true if the machine is in a final state, with the read/write head parked, false
      *         otherwise.
      */
     public boolean isAccepted()

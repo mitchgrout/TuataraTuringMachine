@@ -210,19 +210,19 @@ public class TM_Machine extends Machine<TM_Action, TM_Transition, TM_State, TM_S
         {
             throw new ComputationFailedException(
                     "The machine halted, but the r/w head was not parked, " +
-                    "and the last state was not an accepting state");
+                    "and the last state was not a final state");
         }
         // Halted
         else if (!tape.isParked())
         {
             throw new ComputationFailedException(
-                    "The machine halted in an accepting state, but the r/w head was not parked");
+                    "The machine halted in a final state, but the r/w head was not parked");
         }
         // Halted
         else
         {
             throw new ComputationFailedException(
-                    "The machine halted with the r/w head parked, but was not in an accepting state");
+                    "The machine halted with the r/w head parked, but was not in a final state");
         }      
     }
 
