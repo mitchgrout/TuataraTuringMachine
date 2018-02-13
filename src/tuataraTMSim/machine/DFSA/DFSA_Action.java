@@ -31,7 +31,7 @@ import tuataraTMSim.exceptions.ComputationFailedException;
 import tuataraTMSim.machine.*;
 
 /**
- * An action for a state transition of a DFSA, which consists only of accepting a character.
+ * An action for a state transition of a DFSA, which consists only of final a character.
  */
 public class DFSA_Action extends PreAction
 {

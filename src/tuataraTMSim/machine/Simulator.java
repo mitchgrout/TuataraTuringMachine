@@ -138,8 +138,8 @@ public abstract class Simulator<
     public abstract boolean isHalted();
     
     /**
-     * Determine if the machine is in an accepting state.
-     * @return true if the machine is in an accepting state, false otherwise.
+     * Determine if the machine is in a final state.
+     * @return true if the machine is in a final state, false otherwise.
      */
     public abstract boolean isAccepted();
  

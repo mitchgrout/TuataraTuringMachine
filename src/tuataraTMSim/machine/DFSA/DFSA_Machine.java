@@ -44,7 +44,7 @@ import tuataraTMSim.machine.*;
  * - X is a finite alphabet, consisting of input characters
  * - d is a total function, with QxX mapping to Q
  * - q0 is the unique start state
- * - F is a subset of Q, denoting the accepting states
+ * - F is a subset of Q, denoting the final states
  */
 public class DFSA_Machine extends Machine<DFSA_Action, DFSA_Transition, DFSA_State, DFSA_Simulator>
 {

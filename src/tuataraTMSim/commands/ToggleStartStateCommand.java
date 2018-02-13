@@ -45,7 +45,7 @@ public class ToggleStartStateCommand implements TMCommand
     }
     
     /**
-     * Toggle whether or not the supplied state is accepting.
+     * Toggle whether or not the supplied state is a start state.
      */
     public void doCommand()
     {
@@ -53,7 +53,7 @@ public class ToggleStartStateCommand implements TMCommand
     }
     
     /**
-     * Toggle whether or not the supplied state is accepting.
+     * Toggle whether or not the supplied state is a start state.
      */
     public void undoCommand()
     {

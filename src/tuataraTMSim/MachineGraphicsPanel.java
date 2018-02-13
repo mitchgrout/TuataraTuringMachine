@@ -114,7 +114,7 @@ public abstract class MachineGraphicsPanel<
         m_contextMenu.add(m_addStateAction);
         m_contextMenu.add(m_renameStateAction);
         m_contextMenu.add(m_toggleStartAction);
-        m_contextMenu.add(m_toggleAcceptingAction);
+        m_contextMenu.add(m_toggleFinalAction);
         m_contextMenu.add(m_deleteStateAction);
         m_contextMenu.addSeparator();
         m_contextMenu.add(m_resetLabelsAction);
@@ -474,8 +474,8 @@ public abstract class MachineGraphicsPanel<
                         handleChooseStartClick(e);
                         break;
 
-                    case CHOOSEACCEPTING:
-                        handleChooseAcceptingClick(e);
+                    case CHOOSEFINAL:
+                        handleChooseFinalClick(e);
                         break;
 
                     case SELECTION:
@@ -1321,16 +1321,16 @@ public abstract class MachineGraphicsPanel<
     }
 
     /**
-     * Handle when a mouse click occurs while in select accepting state mode. If the mouse click
-     * occurs over a state, the accepting state of the machine is changed.
+     * Handle when a mouse click occurs while in select final state mode. If the mouse click
+     * occurs over a state, the final state of the machine is changed.
      * @param e The generating event.
      */
-    protected void handleChooseAcceptingClick(MouseEvent e)
+    protected void handleChooseFinalClick(MouseEvent e)
     {
         STATE stateClickedOn = m_sim.getMachine().getStateClickedOn(e.getX(), e.getY());
         if (stateClickedOn != null)
         {
-            doCommand(new ToggleAcceptingStateCommand(this, stateClickedOn));
+            doCommand(new ToggleFinalStateCommand(this, stateClickedOn));
         }
     }
 
@@ -1750,14 +1750,14 @@ public abstract class MachineGraphicsPanel<
         };
 
     /**
-     * Action which toggles whether or not the selected state is accepting.
+     * Action which toggles whether or not the selected state is final.
      */
-    protected Action m_toggleAcceptingAction = 
-        new TriggerAction("Toggle Accepting", TRIGGER_STATE)
+    protected Action m_toggleFinalAction = 
+        new TriggerAction("Toggle Final", TRIGGER_STATE)
         {
             public void actionPerformed(ActionEvent e)
             {
-                doCommand(new ToggleAcceptingStateCommand(MachineGraphicsPanel.this, m_contextState));
+                doCommand(new ToggleFinalStateCommand(MachineGraphicsPanel.this, m_contextState));
             }
         };
 

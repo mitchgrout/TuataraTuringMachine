@@ -91,7 +91,7 @@ public abstract class State<
     }
 
     /**
-     * Change whether this state is an accepting state or not.
+     * Change whether this state is a final state or not.
      * @param value true if this state should be the final state, false otherwise.
      */
     public void setFinalState(boolean value)
