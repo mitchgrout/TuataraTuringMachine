@@ -52,12 +52,7 @@ public class MainWindow extends JFrame
      * The layer used for internal frames containing machines.
      */
     protected static final int MACHINE_WINDOW_LAYER = 50;
-   
-    /**
-     * Internal timer.
-     */
-    protected final java.util.Timer m_timer = new java.util.Timer(true);
-    
+       
     /**
      * String for execution halting.
      */
@@ -1781,6 +1776,11 @@ public class MainWindow extends JFrame
     private final JFileChooser m_fcTape = new JFileChooser();
 
     /**
+     * Internal timer for repeatedly calling m_timerTask.
+     */
+    protected final java.util.Timer m_timer = new java.util.Timer(true);
+
+    /**
      * Timer task used for stepping through a machine on a delay.
      */
     private ExecutionTimerTask m_timerTask;
@@ -2334,7 +2334,7 @@ public class MainWindow extends JFrame
                     }
                     setEditingEnabled(false);
                     m_timerTask = new ExecutionTimerTask(panel, m_tapeDisp);
-                    m_timer.scheduleAtFixedRate(m_timerTask, 0, m_executionDelayTime);
+                    m_timer.schedule(m_timerTask, 0, m_executionDelayTime);
                 }
             }
         };

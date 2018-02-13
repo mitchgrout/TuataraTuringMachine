@@ -52,6 +52,11 @@ public class ExecutionTimerTask extends TimerTask
      */
     public void run()
     {
+        // TODO: Since sim.step() has the potential to block [by prompting the user for a choice],
+        //       we may end up with the simulation 'skipping' a state; this is because the timer
+        //       queues the next run of the task while this is blocking, and immediately run after
+        //       the prompt is finished.
+
         MainWindow inst = MainWindow.getInstance();
 
         try
