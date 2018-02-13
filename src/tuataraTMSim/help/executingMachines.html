@@ -12,46 +12,37 @@ those steps took place.  Hence, simulating the execution of machines step-by-ste
 the core functionality of this program.
 </p>
 
-<p>
-This guide explains in detail how to control the simulation of your shiny new machines. 
-</p>
-
 <p> 
-<h3> Validating a machine </h3>
-To ensure that the current machine is deemed deterministic, select 
-<img src="../images/validate.png"> <i>Validate</i> from the <i>Machine</i> menu or toolbar.  This
-will ensure that there is no nondeterministic behaviour in the machine such as duplicate edges,
-multiple start states, or missing edges. 
+<h3> Validating a machine <img src="../images/validate.png"> </h3>
+As Tuatara supports both deterministic and nondeterministic machines, it may be useful to validate
+that the current machine being designed is deemed determininstic.  To validate a machine, select 
+<i>Machine > Validate</i>.  This will ensure that the current machine does not have any
+nondeterministic qualities, such as duplicate edges, no start states, etc.
 
 <p>
-<h3> Stepping a machine </h3>
-To make the current machine step through one single operation, choose the <img src="../images/step.png"> 
-<i>Step</i> item from the <i>Machine</i> menu or the toolbar.  The machine will complete the
-operation specified by one transition.  The tape and the state of the machine will be updated
-accordingly.
+<h3> Stepping a machine <img src="../images/step.png"> </h3>
+To make the current machine step through one single operation, select <i>Machine > Step</i>.
+The machine will complete the operation specified by exactly one transition.  The tape and the state
+of the machine will be updated accordingly.
 </p>
 
 <p>
-<h3> Executing a machine </h3> 
-Select <img src="../images/fastExecute.png"> <i>Execute</i> from the <i>Machine</i> menu or
-toolbar to start the simulation running.  The machine's execution will occur continuously and
-automatically until the computation halts (in error or otherwise) or the user presses the stop or
-pause buttons.  The <img src="../images/stop.png"> <i>Stop Execution </i> and <img src="../images/pause.png">
-<i>Pause Execution</i> buttons are also located in the <i>Machine</i> menu and toolbar.</p>
-
-<p>
-<h3> Changing Execution Speeds </h3>
-The speed of execution can be controlled via the options in the <i>Machine</i> menu.  This is
-useful for debugging or learning purposes, or to reduce the waiting time for a computation to
-complete.  The speed cannot be modified during automatic execution.
+<h3> Executing a machine <img src="../images/fastExecute.png">
+                         <img src="../images/pause.png">
+                         <img src="../images/stop.png"> </h3> 
+To automatically step through the machine until it halts, select <i>Machine > Execute</i>.  The
+machine's execution will occur automatically until it is either paused via 
+<i>Machine > Pause Execution</i> or reset via <i>Machine > Stop Execution</i>.  The speed of
+execution can be controlled via the options in the <i>Machine</i> menu.  This is useful for
+debugging or learning purposes, or to reduce the waiting time for a computation to complete.  The
+speed cannot be modified during automatic execution.
 </p>
 
 <p>
-<h3> Choosing the Current State </h3>
-The current state of the machine can be modified using the <img src="../images/currentState.png"> 
-<i>Choose Current State</i> mode, found in the <i>Mode</i> menu and toolbar.  This is useful for
-debugging and exploring 'what-if' scenarios.  When in this mode, click on a state to select it as
-the current state.  
+<h3> Choosing the Current State <img src="../images/currentState.png"> </h3>
+The current state of the machine can be modified by selecting <i>Mode > Choose Current State</i>.
+This is useful for debugging and exploring 'what-if' scenarios.  When in this mode, click on a state
+to select it as the current state.  
 </p>
 
 <p>
@@ -59,11 +50,11 @@ the current state.
 The execution of a machine can be described by a sequence of configurations.  How these
 configurations are expressed is entirely machine dependent.
 <br><b>Turing machine:</b> The configuration of a Turing machine is a triple, (<i>u, q, v</i>),
-where <i>uv</i> &isin; <i>Y*</i> is the current tape contents, <i>q</i> is the current state, and
-the read/write head sits above the first symbol of <i>v</i>.
+where <i>uv</i> &isin; <i>&Sigma;*</i> is the current tape contents, <i>q</i> &isin; <i>Q</i> is 
+the current state, and the read/write head sits above the first symbol of <i>v</i>.
 <br><b>DFSA:</b> The configuration of a DFSA is a double, (<i>q, c</i>), where <i>q</i> is the
-current state, and <i>c</i> is the current symbol being read.  If <i>q</i> is an accepting state,
-then <i>c</i> is omitted.
+current state, and <i>c</i> is the current symbol being read.  If the end of the tape is reached,
+<i>c</i> is omitted.
 </p>
 
 <p>

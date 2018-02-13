@@ -1,41 +1,78 @@
 <html>
+<center>
+    <img src="../images/tuatara.png">
+</center>
+
 <h2> Overview of Tuatara Turing Machine Simulator </h2>
 <p>
 This program is a graphical toolkit for designing and simulating various types of deterministic
-finite-state machines.  It was written by Jimmy Foulds during 2006-2007, and later updated and
-extended by Mitchell Grout during 2017-2018, with funding from the Department of Mathematics at the
-University of Waikato, New Zealand.
+finite-state machines.  This program is intended to help understand how finite-state machines work,
+aid in simulating them, and to act as a teaching resource.  This program was originally written by
+Jimmy Foulds during 2006-2007, and later updated by Mitchell Grout in 2017-2018, with funding from
+the Department of Mathematics at the University of Waikato, New Zealand.
 </p>
 
 <p>
 Finite-state machines are a mathematical model of computation, with applications ranging from string
-matching to simulating algorithms.  All finite-state machines consist of at least 5 components: A
-finite alphabet of symbols recognized by the machine, a set of states, a start state, a set of final
-states, and a transition function which maps a state and symbol to another state.  Machines may be
-either deterministic, or nondeterministic.  Below is a description of all machines currently
-supported by Tuatara Turing Machine Simulator.
+matching to simulating algorithms.  A finite-state machine typically consists of the following
+components:
+<ul>
+    <li> A finite alphabet of symbols recognized by the machine, &Sigma;
+    <li> A finite set of states, <i>Q</i>
+    <li> A transition function, which dictates which state the machine should move to given its
+         state, &delta;
+    <li> At least one start state; if this is unique, it is normally denoted <i>q<sub>0</sub></i>,
+         otherwise if there is more than one, <i>S</i> &sube; <i>Q</i>
+    <li> A set of final states, <i>F</i> &sube; <i>Q</i>.  If there is only one final state, it is
+         normally denoted <i>q<sub>f</sub></i>.
+</ul>
+To visualise a machine, we do the following:
+<ul>
+    <li> A state is drawn as a circle, and is given a label.
+    <li> If a state is a start state, we draw a curved arrow coming into the state.
+    <li> If a state is a final state, we draw a smaller circle inside the state.
+    <li> If &delta; defines a transition from state <i>x</i> to state <i>y</i>, then we draw an
+         arrow leaving <i>x</i> and arriving at <i>y</i>.  Depending on the type of machine, we will
+         also draw an 'action' alongside this arrow.
+</ul>
+All finite-state machines may be either deterministic, or nondeterministic.  A deterministic machine
+will, for the same input, always produce the same output.  In contrast, a nondeterministic machine
+may produce different output for the same input.  Tuatara supports both deterministic and
+nondeterministic machines, but in order to avoid any confusion, requires the user to manually deal
+with nondeterministic behaviour via a graphical prompt.
 </p>
 
 <p>
-<h3> Turing Machines </h3>
+Below is a list of finite-state machines currently supported by Tuatara Turing Machine Simulator.
+</p>
+
+<p>
+<h3> Turing Machines (TM) </h3>
 A Turing machine is a class of abstract machine which is considered to be capable of performing any
 computation that is specifiable by an algorithm.  
 </p>
 
 <p>
-Formally, we define a Turing machine to be
-<i>M</i> = (<i>Q</i>, <i>&delta;</i>, <i>q<sub>0</sub></i>, <i>q<sub>f</sub></i>),
-with finite tape alphabet <i>Y</i> and input alphabet <i>X</i> &sub; <i>Y</i>, consisting of:
+Formally, we define a Turing machine to be the 5-tuple
+<i>M</i> = (<i>Q</i>, &Sigma;, &delta;, <i>q<sub>0</sub></i>, <i>q<sub>f</sub></i>),
+with the usual definition for each symbol.  The transition function, &delta;, is defined as follows:
 <ul>
-    <li> A finite set <i>Q</i> of states.
-    <li> A partial function <i>&delta;</i> : <i>Q &times; Y &rarr; Q &times; </i>(<i>Y</i> &cup; {L,R}),
-         the transition function.
-    <li> A start state <i>q<sub>0</sub></i> &isin; <i>Q</i>.
-    <li> A halt state <i>q<sub>f</sub></i> &isin; <i>Q</i>.
-    <li> <i>&delta;</i>(<i>q<sub>f</sub></i>, <i>y</i>) is undefined for all
-         <i>y</i> &isin; <i>Y</i>.
-    <li> There is a symbol <i>b</i> &isin; <i>Y</i> with <i>b</i> &notin; <i>X</i>, called "blank".
+    <li> &delta; : <i>Q</i> &times; &Sigma; &rarr; <i>Q</i> &times; (&Sigma; &cup; {L, R}) 
+         -- i.e. &delta; is a function which takes a state from <i>Q</i>, a letter from &Sigma;, and
+         produces a new state from <i>Q</i>, and either another letter from &Sigma;, or the distinct
+         symbol 'L' or 'R'.
+    <li> &delta; is a partial function, meaning it may not be defined for some inputs.
+    <li> &delta;(<i>q<sub>f</sub></i>, <i>y</i>) is undefined for all <i>y</i> &isin; &Sigma; 
+         -- i.e. the unique halt state does not have any arrows leaving it.
 </ul>
+</p>
+
+<p>
+If &delta;(<i>q</i>, <i>x</i>) = (<i>q'</i>, <i>y</i>), then we have an arrow leaving state <i>q</i>
+and arriving at state </i>q'</i>.  Along with this arrow, we write '<i>x</i>/<i>y</i>', indicating
+that the arrow will be used if the read/write head is looking at the character <i>x</i> on the tape,
+and will write <i>y</i> back to the tape.  If instead <i>y</i> is either 'L' or 'R', then the
+read/write head is moved left or right by one cell respectively.
 </p>
 
 <p>
@@ -46,25 +83,82 @@ tape, writing a symbol, and moving along the tape.
 </p>
 
 <p>
-<h3> Deterministic Finite-State Automata (DFSA) </h3>
-A DFSA is a class of abstract machine which is capable of determining if a string belongs to some
-regular language.  We denote the language accepted by a DFSA <i>M</i> to be <i>L(M)</i>.
+<h3> Nondeterministic Turing Machine (NTM) </h3>
+Nondeterministic Turing Machines are a superset of Turing Machines, i.e. they have the same
+definition, but with relaxed rules.
 </p>
 
 <p>
-Formally, we define a DFSA to be 
-<i>M</i> = (<i>Q</i>, <i>&delta;</i>, <i>q<sub>0</sub></i>, <i>F</i>)</i>, 
-with finite alphabet <i>&Sigma;</i>, consisting of:
+Formally, we define a Nondeterministic Turing machine to be the 5-tuple
+<i>M</i> = (<i>Q</i>, &Sigma;, &delta;, <i>S</i>, <i>F</i>),
+with the usual definition for each symbol.  The transition function, &delta;, is defined as follows:
 <ul>
-    <li> A finite set <i>Q</i> of states.
-    <li> A total function <i>&delta; : Q &times; &Sigma; &rarr; Q</i>, the transition function.
-    <li> A start state <i>q<sub>0</sub></i> &isin; <i>Q</i>.
-    <li> A set of accepting states, <i>F</i> &sube; <i>Q</i>.
+    <li> &delta; : <i>Q</i> &times; &Sigma; &rarr; 2<sup><i>Q</i> &times; (&Sigma; &cup; {L, R})</sup>
+         -- i.e. &delta; is a function which takes a state from <i>Q</i>, a letter from &Sigma;, and
+         produces a set of states from <i>Q</i> and symbols from &Sigma;, or the distinct symbols
+         'L' or 'R'.  This set constitutes all of the potential transitions that the machine could
+         take from the given state with the given input.
+    <li> For all <i>q<sub>f</sub></i> &isin; <i>F</i>, we allow &delta;(<i>q<sub>f</sub></i>, y) to
+         be defined -- i.e. halt states are permitted to have arrows leaving them.
 </ul>
 </p>
 
 <p>
+Like deterministic Turing machines, nondeterministic Turing machines are equipped with an infinitely
+large tape, along with a read/write head, and use the tape in the same fashion as their
+deterministic counterparts.
+</p>
+
+<p>
+<h3> Deterministic Finite-State Automata (DFSA) </h3>
+A DFSA is a class of abstract machine which is capable of determining if a string belongs to some
+regular language.  We denote the language accepted by a DFSA <i>M</i> to be 
+L(<i>M</i>) &sube; &Sigma;*.
+</p>
+
+<p>
+Formally, we define a DFSA to be the 5-tuple
+<i>M</i> = (<i>Q</i>, &Sigma;, &delta;, <i>q<sub>0</sub></i>, <i>F</i>)</i>, 
+with the usual definition for each symbol.  The transition function, &delta;, is defined as follows:
+<ul>
+    <li> &delta; : <i>Q</i> &times; &Sigma; &rarr; <i>Q</i> -- i.e. &delta; is a function which takes
+         a state from <i>Q</i>, a letter from &Sigma;, and produces a new state from <i>Q</i>.
+    <li> &delta; is a total function, meaning it is defined for every possible combination of
+         <i>Q</i> and &Sigma;.
+</ul>
+</p>
+
+<p>
+If &delta;(<i>q</i>, <i>x</i>) = <i>q'</i>, then we have an arrow leaving state <i>q</i> and
+arriving at state </i>q'</i>.  Along with this arrow, we write <i>'x'</i>, indicating that the arrow
+will be used if the current character being read is <i>x</i>.
+</p>
+
+<p>
 A DFSA takes as input some string <i>u</i> &isin; <i>&Sigma;*</i>, reading each symbol from
-left-to-right, and determines if <i>u</i> &isin; <i>L</i>(<i>M</i>) &sube; <i>&Sigma;*</i>.
+left-to-right, and determines whether or not <i>u</i> &isin; L(<i>M</i>).
+</p>
+
+<p>
+<h3> Nondeterministic Finite-State Automata (NFSA) </h3>
+NFSAs are a superset of DFSAs, i.e. they have the same definition, but with relaxed rules.
+</p>
+
+<p>
+Formally, we define a NFSA to be the 5-tuple
+<i>N</i> = (<i>Q</i>, &Sigma;, &delta;, <i>S</i>, <i>F</i>),
+with the usual definition for each symbol.  The transition function, &delta;, is defined as follows:
+<ul>
+    <li> &delta; : <i>Q</i> &times; &Sigma; &rarr; 2<sup><i>Q</i></sup> -- i.e. &delta; is a
+        function which takes a state from <i>Q</i>, a letter from &Sigma;, and produces a subset of
+        states from <i>Q</i>.  This set constitutes all of the potential transitions that the
+        machine could take from the given state with the given input.
+</ul>
+
+<p>
+Depending on which transitions are used during execution, the output of a NFSA for a given input
+string <i>u</i> &isin; &Sigma;*, could either be a 'yes' or 'no'.  However, if there exists at least one path through the
+machine which gives a 'yes', then the input <i>u</i> &isin; L(<i>N</i>).
+</p>
 </p>
 </html>

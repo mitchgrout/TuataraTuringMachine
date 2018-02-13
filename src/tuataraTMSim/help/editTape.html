@@ -20,44 +20,44 @@ tape.
 </p>
 
 <p>
-<h3> Moving the Read/Write Head </h3>
-Use the left and right arrow keys on the keyboard or the arrow buttons, <img src="../images/tapeLeft.png">  
-and <img src="../images/tapeRight.png">, on either side of the tape to move the head one cell at a
-time.  You may also click on a cell to jump the read/write head to that cell.  The left-most button
-near the tape, <img src="../images/tapeStart.png">, (also available from the <i>Tape</i> menu) sends the
-read/write head back to the very first cell.
+<h3> Moving the Read/Write Head <img src="../images/tapeRight.png">
+                                <img src="../images/tapeLeft.png">
+                                <img src="../images/tapeStart.png"> </h3>
+To manually move the read/write head left or right, either use the left and right arrow keys on the
+keyboard, or the arrow buttons on either side of the tape to move the head one cell at a time.  To
+move the read/write head back to the leftmost cell of the tape, select 
+<i>Tape > Reset Read/Write Head</i>, or use the button next to the tape.
 </p>
 
 <p>
 <h3> Writing Symbols to the Tape </h3>
 The read/write head acts as a cursor for you to modify the tape with.  Simply type the character on
 your keyboard to have the corresponding symbol appear on the tape in the location of the read/write
-head.  To type a blank character, press spacebar or '_'.  The backspace key also functions as you
-would expect it to.
+head.  To type a blank character, press spacebar or '_'.  The backspace key will replace the
+character under the read/write head with a blank character, and move left by one.
 </p>
 
 <p>
-<h3> Loading and Saving a Tape  </h3>
-Use the <img src="../images/openTape.png"> <i>Open Tape</i>, <img src="../images/saveTape.png">
-<i>Save Tape</i> and <i>Save Tape As</i> items in the <i>File</i> menu to load and save a tape.
+<h3> Creating a Tape <img src="../images/newTape.png">
+                     <img src="../images/saveTape.png">
+                     <img src="../images/openTape.png"> </h3>
+By default, Tuatara begins with a blank tape.  If at any point you would like to create a new, empty
+tape, select <i>File > New Tape</i>.  Existing tapes may be saved or loaded from disk by selecting
+<i>File > Save Tape</i> and <i>File > Open Tape</i> respectively.
 </p>
 
 <p>
-<h3> Reloading the Tape </h3>
-Often when you are debugging a machine, you may wish to repeatedly apply the same tape input
-to the machine.  It is tedious to re-enter the tape input data manually, or repeatedly have to
-select the same file to load.  Hence, an option is provided to reload the tape to the state it was
-in when it was last saved.  If the tape has not been saved, using this option is equivalent to
-erasing the tape.  To reload the tape, press the <img src="../images/tapeReload.png"> <i>Reload Tape</i>
-button near the bottom right of the window, or select <img src="../images/tapeReload.png"> <i>Reload Tape</i>
-from the <i>Tape</i> Menu.
+<h3> Reloading the Tape <img src="../images/tapeReload.png"> </h3>
+Often when you are debugging a machine, you may wish to repeatedly apply the same input to the
+machine.  It is tedious to re-enter the tape input data manually, or repeatedly have to select the
+same file to load.  Hence, an option is provided to reload the tape to the state it was in when it
+was last saved.  To reload the tape, select <i>Tape > Reload Tape</i>.  If the current tape has not
+been saved, using this option is equivalent to erasing the tape.
 </p>
 
 <p>
-<h3> Erasing the Tape </h3>
-To clear the tape contents, press the <img src="../images/tapeClear.png"> <i>Erase Tape</i> button
-at the bottom-right of the screen, or in the <i>Tape</i> menu.  Choosing <img
-src="../images/newTape.png"> <i>New Tape</i> from the <i>File</i> menu also has the effect of
-erasing the tape.
+<h3> Erasing the Tape <img src="../images/tapeClear.png"> </h3>
+To clear the tape contents, select <i>Tape > New Tape</i>.  Selecting <i>File > New Tape</i> also
+has the effect of erasing the tape.
 </p>
 </html>
