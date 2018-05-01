@@ -278,15 +278,13 @@ public class TMGraphicsPanel
             {
                 if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_LEFT)
                 {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Action.LEFT_ARROW +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as an input symbol.", TM_Action.LEFT_ARROW);
                 }
                 if (e.isActionKey() && e.getKeyCode() == KeyEvent.VK_RIGHT)
                 {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Action.RIGHT_ARROW +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as an input symbol.", TM_Action.RIGHT_ARROW);
                 }
                 else if (c == TM_Machine.OTHERWISE_SYMBOL)
                 {
@@ -295,9 +293,8 @@ public class TMGraphicsPanel
                 }
                 else if (c == 'E' && e.isShiftDown())
                 {
-                    JOptionPane.showMessageDialog(null,"'" + TM_Machine.EMPTY_ACTION_SYMBOL +
-                            "' cannot be used as an input symbol!", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as an input symbol.", TM_Machine.EMPTY_ACTION_SYMBOL);
                 }
                 else if (Character.isLetterOrDigit(c) && getAlphabet().containsSymbol(c))
                 {
@@ -308,16 +305,15 @@ public class TMGraphicsPanel
                     doCommand(new ModifyInputSymbolCommand(this, getSelectedTransition(), Tape.BLANK_SYMBOL));
                 }
                 else if (Character.isLetterOrDigit(c))
-                    JOptionPane.showMessageDialog(null,"The input symbol for this transition"
-                            + " cannot be set to the value '" + c + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                {
+                    Global.showWarningMessage("Update Transition", 
+                            "'%c' cannot be used as it is not in this machine's alphabet.", c);
+                }
                 else if (c == ' ' || c == Tape.BLANK_SYMBOL)
-                    JOptionPane.showMessageDialog(null,"The input symbol for this transition"
-                            + " cannot be set to the value '" + Tape.BLANK_SYMBOL +"', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
-
+                {
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as it is not in this machine's alphabet.", Tape.BLANK_SYMBOL);
+                }
             }
             else
             {
@@ -356,17 +352,13 @@ public class TMGraphicsPanel
                 }
                 else if (Character.isLetterOrDigit(c))
                 {
-                    JOptionPane.showMessageDialog(null,"The action symbol for this transition"
-                            + " cannot be set to the value '" + c + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as it is not in this machine's alphabet", c);
                 }
                 else if (c == ' ' || c == Tape.BLANK_SYMBOL)
                 {
-                    JOptionPane.showMessageDialog(null,"The action symbol for this transition"
-                            + " cannot be set to the value '" + Tape.BLANK_SYMBOL + "', as that symbol is not in "
-                            + "the alphabet for this machine.", "Update transition properties", 
-                            JOptionPane.WARNING_MESSAGE);
+                    Global.showWarningMessage("Update Transition",
+                            "'%c' cannot be used as it is not in this machine's alphabet.", Tape.BLANK_SYMBOL);
                 }
             }
             return true;
@@ -517,8 +509,7 @@ public class TMGraphicsPanel
                                 MainWindow.getInstance().getConsole().log(
                                         "Encountered an error when loading the machine %s: %s",
                                         fc.getSelectedFile().toString(), ex.getMessage());
-                                JOptionPane.showMessageDialog(MainWindow.getInstance(),
-                                        String.format("Error opening machine file %s", fc.getSelectedFile().toString()));
+                                Global.showWarningMessage("Clone Machine", "Error opening machine file %s.", fc.getSelectedFile().toString());
                             }
                             break;
 

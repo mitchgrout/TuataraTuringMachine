@@ -43,6 +43,11 @@ public final class Global
     private Global() { }
 
     /**
+     * Current version of TTM.
+     */
+    public static final String VERSION = "2.0.0";
+
+    /**
      * Font used for rendering text.
      */
     public static final Font FONT_DIALOG = new Font(Font.DIALOG, Font.PLAIN, 12);
@@ -104,5 +109,44 @@ public final class Global
         }
         // Non-reachable
         return null;
+    }
+
+    /**
+     * Display an information message box to the user. Convenience wrapper to
+     * JOptionPane.showMessageDialog.
+     * @param title The title of the message box.
+     * @param fmt The format string for the message body.
+     * @param args The arguments to the format string for the message body.
+     */
+    public static void showInfoMessage(String title, String fmt, Object... args)
+    {
+        JOptionPane.showMessageDialog(MainWindow.getInstance(), String.format(fmt, args), title,
+                JOptionPane.INFORMATION_MESSAGE, null);
+    }
+
+    /**
+     * Display a warning message box to the user. Convenience wrapper to
+     * JOptionPane.showMessageDialog.
+     * @param title The title of the message box.
+     * @param fmt The format string for the message body.
+     * @param args The arguments to the format string for the message body.
+     */
+    public static void showWarningMessage(String title, String fmt, Object... args)
+    {
+        JOptionPane.showMessageDialog(MainWindow.getInstance(), String.format(fmt, args), title,
+                JOptionPane.WARNING_MESSAGE, null);
+    }
+
+    /**
+     * Display an error message box to the user. Convenience wrapper to
+     * JOptionPane.showMessageDialog.
+     * @param title The title of the message box.
+     * @param fmt The format string for the message body.
+     * @param args The arguments to the format string for the message body.
+     */
+    public static void showErrorMessage(String title, String fmt, Object... args)
+    {
+        JOptionPane.showMessageDialog(MainWindow.getInstance(), String.format(fmt, args), title,
+                JOptionPane.ERROR_MESSAGE, null);
     }
 }

@@ -931,7 +931,6 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user
-                        m_console.log("Cancelled saving machine.");
                         return false;
                     }
                 }
@@ -1218,8 +1217,7 @@ public class MainWindow extends JFrame
             // Still nothing, prompt again
             if (!infile.exists())
             {
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Cannot find file '%s'", infile));
+                Global.showWarningMessage("Load File", "Cannot find file %s.", infile.toString());
                 continue;
             }
             // Otherwise return the file chosen
@@ -1525,7 +1523,6 @@ public class MainWindow extends JFrame
             if (panel == null)
             {
                 // Whatever we are looking at isn't a graphics panel
-                m_console.log("Current window is not a graphics panel; cannot save.");
                 return;
             }
 
@@ -1540,7 +1537,6 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user 
-                        m_console.log("Cancelled saving machine.");
                         return;
                     }
                 }
@@ -1548,14 +1544,14 @@ public class MainWindow extends JFrame
                 Machine.saveMachine(machine, outFile);
                 panel.setModifiedSinceSave(false);
                 panel.setFile(outFile);
-                m_console.log("Successfully saved machine %s.", outFile.toString());
+                m_console.log("Successfully saved machine %s.", panel.getFrame().getTitle());
             }
             catch (IOException ex)
             {
-                m_console.log("Encountered an error when saving the machine to %s.\nMessage: %s.",
-                              outFile.toString(), ex.getMessage());
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Error saving machine to %s", outFile.toString()));
+                m_console.log("Encountered an error when saving the machine %s.\nMessage: %s.",
+                              panel.getFrame().getTitle(), ex.getMessage());
+                Global.showErrorMessage("Save Machine", "Error saving machine %s.", 
+                        panel.getFrame().getTitle());
             }
         }
 
@@ -1602,7 +1598,6 @@ public class MainWindow extends JFrame
                     if (outFile == null)
                     {
                         // Cancelled by user 
-                        m_console.log("Cancelled saving tape.");
                         return;
                     }
                 }
@@ -1613,10 +1608,9 @@ public class MainWindow extends JFrame
             }
             catch (IOException ex)
             {
-                m_console.log("Encountered an error when saving the tape to %s.\nMessage: %s",
+                m_console.log("Encountered an error when saving the tape to %s.\nMessage: %s.",
                               outFile.toString(), ex.getMessage());
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        String.format("Error saving tape to %s", outFile.toString()));
+                Global.showErrorMessage("Save Tape", "Error saving tape to %s.", outFile.toString());
             }
         }
 
@@ -1912,7 +1906,6 @@ public class MainWindow extends JFrame
                 if (inFile == null)
                 {
                     // Cancelled by user
-                    m_console.log("Cancelled loading machine.");
                     return;
                 }
                 try
@@ -1932,14 +1925,13 @@ public class MainWindow extends JFrame
                     {
                         addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
                     }
-                    m_console.log("Successfully loaded machine %s.", inFile.toString());
+                    m_console.log("Successfully loaded machine file %s.", inFile.toString());
                 }
                 catch (Exception ex)
                 {
-                    m_console.log("Encountered an error when loading the machine %s.\nMessage: %s.", 
+                    m_console.log("Encountered an error when opening machine file %s.\nMessage: %s.", 
                                   inFile.toString(), ex.getMessage());
-                    JOptionPane.showMessageDialog(MainWindow.this, 
-                            String.format("Error opening machine file %s", inFile.toString()));
+                    Global.showErrorMessage("Open Machine", "Error opening machine file %s.", inFile.toString()); 
                 }
             }
         };
@@ -1968,7 +1960,7 @@ public class MainWindow extends JFrame
                 // Prevent the program from reading from the keyboard while the file dialog is active
                 m_keyboardEnabled = false;
                 Object[] options = { "Ok", "Cancel" };
-                int result = JOptionPane.showOptionDialog(null, 
+                int result = JOptionPane.showOptionDialog(MainWindow.this, 
                         "This will erase the tape. Do you want to continue?", "Clear tape",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 
                         options, options[1]);
@@ -1995,7 +1987,6 @@ public class MainWindow extends JFrame
                 if (inFile == null)
                 {
                     // Cancelled by user
-                    m_console.log("Cancelled loading tape.");
                     return;
                 }
 
@@ -2005,13 +1996,13 @@ public class MainWindow extends JFrame
                     m_tapeDisp.getTape().copyOther(tape);
                     m_tapeDisp.setFile(inFile);
                     m_tapeDisp.repaint();
+                    m_console.log("Successfully loaded tape file %s.", inFile.toString());
                 }
                 catch (Exception ex)
                 {
-                    m_console.log("Encountered an error when load the tape %s.\nMessage: %s.",
+                    m_console.log("Encountered an error when opening tape file %s.\nMessage: %s.",
                                   inFile.toString(), ex.getMessage());
-                    JOptionPane.showMessageDialog(MainWindow.this, 
-                            String.format("Error opening tape file %s", inFile.toString()));
+                    Global.showErrorMessage("Open Tape", "Error opening tape file %s.", inFile.toString());
                 }
             }
         };
@@ -2244,15 +2235,15 @@ public class MainWindow extends JFrame
                 String result = gfxPanel.getSimulator().getMachine().isDeterministic();
                 if (result == null)
                 {
-                    m_console.log("Machine %s is deterministic", gfxPanel.getFrame().getTitle());
-                    JOptionPane.showMessageDialog(null, "Machine is deterministic", 
-                                                  "Validation", JOptionPane.INFORMATION_MESSAGE);
+                    m_console.log("%s is deterministic.",
+                            gfxPanel.getFrame().getTitle());
+                    Global.showInfoMessage("Validation", "Machine is deterministic."); 
                 }
                 else
                 {
-                    m_console.log("Machine %s is nondeterministic: %s", gfxPanel.getFrame().getTitle(), result);
-                    JOptionPane.showMessageDialog(null, "Machine is nondeterministic: " + result,
-                                                  "Validation", JOptionPane.WARNING_MESSAGE);
+                    m_console.log("%s is nondeterministic: %s.", 
+                            gfxPanel.getFrame().getTitle(), result);
+                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s.",  result);
                 }
             }
         };
@@ -2279,10 +2270,23 @@ public class MainWindow extends JFrame
                     String result = sim.getMachine().hasUndefinedSymbols();
                     if (result != null)
                     {
-                        m_console.log(result);
-                        JOptionPane.showMessageDialog(MainWindow.getInstance(), result, 
-                                "Undefined transition", JOptionPane.WARNING_MESSAGE);
+                        m_console.log("Cannot simulate %s: %s.", 
+                                gfxPanel.getFrame().getTitle(), result);
+                        Global.showErrorMessage("Step", "Cannot simulate: %s.", result);
                         return;
+                    }
+                    // If we are just starting, write out the input on the tape
+                    if (sim.getCurrentState() == null)
+                    {
+                        // Issue a minor warning to the console if the r/w head is not in the
+                        // leftmost cell; continue execution
+                        if (m_tape.headLocation() != 0)
+                        {
+                            m_console.log("Warning: Tape head has not been reset.");
+                        }
+                        m_console.logPartial(gfxPanel, "Input: %s\n", 
+                                m_tape.getPartialString(m_tape.headLocation(), 
+                                                        m_tape.getLength() - m_tape.headLocation()));
                     }
                     sim.step();
                     m_tapeDisp.repaint();
@@ -2293,24 +2297,27 @@ public class MainWindow extends JFrame
                     else
                     {
                         m_console.logPartial(gfxPanel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
+                        m_console.endPartial();
                     }
                 }
                 // Machine halted as expected
                 catch (ComputationCompletedException e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);
-                    m_console.log(msg);
-                    JOptionPane.showMessageDialog(MainWindow.getInstance(), msg, 
-                            MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                    m_console.log("Simulation of %s finished: %s.", 
+                            gfxPanel.getFrame().getTitle(), msg);
+                    Global.showInfoMessage(MainWindow.HALTED_MESSAGE_TITLE_STR, 
+                            "Simulation finished: %s.", msg);
                     gfxPanel.getSimulator().resetMachine();
                 }
                 // Machine halted unexpectedly
                 catch (Exception e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);
-                    m_console.log(msg);
-                    JOptionPane.showMessageDialog(MainWindow.getInstance(), msg,
-                            MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+                    m_console.log("Simulation of %s halted unexpectedly: %s.",
+                            gfxPanel.getFrame().getTitle(), msg);
+                    Global.showErrorMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
+                            "Simulation halted unexpectedly: %s.", msg);
                 }
                 repaint();
             }
@@ -2371,7 +2378,7 @@ public class MainWindow extends JFrame
                     {
                         gfxPanel.getSimulator().resetMachine();
                         gfxPanel.repaint();
-                        m_console.log("Stopped machine.");
+                        m_console.log("Stopped executing %s.", gfxPanel.getFrame().getTitle());
                     }
                 }
                 updateUndoActions();
@@ -2450,7 +2457,6 @@ public class MainWindow extends JFrame
                     if (result == JOptionPane.YES_OPTION)
                     {
                         m_tape.clearTape();
-                        m_console.log("Erased tape.");
                     }
                 }
                 else
@@ -2469,10 +2475,9 @@ public class MainWindow extends JFrame
                     }
                     catch (Exception ex)
                     {
-                        m_console.log("Encountered an error when loading the tape %s.\nMessage: %s", 
+                        m_console.log("Encountered an error when loading the tape %s.\nMessage: %s.", 
                                       tfile.toString(), ex.getMessage());
-                        JOptionPane.showMessageDialog(MainWindow.this,
-                                String.format("Error opening tape file %s", tfile.toString()));
+                        Global.showWarningMessage("Reload Tape", "Error opening tape file %s.", tfile.toString());
                     }
                 }
             }
@@ -2499,7 +2504,6 @@ public class MainWindow extends JFrame
                     m_tapeDisp.getTape().clearTape();
                     m_tapeDisp.setFile(null);
                     m_tapeDispController.repaint();
-                    m_console.log("Erased tape.");
                 }
             }
         };
@@ -2558,11 +2562,11 @@ public class MainWindow extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
-                        "and extended by Mitchell Grout in 2017-2018, with funding from the\n"             +
-                        "Department of Mathematics at the University of Waikato, New Zealand.\n"           +
-                        "Graphics kindly provided by Justin Bedggood.");
+                Global.showInfoMessage("About Tuatara",
+                        "Tuatara Turing Machine Simulator %s was written by Jimmy Foulds in 2006-2007,\n" + 
+                        "and extended by Mitchell Grout in 2017-2018, with funding from the\n"            +
+                        "Department of Mathematics at the University of Waikato, New Zealand.\n"          +
+                        "Graphics were kindly provided by Justin Bedggood.", Global.VERSION);
             }
         };
 }

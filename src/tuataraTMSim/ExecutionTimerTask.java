@@ -26,9 +26,9 @@
 package tuataraTMSim;
 
 import java.util.TimerTask;
-import javax.swing.JOptionPane;
 import tuataraTMSim.exceptions.*;
 import tuataraTMSim.machine.Simulator;
+import tuataraTMSim.machine.Tape;
 
 /**
  * An extension of a timer task which simulates a machine on a timer. 
@@ -66,9 +66,25 @@ public class ExecutionTimerTask extends TimerTask
             String result = sim.getMachine().hasUndefinedSymbols();
             if (result != null)
             {
-                inst.getConsole().log(result);
-                JOptionPane.showMessageDialog(inst, result, "Undefined transition", JOptionPane.WARNING_MESSAGE);
+                inst.getConsole().log("Cannot simulate %s: %s.",
+                        m_panel.getFrame().getTitle(), result);
+                Global.showErrorMessage("Execute", "Cannot simulate: %s.", result);
+                cancel();
                 return;
+            }
+            // If we are just starting, write out the input on the tape
+            if (sim.getCurrentState() == null)
+            {
+                Tape tape = inst.getTape();
+                // Issue a minor warning to the console if the r/w head is not in the leftmost cell;
+                // continue execution
+                if (tape.headLocation() != 0)
+                {
+                    inst.getConsole().log("Warning: Tape head has not been reset.");
+                }
+                inst.getConsole().logPartial(m_panel, "Input: %s\n",
+                        tape.getPartialString(tape.headLocation(),
+                                              tape.getLength() - tape.headLocation()));
             }
             sim.step();
             m_panel.repaint();
@@ -76,6 +92,7 @@ public class ExecutionTimerTask extends TimerTask
             if (sim.isHalted())
             {
                 inst.getConsole().logPartial(m_panel, sim.getConfiguration());
+                inst.getConsole().endPartial();
             }
             else
             {
@@ -89,9 +106,10 @@ public class ExecutionTimerTask extends TimerTask
             inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            inst.getConsole().log(msg);
-            JOptionPane.showMessageDialog(inst, msg,
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);
+            inst.getConsole().log("Simulation of %s finished: %s.",
+                    m_panel.getFrame().getTitle(), msg);
+            Global.showInfoMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
+                    "Simulation finished: %s.", msg);
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
         }
@@ -102,9 +120,10 @@ public class ExecutionTimerTask extends TimerTask
             inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            inst.getConsole().log(msg);
-            JOptionPane.showMessageDialog(inst, msg,
-                    MainWindow.HALTED_MESSAGE_TITLE_STR, JOptionPane.WARNING_MESSAGE);           
+            inst.getConsole().log("Simulation of %s halted unexpectedly: %s.",
+                    m_panel.getFrame().getTitle(), msg);
+            Global.showErrorMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
+                    "Simulation halted unexpectedly: %s.", msg);
         }
         inst.repaint();
     }
