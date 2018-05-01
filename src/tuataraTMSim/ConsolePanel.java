@@ -54,10 +54,6 @@ public class ConsolePanel extends JPanel
      */
     private void initComponents()
     {
-        // Menu bar
-        // JMenuBar menuBar = new JMenuBar();
-        // menuBar.add(new JButton(m_clearAction));
-        // setJMenuBar(menuBar);
         setLayout(new BorderLayout());
 
         // Text area
@@ -135,12 +131,9 @@ public class ConsolePanel extends JPanel
      */
     public void endPartial()
     {
-        if (m_partial)
-        {
-            append("\n");
-            m_panel = null;
-            m_partial = false;
-        }
+        if (m_partial) append("\n");
+        m_panel = null;
+        m_partial = false;
     }
 
     /**
@@ -180,16 +173,4 @@ public class ConsolePanel extends JPanel
      * Whether or not we are waiting for more information to add to the log.
      */
     private boolean m_partial;
-
-    /**
-     * Action to clear the current console window.
-     */
-    private Action m_clearAction =
-        new AbstractAction("Clear")
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                clear();
-            }
-        };
 }

@@ -1721,12 +1721,12 @@ public abstract class MachineGraphicsPanel<
                 // Blank label not allowed
                 else if (result.equals(""))
                 {
-                    JOptionPane.showMessageDialog(null, "Empty labels are not allowed!");
+                    Global.showWarningMessage("Rename State", "Empty labels are not allowed.");
                 }
                 // Label already in use
                 else if (m_labelsUsed.contains(result))
                 {
-                    JOptionPane.showMessageDialog(null, "Label is already used by another state!");
+                    Global.showWarningMessage("Rename State", "Label '%s' is already in use.", result);
                 }
                 // Otherwise rename
                 else
@@ -1804,17 +1804,15 @@ public abstract class MachineGraphicsPanel<
                 String result = m_sim.getMachine().isDeterministic();
                 if (result == null)
                 {
-                    MainWindow.getInstance().getConsole().log("Machine %s is deterministic", 
+                    MainWindow.getInstance().getConsole().log("%s is deterministic.", 
                                                               m_iFrame.getTitle());
-                    JOptionPane.showMessageDialog(null, "Machine is deterministic", 
-                                                  "Validation", JOptionPane.INFORMATION_MESSAGE);
+                    Global.showInfoMessage("Validation", "Machine is deterministic.");
                 }
                 else
                 {
-                    MainWindow.getInstance().getConsole().log("Machine %s is nondeterministic: %s", 
+                    MainWindow.getInstance().getConsole().log("%s is nondeterministic: %s", 
                                                               m_iFrame.getTitle(), result);
-                    JOptionPane.showMessageDialog(null, "Machine is nondeterministic: " + result,
-                                                  "Validation", JOptionPane.WARNING_MESSAGE);
+                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s.", result);
                 }
             }
         };

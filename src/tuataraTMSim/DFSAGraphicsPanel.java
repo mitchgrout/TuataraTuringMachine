@@ -116,10 +116,8 @@ public class DFSAGraphicsPanel
         }
         else if (Character.isLetterOrDigit(c))
         {
-            JOptionPane.showMessageDialog(null,"The input symbol for this transition"
-                    + " cannot be set to the value '" + c + "', as that symbol is not in "
-                    + "the alphabet for this machine.", "Update transition properties", 
-                    JOptionPane.WARNING_MESSAGE);
+            Global.showWarningMessage("Update Transition",
+                    "'%c' cannot be used as it is not in this machine's alphabet.", c);
         }
         return true;
     }
