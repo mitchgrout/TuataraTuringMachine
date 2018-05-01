@@ -2563,10 +2563,10 @@ public class MainWindow extends JFrame
             public void actionPerformed(ActionEvent e)
             {
                 Global.showInfoMessage("About Tuatara",
-                        "Tuatara Turing Machine Simulator 1.0 was written by Jimmy Foulds in 2006-2007,\n" + 
-                        "and extended by Mitchell Grout in 2017-2018, with funding from the\n"             +
-                        "Department of Mathematics at the University of Waikato, New Zealand.\n"           +
-                        "Graphics kindly provided by Justin Bedggood.");
+                        "Tuatara Turing Machine Simulator %s was written by Jimmy Foulds in 2006-2007,\n" + 
+                        "and extended by Mitchell Grout in 2017-2018, with funding from the\n"            +
+                        "Department of Mathematics at the University of Waikato, New Zealand.\n"          +
+                        "Graphics were kindly provided by Justin Bedggood.", Global.VERSION);
             }
         };
 }

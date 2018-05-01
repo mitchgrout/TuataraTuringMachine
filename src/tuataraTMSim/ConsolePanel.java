@@ -41,7 +41,7 @@ public class ConsolePanel extends JPanel
     /**
      * Text displayed when the console is opened, or cleared.
      */
-    protected static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator 1.0 <<<";
+    protected static final String SPLASH_TEXT = ">>> Tuatara Turing Machine Simulator " + Global.VERSION + " <<<";
 
     public ConsolePanel()
     {

@@ -43,6 +43,11 @@ public final class Global
     private Global() { }
 
     /**
+     * Current version of TTM.
+     */
+    public static final String VERSION = "2.0.0";
+
+    /**
      * Font used for rendering text.
      */
     public static final Font FONT_DIALOG = new Font(Font.DIALOG, Font.PLAIN, 12);
