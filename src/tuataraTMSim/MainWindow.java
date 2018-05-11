@@ -2293,11 +2293,11 @@ public class MainWindow extends JFrame
                     if (sim.isHalted())
                     {
                         m_console.logPartial(gfxPanel, sim.getConfiguration());
+                        m_console.endPartial();
                     }
                     else
                     {
                         m_console.logPartial(gfxPanel, "%s %c ", sim.getConfiguration(), Global.CONFIG_TEE);
-                        m_console.endPartial();
                     }
                 }
                 // Machine halted as expected
