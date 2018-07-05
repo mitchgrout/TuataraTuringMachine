@@ -95,7 +95,7 @@ public class HelpDisplayer extends JInternalFrame
         }
         catch(Exception e)
         {
-            Global.showErrorMessage("Error", "An error occured: %s.", e.getMessage());
+            Global.showErrorMessage("Error", "An error occured: %s", e.getMessage());
         }
     }
 }

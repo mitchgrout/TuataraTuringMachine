@@ -101,7 +101,7 @@ public class TapeDisplayControllerPanel extends JPanel
 
         m_BLeft = new JButton();
         m_BLeft.setFocusable(false);
-        m_BLeft.setToolTipText("Move the read/write head to the left.");
+        m_BLeft.setToolTipText("Move the read/write head to the left");
         m_BLeft.setIcon(tapeLeftIcon);
         m_BLeft.addActionListener(new ActionListener() 
         {
@@ -120,7 +120,7 @@ public class TapeDisplayControllerPanel extends JPanel
 
         m_BRight = new JButton();
         m_BRight.setFocusable(false);
-        m_BRight.setToolTipText("Move the read/write head to the right.");
+        m_BRight.setToolTipText("Move the read/write head to the right");
         m_BRight.setIcon(tapeRightIcon);
         m_BRight.addActionListener(new ActionListener()
         {    

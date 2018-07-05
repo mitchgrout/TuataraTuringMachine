@@ -117,7 +117,7 @@ public class DFSAGraphicsPanel
         else if (Character.isLetterOrDigit(c))
         {
             Global.showWarningMessage("Update Transition",
-                    "'%c' cannot be used as it is not in this machine's alphabet.", c);
+                    "'%c' cannot be used as it is not in this machine's alphabet", c);
         }
         return true;
     }

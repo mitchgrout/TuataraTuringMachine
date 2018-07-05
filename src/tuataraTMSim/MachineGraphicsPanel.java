@@ -1379,15 +1379,15 @@ public abstract class MachineGraphicsPanel<
     {
         if (e instanceof ComputationCompletedException)
         {
-            return String.format("Execution completed: %s.", e.getMessage());
+            return e.getMessage();
         }
         else if (e instanceof ComputationFailedException)
         {
-            return String.format("Execution failed: %s.", e.getMessage());
+            return e.getMessage();
         }
         else 
         { 
-            return String.format("Unknown error [%s]: %s", e.getClass().getSimpleName(), e.getMessage());
+            return String.format("An unknown error occurred [%s] - %s", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
@@ -1721,12 +1721,12 @@ public abstract class MachineGraphicsPanel<
                 // Blank label not allowed
                 else if (result.equals(""))
                 {
-                    Global.showWarningMessage("Rename State", "Empty labels are not allowed.");
+                    Global.showWarningMessage("Rename State", "Empty labels are not allowed");
                 }
                 // Label already in use
                 else if (m_labelsUsed.contains(result))
                 {
-                    Global.showWarningMessage("Rename State", "Label '%s' is already in use.", result);
+                    Global.showWarningMessage("Rename State", "Label '%s' is already in use", result);
                 }
                 // Otherwise rename
                 else
@@ -1804,15 +1804,15 @@ public abstract class MachineGraphicsPanel<
                 String result = m_sim.getMachine().isDeterministic();
                 if (result == null)
                 {
-                    MainWindow.getInstance().getConsole().log("%s is deterministic.", 
+                    MainWindow.getInstance().getConsole().log("%s is deterministic", 
                                                               m_iFrame.getTitle());
-                    Global.showInfoMessage("Validation", "Machine is deterministic.");
+                    Global.showInfoMessage("Validation", "Machine is deterministic");
                 }
                 else
                 {
                     MainWindow.getInstance().getConsole().log("%s is nondeterministic: %s", 
                                                               m_iFrame.getTitle(), result);
-                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s.", result);
+                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s", result);
                 }
             }
         };

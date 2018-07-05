@@ -45,7 +45,7 @@ public final class Global
     /**
      * Current version of TTM.
      */
-    public static final String VERSION = "2.0.0";
+    public static final String VERSION = "2.0.1";
 
     /**
      * Font used for rendering text.

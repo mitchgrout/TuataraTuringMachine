@@ -66,9 +66,9 @@ public class ExecutionTimerTask extends TimerTask
             String result = sim.getMachine().hasUndefinedSymbols();
             if (result != null)
             {
-                inst.getConsole().log("Cannot simulate %s: %s.",
+                inst.getConsole().log("Cannot simulate %s: %s",
                         m_panel.getFrame().getTitle(), result);
-                Global.showErrorMessage("Execute", "Cannot simulate: %s.", result);
+                Global.showErrorMessage("Execute", "Cannot simulate: %s", result);
                 cancel();
                 return;
             }
@@ -80,7 +80,7 @@ public class ExecutionTimerTask extends TimerTask
                 // continue execution
                 if (tape.headLocation() != 0)
                 {
-                    inst.getConsole().log("Warning: Tape head has not been reset.");
+                    inst.getConsole().log("Warning: Tape head has not been reset");
                 }
                 inst.getConsole().logPartial(m_panel, "Input: %s\n",
                         tape.getPartialString(tape.headLocation(),
@@ -106,10 +106,10 @@ public class ExecutionTimerTask extends TimerTask
             inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            inst.getConsole().log("Simulation of %s finished: %s.",
+            inst.getConsole().log("Simulation of %s finished: %s",
                     m_panel.getFrame().getTitle(), msg);
             Global.showInfoMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
-                    "Simulation finished: %s.", msg);
+                    "Simulation finished: %s", msg);
             m_panel.getSimulator().resetMachine();
             m_panel.repaint();
         }
@@ -120,10 +120,10 @@ public class ExecutionTimerTask extends TimerTask
             inst.stopExecution();
 
             String msg = m_panel.getErrorMessage(e);
-            inst.getConsole().log("Simulation of %s halted unexpectedly: %s.",
+            inst.getConsole().log("Simulation of %s halted unexpectedly: %s",
                     m_panel.getFrame().getTitle(), msg);
             Global.showErrorMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
-                    "Simulation halted unexpectedly: %s.", msg);
+                    "Simulation halted unexpectedly: %s", msg);
         }
         inst.repaint();
     }
