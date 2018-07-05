@@ -918,7 +918,7 @@ public class MainWindow extends JFrame
             }
             
             int result = JOptionPane.showConfirmDialog(null, 
-                    String.format("The machine '%s' is unsaved. Do you wish to save it?", name),
+                    String.format("The machine '%s' is unsaved. Do you want to save it?", name),
                     "Closing window", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION)
             {
@@ -1167,7 +1167,7 @@ public class MainWindow extends JFrame
             if (outfile.exists())
             {
                 int overwrite = JOptionPane.showConfirmDialog(MainWindow.this,
-                        String.format("The file '%s' already exists. Overwrite?", outfile.getName()),
+                        String.format("The file %s already exists. Overwrite?", outfile.getName()),
                         "Save As", JOptionPane.YES_NO_CANCEL_OPTION);
                 switch (overwrite)
                 {
@@ -1217,7 +1217,7 @@ public class MainWindow extends JFrame
             // Still nothing, prompt again
             if (!infile.exists())
             {
-                Global.showWarningMessage("Load File", "Cannot find file %s.", infile.toString());
+                Global.showWarningMessage("Load File", "Cannot find file %s", infile.toString());
                 continue;
             }
             // Otherwise return the file chosen
@@ -1544,13 +1544,13 @@ public class MainWindow extends JFrame
                 Machine.saveMachine(machine, outFile);
                 panel.setModifiedSinceSave(false);
                 panel.setFile(outFile);
-                m_console.log("Successfully saved machine %s.", panel.getFrame().getTitle());
+                m_console.log("Successfully saved machine %s", panel.getFrame().getTitle());
             }
             catch (IOException ex)
             {
-                m_console.log("Encountered an error when saving the machine %s.\nMessage: %s.",
+                m_console.log("Encountered an error when saving the machine %s: %s",
                               panel.getFrame().getTitle(), ex.getMessage());
-                Global.showErrorMessage("Save Machine", "Error saving machine %s.", 
+                Global.showErrorMessage("Save Machine", "Error saving machine %s", 
                         panel.getFrame().getTitle());
             }
         }
@@ -1604,13 +1604,13 @@ public class MainWindow extends JFrame
                 
                 Tape.saveTape(m_tapeDisp.getTape(), outFile);
                 m_tapeDisp.setFile(outFile);
-                m_console.log("Successfully saved tape to %s.", outFile.toString());
+                m_console.log("Successfully saved tape to %s", outFile.toString());
             }
             catch (IOException ex)
             {
-                m_console.log("Encountered an error when saving the tape to %s.\nMessage: %s.",
+                m_console.log("Encountered an error when saving the tape to %s: %s",
                               outFile.toString(), ex.getMessage());
-                Global.showErrorMessage("Save Tape", "Error saving tape to %s.", outFile.toString());
+                Global.showErrorMessage("Save Tape", "Error saving tape to %s", outFile.toString());
             }
         }
 
@@ -1925,13 +1925,13 @@ public class MainWindow extends JFrame
                     {
                         addFrame(newMachineWindow(new DFSAGraphicsPanel((DFSA_Machine)machine, m_tape, inFile)));
                     }
-                    m_console.log("Successfully loaded machine file %s.", inFile.toString());
+                    m_console.log("Successfully loaded machine file %s", inFile.toString());
                 }
                 catch (Exception ex)
                 {
-                    m_console.log("Encountered an error when opening machine file %s.\nMessage: %s.", 
+                    m_console.log("Encountered an error when opening machine file %s: %s", 
                                   inFile.toString(), ex.getMessage());
-                    Global.showErrorMessage("Open Machine", "Error opening machine file %s.", inFile.toString()); 
+                    Global.showErrorMessage("Open Machine", "Error opening machine file %s", inFile.toString()); 
                 }
             }
         };
@@ -1996,13 +1996,13 @@ public class MainWindow extends JFrame
                     m_tapeDisp.getTape().copyOther(tape);
                     m_tapeDisp.setFile(inFile);
                     m_tapeDisp.repaint();
-                    m_console.log("Successfully loaded tape file %s.", inFile.toString());
+                    m_console.log("Successfully loaded tape file %s", inFile.toString());
                 }
                 catch (Exception ex)
                 {
-                    m_console.log("Encountered an error when opening tape file %s.\nMessage: %s.",
+                    m_console.log("Encountered an error when opening tape file %s: %s",
                                   inFile.toString(), ex.getMessage());
-                    Global.showErrorMessage("Open Tape", "Error opening tape file %s.", inFile.toString());
+                    Global.showErrorMessage("Open Tape", "Error opening tape file %s", inFile.toString());
                 }
             }
         };
@@ -2235,15 +2235,15 @@ public class MainWindow extends JFrame
                 String result = gfxPanel.getSimulator().getMachine().isDeterministic();
                 if (result == null)
                 {
-                    m_console.log("%s is deterministic.",
+                    m_console.log("%s is deterministic",
                             gfxPanel.getFrame().getTitle());
-                    Global.showInfoMessage("Validation", "Machine is deterministic."); 
+                    Global.showInfoMessage("Validation", "Machine is deterministic"); 
                 }
                 else
                 {
-                    m_console.log("%s is nondeterministic: %s.", 
+                    m_console.log("%s is nondeterministic: %s", 
                             gfxPanel.getFrame().getTitle(), result);
-                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s.",  result);
+                    Global.showErrorMessage("Validation", "Machine is nondeterministic: %s",  result);
                 }
             }
         };
@@ -2270,9 +2270,9 @@ public class MainWindow extends JFrame
                     String result = sim.getMachine().hasUndefinedSymbols();
                     if (result != null)
                     {
-                        m_console.log("Cannot simulate %s: %s.", 
+                        m_console.log("Cannot simulate %s: %s", 
                                 gfxPanel.getFrame().getTitle(), result);
-                        Global.showErrorMessage("Step", "Cannot simulate: %s.", result);
+                        Global.showErrorMessage("Step", "Cannot simulate: %s", result);
                         return;
                     }
                     // If we are just starting, write out the input on the tape
@@ -2282,7 +2282,7 @@ public class MainWindow extends JFrame
                         // leftmost cell; continue execution
                         if (m_tape.headLocation() != 0)
                         {
-                            m_console.log("Warning: Tape head has not been reset.");
+                            m_console.log("Warning: Tape head has not been reset");
                         }
                         m_console.logPartial(gfxPanel, "Input: %s\n", 
                                 m_tape.getPartialString(m_tape.headLocation(), 
@@ -2304,20 +2304,20 @@ public class MainWindow extends JFrame
                 catch (ComputationCompletedException e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);
-                    m_console.log("Simulation of %s finished: %s.", 
+                    m_console.log("Simulation of %s finished: %s", 
                             gfxPanel.getFrame().getTitle(), msg);
                     Global.showInfoMessage(MainWindow.HALTED_MESSAGE_TITLE_STR, 
-                            "Simulation finished: %s.", msg);
+                            "Simulation finished: %s", msg);
                     gfxPanel.getSimulator().resetMachine();
                 }
                 // Machine halted unexpectedly
                 catch (Exception e2)
                 {
                     String msg = gfxPanel.getErrorMessage(e2);
-                    m_console.log("Simulation of %s halted unexpectedly: %s.",
+                    m_console.log("Simulation of %s halted unexpectedly: %s",
                             gfxPanel.getFrame().getTitle(), msg);
                     Global.showErrorMessage(MainWindow.HALTED_MESSAGE_TITLE_STR,
-                            "Simulation halted unexpectedly: %s.", msg);
+                            "Simulation halted unexpectedly: %s", msg);
                 }
                 repaint();
             }
@@ -2378,7 +2378,7 @@ public class MainWindow extends JFrame
                     {
                         gfxPanel.getSimulator().resetMachine();
                         gfxPanel.repaint();
-                        m_console.log("Stopped executing %s.", gfxPanel.getFrame().getTitle());
+                        m_console.log("Stopped executing %s", gfxPanel.getFrame().getTitle());
                     }
                 }
                 updateUndoActions();
@@ -2471,13 +2471,13 @@ public class MainWindow extends JFrame
                         m_tapeDisp.getTape().copyOther(m_tape);
                         m_tapeDisp.setFile(tfile);
                         m_tapeDisp.repaint();
-                        m_console.log("Reloaded tape from file %s.", tfile.toString());
+                        m_console.log("Reloaded tape from file %s", tfile.toString());
                     }
                     catch (Exception ex)
                     {
-                        m_console.log("Encountered an error when loading the tape %s.\nMessage: %s.", 
+                        m_console.log("Encountered an error when loading the tape %s: %s", 
                                       tfile.toString(), ex.getMessage());
-                        Global.showWarningMessage("Reload Tape", "Error opening tape file %s.", tfile.toString());
+                        Global.showWarningMessage("Reload Tape", "Error opening tape file %s", tfile.toString());
                     }
                 }
             }
